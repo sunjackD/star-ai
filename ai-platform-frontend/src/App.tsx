@@ -407,9 +407,24 @@ Authorization: Bearer xma_xxx
 
 tools:
   - list_skills
+  - get_skill_categories
   - import_skill
   - add_remote_skill
+  - update_skill
   - download_skill`}</pre>
+      </Card>
+      <Card title="Developer API 示例" className="markdown-card">
+        <pre>{`# 查询 Skills
+curl -H "X-API-Key: xma_xxx" http://localhost:8080/api/v1/developer/skills
+
+# 添加远程 Skill
+curl -X POST http://localhost:8080/api/v1/developer/skills/remote \\
+  -H "X-API-Key: xma_xxx" \\
+  -H "Content-Type: application/json" \\
+  -d '{"name":"remote-skill","url":"https://example.com/skill.zip"}'
+
+# 下载 Skill
+curl -H "X-API-Key: xma_xxx" http://localhost:8080/api/v1/developer/skills/1/download`}</pre>
       </Card>
     </div>
   );
