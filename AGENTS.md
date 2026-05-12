@@ -2,7 +2,7 @@
 
 ## 项目基线
 - 项目名称：AI聚合平台
-- 后端技术栈：Spring Boot 3.x、Java 17+、Spring Security 6、JWT、PostgreSQL、Redis、Flyway、MapStruct
+- 后端技术栈：Spring Boot 3.x、Java 17+、Spring Security 6、JWT、MySQL、Redis、Flyway、MapStruct
 - 前端技术栈：React 18、TypeScript、Vite 5、Ant Design 5、React Router 6、Zustand、TanStack Query
 - 部署方式：Docker + Docker Compose
 

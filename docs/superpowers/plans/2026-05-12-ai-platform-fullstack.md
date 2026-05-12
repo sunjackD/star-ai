@@ -1,14 +1,25 @@
-# AI Platform Fullstack Implementation Plan
+# AI Platform Fullstack V2 Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Build a runnable AI aggregation platform MVP with Spring Boot, React, MySQL, Docker, scripts, and documentation.
+**Goal:** Upgrade the runnable MVP into a complete AI aggregation platform with full backend management, full frontend admin console, global style switching, self-management Skill APIs, Docker delivery, and documentation.
 
-**Architecture:** Backend REST API and frontend SPA are developed as separate projects. MySQL stores persistent state, Flyway owns schema and seed data, and Docker Compose builds/runs the system after `.env` configuration.
+**Architecture:** Backend REST API and frontend SPA remain separated. MySQL stores persistent state, Flyway owns schema and seed data, Spring Security enforces JWT/API Key/RBAC, React Router/TanStack Query/Zustand drive the SPA, and Docker Compose builds/runs the system after `.env` configuration.
 
 **Tech Stack:** Java 17, Spring Boot 3, Spring Security, JWT, MySQL, Flyway, Maven, React 18, TypeScript, Vite, Ant Design, Zustand, TanStack Query, Docker Compose.
 
 ---
+
+### Task 0: V2 Delivery Milestones
+
+**Files:**
+- Modify: `AI聚合平台设计方案.md`
+- Modify: `docs/superpowers/plans/2026-05-12-ai-platform-fullstack.md`
+- Modify: `AGENTS.md`
+
+- [x] Write the six major delivery phases into the design document.
+- [ ] Align project rules with MySQL as the implementation database.
+- [ ] Commit documentation and planning alignment.
 
 ### Task 1: Repository And Documentation Baseline
 
@@ -90,3 +101,59 @@
 - [ ] Check git status and commit final fixes.
 - [ ] Report final run commands and remaining user configuration.
 
+### Task 7: Backend Complete Management APIs
+
+**Files:**
+- Create admin DTO/service/controller classes under `ai-platform-backend/src/main/java/com/xingmeng/aiplatform/module/admin`
+- Create audit service under `ai-platform-backend/src/main/java/com/xingmeng/aiplatform/module/audit`
+- Modify domain repositories and controllers as needed.
+- Test: `ai-platform-backend/src/test/java/com/xingmeng/aiplatform/AdminManagementApiTest.java`
+
+- [ ] Add admin CRUD APIs for users, agents, skills, categories, models, finetune jobs, datasets, and redirect links.
+- [ ] Add role/status/password reset operations for users.
+- [ ] Add audit log writing for admin writes and Developer API operations.
+- [ ] Add API Key disabled/expired/last-used behavior.
+- [ ] Add tests for admin auth, CRUD, audit, and Developer API scope enforcement.
+- [ ] Run `mvn test`.
+- [ ] Commit backend management APIs.
+
+### Task 8: Frontend Complete Admin Console
+
+**Files:**
+- Modify: `ai-platform-frontend/src/App.tsx`
+- Modify: `ai-platform-frontend/src/types.ts`
+- Modify: `ai-platform-frontend/src/api/client.ts`
+- Modify: `ai-platform-frontend/src/styles.css`
+
+- [ ] Add admin routes for users, agents, skills, categories, models, finetune jobs, datasets, links, API keys, audit logs, and statistics.
+- [ ] Add table/form/modal workflows for CRUD operations.
+- [ ] Add role-aware navigation and protected admin entry.
+- [ ] Run `npm run build`.
+- [ ] Commit frontend admin console.
+
+### Task 9: Global Style System
+
+**Files:**
+- Modify: `ai-platform-frontend/src/main.tsx`
+- Modify: `ai-platform-frontend/src/themes/ThemeProvider.tsx`
+- Modify: `ai-platform-frontend/src/themes/tokens.ts`
+- Modify: `ai-platform-frontend/src/styles.css`
+
+- [ ] Wire Ant Design `ConfigProvider.theme` to the same theme store used by CSS variables.
+- [ ] Make Shell, dashboard, list pages, detail pages, admin pages, login, developer, API Key, and appearance pages respond to both prototype styles.
+- [ ] Persist logged-in user theme preference and load it after login.
+- [ ] Run `npm run build`.
+- [ ] Commit global style system.
+
+### Task 10: Self-Management Skill Delivery
+
+**Files:**
+- Modify developer API backend classes.
+- Modify frontend developer/API Key/admin audit pages.
+- Modify `README.md`.
+
+- [ ] Complete Skill manifest and API examples.
+- [ ] Ensure API Key calls can list/import/add remote/download/update Skills.
+- [ ] Ensure every Developer API operation audits actor, key prefix, action, resource type, and resource id.
+- [ ] Document AI Agent usage.
+- [ ] Commit self-management Skill completion.

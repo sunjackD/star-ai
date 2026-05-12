@@ -1099,13 +1099,128 @@ class AgentServiceTest {
 10. **代码审查**：使用SonarQube静态代码分析
 11. **安全基线**：详情页必须鉴权，API Key仅保存哈希值，Developer API必须做Scope校验与审计
 
+## V2 大阶段落地方案
+
+### 大阶段 1：项目基线与架构对齐
+
+**目标**：统一方案、项目规范和当前代码实现，避免 MySQL/PostgreSQL、MVP/完整后台、局部主题/全局主题等口径冲突。
+
+**交付内容**：
+- 以用户最终要求为准，数据库统一为 MySQL 8.x。
+- 后端模块边界固定为 auth、user、admin、agent、skill、model、finetune、redirect、developer、audit、rbac。
+- 前端模块边界固定为 layout、auth、admin、resources、developer、account、settings、themes。
+- 管理后台必须覆盖用户、角色、Agents、Skills、Skill 分类、模型、微调任务、数据集、跳转链接、API Key 审计、审计日志和统计。
+- 全局风格切换必须覆盖 Ant Design 组件 Token、CSS 变量、布局密度、卡片形态、后台表格和所有业务页面。
+
+**验收标准**：
+- `AGENTS.md`、本设计方案、README 和实现技术栈口径一致。
+- 所有后续开发范围都能从本方案追溯。
+- 代码提交：`docs: align full platform delivery plan`。
+
+### 大阶段 2：后端完整管理能力落地
+
+**目标**：将后端从展示型 MVP 升级为可管理、可审计、可扩展的平台后台。
+
+**交付内容**：
+- 用户管理 API：用户列表、详情、启用、禁用、角色分配、密码重置。
+- 资源 CRUD API：Agents、Skills、Skill 分类、Models、Finetune Jobs、Datasets、Redirect Links。
+- 管理后台 API：总览统计、审计日志、资源状态管理、批量状态切换。
+- RBAC：角色、权限点、接口权限校验，不仅依赖 `/admin/**` 路径判断。
+- Developer API：scope 校验、过期校验、禁用校验、最后使用时间更新和审计日志。
+- 远程 Skill 导入安全：协议限制、SSRF 防护、大小限制、Zip Slip 防护、非法文件拒绝。
+- DTO 校验、统一响应、统一异常、分页查询和核心接口测试补齐。
+
+**验收标准**：
+- 管理后台所需资源都有后端 API。
+- 所有写操作需要管理员权限或明确 scope。
+- Developer API 操作全部写审计。
+- `mvn test` 通过。
+- 代码提交：`feat: complete backend resource management`。
+
+### 大阶段 3：前端完整后台与资源管理落地
+
+**目标**：补齐企业后台需要的资源管理界面，让管理员可在 UI 中完成核心维护操作。
+
+**交付内容**：
+- 拆分单文件页面，按领域沉淀 `api`、`components`、`pages`、`themes`。
+- 后台二级导航和管理首页。
+- 用户管理：表格、状态、角色、禁用/启用、重置密码。
+- Agents 管理：搜索、分页、新增、编辑、删除、上下架。
+- Skills 管理：分类筛选、新增、编辑、删除、导入、远程添加、下载。
+- 模型管理、微调任务管理、数据集管理、跳转链接管理。
+- API Key 审计与审计日志查询。
+- 管理统计：资源数量、热门 Skills、热门 Agents、Developer API 调用趋势。
+
+**验收标准**：
+- 管理员登录后可通过 UI 管理全部核心资源。
+- 非管理员无法进入后台页面，也无法调用后台 API。
+- 表单具备校验、加载态、错误提示和危险操作确认。
+- `npm run build` 通过。
+- 代码提交：`feat: complete admin console`。
+
+### 大阶段 4：全局风格切换真正落地
+
+**目标**：把现有 CSS 变量切换升级为全站风格系统，支持原型7和原型6全局切换。
+
+**交付内容**：
+- 接入 Ant Design `ConfigProvider.theme`，统一 Button、Card、Table、Menu、Form、Modal 等组件 Token。
+- 建立 `minimal-reference` 和 `minimal-modern` 两套风格包。
+- 风格切换覆盖颜色、字体、圆角、阴影、布局密度、卡片形态、表格视觉和页面背景。
+- Shell、Dashboard、列表页、详情页、后台页、登录页、API Key 页全部响应主题。
+- 右上角切换和设置页切换共享状态。
+- 登录后自动加载服务端主题偏好，切换后同步保存；未登录用户使用本地偏好。
+
+**验收标准**：
+- 任意页面切换原型6/原型7后视觉明显变化。
+- 刷新页面后主题不丢失。
+- 登录用户跨设备可恢复服务端主题偏好。
+- 代码提交：`feat: add global style system`。
+
+### 大阶段 5：平台自管理 Skill 闭环
+
+**目标**：让平台本身作为一个 Skill，被外部 AI Agent 通过 API Key 安全调用，实现站内 Skills 的一站式智能管理。
+
+**交付内容**：
+- 完整 Skill Manifest。
+- API Key 创建、撤销、scope 管理和平台级审计。
+- 自管理 Skill 能力：查询 Skills、导入 Skill、添加远程 Skill、下载 Skill、更新 Skill 元数据。
+- Developer API 文档页面展示调用示例和 Header 规范。
+- 后台可查看 AI Agent 调用审计。
+- 导入、下载、更新操作记录调用者、Key 前缀、IP、资源 ID 和时间。
+
+**验收标准**：
+- 用户登录后可生成 API Key。
+- API Key 可调用自管理 Skill API。
+- scope 不足、Key 过期、Key 禁用均返回明确错误。
+- 后台可查询调用日志。
+- 代码提交：`feat: complete self management skill`。
+
+### 大阶段 6：交付、验证与启动闭环
+
+**目标**：达到仅配置 MySQL 后执行脚本即可构建 Docker 并启动平台的交付状态。
+
+**交付内容**：
+- Dockerfile、Docker Compose、`.env.example` 与 MySQL 配置校准。
+- Windows `scripts/start.ps1` 和 Unix `scripts/start.sh` 可构建并启动。
+- README 完整说明项目用途、默认账号、环境变量、快速启动、后台入口、API Key 和 Developer API。
+- 初始化数据覆盖管理员、示例用户、示例 Agents、Skills、模型、微调任务、链接。
+- 最终验证命令文档化，必要时增加前端分包降低构建警告。
+
+**验收标准**：
+- `mvn test` 通过。
+- `npm run build` 通过。
+- `docker compose config --quiet` 通过。
+- 配置 MySQL 后启动脚本可启动完整系统。
+- 代码提交：`chore: finalize docker delivery`。
+
 ## 预估工作量
 
-- **后端开发**：3-4周
-- **前端开发**：2-3周
-- **集成测试**：1周
-- **部署上线**：1周
-- **总计**：7-9周
+- **大阶段 1：项目基线与架构对齐**：0.5-1天
+- **大阶段 2：后端完整管理能力落地**：3-5天
+- **大阶段 3：前端完整后台与资源管理落地**：3-5天
+- **大阶段 4：全局风格切换真正落地**：1-2天
+- **大阶段 5：平台自管理 Skill 闭环**：1-2天
+- **大阶段 6：交付、验证与启动闭环**：0.5-1天
 
 ## 风险和挑战
 
