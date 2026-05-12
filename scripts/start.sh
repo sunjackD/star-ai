@@ -13,5 +13,5 @@ fi
 docker compose build
 docker compose up -d
 
-echo "AI Platform started: http://localhost"
+echo "AI Platform started: http://localhost:8081"
 echo "Backend API: http://localhost:8080/swagger-ui.html"

@@ -29,7 +29,7 @@
 Copy-Item .env.example .env
 ```
 
-3. 根据需要编辑 `.env` 中的 MySQL 密码和 `JWT_SECRET`。
+3. 根据需要编辑 `.env` 中的 MySQL 密码和 `JWT_SECRET`。示例默认把 MySQL 暴露到宿主机 `3307`，避免和本机已有 MySQL 的 `3306` 冲突。
 
 4. 构建并启动：
 
@@ -47,8 +47,8 @@ sh scripts/start.sh
 
 5. 访问系统：
 
-- 前端：http://localhost
-- 后台：http://localhost/admin
+- 前端：http://localhost:8081
+- 后台：http://localhost:8081/admin
 - Swagger：http://localhost:8080/swagger-ui.html
 
 ## 默认账号

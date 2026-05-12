@@ -16,6 +16,6 @@ docker compose build
 
 if (-not $BuildOnly) {
     docker compose up -d
-    Write-Host "AI Platform started: http://localhost"
+    Write-Host "AI Platform started: http://localhost:8081"
     Write-Host "Backend API: http://localhost:8080/swagger-ui.html"
 }
