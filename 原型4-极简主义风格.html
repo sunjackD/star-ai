@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI工具平台 - 极简主义风格</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            background: #ffffff;
+            color: #1a1a1a;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 40px;
+        }
+
+        /* 顶部导航 */
+        .header {
+            border-bottom: 1px solid #e5e5e5;
+            padding: 32px 0;
+            margin-bottom: 80px;
+        }
+
+        .nav-wrapper {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 16px;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            color: #1a1a1a;
+        }
+
+        .nav {
+            display: flex;
+            gap: 48px;
+        }
+
+        .nav a {
+            color: #666;
+            text-decoration: none;
+            font-size: 14px;
+            transition: color 0.2s ease;
+            position: relative;
+        }
+
+        .nav a::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 0;
+            height: 1px;
+            background: #1a1a1a;
+            transition: width 0.2s ease;
+        }
+
+        .nav a:hover {
+            color: #1a1a1a;
+        }
+
+        .nav a:hover::after {
+            width: 100%;
+        }
+
+        .user-info {
+            font-size: 14px;
+            color: #666;
+        }
+
+        /* 页面标题 */
+        .page-header {
+            margin-bottom: 64px;
+        }
+
+        .page-title {
+            font-size: 48px;
+            font-weight: 400;
+            letter-spacing: -0.5px;
+            margin-bottom: 16px;
+            color: #1a1a1a;
+        }
+
+        .page-subtitle {
+            font-size: 16px;
+            color: #666;
+            font-weight: 400;
+        }
+
+        /* 搜索和筛选 */
+        .controls {
+            margin-bottom: 64px;
+            padding-bottom: 32px;
+            border-bottom: 1px solid #e5e5e5;
+        }
+
+        .search-box {
+            margin-bottom: 32px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 16px 0;
+            border: none;
+            border-bottom: 1px solid #e5e5e5;
+            font-size: 16px;
+            color: #1a1a1a;
+            background: transparent;
+            transition: border-color 0.2s ease;
+        }
+
+        .search-input::placeholder {
+            color: #999;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-bottom-color: #1a1a1a;
+        }
+
+        .filters {
+            display: flex;
+            gap: 24px;
+            flex-wrap: wrap;
+        }
+
+        .filter-item {
+            font-size: 14px;
+            color: #999;
+            cursor: pointer;
+            transition: color 0.2s ease;
+            padding: 4px 0;
+            border-bottom: 1px solid transparent;
+        }
+
+        .filter-item:hover,
+        .filter-item.active {
+            color: #1a1a1a;
+            border-bottom-color: #1a1a1a;
+        }
+
+        /* 工具列表 */
+        .tools-list {
+            display: grid;
+            gap: 1px;
+            background: #e5e5e5;
+            border: 1px solid #e5e5e5;
+        }
+
+        .tool-item {
+            background: #ffffff;
+            padding: 40px;
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 40px;
+            align-items: start;
+            transition: background 0.2s ease;
+            cursor: pointer;
+        }
+
+        .tool-item:hover {
+            background: #fafafa;
+        }
+
+        .tool-content {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .tool-header {
+            display: flex;
+            align-items: baseline;
+            gap: 16px;
+        }
+
+        .tool-name {
+            font-size: 20px;
+            font-weight: 500;
+            color: #1a1a1a;
+            letter-spacing: -0.3px;
+        }
+
+        .tool-category {
+            font-size: 12px;
+            color: #999;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .tool-description {
+            font-size: 15px;
+            color: #666;
+            line-height: 1.7;
+            max-width: 600px;
+        }
+
+        .tool-meta {
+            display: flex;
+            gap: 32px;
+            align-items: center;
+        }
+
+        .tool-stats {
+            display: flex;
+            gap: 24px;
+        }
+
+        .stat {
+            font-size: 13px;
+            color: #999;
+        }
+
+        .stat-value {
+            color: #1a1a1a;
+            margin-right: 4px;
+        }
+
+        .tool-link {
+            font-size: 13px;
+            color: #1a1a1a;
+            text-decoration: none;
+            border-bottom: 1px solid #1a1a1a;
+            transition: opacity 0.2s ease;
+        }
+
+        .tool-link:hover {
+            opacity: 0.6;
+        }
+
+        /* 页脚 */
+        .footer {
+            margin-top: 120px;
+            padding: 40px 0;
+            border-top: 1px solid #e5e5e5;
+            text-align: center;
+            color: #999;
+            font-size: 13px;
+        }
+
+        /* 响应式 */
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 24px;
+            }
+
+            .nav-wrapper {
+                flex-direction: column;
+                gap: 24px;
+                align-items: flex-start;
+            }
+
+            .nav {
+                flex-direction: column;
+                gap: 16px;
+            }
+
+            .page-title {
+                font-size: 32px;
+            }
+
+            .tool-item {
+                grid-template-columns: 1fr;
+                gap: 24px;
+                padding: 32px 24px;
+            }
+
+            .tool-meta {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 顶部导航 -->
+        <header class="header">
+            <div class="nav-wrapper">
+                <div class="logo">AI工具平台</div>
+                <nav class="nav">
+                    <a href="#editors">编辑器</a>
+                    <a href="#skills">技能库</a>
+                    <a href="#models">模型</a>
+                    <a href="#finetune">微调</a>
+                    <a href="#admin">管理</a>
+                </nav>
+                <div class="user-info">开发者</div>
+            </div>
+        </header>
+
+        <!-- 页面标题 -->
+        <div class="page-header">
+            <h1 class="page-title">AI编辑器</h1>
+            <p class="page-subtitle">精选的AI辅助编程工具</p>
+        </div>
+
+        <!-- 搜索和筛选 -->
+        <div class="controls">
+            <div class="search-box">
+                <input type="text" class="search-input" placeholder="搜索工具">
+            </div>
+            <div class="filters">
+                <span class="filter-item active">全部</span>
+                <span class="filter-item">IDE插件</span>
+                <span class="filter-item">独立编辑器</span>
+                <span class="filter-item">云端服务</span>
+                <span class="filter-item">热门</span>
+            </div>
+        </div>
+
+        <!-- 工具列表 -->
+        <div class="tools-list">
+            <!-- 工具1 -->
+            <div class="tool-item">
+                <div class="tool-content">
+                    <div class="tool-header">
+                        <h3 class="tool-name">Claude Code</h3>
+                        <span class="tool-category">IDE Plugin</span>
+                    </div>
+                    <p class="tool-description">
+                        Anthropic官方命令行工具，集成Claude最新模型。支持代码生成、重构和调试，提供智能的编程辅助能力。适用于多种编程语言和开发框架。
+                    </p>
+                </div>
+                <div class="tool-meta">
+                    <div class="tool-stats">
+                        <span class="stat"><span class="stat-value">12,500</span>浏览</span>
+                        <span class="stat"><span class="stat-value">3,200</span>点赞</span>
+                    </div>
+                    <a href="#" class="tool-link">查看详情</a>
+                </div>
+            </div>
+
+            <!-- 工具2 -->
+            <div class="tool-item">
+                <div class="tool-content">
+                    <div class="tool-header">
+                        <h3 class="tool-name">Cursor</h3>
+                        <span class="tool-category">Editor</span>
+                    </div>
+                    <p class="tool-description">
+                        基于VSCode的AI编辑器，深度集成GPT-4。支持智能代码补全、对话式编程和代码解释。界面简洁，性能优秀，适合日常开发使用。
+                    </p>
+                </div>
+                <div class="tool-meta">
+                    <div class="tool-stats">
+                        <span class="stat"><span class="stat-value">25,800</span>浏览</span>
+                        <span class="stat"><span class="stat-value">8,900</span>点赞</span>
+                    </div>
+                    <a href="#" class="tool-link">查看详情</a>
+                </div>
+            </div>
+
+            <!-- 工具3 -->
+            <div class="tool-item">
+                <div class="tool-content">
+                    <div class="tool-header">
+                        <h3 class="tool-name">Windsurf</h3>
+                        <span class="tool-category">Editor</span>
+                    </div>
+                    <p class="tool-description">
+                        新一代AI编程工具，支持多模型切换和实时协作。提供智能重构、代码分析等功能。适合团队协作和大型项目开发。
+                    </p>
+                </div>
+                <div class="tool-meta">
+                    <div class="tool-stats">
+                        <span class="stat"><span class="stat-value">8,300</span>浏览</span>
+                        <span class="stat"><span class="stat-value">2,100</span>点赞</span>
+                    </div>
+                    <a href="#" class="tool-link">查看详情</a>
+                </div>
+            </div>
+
+            <!-- 工具4 -->
+            <div class="tool-item">
+                <div class="tool-content">
+                    <div class="tool-header">
+                        <h3 class="tool-name">GitHub Copilot</h3>
+                        <span class="tool-category">IDE Plugin</span>
+                    </div>
+                    <p class="tool-description">
+                        GitHub官方AI编程助手，基于OpenAI Codex模型。支持多种IDE，提供智能代码建议和自动补全。广泛应用于各类开发场景。
+                    </p>
+                </div>
+                <div class="tool-meta">
+                    <div class="tool-stats">
+                        <span class="stat"><span class="stat-value">45,200</span>浏览</span>
+                        <span class="stat"><span class="stat-value">15,600</span>点赞</span>
+                    </div>
+                    <a href="#" class="tool-link">查看详情</a>
+                </div>
+            </div>
+
+            <!-- 工具5 -->
+            <div class="tool-item">
+                <div class="tool-content">
+                    <div class="tool-header">
+                        <h3 class="tool-name">Tabnine</h3>
+                        <span class="tool-category">IDE Plugin</span>
+                    </div>
+                    <p class="tool-description">
+                        AI代码补全工具，支持多种编程语言和IDE。提供本地和云端两种模式，注重代码隐私保护。适合企业级应用和敏感项目。
+                    </p>
+                </div>
+                <div class="tool-meta">
+                    <div class="tool-stats">
+                        <span class="stat"><span class="stat-value">18,700</span>浏览</span>
+                        <span class="stat"><span class="stat-value">5,400</span>点赞</span>
+                    </div>
+                    <a href="#" class="tool-link">查看详情</a>
+                </div>
+            </div>
+
+            <!-- 工具6 -->
+            <div class="tool-item">
+                <div class="tool-content">
+                    <div class="tool-header">
+                        <h3 class="tool-name">Codeium</h3>
+                        <span class="tool-category">IDE Plugin</span>
+                    </div>
+                    <p class="tool-description">
+                        免费的AI编程助手，支持70多种编程语言。提供智能补全、代码搜索和聊天功能。完全免费使用，适合个人开发者。
+                    </p>
+                </div>
+                <div class="tool-meta">
+                    <div class="tool-stats">
+                        <span class="stat"><span class="stat-value">22,100</span>浏览</span>
+                        <span class="stat"><span class="stat-value">7,800</span>点赞</span>
+                    </div>
+                    <a href="#" class="tool-link">查看详情</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- 页脚 -->
+        <footer class="footer">
+            <p>AI工具平台 © 2026</p>
+        </footer>
+    </div>
+</body>
+</html>

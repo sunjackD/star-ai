@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI聚合平台 - 现代简约风格</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* 顶部导航 */
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 20px 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 28px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .nav {
+            display: flex;
+            gap: 30px;
+        }
+
+        .nav a {
+            text-decoration: none;
+            color: #333;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .nav a:hover {
+            color: #667eea;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+        }
+
+        /* 主要内容区 */
+        .main-content {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            gap: 30px;
+        }
+
+        /* 侧边栏 */
+        .sidebar {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 25px;
+            height: fit-content;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .sidebar h3 {
+            font-size: 18px;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+        }
+
+        .sidebar-menu li {
+            margin-bottom: 12px;
+        }
+
+        .sidebar-menu a {
+            text-decoration: none;
+            color: #666;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 15px;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+
+        .sidebar-menu a:hover,
+        .sidebar-menu a.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        /* 内容区域 */
+        .content {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .content-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .content-header h2 {
+            font-size: 28px;
+            color: #333;
+        }
+
+        .search-bar {
+            display: flex;
+            gap: 10px;
+        }
+
+        .search-bar input {
+            padding: 12px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            width: 300px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        .search-bar input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(102, 126, 234, 0.4);
+        }
+
+        /* 卡片网格 */
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 25px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .card-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .card-description {
+            color: #666;
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .card-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 15px;
+            border-top: 1px solid #f0f0f0;
+        }
+
+        .card-stats {
+            display: flex;
+            gap: 15px;
+            font-size: 13px;
+            color: #999;
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .tag {
+            display: inline-block;
+            padding: 4px 12px;
+            background: #f0f0f0;
+            border-radius: 20px;
+            font-size: 12px;
+            color: #666;
+        }
+
+        /* 响应式 */
+        @media (max-width: 1024px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                display: none;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                gap: 20px;
+            }
+
+            .nav {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .search-bar {
+                flex-direction: column;
+            }
+
+            .search-bar input {
+                width: 100%;
+            }
+
+            .card-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 顶部导航 -->
+        <header class="header">
+            <div class="logo">🚀 AI聚合平台</div>
+            <nav class="nav">
+                <a href="#agents">AI编辑器</a>
+                <a href="#skills">Skills市场</a>
+                <a href="#models">AI模型</a>
+                <a href="#finetune">模型微调</a>
+                <a href="#admin">管理后台</a>
+            </nav>
+            <div class="user-info">
+                <span>开发者</span>
+                <div class="avatar">A</div>
+            </div>
+        </header>
+
+        <!-- 主要内容 -->
+        <div class="main-content">
+            <!-- 侧边栏 -->
+            <aside class="sidebar">
+                <h3>分类</h3>
+                <ul class="sidebar-menu">
+                    <li><a href="#" class="active">🎯 全部</a></li>
+                    <li><a href="#">💻 IDE插件</a></li>
+                    <li><a href="#">🖥️ 独立编辑器</a></li>
+                    <li><a href="#">☁️ 云端服务</a></li>
+                    <li><a href="#">🔥 热门推荐</a></li>
+                    <li><a href="#">⭐ 我的收藏</a></li>
+                </ul>
+            </aside>
+
+            <!-- 内容区域 -->
+            <main class="content">
+                <div class="content-header">
+                    <h2>AI编辑器</h2>
+                    <div class="search-bar">
+                        <input type="text" placeholder="搜索AI编辑器...">
+                        <button class="btn btn-primary">搜索</button>
+                    </div>
+                </div>
+
+                <!-- 卡片网格 -->
+                <div class="card-grid">
+                    <!-- 卡片1 -->
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-icon">🤖</div>
+                            <div>
+                                <div class="card-title">Claude Code</div>
+                                <span class="tag">IDE插件</span>
+                            </div>
+                        </div>
+                        <div class="card-description">
+                            Anthropic官方CLI工具，支持代码生成、重构、调试等功能。集成Claude最新模型，提供强大的AI编程辅助能力。
+                        </div>
+                        <div class="card-footer">
+                            <div class="card-stats">
+                                <span class="stat-item">👁️ 12.5K</span>
+                                <span class="stat-item">❤️ 3.2K</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 卡片2 -->
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-icon">⚡</div>
+                            <div>
+                                <div class="card-title">Cursor</div>
+                                <span class="tag">独立编辑器</span>
+                            </div>
+                        </div>
+                        <div class="card-description">
+                            基于VSCode的AI编辑器，支持智能代码补全、对话式编程、代码解释等功能。深度集成GPT-4。
+                        </div>
+                        <div class="card-footer">
+                            <div class="card-stats">
+                                <span class="stat-item">👁️ 25.8K</span>
+                                <span class="stat-item">❤️ 8.9K</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 卡片3 -->
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-icon">🌊</div>
+                            <div>
+                                <div class="card-title">Windsurf</div>
+                                <span class="tag">独立编辑器</span>
+                            </div>
+                        </div>
+                        <div class="card-description">
+                            新一代AI编程工具，支持多模型切换、实时协作、智能重构等功能。界面简洁，性能优秀。
+                        </div>
+                        <div class="card-footer">
+                            <div class="card-stats">
+                                <span class="stat-item">👁️ 8.3K</span>
+                                <span class="stat-item">❤️ 2.1K</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 卡片4 -->
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-icon">🐙</div>
+                            <div>
+                                <div class="card-title">GitHub Copilot</div>
+                                <span class="tag">IDE插件</span>
+                            </div>
+                        </div>
+                        <div class="card-description">
+                            GitHub官方AI编程助手，支持多种IDE，提供智能代码建议、自动补全、代码解释等功能。
+                        </div>
+                        <div class="card-footer">
+                            <div class="card-stats">
+                                <span class="stat-item">👁️ 45.2K</span>
+                                <span class="stat-item">❤️ 15.6K</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 卡片5 -->
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-icon">🎨</div>
+                            <div>
+                                <div class="card-title">Tabnine</div>
+                                <span class="tag">IDE插件</span>
+                            </div>
+                        </div>
+                        <div class="card-description">
+                            AI代码补全工具，支持多种编程语言和IDE。提供本地和云端两种模式，保护代码隐私。
+                        </div>
+                        <div class="card-footer">
+                            <div class="card-stats">
+                                <span class="stat-item">👁️ 18.7K</span>
+                                <span class="stat-item">❤️ 5.4K</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 卡片6 -->
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-icon">🔮</div>
+                            <div>
+                                <div class="card-title">Codeium</div>
+                                <span class="tag">IDE插件</span>
+                            </div>
+                        </div>
+                        <div class="card-description">
+                            免费的AI编程助手，支持70+编程语言，提供智能补全、代码搜索、聊天等功能。
+                        </div>
+                        <div class="card-footer">
+                            <div class="card-stats">
+                                <span class="stat-item">👁️ 22.1K</span>
+                                <span class="stat-item">❤️ 7.8K</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI聚合平台 - 玻璃态风格</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            background: #0f0f23;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* 动态背景 */
+        body::before {
+            content: '';
+            position: fixed;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background:
+                radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(255, 119, 198, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 40% 20%, rgba(119, 198, 255, 0.3) 0%, transparent 50%);
+            animation: rotate 20s linear infinite;
+            z-index: -1;
+        }
+
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 30px;
+        }
+
+        /* 玻璃态导航栏 */
+        .navbar {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 20px 40px;
+            margin-bottom: 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .logo {
+            font-size: 32px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 40px;
+        }
+
+        .nav-links a {
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            transition: width 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: white;
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        .user-section {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .user-avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        /* 搜索栏 */
+        .search-section {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 40px;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .search-section h1 {
+            color: white;
+            font-size: 42px;
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+
+        .search-section p {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 18px;
+            margin-bottom: 30px;
+        }
+
+        .search-box {
+            max-width: 700px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 18px 60px 18px 25px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50px;
+            color: white;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        .search-box input::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        .search-box input:focus {
+            outline: none;
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+
+        .search-btn {
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            padding: 12px 30px;
+            border-radius: 50px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .search-btn:hover {
+            transform: translateY(-50%) scale(1.05);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        /* 分类标签 */
+        .categories {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 40px;
+        }
+
+        .category-tag {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 12px 25px;
+            border-radius: 50px;
+            color: rgba(255, 255, 255, 0.8);
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .category-tag:hover,
+        .category-tag.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: transparent;
+            transform: translateY(-2px);
+        }
+
+        /* 卡片网格 */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+            gap: 30px;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 30px;
+            transition: all 0.4s;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .glass-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+            opacity: 0;
+            transition: opacity 0.4s;
+        }
+
+        .glass-card:hover {
+            transform: translateY(-10px);
+            border-color: rgba(255, 255, 255, 0.3);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        .glass-card:hover::before {
+            opacity: 1;
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .card-icon {
+            width: 70px;
+            height: 70px;
+            border-radius: 16px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .card-info h3 {
+            color: white;
+            font-size: 22px;
+            margin-bottom: 5px;
+        }
+
+        .card-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .card-description {
+            color: rgba(255, 255, 255, 0.7);
+            line-height: 1.8;
+            margin-bottom: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .card-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            z-index: 1;
+        }
+
+        .card-stats {
+            display: flex;
+            gap: 20px;
+        }
+
+        .stat {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 14px;
+        }
+
+        .card-action {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 8px 20px;
+            border-radius: 20px;
+            color: white;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .card-action:hover {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-color: transparent;
+        }
+
+        /* 响应式 */
+        @media (max-width: 1024px) {
+            .cards-grid {
+                grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            }
+        }
+
+        @media (max-width: 768px) {
+            .navbar {
+                flex-direction: column;
+                gap: 20px;
+            }
+
+            .nav-links {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+
+            .search-section h1 {
+                font-size: 32px;
+            }
+
+            .cards-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 导航栏 -->
+        <nav class="navbar">
+            <div class="logo">
+                <span>✨</span>
+                <span>AI聚合平台</span>
+            </div>
+            <div class="nav-links">
+                <a href="#agents">AI编辑器</a>
+                <a href="#skills">Skills市场</a>
+                <a href="#models">AI模型</a>
+                <a href="#finetune">模型微调</a>
+                <a href="#admin">管理后台</a>
+            </div>
+            <div class="user-section">
+                <span style="color: rgba(255, 255, 255, 0.8);">开发者</span>
+                <div class="user-avatar">A</div>
+            </div>
+        </nav>
+
+        <!-- 搜索区域 -->
+        <section class="search-section">
+            <h1>探索AI编程工具</h1>
+            <p>发现最适合你的AI编辑器和开发工具</p>
+            <div class="search-box">
+                <input type="text" placeholder="搜索AI编辑器、Skills、模型...">
+                <button class="search-btn">搜索</button>
+            </div>
+        </section>
+
+        <!-- 分类标签 -->
+        <div class="categories">
+            <div class="category-tag active">🎯 全部</div>
+            <div class="category-tag">💻 IDE插件</div>
+            <div class="category-tag">🖥️ 独立编辑器</div>
+            <div class="category-tag">☁️ 云端服务</div>
+            <div class="category-tag">🔥 热门推荐</div>
+            <div class="category-tag">⭐ 我的收藏</div>
+        </div>
+
+        <!-- 卡片网格 -->
+        <div class="cards-grid">
+            <!-- 卡片1 -->
+            <div class="glass-card">
+                <div class="card-header">
+                    <div class="card-icon">🤖</div>
+                    <div class="card-info">
+                        <h3>Claude Code</h3>
+                        <span class="card-badge">IDE插件</span>
+                    </div>
+                </div>
+                <div class="card-description">
+                    Anthropic官方CLI工具，支持代码生成、重构、调试等功能。集成Claude最新模型，提供强大的AI编程辅助能力，支持多种编程语言和框架。
+                </div>
+                <div class="card-footer">
+                    <div class="card-stats">
+                        <span class="stat">👁️ 12.5K</span>
+                        <span class="stat">❤️ 3.2K</span>
+                        <span class="stat">⬇️ 8.9K</span>
+                    </div>
+                    <button class="card-action">查看详情</button>
+                </div>
+            </div>
+
+            <!-- 卡片2 -->
+            <div class="glass-card">
+                <div class="card-header">
+                    <div class="card-icon">⚡</div>
+                    <div class="card-info">
+                        <h3>Cursor</h3>
+                        <span class="card-badge">独立编辑器</span>
+                    </div>
+                </div>
+                <div class="card-description">
+                    基于VSCode的AI编辑器，支持智能代码补全、对话式编程、代码解释等功能。深度集成GPT-4，提供流畅的编程体验。
+                </div>
+                <div class="card-footer">
+                    <div class="card-stats">
+                        <span class="stat">👁️ 25.8K</span>
+                        <span class="stat">❤️ 8.9K</span>
+                        <span class="stat">⬇️ 15.2K</span>
+                    </div>
+                    <button class="card-action">查看详情</button>
+                </div>
+            </div>
+
+            <!-- 卡片3 -->
+            <div class="glass-card">
+                <div class="card-header">
+                    <div class="card-icon">🌊</div>
+                    <div class="card-info">
+                        <h3>Windsurf</h3>
+                        <span class="card-badge">独立编辑器</span>
+                    </div>
+                </div>
+                <div class="card-description">
+                    新一代AI编程工具，支持多模型切换、实时协作、智能重构等功能。界面简洁，性能优秀，适合团队协作开发。
+                </div>
+                <div class="card-footer">
+                    <div class="card-stats">
+                        <span class="stat">👁️ 8.3K</span>
+                        <span class="stat">❤️ 2.1K</span>
+                        <span class="stat">⬇️ 5.6K</span>
+                    </div>
+                    <button class="card-action">查看详情</button>
+                </div>
+            </div>
+
+            <!-- 卡片4 -->
+            <div class="glass-card">
+                <div class="card-header">
+                    <div class="card-icon">🐙</div>
+                    <div class="card-info">
+                        <h3>GitHub Copilot</h3>
+                        <span class="card-badge">IDE插件</span>
+                    </div>
+                </div>
+                <div class="card-description">
+                    GitHub官方AI编程助手，支持多种IDE，提供智能代码建议、自动补全、代码解释等功能。基于OpenAI Codex模型。
+                </div>
+                <div class="card-footer">
+                    <div class="card-stats">
+                        <span class="stat">👁️ 45.2K</span>
+                        <span class="stat">❤️ 15.6K</span>
+                        <span class="stat">⬇️ 32.1K</span>
+                    </div>
+                    <button class="card-action">查看详情</button>
+                </div>
+            </div>
+
+            <!-- 卡片5 -->
+            <div class="glass-card">
+                <div class="card-header">
+                    <div class="card-icon">🎨</div>
+                    <div class="card-info">
+                        <h3>Tabnine</h3>
+                        <span class="card-badge">IDE插件</span>
+                    </div>
+                </div>
+                <div class="card-description">
+                    AI代码补全工具，支持多种编程语言和IDE。提供本地和云端两种模式，保护代码隐私，适合企业级应用。
+                </div>
+                <div class="card-footer">
+                    <div class="card-stats">
+                        <span class="stat">👁️ 18.7K</span>
+                        <span class="stat">❤️ 5.4K</span>
+                        <span class="stat">⬇️ 12.3K</span>
+                    </div>
+                    <button class="card-action">查看详情</button>
+                </div>
+            </div>
+
+            <!-- 卡片6 -->
+            <div class="glass-card">
+                <div class="card-header">
+                    <div class="card-icon">🔮</div>
+                    <div class="card-info">
+                        <h3>Codeium</h3>
+                        <span class="card-badge">IDE插件</span>
+                    </div>
+                </div>
+                <div class="card-description">
+                    免费的AI编程助手，支持70+编程语言，提供智能补全、代码搜索、聊天等功能。完全免费，无需付费订阅。
+                </div>
+                <div class="card-footer">
+                    <div class="card-stats">
+                        <span class="stat">👁️ 22.1K</span>
+                        <span class="stat">❤️ 7.8K</span>
+                        <span class="stat">⬇️ 18.5K</span>
+                    </div>
+                    <button class="card-action">查看详情</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

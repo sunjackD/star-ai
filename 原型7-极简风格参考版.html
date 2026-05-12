@@ -1,0 +1,1316 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI工具平台 - 极简风格参考版</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700&family=Noto+Serif+SC:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #faf9f6;
+      --bg-soft: #f3efe8;
+      --panel: rgba(255, 255, 255, 0.82);
+      --panel-strong: #ffffff;
+      --text: #1f1c18;
+      --text-soft: #6d675f;
+      --text-faint: #a0978b;
+      --line: #e4ddd2;
+      --accent: #85684f;
+      --accent-deep: #5f4733;
+      --shadow: 0 24px 60px rgba(31, 28, 24, 0.08);
+      --radius-lg: 28px;
+      --radius-md: 20px;
+      --radius-sm: 14px;
+      --content: 1180px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: "Manrope", "PingFang SC", "Microsoft YaHei", sans-serif;
+      background:
+        radial-gradient(circle at top right, rgba(133, 104, 79, 0.08), transparent 28rem),
+        linear-gradient(180deg, #fbfaf7 0%, #f7f3ec 100%);
+      color: var(--text);
+      line-height: 1.65;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    button {
+      font: inherit;
+    }
+
+    .page-shell {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .page-shell::before,
+    .page-shell::after {
+      content: "";
+      position: absolute;
+      width: 28rem;
+      height: 28rem;
+      border-radius: 50%;
+      filter: blur(12px);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .page-shell::before {
+      top: -8rem;
+      right: -12rem;
+      background: rgba(133, 104, 79, 0.08);
+    }
+
+    .page-shell::after {
+      left: -10rem;
+      top: 34rem;
+      background: rgba(255, 255, 255, 0.45);
+    }
+
+    .container {
+      width: min(var(--content), calc(100% - 2.5rem));
+      margin: 0 auto;
+      position: relative;
+      z-index: 1;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      backdrop-filter: blur(14px);
+      background: rgba(250, 249, 246, 0.82);
+      border-bottom: 1px solid rgba(228, 221, 210, 0.8);
+    }
+
+    .topbar-inner {
+      width: min(var(--content), calc(100% - 2.5rem));
+      margin: 0 auto;
+      padding: 1.05rem 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.9rem;
+    }
+
+    .brand-mark {
+      width: 2.4rem;
+      height: 2.4rem;
+      border-radius: 999px;
+      display: grid;
+      place-items: center;
+      background: var(--text);
+      color: #fff;
+      font-size: 0.78rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+    }
+
+    .brand-copy strong {
+      display: block;
+      font-size: 0.95rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+    }
+
+    .brand-copy span {
+      display: block;
+      font-size: 0.78rem;
+      color: var(--text-soft);
+      letter-spacing: 0.04em;
+    }
+
+    .nav {
+      display: flex;
+      align-items: center;
+      gap: 2rem;
+      color: var(--text-soft);
+      font-size: 0.92rem;
+    }
+
+    .nav a {
+      position: relative;
+      transition: color 0.2s ease;
+    }
+
+    .nav a::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      bottom: -0.35rem;
+      width: 100%;
+      height: 1px;
+      transform: scaleX(0);
+      transform-origin: left;
+      background: var(--text);
+      transition: transform 0.22s ease;
+    }
+
+    .nav a:hover {
+      color: var(--text);
+    }
+
+    .nav a:hover::after {
+      transform: scaleX(1);
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+    }
+
+    .ghost-btn,
+    .solid-btn,
+    .line-btn {
+      border-radius: 999px;
+      padding: 0.9rem 1.35rem;
+      transition: transform 0.2s ease, background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+      cursor: pointer;
+    }
+
+    .ghost-btn {
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--text-soft);
+    }
+
+    .ghost-btn:hover {
+      color: var(--text);
+      transform: translateY(-1px);
+    }
+
+    .solid-btn {
+      border: 1px solid var(--text);
+      background: var(--text);
+      color: #fff;
+      box-shadow: 0 8px 24px rgba(31, 28, 24, 0.14);
+    }
+
+    .solid-btn:hover {
+      transform: translateY(-2px);
+      background: var(--accent-deep);
+      border-color: var(--accent-deep);
+    }
+
+    .line-btn {
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.55);
+      color: var(--text);
+    }
+
+    .line-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent-deep);
+      transform: translateY(-2px);
+    }
+
+    .hero {
+      padding: 5.5rem 0 4.5rem;
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.2fr) minmax(22rem, 0.8fr);
+      gap: 2rem;
+      align-items: end;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.65rem;
+      padding: 0.45rem 0.8rem;
+      border: 1px solid rgba(133, 104, 79, 0.18);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.72);
+      color: var(--accent-deep);
+      font-size: 0.74rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      margin-bottom: 1.4rem;
+    }
+
+    .eyebrow-dot {
+      width: 0.48rem;
+      height: 0.48rem;
+      border-radius: 999px;
+      background: var(--accent);
+      box-shadow: 0 0 0 0 rgba(133, 104, 79, 0.3);
+      animation: pulse 2.1s infinite;
+    }
+
+    @keyframes pulse {
+      0% {
+        box-shadow: 0 0 0 0 rgba(133, 104, 79, 0.28);
+      }
+      70% {
+        box-shadow: 0 0 0 0.7rem rgba(133, 104, 79, 0);
+      }
+      100% {
+        box-shadow: 0 0 0 0 rgba(133, 104, 79, 0);
+      }
+    }
+
+    .hero h1 {
+      font-family: "Noto Serif SC", serif;
+      font-size: clamp(3rem, 7.8vw, 5.9rem);
+      line-height: 1.06;
+      font-weight: 600;
+      letter-spacing: -0.03em;
+      max-width: 10.5em;
+    }
+
+    .hero h1 span {
+      color: var(--accent-deep);
+      display: block;
+    }
+
+    .hero-summary {
+      margin-top: 1.5rem;
+      max-width: 42rem;
+      font-size: 1.08rem;
+      color: var(--text-soft);
+    }
+
+    .hero-actions {
+      margin-top: 2rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.85rem;
+    }
+
+    .hero-note {
+      margin-top: 1.35rem;
+      color: var(--text-faint);
+      font-size: 0.92rem;
+      display: flex;
+      gap: 1.25rem;
+      flex-wrap: wrap;
+    }
+
+    .hero-note span::before {
+      content: "·";
+      margin-right: 0.5rem;
+      color: var(--accent);
+    }
+
+    .hero-aside {
+      display: grid;
+      gap: 1rem;
+    }
+
+    .glass-card,
+    .metric-card,
+    .feature-card,
+    .timeline-card,
+    .split-card,
+    .price-card,
+    .footer-card {
+      background: var(--panel);
+      border: 1px solid rgba(228, 221, 210, 0.9);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(12px);
+    }
+
+    .dashboard-card {
+      padding: 1.4rem;
+    }
+
+    .dashboard-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+
+    .dashboard-head strong {
+      font-size: 1rem;
+      font-weight: 700;
+    }
+
+    .dashboard-head span {
+      color: var(--text-faint);
+      font-size: 0.82rem;
+    }
+
+    .dashboard-panel {
+      background: var(--panel-strong);
+      border: 1px solid var(--line);
+      border-radius: 1.25rem;
+      padding: 1rem;
+      display: grid;
+      gap: 1rem;
+    }
+
+    .panel-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 0.75rem;
+      align-items: center;
+    }
+
+    .panel-label {
+      color: var(--text-soft);
+      font-size: 0.85rem;
+    }
+
+    .panel-value {
+      font-weight: 700;
+      font-size: 0.95rem;
+    }
+
+    .meter {
+      height: 0.55rem;
+      border-radius: 999px;
+      background: var(--bg-soft);
+      overflow: hidden;
+    }
+
+    .meter > span {
+      display: block;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--accent), #bea388);
+    }
+
+    .metric-strip {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1rem;
+    }
+
+    .metric-card {
+      padding: 1.15rem 1.2rem;
+    }
+
+    .metric-card strong {
+      display: block;
+      font-size: 2rem;
+      font-weight: 600;
+      line-height: 1;
+      margin-bottom: 0.35rem;
+    }
+
+    .metric-card span {
+      display: block;
+      color: var(--text-soft);
+      font-size: 0.9rem;
+    }
+
+    section {
+      padding: 2rem 0 4.8rem;
+    }
+
+    .section-head {
+      margin-bottom: 2rem;
+      display: grid;
+      gap: 0.8rem;
+    }
+
+    .section-label {
+      color: var(--accent);
+      font-size: 0.76rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+    }
+
+    .section-title {
+      font-family: "Noto Serif SC", serif;
+      font-size: clamp(2rem, 4vw, 3.2rem);
+      line-height: 1.15;
+      letter-spacing: -0.03em;
+      max-width: 13em;
+    }
+
+    .section-desc {
+      max-width: 42rem;
+      color: var(--text-soft);
+      font-size: 1rem;
+    }
+
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 1rem;
+    }
+
+    .feature-card {
+      padding: 1.5rem;
+      min-height: 18rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .feature-index {
+      color: var(--text-faint);
+      font-size: 0.82rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+
+    .feature-card h3 {
+      font-size: 1.35rem;
+      line-height: 1.2;
+      margin-top: 1rem;
+      margin-bottom: 0.8rem;
+    }
+
+    .feature-card p {
+      color: var(--text-soft);
+      font-size: 0.96rem;
+      max-width: 26ch;
+    }
+
+    .feature-meta {
+      margin-top: 1.2rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--line);
+      color: var(--accent-deep);
+      font-size: 0.84rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .split-layout {
+      display: grid;
+      grid-template-columns: 1.05fr 0.95fr;
+      gap: 1rem;
+    }
+
+    .split-card {
+      padding: 1.75rem;
+    }
+
+    .split-card h3 {
+      font-family: "Noto Serif SC", serif;
+      font-size: 1.75rem;
+      line-height: 1.2;
+      margin-bottom: 0.8rem;
+    }
+
+    .split-card p {
+      color: var(--text-soft);
+      margin-bottom: 1.2rem;
+    }
+
+    .bullet-list {
+      display: grid;
+      gap: 0.85rem;
+    }
+
+    .bullet-item {
+      display: grid;
+      grid-template-columns: 1.5rem 1fr;
+      gap: 0.7rem;
+      align-items: start;
+      color: var(--text-soft);
+      font-size: 0.96rem;
+    }
+
+    .bullet-item strong {
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    .bullet-icon {
+      width: 1.5rem;
+      height: 1.5rem;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      display: grid;
+      place-items: center;
+      color: var(--accent);
+      font-size: 0.8rem;
+      margin-top: 0.1rem;
+    }
+
+    .api-callout {
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.88), rgba(245, 239, 232, 0.92));
+      border: 1px solid var(--line);
+      border-radius: 1.3rem;
+      padding: 1.1rem;
+      margin-top: 1.2rem;
+    }
+
+    .api-callout code {
+      display: block;
+      margin-top: 0.8rem;
+      padding: 1rem;
+      border-radius: 1rem;
+      background: #231f1b;
+      color: #efe7dc;
+      font-family: "SFMono-Regular", Consolas, monospace;
+      font-size: 0.9rem;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .timeline {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 1rem;
+    }
+
+    .timeline-card {
+      padding: 1.4rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .timeline-card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 0.28rem;
+      background: linear-gradient(90deg, var(--accent), rgba(133, 104, 79, 0.25));
+    }
+
+    .timeline-step {
+      color: var(--text-faint);
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      font-size: 0.74rem;
+      margin-bottom: 1rem;
+    }
+
+    .timeline-card h3 {
+      font-size: 1.15rem;
+      margin-bottom: 0.65rem;
+    }
+
+    .timeline-card p {
+      color: var(--text-soft);
+      font-size: 0.93rem;
+    }
+
+    .catalog {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 1rem;
+    }
+
+    .catalog-board,
+    .catalog-side {
+      padding: 1.4rem;
+      border-radius: var(--radius-lg);
+      background: var(--panel);
+      border: 1px solid rgba(228, 221, 210, 0.9);
+      box-shadow: var(--shadow);
+    }
+
+    .skill-row {
+      display: grid;
+      grid-template-columns: 1.4fr 0.8fr 0.6fr;
+      gap: 1rem;
+      align-items: center;
+      padding: 1rem 0;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .skill-row:last-child {
+      border-bottom: none;
+    }
+
+    .skill-name {
+      font-weight: 600;
+      margin-bottom: 0.3rem;
+    }
+
+    .skill-desc {
+      color: var(--text-soft);
+      font-size: 0.92rem;
+    }
+
+    .skill-tag {
+      justify-self: start;
+      padding: 0.35rem 0.7rem;
+      border-radius: 999px;
+      background: rgba(133, 104, 79, 0.08);
+      color: var(--accent-deep);
+      font-size: 0.76rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .skill-action {
+      justify-self: end;
+      color: var(--text);
+      font-size: 0.88rem;
+    }
+
+    .catalog-side {
+      display: grid;
+      gap: 1rem;
+      align-content: start;
+    }
+
+    .side-block {
+      padding: 1.1rem;
+      border-radius: 1.15rem;
+      background: rgba(255, 255, 255, 0.72);
+      border: 1px solid var(--line);
+    }
+
+    .side-block h3 {
+      font-size: 1rem;
+      margin-bottom: 0.45rem;
+    }
+
+    .side-block p,
+    .side-block li {
+      color: var(--text-soft);
+      font-size: 0.92rem;
+    }
+
+    .side-block ul {
+      list-style: none;
+      display: grid;
+      gap: 0.55rem;
+      margin-top: 0.75rem;
+    }
+
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 1rem;
+    }
+
+    .price-card {
+      padding: 1.6rem;
+    }
+
+    .price-card.featured {
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(243, 239, 232, 0.98));
+      border-color: rgba(133, 104, 79, 0.28);
+    }
+
+    .price-label {
+      color: var(--text-faint);
+      font-size: 0.78rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      margin-bottom: 1rem;
+    }
+
+    .price-name {
+      font-family: "Noto Serif SC", serif;
+      font-size: 1.6rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .price-value {
+      display: flex;
+      align-items: end;
+      gap: 0.25rem;
+      margin-bottom: 1rem;
+    }
+
+    .price-value strong {
+      font-size: 3rem;
+      line-height: 1;
+      font-weight: 700;
+    }
+
+    .price-value span {
+      color: var(--text-soft);
+      margin-bottom: 0.35rem;
+    }
+
+    .price-desc {
+      color: var(--text-soft);
+      min-height: 3.2rem;
+      margin-bottom: 1rem;
+    }
+
+    .price-list {
+      list-style: none;
+      display: grid;
+      gap: 0.7rem;
+      margin-bottom: 1.4rem;
+    }
+
+    .price-list li {
+      color: var(--text-soft);
+      font-size: 0.93rem;
+    }
+
+    .cta-band {
+      padding-bottom: 5.5rem;
+    }
+
+    .cta-wrap {
+      padding: 2.4rem;
+      border-radius: 2rem;
+      background:
+        radial-gradient(circle at top right, rgba(133, 104, 79, 0.12), transparent 18rem),
+        linear-gradient(135deg, rgba(255, 255, 255, 0.94), rgba(243, 239, 232, 0.98));
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 2rem;
+      align-items: center;
+    }
+
+    .cta-wrap h2 {
+      font-family: "Noto Serif SC", serif;
+      font-size: clamp(2rem, 4vw, 3rem);
+      line-height: 1.15;
+      margin-bottom: 0.9rem;
+    }
+
+    .cta-wrap p {
+      color: var(--text-soft);
+      max-width: 36rem;
+    }
+
+    .cta-aside {
+      display: grid;
+      gap: 0.9rem;
+      justify-items: start;
+    }
+
+    .cta-stats {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.8rem;
+      color: var(--text-faint);
+      font-size: 0.9rem;
+    }
+
+    .footer {
+      padding-bottom: 3rem;
+    }
+
+    .footer-card {
+      padding: 1.4rem 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .footer-brand strong {
+      display: block;
+      font-size: 1rem;
+      margin-bottom: 0.25rem;
+    }
+
+    .footer-brand span,
+    .footer-links a {
+      color: var(--text-soft);
+      font-size: 0.9rem;
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 1.2rem;
+      flex-wrap: wrap;
+    }
+
+    @media (max-width: 1080px) {
+      .hero-grid,
+      .split-layout,
+      .catalog,
+      .cta-wrap {
+        grid-template-columns: 1fr;
+      }
+
+      .feature-grid,
+      .timeline,
+      .pricing-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .nav {
+        display: none;
+      }
+    }
+
+    @media (max-width: 720px) {
+      .container,
+      .topbar-inner {
+        width: min(var(--content), calc(100% - 1.2rem));
+      }
+
+      .hero {
+        padding-top: 3.8rem;
+      }
+
+      .metric-strip,
+      .feature-grid,
+      .timeline,
+      .pricing-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .skill-row {
+        grid-template-columns: 1fr;
+      }
+
+      .skill-action,
+      .skill-tag {
+        justify-self: start;
+      }
+
+      .nav-actions {
+        width: 100%;
+        justify-content: flex-end;
+      }
+
+      .topbar-inner {
+        flex-wrap: wrap;
+      }
+
+      .hero-actions {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .ghost-btn,
+      .solid-btn,
+      .line-btn {
+        width: 100%;
+        text-align: center;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page-shell">
+    <header class="topbar">
+      <div class="topbar-inner">
+        <a class="brand" href="#hero">
+          <div class="brand-mark">XM</div>
+          <div class="brand-copy">
+            <strong>星梦 AI 聚合平台</strong>
+            <span>Minimal Reference Prototype</span>
+          </div>
+        </a>
+        <nav class="nav" aria-label="主导航">
+          <a href="#products">产品矩阵</a>
+          <a href="#workflow">使用流程</a>
+          <a href="#api">API Key</a>
+          <a href="#skills">Skills</a>
+          <a href="#pricing">方案</a>
+        </nav>
+        <div class="nav-actions">
+          <a class="ghost-btn" href="#api">开发者入口</a>
+          <a class="solid-btn" href="#cta">申请演示</a>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero" id="hero">
+        <div class="container hero-grid">
+          <div>
+            <div class="eyebrow">
+              <span class="eyebrow-dot"></span>
+              <span>AI Tool Platform / Minimal Edition</span>
+            </div>
+            <h1>
+              把分散的 AI 工具、Skills 与模型入口
+              <span>收回到一个工作台。</span>
+            </h1>
+            <p class="hero-summary">
+              面向企业团队与 AI 开发者的统一聚合平台，集中管理 AI Agents、Skills 市场、模型入口、微调任务与后台操作。
+              用户登录后才能查看详情页；生成 API Key 后，还能把平台本身当作一个 Skill，直接交给 AI Agent 远程管理。
+            </p>
+            <div class="hero-actions">
+              <a class="solid-btn" href="#products">查看产品结构</a>
+              <a class="line-btn" href="#api">查看 API Key 工作流</a>
+            </div>
+            <div class="hero-note">
+              <span>登录后查看详情</span>
+              <span>右上角生成 API Key</span>
+              <span>AI Agent 一站式调用后台</span>
+            </div>
+          </div>
+
+          <div class="hero-aside">
+            <div class="glass-card dashboard-card">
+              <div class="dashboard-head">
+                <strong>控制台总览</strong>
+                <span>实时聚合中</span>
+              </div>
+              <div class="dashboard-panel">
+                <div class="panel-row">
+                  <div>
+                    <div class="panel-label">已收录 Skills</div>
+                    <div class="panel-value">1,284 个</div>
+                  </div>
+                  <div class="panel-label">今日新增 +36</div>
+                </div>
+                <div class="meter"><span style="width: 76%"></span></div>
+                <div class="panel-row">
+                  <div>
+                    <div class="panel-label">活跃 API Key</div>
+                    <div class="panel-value">312 个</div>
+                  </div>
+                  <div class="panel-label">调用成功率 99.4%</div>
+                </div>
+                <div class="meter"><span style="width: 88%"></span></div>
+                <div class="panel-row">
+                  <div>
+                    <div class="panel-label">微调任务</div>
+                    <div class="panel-value">18 个进行中</div>
+                  </div>
+                  <div class="panel-label">平均耗时 41 分钟</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="metric-strip">
+              <div class="metric-card">
+                <strong>06</strong>
+                <span>核心业务模块</span>
+              </div>
+              <div class="metric-card">
+                <strong>24h</strong>
+                <span>操作审计追踪</span>
+              </div>
+              <div class="metric-card">
+                <strong>JWT</strong>
+                <span>详情页登录鉴权</span>
+              </div>
+              <div class="metric-card">
+                <strong>Scope</strong>
+                <span>API Key 细粒度授权</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="products">
+        <div class="container">
+          <div class="section-head">
+            <div class="section-label">Product Matrix</div>
+            <h2 class="section-title">极简结构，不是减功能，而是把复杂度藏进秩序里。</h2>
+            <p class="section-desc">
+              参考稿里的极简卡片与数据面板语言，这里把内容替换为 AI 聚合平台的真实业务面：知识库、Skills 市场、模型入口、微调管理与统一后台。
+            </p>
+          </div>
+
+          <div class="feature-grid">
+            <article class="feature-card">
+              <div>
+                <div class="feature-index">01 / Agents</div>
+                <h3>AI Agents 展示库</h3>
+                <p>集中呈现 Claude Code、Cursor、Windsurf 等工具的配置文档、教程、代码示例与标签搜索。</p>
+              </div>
+              <div class="feature-meta">详情页登录后可见</div>
+            </article>
+
+            <article class="feature-card">
+              <div>
+                <div class="feature-index">02 / Skills</div>
+                <h3>Skills 聚合市场</h3>
+                <p>支持列表检索、分类筛选、导入导出、浏览统计与下载统计，同时保留平台内统一的元数据管理能力。</p>
+              </div>
+              <div class="feature-meta">支持导入、下载、远程同步</div>
+            </article>
+
+            <article class="feature-card">
+              <div>
+                <div class="feature-index">03 / Models</div>
+                <h3>模型与微调工作台</h3>
+                <p>把模型入口、微调任务、数据集管理放进统一的视觉层级中，让平台既能做导航，也能做执行。</p>
+              </div>
+              <div class="feature-meta">统一入口跳转与任务监控</div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section id="workflow">
+        <div class="container split-layout">
+          <article class="split-card">
+            <div class="section-label">Access Control</div>
+            <h3>详情页只对登录用户开放。</h3>
+            <p>
+              平台首页、列表页、搜索页可以公开展示；一旦进入 Agent 详情、Skill 详情、微调任务详情或个人中心，就必须完成登录鉴权。
+              这让内容曝光与后台能力天然分层。
+            </p>
+            <div class="bullet-list">
+              <div class="bullet-item">
+                <div class="bullet-icon">1</div>
+                <div><strong>前端路由守卫</strong>：未登录访问详情页时自动跳转登录页，并带回跳地址。</div>
+              </div>
+              <div class="bullet-item">
+                <div class="bullet-icon">2</div>
+                <div><strong>后端 JWT 兜底</strong>：详情接口本身开启鉴权，不依赖前端拦截。</div>
+              </div>
+              <div class="bullet-item">
+                <div class="bullet-icon">3</div>
+                <div><strong>后台 RBAC</strong>：创建、更新、导入、删除等操作只对有权限的角色开放。</div>
+              </div>
+            </div>
+          </article>
+
+          <article class="split-card" id="api">
+            <div class="section-label">API Key / Self Skill</div>
+            <h3>平台自身也是一个可调用的 Skill。</h3>
+            <p>
+              用户登录后可在右上角生成 API Key，进入专门的 API Key 页面查看权限范围、最后使用时间与调用示例。
+              之后把平台自管理 Skill 引入 AI Agent，就能直接查询 Skills 列表、导入、远程添加和下载。
+            </p>
+            <div class="bullet-list">
+              <div class="bullet-item">
+                <div class="bullet-icon">A</div>
+                <div><strong>Scopes</strong>：`skills:read`、`skills:import`、`skills:write`、`skills:download`、`admin:manage`。</div>
+              </div>
+              <div class="bullet-item">
+                <div class="bullet-icon">B</div>
+                <div><strong>安全基线</strong>：明文 Key 只展示一次，数据库仅保存哈希值，并保留调用审计。</div>
+              </div>
+            </div>
+            <div class="api-callout">
+              AI Agent 可直接调用的管理能力示意：
+              <code>list_skills()
+import_skill(file)
+add_remote_skill(url)
+download_skill(skill_id)
+upsert_skill_metadata(payload)</code>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section>
+        <div class="container">
+          <div class="section-head">
+            <div class="section-label">One Flow</div>
+            <h2 class="section-title">从浏览，到授权，到被 AI Agent 接管后台，只需要四步。</h2>
+          </div>
+
+          <div class="timeline">
+            <article class="timeline-card">
+              <div class="timeline-step">Step 01</div>
+              <h3>浏览市场</h3>
+              <p>用户先在公开列表中筛选 Agents、Skills 与模型入口，确认需要深入查看的目标。</p>
+            </article>
+
+            <article class="timeline-card">
+              <div class="timeline-step">Step 02</div>
+              <h3>登录查看详情</h3>
+              <p>进入详情页时触发登录，解锁完整文档、下载、导入、收藏与后台操作入口。</p>
+            </article>
+
+            <article class="timeline-card">
+              <div class="timeline-step">Step 03</div>
+              <h3>生成 API Key</h3>
+              <p>在右上角或个人中心创建带 Scope 的 API Key，用于外部 Agent 安全调用。</p>
+            </article>
+
+            <article class="timeline-card">
+              <div class="timeline-step">Step 04</div>
+              <h3>自然语言管理</h3>
+              <p>在 AI Agent 中引用平台自带 Skill，直接执行查询、导入、同步与下载操作。</p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section id="skills">
+        <div class="container">
+          <div class="section-head">
+            <div class="section-label">Skills Console</div>
+            <h2 class="section-title">看起来像市场，运行起来像中台。</h2>
+            <p class="section-desc">
+              市场前台负责发现与转化，Developer API 负责自动化接入与批量管理。极简视觉下，每个动作都保留清晰路径。
+            </p>
+          </div>
+
+          <div class="catalog">
+            <div class="catalog-board">
+              <div class="skill-row">
+                <div>
+                  <div class="skill-name">Skill Installer</div>
+                  <div class="skill-desc">查询系统中的 Skills 列表，导入 GitHub 或本地目录中的 Skill。</div>
+                </div>
+                <div class="skill-tag">Import</div>
+                <div class="skill-action">导入</div>
+              </div>
+              <div class="skill-row">
+                <div>
+                  <div class="skill-name">Remote Sync</div>
+                  <div class="skill-desc">从 URL 或 Git 仓库拉取远程 Skill，写入平台并记录来源与同步状态。</div>
+                </div>
+                <div class="skill-tag">Remote</div>
+                <div class="skill-action">同步</div>
+              </div>
+              <div class="skill-row">
+                <div>
+                  <div class="skill-name">Policy Guard</div>
+                  <div class="skill-desc">负责 API Key scope 校验、详情页鉴权、审计记录和后台操作安全隔离。</div>
+                </div>
+                <div class="skill-tag">Security</div>
+                <div class="skill-action">审计</div>
+              </div>
+              <div class="skill-row">
+                <div>
+                  <div class="skill-name">Skill Exporter</div>
+                  <div class="skill-desc">允许用户从站内下载某个 Skill，用于二次分发或导入到其他 Agent 环境。</div>
+                </div>
+                <div class="skill-tag">Download</div>
+                <div class="skill-action">下载</div>
+              </div>
+            </div>
+
+            <aside class="catalog-side">
+              <div class="side-block">
+                <h3>开发者入口</h3>
+                <p>右上角始终保留 API Key 入口与个人中心入口，减少二级导航层级。</p>
+              </div>
+              <div class="side-block">
+                <h3>后台字段</h3>
+                <ul>
+                  <li>名称、描述、分类、标签、作者</li>
+                  <li>来源地址、同步状态、最近同步时间</li>
+                  <li>浏览量、下载量、收藏数与操作审计</li>
+                </ul>
+              </div>
+              <div class="side-block">
+                <h3>风格说明</h3>
+                <p>延续参考稿中的米白、浅褐、玻璃层叠与宽留白，但把内容全部替换为 AI 聚合平台语义。</p>
+              </div>
+            </aside>
+          </div>
+        </div>
+      </section>
+
+      <section id="pricing">
+        <div class="container">
+          <div class="section-head">
+            <div class="section-label">Deployment Plans</div>
+            <h2 class="section-title">从体验版，到团队版，再到智能托管版。</h2>
+          </div>
+
+          <div class="pricing-grid">
+            <article class="price-card">
+              <div class="price-label">Starter</div>
+              <div class="price-name">浏览与检索</div>
+              <div class="price-value">
+                <strong>¥0</strong>
+                <span>/ 试用</span>
+              </div>
+              <p class="price-desc">适合先验证页面体验、列表结构与内容体系的个人或内部预览场景。</p>
+              <ul class="price-list">
+                <li>公开列表浏览</li>
+                <li>搜索与筛选</li>
+                <li>基础模型入口跳转</li>
+              </ul>
+              <a class="line-btn" href="#cta">预约体验</a>
+            </article>
+
+            <article class="price-card featured">
+              <div class="price-label">Professional</div>
+              <div class="price-name">登录与后台</div>
+              <div class="price-value">
+                <strong>¥299</strong>
+                <span>/ 月</span>
+              </div>
+              <p class="price-desc">覆盖登录鉴权、详情页门禁、Skills 管理、管理后台与基础统计分析。</p>
+              <ul class="price-list">
+                <li>JWT 登录鉴权</li>
+                <li>详情页权限控制</li>
+                <li>Skills 导入导出</li>
+                <li>后台管理与统计</li>
+              </ul>
+              <a class="solid-btn" href="#cta">进入方案沟通</a>
+            </article>
+
+            <article class="price-card">
+              <div class="price-label">Intelligent Ops</div>
+              <div class="price-name">API Key + Self Skill</div>
+              <div class="price-value">
+                <strong>¥899</strong>
+                <span>/ 月</span>
+              </div>
+              <p class="price-desc">提供平台自管理 Skill、Developer API、远程导入、审计日志与智能体一站式调用能力。</p>
+              <ul class="price-list">
+                <li>API Key 页面与 Scope</li>
+                <li>Agent 自然语言操作后台</li>
+                <li>远程 Skill 同步与下载</li>
+                <li>审计日志与安全基线</li>
+              </ul>
+              <a class="line-btn" href="#api">查看接口能力</a>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="cta-band" id="cta">
+        <div class="container">
+          <div class="cta-wrap">
+            <div>
+              <div class="section-label">Next Step</div>
+              <h2>如果这个原型方向正确，下一步就可以开始切 React 页面与后台接口。</h2>
+              <p>
+                当前版本重点解决的是视觉结构、信息组织和关键产品能力表达。它已经把“登录后看详情”和“平台作为 Skill 被 Agent 调用”这两个核心方案直观地展示出来了。
+              </p>
+            </div>
+            <div class="cta-aside">
+              <a class="solid-btn" href="AI聚合平台设计方案.md">查看设计方案</a>
+              <a class="line-btn" href="AGENTS.md">查看项目规范</a>
+              <div class="cta-stats">
+                <span>极简布局</span>
+                <span>企业语义</span>
+                <span>可直接继续开发</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div class="container">
+        <div class="footer-card">
+          <div class="footer-brand">
+            <strong>星梦 AI 聚合平台</strong>
+            <span>Less clutter, more control.</span>
+          </div>
+          <div class="footer-links">
+            <a href="#products">产品矩阵</a>
+            <a href="#workflow">流程</a>
+            <a href="#api">API Key</a>
+            <a href="#skills">Skills</a>
+          </div>
+        </div>
+      </div>
+    </footer>
+  </div>
+</body>
+</html>

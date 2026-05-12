@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI工具平台 - 杂志编辑风格</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Georgia', 'Times New Roman', 'Songti SC', 'SimSun', serif;
+            background: #f8f7f4;
+            color: #2c2c2c;
+            line-height: 1.8;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 60px;
+        }
+
+        /* 顶部导航 */
+        .header {
+            padding: 40px 0;
+            border-bottom: 2px solid #2c2c2c;
+            margin-bottom: 60px;
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .logo {
+            font-size: 32px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            color: #2c2c2c;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+
+        .date {
+            font-size: 13px;
+            color: #666;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+
+        .nav {
+            display: flex;
+            gap: 40px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+
+        .nav a {
+            color: #2c2c2c;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: color 0.3s;
+        }
+
+        .nav a:hover {
+            color: #c8102e;
+        }
+
+        /* 特色文章 */
+        .featured {
+            margin-bottom: 80px;
+            display: grid;
+            grid-template-columns: 1.2fr 1fr;
+            gap: 60px;
+            padding-bottom: 60px;
+            border-bottom: 1px solid #d4d4d4;
+        }
+
+        .featured-main {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .featured-category {
+            font-size: 12px;
+            color: #c8102e;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: 600;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+
+        .featured-title {
+            font-size: 48px;
+            line-height: 1.2;
+            font-weight: 700;
+            color: #2c2c2c;
+            margin-bottom: 16px;
+        }
+
+        .featured-excerpt {
+            font-size: 18px;
+            line-height: 1.7;
+            color: #555;
+            margin-bottom: 24px;
+        }
+
+        .featured-meta {
+            display: flex;
+            gap: 24px;
+            font-size: 14px;
+            color: #888;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+
+        .featured-sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 32px;
+        }
+
+        .sidebar-item {
+            padding-bottom: 32px;
+            border-bottom: 1px solid #e8e8e8;
+        }
+
+        .sidebar-item:last-child {
+            border-bottom: none;
+        }
+
+        .sidebar-category {
+            font-size: 11px;
+            color: #c8102e;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 12px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+
+        .sidebar-title {
+            font-size: 20px;
+            line-height: 1.4;
+            font-weight: 600;
+            color: #2c2c2c;
+            margin-bottom: 8px;
+        }
+
+        .sidebar-excerpt {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #666;
+        }
+
+        /* 文章网格 */
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 40px;
+            padding-bottom: 16px;
+            border-bottom: 2px solid #2c2c2c;
+        }
+
+        .section-title {
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+
+        .section-link {
+            font-size: 13px;
+            color: #c8102e;
+            text-decoration: none;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            font-weight: 500;
+        }
+
+        .articles-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 50px 40px;
+            margin-bottom: 80px;
+        }
+
+        .article-card {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .article-number {
+            font-size: 48px;
+            font-weight: 700;
+            color: #e8e8e8;
+            line-height: 1;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+
+        .article-category {
+            font-size: 11px;
+            color: #c8102e;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+
+        .article-title {
+            font-size: 22px;
+            line-height: 1.3;
+            font-weight: 600;
+            color: #2c2c2c;
+            margin-bottom: 8px;
+        }
+
+        .article-description {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #666;
+            margin-bottom: 16px;
+        }
+
+        .article-stats {
+            display: flex;
+            gap: 20px;
+            font-size: 13px;
+            color: #999;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+
+        .article-link {
+            font-size: 13px;
+            color: #2c2c2c;
+            text-decoration: none;
+            font-weight: 600;
+            border-bottom: 2px solid #2c2c2c;
+            display: inline-block;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            transition: color 0.3s, border-color 0.3s;
+        }
+
+        .article-link:hover {
+            color: #c8102e;
+            border-color: #c8102e;
+        }
+
+        /* 页脚 */
+        .footer {
+            margin-top: 100px;
+            padding: 60px 0;
+            border-top: 2px solid #2c2c2c;
+            text-align: center;
+        }
+
+        .footer-text {
+            font-size: 13px;
+            color: #888;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+
+        /* 响应式 */
+        @media (max-width: 1024px) {
+            .featured {
+                grid-template-columns: 1fr;
+            }
+
+            .articles-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 24px;
+            }
+
+            .nav {
+                flex-wrap: wrap;
+                gap: 20px;
+            }
+
+            .featured-title {
+                font-size: 32px;
+            }
+
+            .articles-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 顶部导航 -->
+        <header class="header">
+            <div class="header-top">
+                <div class="logo">AI TOOLS</div>
+                <div class="date">2026年5月12日 星期一</div>
+            </div>
+            <nav class="nav">
+                <a href="#editors">编辑器</a>
+                <a href="#skills">技能库</a>
+                <a href="#models">模型</a>
+                <a href="#finetune">微调</a>
+                <a href="#trends">趋势</a>
+                <a href="#admin">管理</a>
+            </nav>
+        </header>
+
+        <!-- 特色文章 -->
+        <section class="featured">
+            <div class="featured-main">
+                <div class="featured-category">编辑器推荐</div>
+                <h1 class="featured-title">Claude Code：重新定义AI辅助编程</h1>
+                <p class="featured-excerpt">
+                    Anthropic推出的官方命令行工具，将Claude的强大能力直接集成到开发流程中。支持代码生成、智能重构和实时调试，为开发者提供前所未有的编程体验。
+                </p>
+                <div class="featured-meta">
+                    <span>12,500 次浏览</span>
+                    <span>3,200 次点赞</span>
+                    <span>IDE插件</span>
+                </div>
+            </div>
+            <div class="featured-sidebar">
+                <div class="sidebar-item">
+                    <div class="sidebar-category">热门工具</div>
+                    <h3 class="sidebar-title">Cursor：基于VSCode的AI编辑器</h3>
+                    <p class="sidebar-excerpt">深度集成GPT-4，提供流畅的对话式编程体验。</p>
+                </div>
+                <div class="sidebar-item">
+                    <div class="sidebar-category">新兴工具</div>
+                    <h3 class="sidebar-title">Windsurf：新一代协作编程工具</h3>
+                    <p class="sidebar-excerpt">支持多模型切换和实时团队协作功能。</p>
+                </div>
+                <div class="sidebar-item">
+                    <div class="sidebar-category">经典工具</div>
+                    <h3 class="sidebar-title">GitHub Copilot：开发者的AI助手</h3>
+                    <p class="sidebar-excerpt">GitHub官方出品，广受全球开发者信赖。</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 文章网格 -->
+        <section>
+            <div class="section-header">
+                <h2 class="section-title">所有工具</h2>
+                <a href="#" class="section-link">查看全部 →</a>
+            </div>
+            <div class="articles-grid">
+                <!-- 文章1 -->
+                <article class="article-card">
+                    <div class="article-number">01</div>
+                    <div class="article-category">IDE插件</div>
+                    <h3 class="article-title">Claude Code</h3>
+                    <p class="article-description">
+                        Anthropic官方CLI工具，集成最新Claude模型，支持代码生成、重构和调试。
+                    </p>
+                    <div class="article-stats">
+                        <span>12.5K 浏览</span>
+                        <span>3.2K 点赞</span>
+                    </div>
+                    <a href="#" class="article-link">阅读更多</a>
+                </article>
+
+                <!-- 文章2 -->
+                <article class="article-card">
+                    <div class="article-number">02</div>
+                    <div class="article-category">独立编辑器</div>
+                    <h3 class="article-title">Cursor</h3>
+                    <p class="article-description">
+                        基于VSCode的AI编辑器，深度集成GPT-4，提供智能补全和对话式编程。
+                    </p>
+                    <div class="article-stats">
+                        <span>25.8K 浏览</span>
+                        <span>8.9K 点赞</span>
+                    </div>
+                    <a href="#" class="article-link">阅读更多</a>
+                </article>
+
+                <!-- 文章3 -->
+                <article class="article-card">
+                    <div class="article-number">03</div>
+                    <div class="article-category">独立编辑器</div>
+                    <h3 class="article-title">Windsurf</h3>
+                    <p class="article-description">
+                        新一代AI编程工具，支持多模型切换、实时协作和智能重构功能。
+                    </p>
+                    <div class="article-stats">
+                        <span>8.3K 浏览</span>
+                        <span>2.1K 点赞</span>
+                    </div>
+                    <a href="#" class="article-link">阅读更多</a>
+                </article>
+
+                <!-- 文章4 -->
+                <article class="article-card">
+                    <div class="article-number">04</div>
+                    <div class="article-category">IDE插件</div>
+                    <h3 class="article-title">GitHub Copilot</h3>
+                    <p class="article-description">
+                        GitHub官方AI编程助手，基于OpenAI Codex，支持多种IDE和编程语言。
+                    </p>
+                    <div class="article-stats">
+                        <span>45.2K 浏览</span>
+                        <span>15.6K 点赞</span>
+                    </div>
+                    <a href="#" class="article-link">阅读更多</a>
+                </article>
+
+                <!-- 文章5 -->
+                <article class="article-card">
+                    <div class="article-number">05</div>
+                    <div class="article-category">IDE插件</div>
+                    <h3 class="article-title">Tabnine</h3>
+                    <p class="article-description">
+                        AI代码补全工具，提供本地和云端模式，注重代码隐私保护。
+                    </p>
+                    <div class="article-stats">
+                        <span>18.7K 浏览</span>
+                        <span>5.4K 点赞</span>
+                    </div>
+                    <a href="#" class="article-link">阅读更多</a>
+                </article>
+
+                <!-- 文章6 -->
+                <article class="article-card">
+                    <div class="article-number">06</div>
+                    <div class="article-category">IDE插件</div>
+                    <h3 class="article-title">Codeium</h3>
+                    <p class="article-description">
+                        免费的AI编程助手，支持70多种编程语言，提供智能补全和代码搜索。
+                    </p>
+                    <div class="article-stats">
+                        <span>22.1K 浏览</span>
+                        <span>7.8K 点赞</span>
+                    </div>
+                    <a href="#" class="article-link">阅读更多</a>
+                </article>
+            </div>
+        </section>
+
+        <!-- 页脚 -->
+        <footer class="footer">
+            <p class="footer-text">AI工具平台 © 2026 · 为开发者精选最佳AI工具</p>
+        </footer>
+    </div>
+</body>
+</html>

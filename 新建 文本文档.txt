@@ -1,0 +1,1264 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>极简主义</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="/assets/index-xfgqKiMF.css">
+  <style>
+
+  /* ===== 色彩系統 ===== */
+  :root {
+    --color-bg-primary: #FAF9F6;      /* 米白背景 */
+    --color-bg-secondary: #F5F3EE;    /* 次要背景 */
+    --color-bg-tertiary: #FFFFFF;     /* 純白背景 */
+    --color-text-primary: #2C2C2C;    /* 深灰文字 */
+    --color-text-secondary: #6B6B6B;  /* 次要文字 */
+    --color-text-tertiary: #A8A29E;   /* 三級文字 */
+    --color-accent: #8B7355;          /* 溫暖褐色點綴 */
+    --color-border: #E8DFD0;          /* 淺褐边框 */
+    --color-border-light: #F0EBE3;    /* 更淺边框 */
+  }
+
+  /* ===== 全局樣式 ===== */
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    background: var(--color-bg-primary);
+    color: var(--color-text-primary);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* ===== Navigation ===== */
+  .min-nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: rgba(250, 249, 246, 0.95);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--color-border);
+    z-index: 1000;
+  }
+  .min-nav-container {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 1.25rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .min-logo {
+    font-size: 0.875rem;
+    font-weight: 300;
+    letter-spacing: 0.2em;
+    color: var(--color-text-primary);
+  }
+
+  .min-nav-menu {
+    display: flex;
+    gap: 3rem;
+    list-style: none;
+  }
+
+  .min-nav-menu a {
+    color: var(--color-text-secondary);
+    text-decoration: none;
+    font-size: 0.875rem;
+    font-weight: 300;
+    letter-spacing: 0.05em;
+    transition: color 0.2s ease;
+  }
+
+  .min-nav-menu a:hover {
+    color: var(--color-text-primary);
+  }
+
+  .min-nav-cta {
+    padding: 0.625rem 1.5rem;
+    border: 1px solid var(--color-accent);
+    background: transparent;
+    color: var(--color-accent);
+    font-size: 0.875rem;
+    font-weight: 300;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    transition: all 0.25s ease;
+  }
+
+  .min-nav-cta:hover {
+    background: var(--color-accent);
+    color: var(--color-bg-tertiary);
+  }
+
+  /* ===== Hero Section ===== */
+  .min-hero {
+    padding-top: 10rem;
+    padding-bottom: 6rem;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--color-bg-primary);
+  }
+  .min-hero-container {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 2rem;
+    text-align: center;
+  }
+
+  .min-hero-label {
+    font-size: 0.75rem;
+    font-weight: 300;
+    letter-spacing: 0.2em;
+    color: var(--color-accent);
+    margin-bottom: 2rem;
+  }
+
+  .min-hero-title {
+    font-size: clamp(3rem, 10vw, 7rem);
+    font-weight: 100;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+    margin-bottom: 2rem;
+    color: var(--color-text-primary);
+  }
+
+  .min-hero-title-line {
+    display: block;
+  }
+
+  .min-hero-title-bold {
+    font-weight: 600;
+    margin-top: 0.5rem;
+  }
+
+  .min-hero-subtitle {
+    font-size: 1.125rem;
+    font-weight: 300;
+    line-height: 1.8;
+    color: var(--color-text-secondary);
+    max-width: 600px;
+    margin: 0 auto 3rem;
+  }
+
+  .min-hero-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-bottom: 5rem;
+  }
+
+  .min-btn-primary {
+    padding: 1rem 2.5rem;
+    border: 1px solid var(--color-text-primary);
+    background: var(--color-text-primary);
+    color: var(--color-bg-tertiary);
+    font-size: 0.875rem;
+    font-weight: 300;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    transition: all 0.25s ease;
+  }
+
+  .min-btn-primary:hover {
+    background: transparent;
+    color: var(--color-text-primary);
+    transform: translateY(-2px);
+  }
+
+  .min-btn-secondary {
+    padding: 1rem 2.5rem;
+    border: 1px solid var(--color-border);
+    background: transparent;
+    color: var(--color-text-secondary);
+    font-size: 0.875rem;
+    font-weight: 300;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    transition: all 0.25s ease;
+  }
+
+  .min-btn-secondary:hover {
+    border-color: var(--color-text-primary);
+    color: var(--color-text-primary);
+    transform: translateY(-2px);
+  }
+
+  .min-hero-scroll {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--color-text-tertiary);
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+  }
+
+  .min-scroll-line {
+    width: 1px;
+    height: 3rem;
+    background: linear-gradient(to bottom, transparent, var(--color-accent), transparent);
+    animation: scrollPulse 2s ease-in-out infinite;
+  }
+
+  @keyframes scrollPulse {
+    0%, 100% { opacity: 0.3; }
+    50% { opacity: 1; }
+  }
+
+  /* ===== Stats Section ===== */
+  .min-stats {
+    padding: 4rem 0;
+    background: var(--color-bg-secondary);
+  }
+
+  .min-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 2rem;
+  }
+
+  .min-stat-card {
+    text-align: center;
+    padding: 2rem 1rem;
+  }
+
+  .min-stat-number {
+    font-size: 3rem;
+    font-weight: 300;
+    color: var(--color-text-primary);
+    line-height: 1;
+    margin-bottom: 0.5rem;
+  }
+
+  .min-stat-label {
+    font-size: 1rem;
+    font-weight: 400;
+    color: var(--color-text-primary);
+    margin-bottom: 0.25rem;
+  }
+
+  .min-stat-desc {
+    font-size: 0.875rem;
+    color: var(--color-text-secondary);
+  }
+
+  /* ===== Section Shared ===== */
+  .min-section-container {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 2rem;
+  }
+
+  .min-section-header {
+    text-align: center;
+    margin-bottom: 4rem;
+  }
+
+  .min-section-label {
+    font-size: 0.75rem;
+    font-weight: 300;
+    letter-spacing: 0.2em;
+    color: var(--color-accent);
+    display: block;
+    margin-bottom: 1rem;
+  }
+
+  .min-section-title {
+    font-size: clamp(2rem, 5vw, 3rem);
+    font-weight: 300;
+    color: var(--color-text-primary);
+    margin-bottom: 1rem;
+  }
+
+  .min-section-desc {
+    font-size: 1.125rem;
+    color: var(--color-text-secondary);
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  /* ===== Timeline ===== */
+  .min-timeline-section {
+    padding: 6rem 0;
+    background: var(--color-bg-primary);
+  }
+
+  .min-timeline {
+    max-width: 800px;
+    margin: 0 auto;
+    position: relative;
+  }
+
+  .min-timeline::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: var(--color-border);
+  }
+
+  .min-timeline-item {
+    position: relative;
+    padding-left: 3rem;
+    padding-bottom: 3rem;
+  }
+
+  .min-timeline-item:last-child {
+    padding-bottom: 0;
+  }
+
+  .min-timeline-marker {
+    position: absolute;
+    left: -0.375rem;
+    top: 0.25rem;
+    width: 0.75rem;
+    height: 0.75rem;
+    border-radius: 50%;
+    background: var(--color-accent);
+    border: 2px solid var(--color-bg-primary);
+  }
+
+  .min-timeline-date {
+    font-size: 0.75rem;
+    font-weight: 300;
+    letter-spacing: 0.1em;
+    color: var(--color-accent);
+    margin-bottom: 0.5rem;
+  }
+
+  .min-timeline-title {
+    font-size: 1.25rem;
+    font-weight: 400;
+    color: var(--color-text-primary);
+    margin-bottom: 0.5rem;
+  }
+
+  .min-timeline-desc {
+    font-size: 1rem;
+    color: var(--color-text-secondary);
+    line-height: 1.6;
+  }
+
+  /* ===== Features ===== */
+  .min-features {
+    padding: 6rem 0;
+    background: var(--color-bg-secondary);
+  }
+
+  .min-features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 3rem;
+  }
+
+  .min-feature-card {
+    text-align: center;
+  }
+
+  .min-feature-icon {
+    font-size: 2.5rem;
+    color: var(--color-accent);
+    margin-bottom: 1.5rem;
+    line-height: 1;
+  }
+
+  .min-feature-title {
+    font-size: 1.125rem;
+    font-weight: 400;
+    color: var(--color-text-primary);
+    margin-bottom: 0.75rem;
+  }
+
+  .min-feature-desc {
+    font-size: 0.9375rem;
+    color: var(--color-text-secondary);
+    line-height: 1.7;
+  }
+
+  /* ===== List View ===== */
+  .min-list-section {
+    padding: 6rem 0;
+    background: var(--color-bg-primary);
+  }
+
+  .min-list-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 4rem;
+  }
+
+  .min-list-heading {
+    font-size: 1.125rem;
+    font-weight: 400;
+    color: var(--color-text-primary);
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .min-list {
+    list-style: none;
+  }
+
+  .min-list-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 0;
+    font-size: 0.9375rem;
+    color: var(--color-text-secondary);
+    border-bottom: 1px solid var(--color-border-light);
+  }
+
+  .min-list-item:last-child {
+    border-bottom: none;
+  }
+
+  .min-list-check {
+    color: var(--color-accent);
+    font-weight: 600;
+  }
+
+  /* ===== Loading Animations ===== */
+  .min-loading-section {
+    padding: 6rem 0;
+    background: var(--color-bg-secondary);
+  }
+
+  .min-loading-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 3rem;
+  }
+
+  .min-loading-demo {
+    text-align: center;
+    padding: 3rem 2rem;
+    background: var(--color-bg-primary);
+    border: 1px solid var(--color-border);
+  }
+
+  .min-loading-label {
+    font-size: 0.875rem;
+    font-weight: 300;
+    letter-spacing: 0.1em;
+    color: var(--color-text-secondary);
+    margin-bottom: 2rem;
+  }
+
+  .min-loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 2px solid var(--color-border);
+    border-top-color: var(--color-accent);
+    border-radius: 50%;
+    margin: 0 auto;
+    animation: spin 1s linear infinite;
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  .min-loading-pulse {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+  }
+
+  .min-loading-pulse span {
+    width: 10px;
+    height: 10px;
+    background: var(--color-accent);
+    border-radius: 50%;
+    animation: pulse 1.4s ease-in-out infinite;
+  }
+
+  .min-loading-pulse span:nth-child(2) {
+    animation-delay: 0.2s;
+  }
+
+  .min-loading-pulse span:nth-child(3) {
+    animation-delay: 0.4s;
+  }
+
+  @keyframes pulse {
+    0%, 80%, 100% { opacity: 0.3; transform: scale(0.8); }
+    40% { opacity: 1; transform: scale(1); }
+  }
+
+  .min-loading-progress {
+    width: 100%;
+    height: 2px;
+    background: var(--color-border);
+    overflow: hidden;
+  }
+
+  .min-loading-progress-bar {
+    height: 100%;
+    background: var(--color-accent);
+    animation: progress 2s ease-in-out infinite;
+  }
+
+  @keyframes progress {
+    0% { width: 0%; margin-left: 0%; }
+    50% { width: 50%; margin-left: 25%; }
+    100% { width: 0%; margin-left: 100%; }
+  }
+
+  /* ===== Testimonials ===== */
+  .min-testimonials {
+    padding: 6rem 0;
+    background: var(--color-bg-primary);
+  }
+
+  .min-testimonial-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 2rem;
+  }
+
+  .min-testimonial-item {
+    padding: 2rem;
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-tertiary);
+  }
+
+  .min-testimonial-text {
+    font-size: 1.125rem;
+    font-weight: 300;
+    color: var(--color-text-primary);
+    line-height: 1.7;
+    margin-bottom: 1.5rem;
+  }
+
+  .min-testimonial-name {
+    font-size: 0.9375rem;
+    font-weight: 400;
+    color: var(--color-text-primary);
+  }
+
+  .min-testimonial-role {
+    font-size: 0.875rem;
+    color: var(--color-text-secondary);
+  }
+
+  /* ===== Pricing ===== */
+  .min-pricing {
+    padding: 6rem 0;
+    background: var(--color-bg-secondary);
+  }
+
+  .min-pricing-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    max-width: 1000px;
+    margin: 0 auto;
+  }
+
+  .min-price-card {
+    padding: 3rem 2rem;
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-tertiary);
+    position: relative;
+  }
+
+  .min-price-featured {
+    border-color: var(--color-accent);
+    transform: scale(1.05);
+  }
+
+  .min-price-badge {
+    position: absolute;
+    top: -0.75rem;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 0.25rem 1rem;
+    background: var(--color-accent);
+    color: var(--color-bg-tertiary);
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+  }
+
+  .min-price-header {
+    text-align: center;
+    margin-bottom: 2rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid var(--color-border-light);
+  }
+
+  .min-price-name {
+    font-size: 1.125rem;
+    font-weight: 400;
+    color: var(--color-text-primary);
+    margin-bottom: 1rem;
+  }
+
+  .min-price-amount {
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    gap: 0.25rem;
+  }
+
+  .min-price-currency {
+    font-size: 1.5rem;
+    color: var(--color-text-secondary);
+  }
+
+  .min-price-value {
+    font-size: 3.5rem;
+    font-weight: 300;
+    color: var(--color-text-primary);
+    line-height: 1;
+  }
+
+  .min-price-period {
+    font-size: 1rem;
+    color: var(--color-text-secondary);
+  }
+
+  .min-price-features {
+    list-style: none;
+    margin-bottom: 2rem;
+  }
+
+  .min-price-features li {
+    padding: 0.75rem 0;
+    font-size: 0.9375rem;
+    color: var(--color-text-secondary);
+    text-align: center;
+    border-bottom: 1px solid var(--color-border-light);
+  }
+
+  .min-price-features li:last-child {
+    border-bottom: none;
+  }
+
+  .min-price-btn {
+    width: 100%;
+    padding: 1rem;
+    border: 1px solid var(--color-border);
+    background: transparent;
+    color: var(--color-text-primary);
+    font-size: 0.875rem;
+    font-weight: 300;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    transition: all 0.25s ease;
+  }
+
+  .min-price-btn:hover {
+    border-color: var(--color-text-primary);
+  }
+
+  .min-price-btn-primary {
+    background: var(--color-text-primary);
+    color: var(--color-bg-tertiary);
+    border-color: var(--color-text-primary);
+  }
+
+  .min-price-btn-primary:hover {
+    background: transparent;
+    color: var(--color-text-primary);
+  }
+
+  /* ===== CTA ===== */
+  .min-cta {
+    padding: 8rem 0;
+    background: var(--color-bg-primary);
+    text-align: center;
+  }
+
+  .min-cta-content {
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  .min-cta-title {
+    font-size: clamp(2rem, 5vw, 3rem);
+    font-weight: 300;
+    color: var(--color-text-primary);
+    margin-bottom: 1rem;
+  }
+
+  .min-cta-subtitle {
+    font-size: 1.125rem;
+    color: var(--color-text-secondary);
+    margin-bottom: 2rem;
+  }
+
+  .min-cta-btn {
+    padding: 1.25rem 3rem;
+    border: 1px solid var(--color-text-primary);
+    background: var(--color-text-primary);
+    color: var(--color-bg-tertiary);
+    font-size: 0.875rem;
+    font-weight: 300;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    margin-bottom: 1rem;
+  }
+
+  .min-cta-btn:hover {
+    background: transparent;
+    color: var(--color-text-primary);
+    transform: translateY(-2px);
+  }
+
+  .min-cta-note {
+    font-size: 0.875rem;
+    color: var(--color-text-tertiary);
+  }
+
+  /* ===== Footer ===== */
+  .min-footer {
+    padding: 4rem 0 2rem;
+    background: var(--color-bg-secondary);
+    border-top: 1px solid var(--color-border);
+  }
+
+  .min-footer-grid {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 4rem;
+    margin-bottom: 3rem;
+  }
+
+  .min-footer-logo {
+    font-size: 0.875rem;
+    font-weight: 300;
+    letter-spacing: 0.2em;
+    color: var(--color-text-primary);
+    margin-bottom: 0.5rem;
+  }
+
+  .min-footer-tagline {
+    font-size: 0.875rem;
+    color: var(--color-text-secondary);
+  }
+
+  .min-footer-links {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 2rem;
+  }
+
+  .min-footer-column {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .min-footer-heading {
+    font-size: 0.875rem;
+    font-weight: 400;
+    color: var(--color-text-primary);
+    margin-bottom: 0.25rem;
+  }
+
+  .min-footer-column a {
+    font-size: 0.875rem;
+    color: var(--color-text-secondary);
+    text-decoration: none;
+    transition: color 0.2s ease;
+  }
+
+  .min-footer-column a:hover {
+    color: var(--color-text-primary);
+  }
+
+  .min-footer-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 2rem;
+    border-top: 1px solid var(--color-border-light);
+  }
+
+  .min-footer-copyright {
+    font-size: 0.875rem;
+    color: var(--color-text-secondary);
+  }
+
+  .min-footer-social {
+    display: flex;
+    gap: 2rem;
+  }
+
+  .min-footer-social a {
+    font-size: 0.875rem;
+    color: var(--color-text-secondary);
+    text-decoration: none;
+    transition: color 0.2s ease;
+  }
+
+  .min-footer-social a:hover {
+    color: var(--color-text-primary);
+  }
+
+  /* ===== Responsive ===== */
+  @media (max-width: 768px) {
+    .min-nav-menu {
+      display: none;
+    }
+
+    .min-hero {
+      padding-top: 8rem;
+    }
+
+    .min-hero-title {
+      font-size: 3rem;
+    }
+
+    .min-stats-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .min-footer-grid {
+      grid-template-columns: 1fr;
+      gap: 2rem;
+    }
+
+    .min-footer-bottom {
+      flex-direction: column;
+      gap: 1rem;
+    }
+  }
+
+  </style>
+</head>
+<body class="preview-fullscreen">
+
+  <!-- Navigation -->
+  <nav class="min-nav">
+    <div class="min-nav-container">
+      <div class="min-logo">FOCUS</div>
+      <ul class="min-nav-menu">
+        <li><a href="javascript:void(0)" data-i18n="saasLanding.nav.product">Product</a></li>
+        <li><a href="javascript:void(0)" data-i18n="saasLanding.nav.features">Features</a></li>
+        <li><a href="javascript:void(0)" data-i18n="saasLanding.nav.pricing">Pricing</a></li>
+        <li><a href="javascript:void(0)" data-i18n="saasLanding.nav.docs">Docs</a></li>
+      </ul>
+      <button class="min-nav-cta" data-i18n="saasLanding.cta.startTrial">Start Free Trial</button>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="min-hero">
+    <div class="min-hero-container">
+      <div class="min-hero-label" data-i18n="saasLanding.hero.label">PRODUCTIVITY SUITE</div>
+      <h1 class="min-hero-title">
+        <span class="min-hero-title-line" data-i18n="saasLanding.hero.title1">Less Complexity</span>
+        <span class="min-hero-title-line min-hero-title-bold" data-i18n="saasLanding.hero.title2">More Focus</span>
+      </h1>
+      <p class="min-hero-subtitle">
+        <span data-i18n="saasLanding.hero.subtitle">The workspace designed for clarity. Remove distractions, amplify productivity. Simply powerful.</span>
+      </p>
+      <div class="min-hero-actions">
+        <button class="min-btn-primary" data-i18n="saasLanding.cta.startFree">Start Free</button>
+        <button class="min-btn-secondary" data-i18n="saasLanding.cta.watchDemo">Watch Demo →</button>
+      </div>
+      <div class="min-hero-scroll">
+        <div class="min-scroll-line"></div>
+        <span data-i18n="common.scroll">Scroll</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Stats Section -->
+  <section class="min-stats">
+    <div class="min-section-container">
+      <div class="min-stats-grid">
+        <div class="min-stat-card">
+          <div class="min-stat-number">50K+</div>
+          <div class="min-stat-label" data-i18n="saasLanding.stats.activeUsers">Active Users</div>
+          <div class="min-stat-desc" data-i18n="saasLanding.stats.worldwide">Worldwide</div>
+        </div>
+        <div class="min-stat-card">
+          <div class="min-stat-number">99.9%</div>
+          <div class="min-stat-label" data-i18n="saasLanding.stats.uptime">Uptime</div>
+          <div class="min-stat-desc" data-i18n="saasLanding.stats.last12Months">Last 12 months</div>
+        </div>
+        <div class="min-stat-card">
+          <div class="min-stat-number">4.9/5</div>
+          <div class="min-stat-label" data-i18n="saasLanding.stats.rating">Rating</div>
+          <div class="min-stat-desc" data-i18n="saasLanding.stats.reviews">From 2,000+ reviews</div>
+        </div>
+        <div class="min-stat-card">
+          <div class="min-stat-number">24/7</div>
+          <div class="min-stat-label" data-i18n="saasLanding.stats.support">Support</div>
+          <div class="min-stat-desc" data-i18n="saasLanding.stats.alwaysAvailable">Always available</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Timeline Section -->
+  <section class="min-timeline-section">
+    <div class="min-section-container">
+      <div class="min-section-header">
+        <span class="min-section-label" data-i18n="saasLanding.timeline.label">ROADMAP</span>
+        <h2 class="min-section-title" data-i18n="saasLanding.timeline.title">Our Journey</h2>
+      </div>
+      <div class="min-timeline">
+        <div class="min-timeline-item">
+          <div class="min-timeline-marker"></div>
+          <div class="min-timeline-content">
+            <div class="min-timeline-date" data-i18n="saasLanding.timeline.q1Date">Q1 2024</div>
+            <h3 class="min-timeline-title" data-i18n="saasLanding.timeline.q1Title">Launch</h3>
+            <p class="min-timeline-desc" data-i18n="saasLanding.timeline.q1Desc">Initial release with core features and workspace management.</p>
+          </div>
+        </div>
+        <div class="min-timeline-item">
+          <div class="min-timeline-marker"></div>
+          <div class="min-timeline-content">
+            <div class="min-timeline-date" data-i18n="saasLanding.timeline.q2Date">Q2 2024</div>
+            <h3 class="min-timeline-title" data-i18n="saasLanding.timeline.q2Title">Collaboration Tools</h3>
+            <p class="min-timeline-desc" data-i18n="saasLanding.timeline.q2Desc">Real-time collaboration, comments, and team features.</p>
+          </div>
+        </div>
+        <div class="min-timeline-item">
+          <div class="min-timeline-marker"></div>
+          <div class="min-timeline-content">
+            <div class="min-timeline-date" data-i18n="saasLanding.timeline.q3Date">Q3 2024</div>
+            <h3 class="min-timeline-title" data-i18n="saasLanding.timeline.q3Title">API & Integrations</h3>
+            <p class="min-timeline-desc" data-i18n="saasLanding.timeline.q3Desc">Developer API and third-party app integrations.</p>
+          </div>
+        </div>
+        <div class="min-timeline-item">
+          <div class="min-timeline-marker"></div>
+          <div class="min-timeline-content">
+            <div class="min-timeline-date" data-i18n="saasLanding.timeline.q4Date">Q4 2024</div>
+            <h3 class="min-timeline-title" data-i18n="saasLanding.timeline.q4Title">AI Features</h3>
+            <p class="min-timeline-desc" data-i18n="saasLanding.timeline.q4Desc">Smart suggestions and automated workflow optimization.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Grid -->
+  <section class="min-features">
+    <div class="min-section-container">
+      <div class="min-section-header">
+        <span class="min-section-label" data-i18n="saasLanding.features.label">CORE FEATURES</span>
+        <h2 class="min-section-title" data-i18n="saasLanding.features.title">Everything You Need</h2>
+      </div>
+      <div class="min-features-grid">
+        <div class="min-feature-card">
+          <div class="min-feature-icon">—</div>
+          <h3 class="min-feature-title" data-i18n="saasLanding.features.feature1.title">Clean Interface</h3>
+          <p class="min-feature-desc" data-i18n="saasLanding.features.feature1.desc">Distraction-free workspace focused on what matters most.</p>
+        </div>
+        <div class="min-feature-card">
+          <div class="min-feature-icon">○</div>
+          <h3 class="min-feature-title" data-i18n="saasLanding.features.feature2.title">Fast Performance</h3>
+          <p class="min-feature-desc" data-i18n="saasLanding.features.feature2.desc">Lightning-fast response times and instant synchronization.</p>
+        </div>
+        <div class="min-feature-card">
+          <div class="min-feature-icon">□</div>
+          <h3 class="min-feature-title" data-i18n="saasLanding.features.feature3.title">Secure Storage</h3>
+          <p class="min-feature-desc" data-i18n="saasLanding.features.feature3.desc">End-to-end encryption keeps your data private and safe.</p>
+        </div>
+        <div class="min-feature-card">
+          <div class="min-feature-icon">△</div>
+          <h3 class="min-feature-title" data-i18n="saasLanding.features.feature4.title">Team Collaboration</h3>
+          <p class="min-feature-desc" data-i18n="saasLanding.features.feature4.desc">Work together seamlessly with real-time updates.</p>
+        </div>
+        <div class="min-feature-card">
+          <div class="min-feature-icon">◇</div>
+          <h3 class="min-feature-title" data-i18n="saasLanding.features.feature5.title">Cross-Platform</h3>
+          <p class="min-feature-desc" data-i18n="saasLanding.features.feature5.desc">Access your workspace from any device, anywhere.</p>
+        </div>
+        <div class="min-feature-card">
+          <div class="min-feature-icon">▽</div>
+          <h3 class="min-feature-title" data-i18n="saasLanding.features.feature6.title">Smart Automation</h3>
+          <p class="min-feature-desc" data-i18n="saasLanding.features.feature6.desc">Automate repetitive tasks and boost productivity.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- List View Section -->
+  <section class="min-list-section">
+    <div class="min-section-container">
+      <div class="min-section-header">
+        <span class="min-section-label" data-i18n="saasLanding.listView.label">WHAT'S INCLUDED</span>
+        <h2 class="min-section-title" data-i18n="saasLanding.listView.title">Complete Feature Set</h2>
+      </div>
+      <div class="min-list-grid">
+        <div class="min-list-column">
+          <h3 class="min-list-heading" data-i18n="saasLanding.listView.workspace">Workspace</h3>
+          <ul class="min-list">
+            <li class="min-list-item">
+              <span class="min-list-check">✓</span>
+              <span data-i18n="saasLanding.listView.unlimitedProjects">Unlimited projects</span>
+            </li>
+            <li class="min-list-item">
+              <span class="min-list-check">✓</span>
+              <span data-i18n="saasLanding.listView.customTemplates">Custom templates</span>
+            </li>
+            <li class="min-list-item">
+              <span class="min-list-check">✓</span>
+              <span data-i18n="saasLanding.listView.folderOrganization">Folder organization</span>
+            </li>
+            <li class="min-list-item">
+              <span class="min-list-check">✓</span>
+              <span data-i18n="saasLanding.listView.quickSearch">Quick search</span>
+            </li>
+          </ul>
+        </div>
+        <div class="min-list-column">
+          <h3 class="min-list-heading" data-i18n="saasLanding.listView.collaboration">Collaboration</h3>
+          <ul class="min-list">
+            <li class="min-list-item">
+              <span class="min-list-check">✓</span>
+              <span data-i18n="saasLanding.listView.realtimeSync">Real-time sync</span>
+            </li>
+            <li class="min-list-item">
+              <span class="min-list-check">✓</span>
+              <span data-i18n="saasLanding.listView.teamComments">Team comments</span>
+            </li>
+            <li class="min-list-item">
+              <span class="min-list-check">✓</span>
+              <span data-i18n="saasLanding.listView.sharePermissions">Share permissions</span>
+            </li>
+            <li class="min-list-item">
+              <span class="min-list-check">✓</span>
+              <span data-i18n="saasLanding.listView.activityTracking">Activity tracking</span>
+            </li>
+          </ul>
+        </div>
+        <div class="min-list-column">
+          <h3 class="min-list-heading" data-i18n="saasLanding.listView.integration">Integration</h3>
+          <ul class="min-list">
+            <li class="min-list-item">
+              <span class="min-list-check">✓</span>
+              <span data-i18n="saasLanding.listView.restApi">REST API access</span>
+            </li>
+            <li class="min-list-item">
+              <span class="min-list-check">✓</span>
+              <span data-i18n="saasLanding.listView.webhooks">Webhooks support</span>
+            </li>
+            <li class="min-list-item">
+              <span class="min-list-check">✓</span>
+              <span data-i18n="saasLanding.listView.thirdPartyApps">Third-party apps</span>
+            </li>
+            <li class="min-list-item">
+              <span class="min-list-check">✓</span>
+              <span data-i18n="saasLanding.listView.exportData">Export data</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Loading Animations Section -->
+  <section class="min-loading-section">
+    <div class="min-section-container">
+      <div class="min-section-header">
+        <span class="min-section-label" data-i18n="saasLanding.loading.label">PERFORMANCE</span>
+        <h2 class="min-section-title" data-i18n="saasLanding.loading.title">Loading States</h2>
+        <p class="min-section-desc" data-i18n="saasLanding.loading.desc">Minimal, elegant loading indicators</p>
+      </div>
+      <div class="min-loading-grid">
+        <div class="min-loading-demo">
+          <div class="min-loading-label" data-i18n="saasLanding.loading.spinner">Spinner</div>
+          <div class="min-loading-spinner"></div>
+        </div>
+        <div class="min-loading-demo">
+          <div class="min-loading-label" data-i18n="saasLanding.loading.pulse">Pulse</div>
+          <div class="min-loading-pulse">
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+        </div>
+        <div class="min-loading-demo">
+          <div class="min-loading-label" data-i18n="saasLanding.loading.progress">Progress</div>
+          <div class="min-loading-progress">
+            <div class="min-loading-progress-bar"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Testimonials -->
+  <section class="min-testimonials">
+    <div class="min-section-container">
+      <div class="min-section-header">
+        <span class="min-section-label" data-i18n="saasLanding.testimonials.label">TESTIMONIALS</span>
+        <h2 class="min-section-title" data-i18n="saasLanding.testimonials.title">Loved by Teams</h2>
+      </div>
+      <div class="min-testimonial-list">
+        <div class="min-testimonial-item">
+          <p class="min-testimonial-text" data-i18n="saasLanding.testimonials.testimonial1.text">"The cleanest workspace tool I've ever used. It just works."</p>
+          <div class="min-testimonial-author">
+            <div class="min-testimonial-name" data-i18n="saasLanding.testimonials.testimonial1.author">Sarah Chen</div>
+            <div class="min-testimonial-role" data-i18n="saasLanding.testimonials.testimonial1.role">Product Designer, Stripe</div>
+          </div>
+        </div>
+        <div class="min-testimonial-item">
+          <p class="min-testimonial-text" data-i18n="saasLanding.testimonials.testimonial2.text">"Finally, a tool that doesn't get in the way. Pure productivity."</p>
+          <div class="min-testimonial-author">
+            <div class="min-testimonial-name" data-i18n="saasLanding.testimonials.testimonial2.author">Marcus Rivera</div>
+            <div class="min-testimonial-role" data-i18n="saasLanding.testimonials.testimonial2.role">Engineering Lead, Notion</div>
+          </div>
+        </div>
+        <div class="min-testimonial-item">
+          <p class="min-testimonial-text" data-i18n="saasLanding.testimonials.testimonial3.text">"Minimalism done right. Every pixel has a purpose."</p>
+          <div class="min-testimonial-author">
+            <div class="min-testimonial-name" data-i18n="saasLanding.testimonials.testimonial3.author">Emma Thompson</div>
+            <div class="min-testimonial-role" data-i18n="saasLanding.testimonials.testimonial3.role">CEO, Linear</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Pricing -->
+  <section class="min-pricing">
+    <div class="min-section-container">
+      <div class="min-section-header">
+        <span class="min-section-label" data-i18n="saasLanding.pricing.label">PRICING</span>
+        <h2 class="min-section-title" data-i18n="saasLanding.pricing.title">Simple, Transparent</h2>
+      </div>
+      <div class="min-pricing-grid">
+        <div class="min-price-card">
+          <div class="min-price-header">
+            <div class="min-price-name" data-i18n="saasLanding.pricing.free.name">Free</div>
+            <div class="min-price-amount">
+              <span class="min-price-currency">$</span>
+              <span class="min-price-value">0</span>
+              <span class="min-price-period" data-i18n="saasLanding.pricing.period">/mo</span>
+            </div>
+          </div>
+          <ul class="min-price-features">
+            <li data-i18n="saasLanding.pricing.free.feature1">3 Projects</li>
+            <li data-i18n="saasLanding.pricing.free.feature2">Basic features</li>
+            <li data-i18n="saasLanding.pricing.free.feature3">Community support</li>
+          </ul>
+          <button class="min-price-btn" data-i18n="saasLanding.pricing.free.getStarted">Get Started</button>
+        </div>
+        <div class="min-price-card min-price-featured">
+          <div class="min-price-badge" data-i18n="saasLanding.pricing.pro.badge">POPULAR</div>
+          <div class="min-price-header">
+            <div class="min-price-name" data-i18n="saasLanding.pricing.pro.name">Pro</div>
+            <div class="min-price-amount">
+              <span class="min-price-currency">$</span>
+              <span class="min-price-value">12</span>
+              <span class="min-price-period" data-i18n="saasLanding.pricing.period">/mo</span>
+            </div>
+          </div>
+          <ul class="min-price-features">
+            <li data-i18n="saasLanding.pricing.pro.feature1">Unlimited projects</li>
+            <li data-i18n="saasLanding.pricing.pro.feature2">All features</li>
+            <li data-i18n="saasLanding.pricing.pro.feature3">Priority support</li>
+            <li data-i18n="saasLanding.pricing.pro.feature4">API access</li>
+          </ul>
+          <button class="min-price-btn min-price-btn-primary" data-i18n="saasLanding.pricing.pro.startTrial">Start Trial</button>
+        </div>
+        <div class="min-price-card">
+          <div class="min-price-header">
+            <div class="min-price-name" data-i18n="saasLanding.pricing.team.name">Team</div>
+            <div class="min-price-amount">
+              <span class="min-price-currency">$</span>
+              <span class="min-price-value">29</span>
+              <span class="min-price-period" data-i18n="saasLanding.pricing.period">/mo</span>
+            </div>
+          </div>
+          <ul class="min-price-features">
+            <li data-i18n="saasLanding.pricing.team.feature1">Everything in Pro</li>
+            <li data-i18n="saasLanding.pricing.team.feature2">Team collaboration</li>
+            <li data-i18n="saasLanding.pricing.team.feature3">Advanced analytics</li>
+            <li data-i18n="saasLanding.pricing.team.feature4">Custom integrations</li>
+          </ul>
+          <button class="min-price-btn" data-i18n="saasLanding.pricing.team.contactSales">Contact Sales</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="min-cta">
+    <div class="min-section-container">
+      <div class="min-cta-content">
+        <h2 class="min-cta-title" data-i18n="saasLanding.cta.title">Start Your Journey</h2>
+        <p class="min-cta-subtitle" data-i18n="saasLanding.cta.subtitle">Join 50,000+ teams building with clarity</p>
+        <button class="min-cta-btn" data-i18n="saasLanding.cta.startFreeTrial">Start Free Trial</button>
+        <p class="min-cta-note" data-i18n="saasLanding.cta.note">No credit card required • 14-day trial</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="min-footer">
+    <div class="min-section-container">
+      <div class="min-footer-grid">
+        <div class="min-footer-brand">
+          <div class="min-footer-logo">FOCUS</div>
+          <p class="min-footer-tagline" data-i18n="saasLanding.footer.tagline">Less complexity. More focus.</p>
+        </div>
+        <div class="min-footer-links">
+          <div class="min-footer-column">
+            <div class="min-footer-heading" data-i18n="saasLanding.footer.product">Product</div>
+            <a href="javascript:void(0)" data-i18n="saasLanding.footer.features">Features</a>
+            <a href="javascript:void(0)" data-i18n="saasLanding.footer.pricing">Pricing</a>
+            <a href="javascript:void(0)" data-i18n="saasLanding.footer.roadmap">Roadmap</a>
+            <a href="javascript:void(0)" data-i18n="saasLanding.footer.changelog">Changelog</a>
+          </div>
+          <div class="min-footer-column">
+            <div class="min-footer-heading" data-i18n="saasLanding.footer.company">Company</div>
+            <a href="javascript:void(0)" data-i18n="saasLanding.footer.about">About</a>
+            <a href="javascript:void(0)" data-i18n="saasLanding.footer.blog">Blog</a>
+            <a href="javascript:void(0)" data-i18n="saasLanding.footer.careers">Careers</a>
+            <a href="javascript:void(0)" data-i18n="saasLanding.footer.contact">Contact</a>
+          </div>
+          <div class="min-footer-column">
+            <div class="min-footer-heading" data-i18n="saasLanding.footer.resources">Resources</div>
+            <a href="javascript:void(0)" data-i18n="saasLanding.footer.documentation">Documentation</a>
+            <a href="javascript:void(0)" data-i18n="saasLanding.footer.apiReference">API Reference</a>
+            <a href="javascript:void(0)" data-i18n="saasLanding.footer.support">Support</a>
+            <a href="javascript:void(0)" data-i18n="saasLanding.footer.community">>[object Object]</a>
+          </div>
+        </div>
+      </div>
+      <div class="min-footer-bottom">
+        <div class="min-footer-copyright" data-i18n="saasLanding.footer.copyright">© 2025 Focus. All rights reserved.</div>
+        <div class="min-footer-social">
+          <a href="javascript:void(0)" data-i18n="saasLanding.footer.twitter">Twitter</a>
+          <a href="javascript:void(0)" data-i18n="saasLanding.footer.linkedin">LinkedIn</a>
+          <a href="javascript:void(0)" data-i18n="saasLanding.footer.github">GitHub</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+## 配色方案
+
+配色方案：霓虹粉紫 (#FF71CE)、霓虹蓝 (#01CDFE)、霓虹紫 (#B967FF)、暗紫背景 (#2E1F47)
+
+
+主色温暖米白 (#FAF9F7)、深色文字 (#1F1F1F)、中性灰色 (#8B8B8B)、浅灰背景 (#F5F5F5)、功能黑色 (#000000)
+
+</body>
+</html>

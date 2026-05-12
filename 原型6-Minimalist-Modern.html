@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI工具平台 - Minimalist Modern</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Calistoga&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --background: #FAFAFA;
+            --foreground: #0F172A;
+            --muted: #F1F5F9;
+            --muted-foreground: #64748B;
+            --accent: #0052FF;
+            --accent-secondary: #4D7CFF;
+            --accent-foreground: #FFFFFF;
+            --border: #E2E8F0;
+            --card: #FFFFFF;
+            --ring: #0052FF;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background: var(--background);
+            color: var(--foreground);
+            line-height: 1.625;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .container {
+            max-width: 72rem;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        /* Header */
+        .header {
+            padding: 2rem 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .nav-wrapper {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-family: 'Calistoga', Georgia, serif;
+            font-size: 1.5rem;
+            color: var(--foreground);
+            letter-spacing: -0.02em;
+        }
+
+        .nav {
+            display: flex;
+            gap: 2.5rem;
+        }
+
+        .nav a {
+            color: var(--muted-foreground);
+            text-decoration: none;
+            font-size: 0.9375rem;
+            font-weight: 500;
+            transition: color 0.2s ease;
+        }
+
+        .nav a:hover {
+            color: var(--accent);
+        }
+
+        /* Hero Section */
+        .hero {
+            padding: 7rem 0 5rem;
+            text-align: center;
+        }
+
+        .section-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.5rem 1.25rem;
+            border-radius: 9999px;
+            border: 1px solid rgba(0, 82, 255, 0.3);
+            background: rgba(0, 82, 255, 0.05);
+            margin-bottom: 2rem;
+        }
+
+        .badge-dot {
+            width: 0.5rem;
+            height: 0.5rem;
+            border-radius: 50%;
+            background: var(--accent);
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.7; transform: scale(1.3); }
+        }
+
+        .badge-text {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            color: var(--accent);
+        }
+
+        .hero-title {
+            font-family: 'Calistoga', Georgia, serif;
+            font-size: clamp(2.5rem, 5vw, 5.25rem);
+            line-height: 1.05;
+            letter-spacing: -0.02em;
+            margin-bottom: 1.5rem;
+            color: var(--foreground);
+        }
+
+        .gradient-text {
+            background: linear-gradient(to right, var(--accent), var(--accent-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            position: relative;
+            display: inline-block;
+        }
+
+        .gradient-text::after {
+            content: '';
+            position: absolute;
+            bottom: -0.5rem;
+            left: 0;
+            width: 100%;
+            height: 1rem;
+            border-radius: 0.125rem;
+            background: linear-gradient(to right, rgba(0, 82, 255, 0.15), rgba(77, 124, 255, 0.1));
+        }
+
+        .hero-description {
+            font-size: 1.125rem;
+            color: var(--muted-foreground);
+            max-width: 42rem;
+            margin: 0 auto 2.5rem;
+            line-height: 1.75;
+        }
+
+        .hero-cta {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.875rem 2rem;
+            background: linear-gradient(to right, var(--accent), var(--accent-secondary));
+            color: var(--accent-foreground);
+            border: none;
+            border-radius: 0.75rem;
+            font-size: 0.9375rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+        }
+
+        .hero-cta:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 14px rgba(0, 82, 255, 0.25);
+        }
+
+        /* Filters */
+        .filters {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-bottom: 4rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 0.625rem 1.25rem;
+            background: transparent;
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            color: var(--muted-foreground);
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .filter-btn:hover,
+        .filter-btn.active {
+            background: rgba(0, 82, 255, 0.05);
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        /* Tools Grid */
+        .tools-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(22rem, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 7rem;
+        }
+
+        .tool-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 1rem;
+            padding: 2rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .tool-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(to bottom right, rgba(0, 82, 255, 0.03), transparent);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .tool-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 25px rgba(0, 0, 0, 0.1);
+            border-color: rgba(0, 82, 255, 0.3);
+        }
+
+        .tool-card:hover::before {
+            opacity: 1;
+        }
+
+        .tool-icon {
+            width: 3.5rem;
+            height: 3.5rem;
+            border-radius: 0.75rem;
+            background: linear-gradient(135deg, var(--accent), var(--accent-secondary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.75rem;
+            margin-bottom: 1.25rem;
+            box-shadow: 0 4px 14px rgba(0, 82, 255, 0.25);
+        }
+
+        .tool-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 1rem;
+        }
+
+        .tool-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--foreground);
+            letter-spacing: -0.01em;
+        }
+
+        .tool-category {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.6875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--muted-foreground);
+            padding: 0.25rem 0.625rem;
+            background: var(--muted);
+            border-radius: 0.25rem;
+        }
+
+        .tool-description {
+            font-size: 0.9375rem;
+            line-height: 1.7;
+            color: var(--muted-foreground);
+            margin-bottom: 1.5rem;
+        }
+
+        .tool-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 1.25rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .tool-stats {
+            display: flex;
+            gap: 1.25rem;
+            font-size: 0.8125rem;
+            color: var(--muted-foreground);
+        }
+
+        .stat-value {
+            font-weight: 600;
+            color: var(--foreground);
+            margin-right: 0.25rem;
+        }
+
+        .tool-link {
+            font-size: 0.8125rem;
+            color: var(--accent);
+            text-decoration: none;
+            font-weight: 600;
+            transition: opacity 0.2s ease;
+        }
+
+        .tool-link:hover {
+            opacity: 0.7;
+        }
+
+        /* Featured Card */
+        .tool-card.featured {
+            background: linear-gradient(to bottom right, var(--accent), var(--accent-secondary));
+            padding: 2px;
+        }
+
+        .tool-card.featured .card-inner {
+            background: var(--card);
+            border-radius: calc(1rem - 2px);
+            padding: 2rem;
+            height: 100%;
+        }
+
+        /* Inverted Section */
+        .inverted-section {
+            background: var(--foreground);
+            color: var(--background);
+            padding: 7rem 0;
+            margin: 7rem 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .inverted-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: radial-gradient(circle, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 32px 32px;
+        }
+
+        .inverted-section .section-title {
+            color: var(--background);
+        }
+
+        .inverted-section .tool-description {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 1.5rem;
+            }
+
+            .nav {
+                display: none;
+            }
+
+            .hero {
+                padding: 4rem 0 3rem;
+            }
+
+            .tools-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="nav-wrapper">
+                <div class="logo">AI Tools</div>
+                <nav class="nav">
+                    <a href="#editors">编辑器</a>
+                    <a href="#skills">技能库</a>
+                    <a href="#models">模型</a>
+                    <a href="#finetune">微调</a>
+                    <a href="#admin">管理</a>
+                </nav>
+            </div>
+        </header>
+
+        <!-- Hero -->
+        <section class="hero">
+            <div class="section-badge">
+                <span class="badge-dot"></span>
+                <span class="badge-text">AI Editors</span>
+            </div>
+            <h1 class="hero-title">
+                探索最佳的<br>
+                <span class="gradient-text">AI编程工具</span>
+            </h1>
+            <p class="hero-description">
+                精选的AI辅助编程工具，帮助开发者提升效率，释放创造力。从IDE插件到独立编辑器，找到最适合你的AI助手。
+            </p>
+            <button class="hero-cta">
+                开始探索
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                    <path d="M6 3L11 8L6 13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </button>
+        </section>
+
+        <!-- Filters -->
+        <div class="filters">
+            <button class="filter-btn active">全部</button>
+            <button class="filter-btn">IDE插件</button>
+            <button class="filter-btn">独立编辑器</button>
+            <button class="filter-btn">云端服务</button>
+            <button class="filter-btn">热门推荐</button>
+        </div>
+
+        <!-- Tools Grid -->
+        <div class="tools-grid">
+            <!-- Featured Tool -->
+            <div class="tool-card featured">
+                <div class="card-inner">
+                    <div class="tool-icon">🤖</div>
+                    <div class="tool-header">
+                        <h3 class="tool-title">Claude Code</h3>
+                        <span class="tool-category">IDE Plugin</span>
+                    </div>
+                    <p class="tool-description">
+                        Anthropic官方CLI工具，集成Claude最新模型。支持代码生成、重构和调试，提供强大的AI编程辅助能力。
+                    </p>
+                    <div class="tool-footer">
+                        <div class="tool-stats">
+                            <span><span class="stat-value">12.5K</span>浏览</span>
+                            <span><span class="stat-value">3.2K</span>点赞</span>
+                        </div>
+                        <a href="#" class="tool-link">查看详情 →</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Regular Tools -->
+            <div class="tool-card">
+                <div class="tool-icon">⚡</div>
+                <div class="tool-header">
+                    <h3 class="tool-title">Cursor</h3>
+                    <span class="tool-category">Editor</span>
+                </div>
+                <p class="tool-description">
+                    基于VSCode的AI编辑器，深度集成GPT-4。支持智能代码补全、对话式编程和代码解释功能。
+                </p>
+                <div class="tool-footer">
+                    <div class="tool-stats">
+                        <span><span class="stat-value">25.8K</span>浏览</span>
+                        <span><span class="stat-value">8.9K</span>点赞</span>
+                    </div>
+                    <a href="#" class="tool-link">查看详情 →</a>
+                </div>
+            </div>
+
+            <div class="tool-card">
+                <div class="tool-icon">🌊</div>
+                <div class="tool-header">
+                    <h3 class="tool-title">Windsurf</h3>
+                    <span class="tool-category">Editor</span>
+                </div>
+                <p class="tool-description">
+                    新一代AI编程工具，支持多模型切换、实时协作和智能重构。适合团队协作开发。
+                </p>
+                <div class="tool-footer">
+                    <div class="tool-stats">
+                        <span><span class="stat-value">8.3K</span>浏览</span>
+                        <span><span class="stat-value">2.1K</span>点赞</span>
+                    </div>
+                    <a href="#" class="tool-link">查看详情 →</a>
+                </div>
+            </div>
+
+            <div class="tool-card">
+                <div class="tool-icon">🐙</div>
+                <div class="tool-header">
+                    <h3 class="tool-title">GitHub Copilot</h3>
+                    <span class="tool-category">IDE Plugin</span>
+                </div>
+                <p class="tool-description">
+                    GitHub官方AI编程助手，基于OpenAI Codex模型。支持多种IDE，提供智能代码建议。
+                </p>
+                <div class="tool-footer">
+                    <div class="tool-stats">
+                        <span><span class="stat-value">45.2K</span>浏览</span>
+                        <span><span class="stat-value">15.6K</span>点赞</span>
+                    </div>
+                    <a href="#" class="tool-link">查看详情 →</a>
+                </div>
+            </div>
+
+            <div class="tool-card">
+                <div class="tool-icon">🎨</div>
+                <div class="tool-header">
+                    <h3 class="tool-title">Tabnine</h3>
+                    <span class="tool-category">IDE Plugin</span>
+                </div>
+                <p class="tool-description">
+                    AI代码补全工具，支持多种编程语言和IDE。提供本地和云端模式，注重代码隐私保护。
+                </p>
+                <div class="tool-footer">
+                    <div class="tool-stats">
+                        <span><span class="stat-value">18.7K</span>浏览</span>
+                        <span><span class="stat-value">5.4K</span>点赞</span>
+                    </div>
+                    <a href="#" class="tool-link">查看详情 →</a>
+                </div>
+            </div>
+
+            <div class="tool-card">
+                <div class="tool-icon">🔮</div>
+                <div class="tool-header">
+                    <h3 class="tool-title">Codeium</h3>
+                    <span class="tool-category">IDE Plugin</span>
+                </div>
+                <p class="tool-description">
+                    免费的AI编程助手，支持70多种编程语言。提供智能补全、代码搜索和聊天功能。
+                </p>
+                <div class="tool-footer">
+                    <div class="tool-stats">
+                        <span><span class="stat-value">22.1K</span>浏览</span>
+                        <span><span class="stat-value">7.8K</span>点赞</span>
+                    </div>
+                    <a href="#" class="tool-link">查看详情 →</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
