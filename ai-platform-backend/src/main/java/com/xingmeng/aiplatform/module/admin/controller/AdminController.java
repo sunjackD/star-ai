@@ -216,6 +216,13 @@ public class AdminController {
         return ApiResponse.success(category);
     }
 
+    @DeleteMapping("/skill-categories/{id}")
+    public ApiResponse<Void> deleteSkillCategory(Authentication authentication, @PathVariable Long id) {
+        categoryRepository.delete(category(id));
+        auditService.log(authentication, "SKILL_CATEGORY_DELETED", "SKILL_CATEGORY", id, "deleted");
+        return ApiResponse.success(null);
+    }
+
     @GetMapping("/skills")
     public ApiResponse<List<Skill>> skills() {
         return ApiResponse.success(skillRepository.findAll());
@@ -296,6 +303,26 @@ public class AdminController {
         return ApiResponse.success(saved);
     }
 
+    @PutMapping("/datasets/{id}")
+    @Transactional
+    public ApiResponse<Dataset> updateDataset(
+            Authentication authentication,
+            @PathVariable Long id,
+            @Valid @RequestBody DatasetRequest request
+    ) {
+        Dataset dataset = dataset(id);
+        applyDataset(dataset, request);
+        auditService.log(authentication, "DATASET_UPDATED", "DATASET", id, dataset.getName());
+        return ApiResponse.success(dataset);
+    }
+
+    @DeleteMapping("/datasets/{id}")
+    public ApiResponse<Void> deleteDataset(Authentication authentication, @PathVariable Long id) {
+        datasetRepository.delete(dataset(id));
+        auditService.log(authentication, "DATASET_DELETED", "DATASET", id, "deleted");
+        return ApiResponse.success(null);
+    }
+
     @GetMapping("/finetune-jobs")
     public ApiResponse<List<FinetuneJob>> finetuneJobs() {
         return ApiResponse.success(jobRepository.findAll());
@@ -310,6 +337,26 @@ public class AdminController {
         FinetuneJob saved = jobRepository.save(job);
         auditService.log(authentication, "FINETUNE_JOB_CREATED", "FINETUNE_JOB", saved.getId(), saved.getName());
         return ApiResponse.success(saved);
+    }
+
+    @PutMapping("/finetune-jobs/{id}")
+    @Transactional
+    public ApiResponse<FinetuneJob> updateFinetuneJob(
+            Authentication authentication,
+            @PathVariable Long id,
+            @Valid @RequestBody FinetuneJobRequest request
+    ) {
+        FinetuneJob job = job(id);
+        applyFinetuneJob(job, request);
+        auditService.log(authentication, "FINETUNE_JOB_UPDATED", "FINETUNE_JOB", id, job.getName());
+        return ApiResponse.success(job);
+    }
+
+    @DeleteMapping("/finetune-jobs/{id}")
+    public ApiResponse<Void> deleteFinetuneJob(Authentication authentication, @PathVariable Long id) {
+        jobRepository.delete(job(id));
+        auditService.log(authentication, "FINETUNE_JOB_DELETED", "FINETUNE_JOB", id, "deleted");
+        return ApiResponse.success(null);
     }
 
     @PostMapping("/finetune-jobs/{id}/start")
@@ -344,6 +391,13 @@ public class AdminController {
         applyLink(link, request);
         auditService.log(authentication, "LINK_UPDATED", "REDIRECT_LINK", id, link.getName());
         return ApiResponse.success(link);
+    }
+
+    @DeleteMapping("/links/{id}")
+    public ApiResponse<Void> deleteLink(Authentication authentication, @PathVariable Long id) {
+        linkRepository.delete(link(id));
+        auditService.log(authentication, "LINK_DELETED", "REDIRECT_LINK", id, "deleted");
+        return ApiResponse.success(null);
     }
 
     @GetMapping("/api-keys")
