@@ -12,6 +12,8 @@
   --shadow: 0 18px 42px rgba(31, 28, 24, 0.08);
   --font: Manrope, "PingFang SC", "Microsoft YaHei", sans-serif;
   --display-font: "Noto Serif SC", "PingFang SC", serif;
+  --content-width: 1180px;
+  --card-padding: 28px;
 }
 
 * {
@@ -44,6 +46,18 @@ html[data-theme='minimal-modern'] body {
 .app-sider {
   border-right: 1px solid var(--border);
   background: var(--surface-strong) !important;
+}
+
+html[data-theme='minimal-modern'] .app-sider {
+  background: #0f172a !important;
+}
+
+html[data-theme='minimal-modern'] .app-sider .brand,
+html[data-theme='minimal-modern'] .app-sider .ant-menu,
+html[data-theme='minimal-modern'] .app-sider .ant-menu-item,
+html[data-theme='minimal-modern'] .app-sider .ant-menu-submenu-title {
+  color: #e2e8f0 !important;
+  background: transparent !important;
 }
 
 .brand {
@@ -96,7 +110,7 @@ html[data-theme='minimal-modern'] body {
 }
 
 .page {
-  max-width: 1180px;
+  max-width: var(--content-width);
   margin: 0 auto;
 }
 
@@ -122,7 +136,7 @@ html[data-theme='minimal-modern'] body {
   min-height: 310px;
   display: flex;
   align-items: center;
-  padding: 40px;
+  padding: calc(var(--card-padding) + 12px);
   margin-bottom: 24px;
   border: 1px solid var(--border);
   border-radius: var(--radius);
@@ -134,6 +148,7 @@ html[data-theme='minimal-modern'] .workspace-hero {
   background:
     linear-gradient(135deg, rgba(0, 82, 255, 0.08), transparent 44%),
     var(--surface-strong);
+  border-radius: 18px;
 }
 
 .metric-grid {
@@ -211,6 +226,18 @@ pre {
   cursor: pointer;
 }
 
+.admin-create-button {
+  margin-bottom: 16px;
+}
+
+.admin-inline-select {
+  min-width: 180px;
+}
+
+.admin-number-input {
+  width: 100%;
+}
+
 .theme-preview {
   height: 120px;
   border-radius: var(--radius);
@@ -246,6 +273,25 @@ pre {
   box-shadow: var(--shadow);
 }
 
+.ant-card .ant-card-body {
+  padding: var(--card-padding);
+}
+
+html[data-theme='minimal-modern'] .ant-card {
+  border-width: 1px;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
+}
+
+html[data-theme='minimal-reference'] .ant-table-wrapper {
+  box-shadow: var(--shadow);
+}
+
+html[data-theme='minimal-modern'] .ant-table-wrapper {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
 .ant-btn-primary {
   background: var(--accent);
 }
@@ -265,4 +311,3 @@ pre {
     padding: 24px;
   }
 }
-

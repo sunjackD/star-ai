@@ -20,6 +20,19 @@ import { useAuthStore } from './store/authStore';
 import { useThemeStore } from './store/themeStore';
 import { themes } from './themes/tokens';
 import type { AdminOverview, Agent, AiModel, ApiKey, AuthResponse, FinetuneJob, Skill, SkillCategory, ThemeName } from './types';
+import {
+  AdminLandingPage,
+  AgentsAdminPage,
+  ApiKeysAdminPage,
+  AuditLogsAdminPage,
+  DatasetsAdminPage,
+  FinetuneJobsAdminPage,
+  LinksAdminPage,
+  ModelsAdminPage,
+  SkillCategoriesAdminPage,
+  SkillsAdminPage,
+  UsersAdminPage
+} from './pages/AdminPages';
 
 const { Header, Sider, Content } = Layout;
 const { Title, Paragraph, Text } = Typography;
@@ -33,13 +46,34 @@ function RequireAuth() {
   return <Outlet />;
 }
 
+function RequireAdmin() {
+  const profile = useAuthStore((state) => state.profile);
+  if (!profile?.roles.includes('ADMIN')) {
+    return <Navigate to="/" replace />;
+  }
+  return <Outlet />;
+}
+
 function Shell() {
   const navigate = useNavigate();
   const token = useAuthStore((state) => state.token);
   const profile = useAuthStore((state) => state.profile);
+  const setProfile = useAuthStore((state) => state.setProfile);
   const logout = useAuthStore((state) => state.logout);
   const theme = useThemeStore((state) => state.theme);
   const setTheme = useThemeStore((state) => state.setTheme);
+  const isAdmin = profile?.roles.includes('ADMIN');
+  const themeMutation = useMutation({
+    mutationFn: (themePreference: ThemeName) => putData('/profile/theme', { themePreference }),
+    onSuccess: (data) => setProfile(data as NonNullable<typeof profile>)
+  });
+
+  function switchTheme(nextTheme: ThemeName) {
+    setTheme(nextTheme);
+    if (profile) {
+      themeMutation.mutate(nextTheme);
+    }
+  }
 
   const menuItems = [
     { key: '/', icon: <LayoutDashboard size={18} />, label: <Link to="/">总览</Link> },
@@ -50,7 +84,23 @@ function Shell() {
     { key: '/developer', icon: <Code2 size={18} />, label: <Link to="/developer">开发者</Link> },
     { key: '/account/api-keys', icon: <KeyRound size={18} />, label: <Link to="/account/api-keys">API Key</Link> },
     { key: '/settings/appearance', icon: <Palette size={18} />, label: <Link to="/settings/appearance">外观</Link> },
-    { key: '/admin', icon: <ShieldCheck size={18} />, label: <Link to="/admin">后台</Link> }
+    ...(isAdmin ? [{
+      key: '/admin',
+      icon: <ShieldCheck size={18} />,
+      label: <Link to="/admin">后台</Link>,
+      children: [
+        { key: '/admin/users', label: <Link to="/admin/users">用户管理</Link> },
+        { key: '/admin/agents', label: <Link to="/admin/agents">Agents</Link> },
+        { key: '/admin/skills', label: <Link to="/admin/skills">Skills</Link> },
+        { key: '/admin/skill-categories', label: <Link to="/admin/skill-categories">分类</Link> },
+        { key: '/admin/models', label: <Link to="/admin/models">模型</Link> },
+        { key: '/admin/datasets', label: <Link to="/admin/datasets">数据集</Link> },
+        { key: '/admin/finetune-jobs', label: <Link to="/admin/finetune-jobs">微调任务</Link> },
+        { key: '/admin/links', label: <Link to="/admin/links">跳转链接</Link> },
+        { key: '/admin/api-keys', label: <Link to="/admin/api-keys">Key 审计</Link> },
+        { key: '/admin/audit-logs', label: <Link to="/admin/audit-logs">审计日志</Link> }
+      ]
+    }] : [])
   ];
 
   return (
@@ -70,7 +120,7 @@ function Shell() {
           <Space size={12} wrap>
             <Segmented
               value={theme}
-              onChange={(value) => setTheme(value as ThemeName)}
+              onChange={(value) => switchTheme(value as ThemeName)}
               options={[
                 { label: '原型7', value: 'minimal-reference' },
                 { label: '原型6', value: 'minimal-modern' }
@@ -79,6 +129,8 @@ function Shell() {
             {token ? (
               <>
                 <Text>{profile?.displayName ?? profile?.username}</Text>
+                <Link to="/account/profile"><Button>个人中心</Button></Link>
+                <Link to="/account/api-keys"><Button>API Key</Button></Link>
                 <Button icon={<LogOut size={16} />} onClick={() => { logout(); navigate('/login'); }}>
                   退出
                 </Button>
@@ -149,11 +201,13 @@ function LoginPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const setSession = useAuthStore((state) => state.setSession);
+  const setTheme = useThemeStore((state) => state.setTheme);
   const from = (location.state as { from?: string } | null)?.from ?? '/';
   const mutation = useMutation({
     mutationFn: (values: { username: string; password: string }) => postData<AuthResponse>('/auth/login', values),
     onSuccess: (data) => {
       setSession(data.token, data.profile);
+      setTheme(data.profile.themePreference);
       navigate(from, { replace: true });
     },
     onError: () => message.error('登录失败，请检查账号密码')
@@ -173,6 +227,24 @@ function LoginPage() {
           </Form.Item>
           <Button type="primary" htmlType="submit" loading={mutation.isPending} block>登录</Button>
         </Form>
+      </Card>
+    </div>
+  );
+}
+
+function AccountProfilePage() {
+  const profile = useAuthStore((state) => state.profile);
+  return (
+    <div className="page">
+      <PageTitle title="个人中心" description="查看当前登录账号、角色和界面偏好。" />
+      <Card>
+        <Space direction="vertical">
+          <Text>用户名：{profile?.username}</Text>
+          <Text>邮箱：{profile?.email}</Text>
+          <Text>显示名：{profile?.displayName}</Text>
+          <Text>角色：{profile?.roles.map((role) => <Tag key={role}>{role}</Tag>)}</Text>
+          <Text>界面风格：{profile?.themePreference}</Text>
+        </Space>
       </Card>
     </div>
   );
@@ -377,20 +449,6 @@ function AppearancePage() {
   );
 }
 
-function AdminPage() {
-  const { data } = useQuery({ queryKey: ['admin-overview'], queryFn: () => getData<AdminOverview>('/admin/overview') });
-  return (
-    <div className="page">
-      <PageTitle title="管理后台" description="管理员查看平台资源总览。" />
-      <div className="metric-grid">
-        <Card><Statistic title="用户" value={data?.users ?? 0} /></Card>
-        <Card><Statistic title="Agents" value={data?.agents ?? 0} /></Card>
-        <Card><Statistic title="Skills" value={data?.skills ?? 0} /></Card>
-      </div>
-    </div>
-  );
-}
-
 function PageTitle({ title, description }: { title: string; description: string }) {
   return (
     <div className="page-title">
@@ -415,9 +473,22 @@ function App() {
             <Route path="/skills/:id" element={<SkillDetailPage />} />
             <Route path="/finetune" element={<FinetunePage />} />
             <Route path="/developer" element={<DeveloperPage />} />
+            <Route path="/account/profile" element={<AccountProfilePage />} />
             <Route path="/account/api-keys" element={<ApiKeysPage />} />
             <Route path="/settings/appearance" element={<AppearancePage />} />
-            <Route path="/admin" element={<AdminPage />} />
+            <Route element={<RequireAdmin />}>
+              <Route path="/admin" element={<AdminLandingPage />} />
+              <Route path="/admin/users" element={<UsersAdminPage />} />
+              <Route path="/admin/agents" element={<AgentsAdminPage />} />
+              <Route path="/admin/skills" element={<SkillsAdminPage />} />
+              <Route path="/admin/skill-categories" element={<SkillCategoriesAdminPage />} />
+              <Route path="/admin/models" element={<ModelsAdminPage />} />
+              <Route path="/admin/datasets" element={<DatasetsAdminPage />} />
+              <Route path="/admin/finetune-jobs" element={<FinetuneJobsAdminPage />} />
+              <Route path="/admin/links" element={<LinksAdminPage />} />
+              <Route path="/admin/api-keys" element={<ApiKeysAdminPage />} />
+              <Route path="/admin/audit-logs" element={<AuditLogsAdminPage />} />
+            </Route>
           </Route>
         </Route>
       </Routes>

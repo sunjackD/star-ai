@@ -25,10 +25,12 @@ export type Agent = {
   name: string;
   category: string;
   description: string;
+  icon?: string;
   guideMarkdown: string;
   officialUrl?: string;
   viewCount: number;
   likeCount: number;
+  status: string;
 };
 
 export type SkillCategory = {
@@ -49,6 +51,7 @@ export type Skill = {
   viewCount: number;
   downloadCount: number;
   starCount: number;
+  status: string;
 };
 
 export type AiModel = {
@@ -65,9 +68,27 @@ export type FinetuneJob = {
   id: number;
   name: string;
   baseModel: string;
+  dataset?: Dataset;
   status: string;
   progress: number;
   configJson: string;
+};
+
+export type Dataset = {
+  id: number;
+  name: string;
+  filePath: string;
+  recordCount: number;
+  format: string;
+};
+
+export type RedirectLink = {
+  id: number;
+  name: string;
+  url: string;
+  description: string;
+  icon?: string;
+  status: string;
 };
 
 export type ApiKey = {
@@ -85,5 +106,34 @@ export type AdminOverview = {
   users: number;
   agents: number;
   skills: number;
+  models: number;
+  datasets: number;
+  finetuneJobs: number;
+  links: number;
+  apiKeys: number;
+  auditLogs: number;
 };
 
+export type AdminUser = {
+  id: number;
+  username: string;
+  email: string;
+  displayName: string;
+  status: string;
+  themePreference: ThemeName;
+  roles: string[];
+};
+
+export type Role = {
+  id: number;
+  name: string;
+};
+
+export type AuditLog = {
+  id: number;
+  actor: string;
+  action: string;
+  resourceType: string;
+  resourceId: string;
+  detail: string;
+};

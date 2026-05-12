@@ -1,4 +1,6 @@
 import { ReactNode, useEffect } from 'react';
+import { ConfigProvider } from 'antd';
+import zhCN from 'antd/locale/zh_CN';
 import { useThemeStore } from '../store/themeStore';
 import { themes } from './tokens';
 
@@ -20,8 +22,13 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     root.style.setProperty('--shadow', tokens.shadow);
     root.style.setProperty('--font', tokens.font);
     root.style.setProperty('--display-font', tokens.displayFont);
+    root.style.setProperty('--content-width', tokens.contentWidth);
+    root.style.setProperty('--card-padding', tokens.cardPadding);
   }, [themeName]);
 
-  return children;
+  return (
+    <ConfigProvider locale={zhCN} theme={themes[themeName].antd}>
+      {children}
+    </ConfigProvider>
+  );
 }
-
