@@ -142,7 +142,7 @@ CREATE TABLE audit_logs (
 
 INSERT INTO roles (name) VALUES ('ADMIN'), ('DEVELOPER'), ('VIEWER');
 INSERT INTO users (username, email, password_hash, display_name, status, theme_preference)
-VALUES ('admin', 'admin@example.com', '$2a$10$dXJ3SW6G7P50lGf6ydQzC.Y4bqSXsZw6nRnmN7UMH7p9z2xD.R9sG', '平台管理员', 'ACTIVE', 'minimal-reference');
+VALUES ('admin', 'admin@example.com', '$2a$10$d1SUoWxD4UOrKEfB9UjwROAHnCZ3BK2URxLMgA8WAAcrwRLYYPjfG', '平台管理员', 'ACTIVE', 'minimal-reference');
 INSERT INTO user_roles (user_id, role_id)
 SELECT u.id, r.id FROM users u JOIN roles r ON r.name = 'ADMIN' WHERE u.username = 'admin';
 

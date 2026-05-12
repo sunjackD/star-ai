@@ -30,6 +30,19 @@ class AuthAndDeveloperApiTest {
     }
 
     @Test
+    void seededAdminCanLogin() throws Exception {
+        mockMvc.perform(post("/api/v1/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "username": "admin",
+                                  "password": "admin123"
+                                }
+                                """))
+                .andExpect(status().isOk());
+    }
+
+    @Test
     void userCanRegisterCreateApiKeyAndCallDeveloperSkillList() throws Exception {
         String registerBody = """
                 {
@@ -110,4 +123,3 @@ class AuthAndDeveloperApiTest {
                 .andExpect(status().isForbidden());
     }
 }
-

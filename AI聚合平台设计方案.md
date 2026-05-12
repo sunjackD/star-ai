@@ -17,8 +17,8 @@
 ### 后端：Spring Boot 3.x + Java 17
 - **JDK版本**：Java 17（LTS）或 Java 21（推荐）
 - **框架**：Spring Boot 3.2+
-- **数据库**：PostgreSQL 16 + Spring Data JPA
-- **缓存**：Redis 7
+- **数据库**：MySQL 8.4 + Spring Data JPA
+- **缓存**：Redis 7（后续可选增强，当前MVP先保留接口扩展点）
 - **认证**：Spring Security 6 + JWT
 - **API文档**：SpringDoc OpenAPI 3 (Swagger)
 - **数据库迁移**：Flyway
@@ -41,8 +41,7 @@
 ### 部署：Docker + Docker Compose
 - 后端容器（Spring Boot）
 - 前端容器（Nginx）
-- PostgreSQL容器
-- Redis容器
+- MySQL容器
 
 ## 项目结构
 
@@ -355,31 +354,28 @@ ai-platform-frontend/
 ### docker-compose.yml结构
 ```yaml
 services:
-  postgres:
-    image: postgres:16
+  mysql:
+    image: mysql:8.4
     environment:
-      POSTGRES_DB: ai_platform
-      POSTGRES_USER: admin
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - mysql_data:/var/lib/mysql
     ports:
-      - "5432:5432"
-
-  redis:
-    image: redis:7-alpine
-    ports:
-      - "6379:6379"
+      - "${MYSQL_PORT}:3306"
 
   backend:
     build: ./ai-platform-backend
     environment:
-      SPRING_PROFILES_ACTIVE: prod
-      DB_HOST: postgres
-      REDIS_HOST: redis
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/${MYSQL_DATABASE}
+      SPRING_DATASOURCE_USERNAME: ${MYSQL_USER}
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
     depends_on:
-      - postgres
-      - redis
+      mysql:
+        condition: service_healthy
     ports:
       - "8080:8080"
 
@@ -392,16 +388,27 @@ services:
 ```
 
 ### 环境变量配置
-- `DB_PASSWORD` - 数据库密码
+- `MYSQL_DATABASE` - MySQL数据库名
+- `MYSQL_USER` - MySQL业务用户
+- `MYSQL_PASSWORD` - MySQL业务用户密码
+- `MYSQL_ROOT_PASSWORD` - MySQL root密码
 - `JWT_SECRET` - JWT密钥
-- `REDIS_PASSWORD` - Redis密码（可选）
-- `API_BASE_URL` - 后端API地址
+- `BACKEND_PORT` - 后端映射端口
+- `FRONTEND_PORT` - 前端映射端口
+- `CORS_ALLOWED_ORIGINS` - 前端跨域白名单
+
+### 本地启动脚本
+- Windows：执行 `.\scripts\start.ps1`
+- Unix-like：执行 `sh scripts/start.sh`
+- 脚本会在缺少 `.env` 时从 `.env.example` 复制一份，然后执行 `docker compose build` 和 `docker compose up -d`
+- 默认访问地址：前端 `http://localhost`，Swagger `http://localhost:8080/swagger-ui.html`
+- 默认管理员账号：`admin / admin123`
 
 ## 实施步骤
 
 ### Phase 1: 基础设施（Week 1）
 1. 创建Spring Boot项目，配置Maven依赖
-2. 配置PostgreSQL和Redis连接
+2. 配置MySQL连接
 3. 设置Flyway数据库迁移
 4. 创建基础实体类和审计配置
 5. 配置Spring Security + JWT
@@ -642,7 +649,7 @@ GET  /api/v1/statistics/users          // 用户统计
 
 ## 技术亮点
 
-1. **企业级架构**：Spring Boot + PostgreSQL + Redis，稳定可靠
+1. **企业级架构**：Spring Boot + MySQL + Flyway，稳定可靠
 2. **前后端分离**：独立部署，便于扩展和维护
 3. **安全性**：JWT认证 + RBAC权限控制 + 数据加密
 4. **高性能**：Redis缓存 + 数据库索引优化 + 分页查询
