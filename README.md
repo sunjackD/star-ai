@@ -37,6 +37,8 @@ Copy-Item .env.example .env
 .\scripts\start.ps1
 ```
 
+启动脚本会默认使用 Docker 经典构建器（`DOCKER_BUILDKIT=0`），用于规避部分 Windows 代理环境下 BuildKit 拉取 Docker Hub Token 失败的问题。
+
 Unix-like 环境可执行：
 
 ```bash

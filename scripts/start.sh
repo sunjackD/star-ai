@@ -3,6 +3,7 @@ set -eu
 
 ROOT="$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)"
 cd "$ROOT"
+export DOCKER_BUILDKIT=0
 
 if [ ! -f ".env" ]; then
   cp ".env.example" ".env"
@@ -14,4 +15,3 @@ docker compose up -d
 
 echo "AI Platform started: http://localhost"
 echo "Backend API: http://localhost:8080/swagger-ui.html"
-

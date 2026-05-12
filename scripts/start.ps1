@@ -5,6 +5,7 @@ param(
 $ErrorActionPreference = "Stop"
 $Root = Split-Path -Parent $PSScriptRoot
 Set-Location $Root
+$env:DOCKER_BUILDKIT = "0"
 
 if (-not (Test-Path ".env")) {
     Copy-Item ".env.example" ".env"
@@ -18,4 +19,3 @@ if (-not $BuildOnly) {
     Write-Host "AI Platform started: http://localhost"
     Write-Host "Backend API: http://localhost:8080/swagger-ui.html"
 }
-
