@@ -39,8 +39,9 @@ public class ApiKeyAuthenticationFilter extends OncePerRequestFilter {
                         .map(scope -> new SimpleGrantedAuthority("SCOPE_" + scope))
                         .toList();
                 var principal = new AuthenticatedUser(apiKey.getUser().getId(), apiKey.getUser().getUsername(), "", authorities);
-                SecurityContextHolder.getContext()
-                        .setAuthentication(new UsernamePasswordAuthenticationToken(principal, null, authorities));
+                var authentication = new UsernamePasswordAuthenticationToken(principal, null, authorities);
+                authentication.setDetails(apiKey.getKeyPrefix());
+                SecurityContextHolder.getContext().setAuthentication(authentication);
             });
         }
         filterChain.doFilter(request, response);
@@ -64,4 +65,3 @@ public class ApiKeyAuthenticationFilter extends OncePerRequestFilter {
                 .filter(key -> key.getExpiresAt() == null || key.getExpiresAt().isAfter(LocalDateTime.now()));
     }
 }
-
