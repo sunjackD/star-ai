@@ -18,6 +18,9 @@ node_modules/
 dist/
 .vite/
 coverage/
+*.tsbuildinfo
+vite.config.js
+vite.config.d.ts
 
 # Environment
 .env
@@ -28,4 +31,3 @@ coverage/
 data/
 uploads/
 tmp/
-
