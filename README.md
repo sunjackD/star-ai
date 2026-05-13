@@ -22,7 +22,7 @@
 
 ## 快速启动
 
-1. 确认本机已安装 Docker 和 Docker Compose。
+1. 确认本机已安装 Docker 和 Docker Compose，并已启动 Docker Desktop / Docker daemon。
 
 2. 初始化环境配置：
 
@@ -38,7 +38,7 @@ Copy-Item .env.example .env
 .\scripts\start.ps1
 ```
 
-启动脚本会默认使用 Docker 经典构建器（`DOCKER_BUILDKIT=0`），用于规避部分 Windows 代理环境下 BuildKit 拉取 Docker Hub Token 失败的问题。
+启动脚本会默认使用 Docker 经典构建器（`DOCKER_BUILDKIT=0`），用于规避部分 Windows 代理环境下 BuildKit 拉取 Docker Hub Token 失败的问题；如果 Docker daemon 不可用，脚本会直接失败而不是继续打印成功信息。
 
 Unix-like 环境可执行：
 
