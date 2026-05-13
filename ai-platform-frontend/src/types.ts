@@ -126,6 +126,64 @@ export type RedirectLink = {
   status: string;
 };
 
+export type BestPracticeSummary = {
+  id: number;
+  title: string;
+  slug: string;
+  summary: string;
+  category: string;
+  tags: string;
+  difficulty: 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED';
+  estimatedMinutes: number;
+  coverIcon?: string;
+  status: string;
+  sortOrder: number;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type BestPracticeStep = {
+  id: number;
+  title: string;
+  description: string;
+  checklistMarkdown: string;
+  acceptanceMarkdown: string;
+  requiredStep: boolean;
+  sortOrder: number;
+};
+
+export type BestPracticeArtifact = {
+  id: number;
+  name: string;
+  artifactType: 'SCRIPT' | 'PROMPT' | 'IMAGE' | 'CONFIG' | 'FILE' | 'LINK';
+  contentText?: string;
+  fileName?: string;
+  contentType?: string;
+  externalUrl?: string;
+  sortOrder: number;
+};
+
+export type BestPracticeRelatedResource = {
+  id: number;
+  resourceType: 'SKILL' | 'MODEL' | 'DATASET' | 'FINETUNE_JOB' | 'REDIRECT_LINK';
+  resourceId?: number;
+  title: string;
+  url?: string;
+  description: string;
+  sortOrder: number;
+};
+
+export type BestPracticeDetail = BestPracticeSummary & {
+  sourceUrl?: string;
+  outcomeMarkdown: string;
+  prerequisitesMarkdown: string;
+  safetyMarkdown: string;
+  bodyMarkdown: string;
+  steps: BestPracticeStep[];
+  artifacts: BestPracticeArtifact[];
+  relatedResources: BestPracticeRelatedResource[];
+};
+
 export type ApiKey = {
   id: number;
   name: string;

@@ -439,6 +439,97 @@ pre {
   color: var(--text);
 }
 
+.practice-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 18px;
+}
+
+.practice-card {
+  min-height: 240px;
+}
+
+.practice-card h3 {
+  font-family: var(--display-font);
+}
+
+.practice-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.practice-detail-hero {
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 18px;
+}
+
+.practice-detail-hero::after {
+  content: "";
+  position: absolute;
+  right: -80px;
+  top: -80px;
+  width: 260px;
+  height: 260px;
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(111, 92, 247, 0.18), transparent 68%);
+}
+
+.practice-safety {
+  margin-bottom: 18px;
+  border-radius: var(--radius);
+}
+
+.practice-step-list {
+  display: grid;
+  gap: 16px;
+}
+
+.practice-step-card {
+  position: relative;
+  padding-left: 48px;
+}
+
+.practice-step-index {
+  position: absolute;
+  left: 18px;
+  top: 24px;
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #fff;
+  font-weight: 700;
+}
+
+.practice-artifacts,
+.practice-related {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px;
+}
+
+.practice-code,
+.practice-markdown {
+  white-space: pre-wrap;
+  max-height: 280px;
+  overflow: auto;
+  border-radius: 14px;
+  padding: 14px;
+  background: rgba(15, 23, 42, 0.08);
+  color: var(--text);
+  font-family: "JetBrains Mono", "Cascadia Code", Consolas, monospace;
+  line-height: 1.7;
+}
+
+.practice-markdown {
+  max-height: none;
+}
+
 .icon-input {
   width: 100%;
 }

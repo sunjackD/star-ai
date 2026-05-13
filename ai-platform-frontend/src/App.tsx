@@ -7,9 +7,12 @@ import {
   Bot,
   Boxes,
   BrainCircuit,
+  BookOpenCheck,
   Code2,
+  Copy,
   Database,
   Download,
+  ExternalLink,
   KeyRound,
   LayoutDashboard,
   LogOut,
@@ -25,6 +28,10 @@ import type {
   AiModel,
   ApiKey,
   AuthResponse,
+  BestPracticeArtifact,
+  BestPracticeDetail,
+  BestPracticeRelatedResource,
+  BestPracticeSummary,
   FinetuneJob,
   PlatformConfig,
   RedirectLink,
@@ -101,6 +108,7 @@ function Shell() {
     { key: '/', icon: <LayoutDashboard size={18} />, label: <Link to="/">总览</Link> },
     { key: '/agents', icon: <Bot size={18} />, label: <Link to="/agents">AI Agents</Link> },
     { key: '/skills', icon: <Boxes size={18} />, label: <Link to="/skills">Skills</Link> },
+    { key: '/best-practices', icon: <BookOpenCheck size={18} />, label: <Link to="/best-practices">最佳实践</Link> },
     { key: '/models', icon: <BrainCircuit size={18} />, label: <Link to="/models">模型</Link> },
     { key: '/finetune', icon: <Database size={18} />, label: <Link to="/finetune">微调</Link> },
     { key: '/developer', icon: <Code2 size={18} />, label: <Link to="/developer">开发者</Link> },
@@ -451,6 +459,202 @@ function SkillDetailPage() {
       actions={<Button type="primary" icon={<Download size={16} />} onClick={() => downloadFile(`/skills/${data.id}/download`, `${data.name}.skill.md`)}>下载 Skill</Button>}
     />
   );
+}
+
+function BestPracticesPage() {
+  const navigate = useNavigate();
+  const token = useAuthStore((state) => state.token);
+  const { data = [] } = useQuery({
+    queryKey: ['best-practices'],
+    queryFn: () => getPublicData<BestPracticeSummary[]>('/best-practices')
+  });
+
+  function openDetail(id: number) {
+    if (!token) {
+      navigate('/login', { state: { from: `/best-practices/${id}` } });
+      return;
+    }
+    navigate(`/best-practices/${id}`);
+  }
+
+  return (
+    <div className="page">
+      <PageTitle title="最佳实践库" description="把教程、脚本、Prompt 和配置沉淀成可复用的 AI 工作流。" />
+      <div className="practice-grid">
+        {data.map((practice) => (
+          <Card
+            hoverable
+            key={practice.id}
+            className="practice-card"
+            onClick={() => openDetail(practice.id)}
+          >
+            <div className="practice-meta">
+              <Tag color="blue">{practice.category}</Tag>
+              <Tag color={difficultyColor(practice.difficulty)}>{difficultyLabel(practice.difficulty)}</Tag>
+              <Tag>{practice.estimatedMinutes} 分钟</Tag>
+            </div>
+            <Title level={3}>{practice.title}</Title>
+            <Paragraph>{practice.summary}</Paragraph>
+            <Space wrap>
+              {practice.tags.split(',').map((tag) => <Tag key={tag}>{tag}</Tag>)}
+            </Space>
+          </Card>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function BestPracticeDetailPage() {
+  const { id } = useParams();
+  const { data } = useQuery({
+    queryKey: ['best-practice', id],
+    queryFn: () => getData<BestPracticeDetail>(`/best-practices/${id}`),
+    enabled: Boolean(id)
+  });
+
+  if (!data) {
+    return null;
+  }
+
+  return (
+    <div className="page">
+      <Card className="practice-detail-hero">
+        <div className="practice-meta">
+          <Tag color="blue">{data.category}</Tag>
+          <Tag color={difficultyColor(data.difficulty)}>{difficultyLabel(data.difficulty)}</Tag>
+          <Tag>{data.estimatedMinutes} 分钟</Tag>
+          <Tag>{data.status}</Tag>
+        </div>
+        <Title>{data.title}</Title>
+        <Paragraph>{data.summary}</Paragraph>
+        <Space wrap>
+          {data.sourceUrl && <Button href={data.sourceUrl} target="_blank" icon={<ExternalLink size={16} />}>来源</Button>}
+          <Link to="/admin/finetune-jobs"><Button>创建微调任务草稿</Button></Link>
+        </Space>
+      </Card>
+
+      <Alert
+        showIcon
+        type="warning"
+        className="practice-safety"
+        message="安全与隐私边界"
+        description={data.safetyMarkdown}
+      />
+
+      <div className="content-grid">
+        <Card title="最终产物"><MarkdownBlock value={data.outcomeMarkdown} /></Card>
+        <Card title="前置条件"><MarkdownBlock value={data.prerequisitesMarkdown} /></Card>
+      </div>
+
+      <Card title="实践说明">
+        <MarkdownBlock value={data.bodyMarkdown} />
+      </Card>
+
+      <Card title="流程步骤">
+        <div className="practice-step-list">
+          {data.steps.map((step, index) => (
+            <Card key={step.id} className="practice-step-card">
+              <div className="practice-step-index">{index + 1}</div>
+              <Title level={4}>{step.title}</Title>
+              <Paragraph>{step.description}</Paragraph>
+              <Text strong>清单</Text>
+              <MarkdownBlock value={step.checklistMarkdown} />
+              <Text strong>验收</Text>
+              <MarkdownBlock value={step.acceptanceMarkdown} />
+            </Card>
+          ))}
+        </div>
+      </Card>
+
+      <Card title="脚本、Prompt 与附件">
+        <div className="practice-artifacts">
+          {data.artifacts.map((artifact) => (
+            <PracticeArtifactCard key={artifact.id} practiceId={data.id} artifact={artifact} />
+          ))}
+        </div>
+      </Card>
+
+      <Card title="关联资源">
+        <div className="practice-related">
+          {data.relatedResources.map((resource) => <RelatedResourceCard key={resource.id} resource={resource} />)}
+        </div>
+      </Card>
+    </div>
+  );
+}
+
+function PracticeArtifactCard(props: { practiceId: number; artifact: BestPracticeArtifact }) {
+  const { artifact } = props;
+  const canCopy = Boolean(artifact.contentText);
+  const canDownload = Boolean(artifact.fileName || artifact.contentText);
+
+  return (
+    <Card className="practice-artifact-card">
+      <div className="practice-meta">
+        <Tag color="purple">{artifact.artifactType}</Tag>
+        {artifact.fileName && <Tag>{artifact.fileName}</Tag>}
+      </div>
+      <Title level={4}>{artifact.name}</Title>
+      {artifact.contentText && <pre className="practice-code">{artifact.contentText}</pre>}
+      <Space wrap>
+        {canCopy && (
+          <Button
+            icon={<Copy size={14} />}
+            onClick={() => {
+              navigator.clipboard.writeText(artifact.contentText ?? '');
+              message.success('已复制');
+            }}
+          >
+            复制
+          </Button>
+        )}
+        {canDownload && (
+          <Button
+            icon={<Download size={14} />}
+            onClick={() => downloadFile(
+              `/best-practices/${props.practiceId}/artifacts/${artifact.id}/download`,
+              artifact.fileName ?? `${artifact.name}.md`
+            )}
+          >
+            下载
+          </Button>
+        )}
+        {artifact.externalUrl && (
+          <Button href={artifact.externalUrl} target="_blank" icon={<ExternalLink size={14} />}>打开链接</Button>
+        )}
+      </Space>
+    </Card>
+  );
+}
+
+function RelatedResourceCard({ resource }: { resource: BestPracticeRelatedResource }) {
+  const action = resource.url?.startsWith('/') ? (
+    <Link to={resource.url}><Button size="small">打开</Button></Link>
+  ) : resource.url ? (
+    <Button size="small" href={resource.url} target="_blank" icon={<ExternalLink size={14} />}>打开</Button>
+  ) : null;
+
+  return (
+    <Card className="practice-related-card">
+      <Tag>{resource.resourceType}</Tag>
+      <Title level={4}>{resource.title}</Title>
+      <Paragraph>{resource.description}</Paragraph>
+      {action}
+    </Card>
+  );
+}
+
+function MarkdownBlock({ value }: { value: string }) {
+  return <pre className="practice-markdown">{value}</pre>;
+}
+
+function difficultyLabel(value: BestPracticeSummary['difficulty']) {
+  return { BEGINNER: '入门', INTERMEDIATE: '进阶', ADVANCED: '高级' }[value];
+}
+
+function difficultyColor(value: BestPracticeSummary['difficulty']) {
+  return { BEGINNER: 'green', INTERMEDIATE: 'gold', ADVANCED: 'red' }[value];
 }
 
 function MarketSkillUploadButton(props: {
@@ -826,10 +1030,12 @@ function App() {
             <Route index element={<DashboardPage />} />
             <Route path="/agents" element={<AgentsPage />} />
             <Route path="/skills" element={<SkillsPage />} />
+            <Route path="/best-practices" element={<BestPracticesPage />} />
             <Route path="/models" element={<ModelsPage />} />
             <Route element={<RequireAuth />}>
               <Route path="/agents/:id" element={<AgentDetailPage />} />
               <Route path="/skills/:id" element={<SkillDetailPage />} />
+              <Route path="/best-practices/:id" element={<BestPracticeDetailPage />} />
               <Route path="/finetune" element={<FinetunePage />} />
               <Route path="/developer" element={<DeveloperPage />} />
               <Route path="/account/profile" element={<AccountProfilePage />} />
