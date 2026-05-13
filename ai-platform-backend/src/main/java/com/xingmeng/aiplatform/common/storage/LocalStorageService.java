@@ -29,7 +29,11 @@ import java.util.zip.ZipOutputStream;
 public class LocalStorageService implements StorageService {
     private static final long MAX_ICON_SIZE = 2L * 1024 * 1024;
     private static final long MAX_SKILL_SIZE = 20L * 1024 * 1024;
+    private static final long MAX_BEST_PRACTICE_ARTIFACT_SIZE = 20L * 1024 * 1024;
     private static final Set<String> ICON_TYPES = Set.of("image/png", "image/jpeg", "image/webp", "image/svg+xml");
+    private static final Set<String> BEST_PRACTICE_SUFFIXES = Set.of(
+            ".py", ".md", ".json", ".jsonl", ".yaml", ".yml", ".txt", ".png", ".jpg", ".jpeg", ".webp", ".zip"
+    );
 
     private final Path root;
 
@@ -59,6 +63,21 @@ public class LocalStorageService implements StorageService {
             validateZip(file);
         }
         return store("skills", file, file.getContentType());
+    }
+
+    @Override
+    public StoredObject storeBestPracticeArtifact(MultipartFile file) {
+        ensureFile(file, MAX_BEST_PRACTICE_ARTIFACT_SIZE);
+        String filename = cleanOriginalName(file);
+        String lowerName = filename.toLowerCase(Locale.ROOT);
+        boolean allowed = BEST_PRACTICE_SUFFIXES.stream().anyMatch(lowerName::endsWith);
+        if (!allowed) {
+            throw new BusinessException(HttpStatus.BAD_REQUEST, "不支持的最佳实践附件类型");
+        }
+        if (lowerName.endsWith(".zip")) {
+            validateZipPaths(file);
+        }
+        return store("best-practices", file, file.getContentType());
     }
 
     @Override
@@ -177,6 +196,20 @@ public class LocalStorageService implements StorageService {
         }
         if (!hasSkill) {
             throw new BusinessException(HttpStatus.BAD_REQUEST, "Skill 包必须包含 SKILL.md");
+        }
+    }
+
+    private void validateZipPaths(MultipartFile file) {
+        try (ZipInputStream zip = new ZipInputStream(file.getInputStream())) {
+            ZipEntry entry;
+            while ((entry = zip.getNextEntry()) != null) {
+                Path normalized = Paths.get(entry.getName()).normalize();
+                if (normalized.isAbsolute() || normalized.startsWith("..")) {
+                    throw new BusinessException(HttpStatus.BAD_REQUEST, "压缩包包含非法路径");
+                }
+            }
+        } catch (IOException exception) {
+            throw new BusinessException(HttpStatus.BAD_REQUEST, "压缩包读取失败");
         }
     }
 

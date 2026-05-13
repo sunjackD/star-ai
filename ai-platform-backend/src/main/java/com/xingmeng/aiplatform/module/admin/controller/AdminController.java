@@ -6,6 +6,7 @@ import com.xingmeng.aiplatform.module.agent.entity.Agent;
 import com.xingmeng.aiplatform.module.agent.repository.AgentRepository;
 import com.xingmeng.aiplatform.module.audit.repository.AuditLogRepository;
 import com.xingmeng.aiplatform.module.audit.service.AuditService;
+import com.xingmeng.aiplatform.module.bestpractice.repository.BestPracticeRepository;
 import com.xingmeng.aiplatform.module.developer.repository.ApiKeyRepository;
 import com.xingmeng.aiplatform.module.finetune.repository.DatasetRepository;
 import com.xingmeng.aiplatform.module.finetune.repository.FinetuneJobRepository;
@@ -46,6 +47,7 @@ public class AdminController {
     private final RedirectLinkRepository linkRepository;
     private final ApiKeyRepository apiKeyRepository;
     private final AuditLogRepository auditLogRepository;
+    private final BestPracticeRepository bestPracticeRepository;
     private final AuditService auditService;
     private final PasswordEncoder passwordEncoder;
 
@@ -61,6 +63,7 @@ public class AdminController {
             RedirectLinkRepository linkRepository,
             ApiKeyRepository apiKeyRepository,
             AuditLogRepository auditLogRepository,
+            BestPracticeRepository bestPracticeRepository,
             AuditService auditService,
             PasswordEncoder passwordEncoder
     ) {
@@ -75,6 +78,7 @@ public class AdminController {
         this.linkRepository = linkRepository;
         this.apiKeyRepository = apiKeyRepository;
         this.auditLogRepository = auditLogRepository;
+        this.bestPracticeRepository = bestPracticeRepository;
         this.auditService = auditService;
         this.passwordEncoder = passwordEncoder;
     }
@@ -90,7 +94,8 @@ public class AdminController {
                 "finetuneJobs", jobRepository.count(),
                 "links", linkRepository.count(),
                 "apiKeys", apiKeyRepository.count(),
-                "auditLogs", auditLogRepository.count()
+                "auditLogs", auditLogRepository.count(),
+                "bestPractices", bestPracticeRepository.count()
         ));
     }
 
