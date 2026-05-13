@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { BrowserRouter, Link, Navigate, Outlet, Route, Routes, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Alert, Button, Card, Form, Input, Layout, Menu, Modal, Progress, Segmented, Select, Space, Statistic, Table, Tag, Typography, message } from 'antd';
+import { Alert, Button, Card, Form, Input, Layout, Menu, Modal, Progress, Select, Space, Statistic, Table, Tag, Typography, message } from 'antd';
 import {
   Bot,
   Boxes,
@@ -11,15 +11,24 @@ import {
   KeyRound,
   LayoutDashboard,
   LogOut,
-  Palette,
   ShieldCheck,
   Sparkles
 } from 'lucide-react';
-import { getData, postData, putData } from './api/client';
+import { getData, postData } from './api/client';
 import { useAuthStore } from './store/authStore';
 import { useThemeStore } from './store/themeStore';
-import { themes } from './themes/tokens';
-import type { AdminOverview, Agent, AiModel, ApiKey, AuthResponse, FinetuneJob, Skill, SkillCategory, ThemeName } from './types';
+import type {
+  AdminOverview,
+  Agent,
+  AiModel,
+  ApiKey,
+  AuthResponse,
+  FinetuneJob,
+  PlatformConfig,
+  RedirectLink,
+  Skill,
+  SkillCategory
+} from './types';
 import {
   AdminLandingPage,
   AgentsAdminPage,
@@ -29,6 +38,7 @@ import {
   FinetuneJobsAdminPage,
   LinksAdminPage,
   ModelsAdminPage,
+  SettingsAdminPage,
   SkillCategoriesAdminPage,
   SkillsAdminPage,
   UsersAdminPage
@@ -58,22 +68,9 @@ function Shell() {
   const navigate = useNavigate();
   const token = useAuthStore((state) => state.token);
   const profile = useAuthStore((state) => state.profile);
-  const setProfile = useAuthStore((state) => state.setProfile);
   const logout = useAuthStore((state) => state.logout);
-  const theme = useThemeStore((state) => state.theme);
-  const setTheme = useThemeStore((state) => state.setTheme);
+  const { data: platform } = useQuery({ queryKey: ['platform-config'], queryFn: () => getData<PlatformConfig>('/platform/config') });
   const isAdmin = profile?.roles.includes('ADMIN');
-  const themeMutation = useMutation({
-    mutationFn: (themePreference: ThemeName) => putData('/profile/theme', { themePreference }),
-    onSuccess: (data) => setProfile(data as NonNullable<typeof profile>)
-  });
-
-  function switchTheme(nextTheme: ThemeName) {
-    setTheme(nextTheme);
-    if (profile) {
-      themeMutation.mutate(nextTheme);
-    }
-  }
 
   const menuItems = [
     { key: '/', icon: <LayoutDashboard size={18} />, label: <Link to="/">总览</Link> },
@@ -83,7 +80,6 @@ function Shell() {
     { key: '/finetune', icon: <Database size={18} />, label: <Link to="/finetune">微调</Link> },
     { key: '/developer', icon: <Code2 size={18} />, label: <Link to="/developer">开发者</Link> },
     { key: '/account/api-keys', icon: <KeyRound size={18} />, label: <Link to="/account/api-keys">API Key</Link> },
-    { key: '/settings/appearance', icon: <Palette size={18} />, label: <Link to="/settings/appearance">外观</Link> },
     ...(isAdmin ? [{
       key: '/admin',
       icon: <ShieldCheck size={18} />,
@@ -97,6 +93,7 @@ function Shell() {
         { key: '/admin/datasets', label: <Link to="/admin/datasets">数据集</Link> },
         { key: '/admin/finetune-jobs', label: <Link to="/admin/finetune-jobs">微调任务</Link> },
         { key: '/admin/links', label: <Link to="/admin/links">跳转链接</Link> },
+        { key: '/admin/settings', label: <Link to="/admin/settings">系统设置</Link> },
         { key: '/admin/api-keys', label: <Link to="/admin/api-keys">Key 审计</Link> },
         { key: '/admin/audit-logs', label: <Link to="/admin/audit-logs">审计日志</Link> }
       ]
@@ -109,8 +106,8 @@ function Shell() {
         <Link to="/" className="brand">
           <span className="brand-mark">XM</span>
           <span>
-            <strong>星梦 AI</strong>
-            <small>Aggregation Console</small>
+            <strong>{platform?.siteName ?? '星梦 AI'}</strong>
+            <small>{platform?.siteSubtitle ?? 'Aggregation Console'}</small>
           </span>
         </Link>
         <Menu mode="inline" selectable={false} items={menuItems} className="side-menu" />
@@ -118,14 +115,6 @@ function Shell() {
       <Layout>
         <Header className="app-header">
           <Space size={12} wrap>
-            <Segmented
-              value={theme}
-              onChange={(value) => switchTheme(value as ThemeName)}
-              options={[
-                { label: '原型7', value: 'minimal-reference' },
-                { label: '原型6', value: 'minimal-modern' }
-              ]}
-            />
             {token ? (
               <>
                 <Text>{profile?.displayName ?? profile?.username}</Text>
@@ -152,16 +141,18 @@ function DashboardPage() {
   const { data: agents = [] } = useQuery({ queryKey: ['agents'], queryFn: () => getData<Agent[]>('/agents') });
   const { data: skills = [] } = useQuery({ queryKey: ['skills'], queryFn: () => getData<Skill[]>('/skills') });
   const { data: models = [] } = useQuery({ queryKey: ['models'], queryFn: () => getData<AiModel[]>('/models') });
-  const theme = useThemeStore((state) => state.theme);
+  const { data: links = [] } = useQuery({ queryKey: ['links'], queryFn: () => getData<RedirectLink[]>('/links') });
+  const { data: platform } = useQuery({ queryKey: ['platform-config'], queryFn: () => getData<PlatformConfig>('/platform/config') });
+  const groupedLinks = groupLinks(links);
 
   return (
     <div className="page">
       <section className="workspace-hero">
         <div>
-          <Tag color="processing" icon={<Sparkles size={14} />}>{themes[theme].label}</Tag>
-          <Title level={1}>AI 工具、Skills 与模型的统一工作台</Title>
+          <Tag color="processing" icon={<Sparkles size={14} />}>一站式 AI 工作台</Tag>
+          <Title level={1}>{platform?.siteName ?? 'AI 工具、Skills 与模型的统一工作台'}</Title>
           <Paragraph>
-            登录后查看详情，生成 API Key 后可让 AI Agent 直接调用平台自管理 Skill 查询、导入和下载站内 Skills。
+            {platform?.siteSubtitle ?? '登录后查看详情，生成 API Key 后可让 AI Agent 直接调用平台自管理 Skill。'}
           </Paragraph>
           <Space wrap>
             <Link to="/skills"><Button type="primary">进入 Skills 市场</Button></Link>
@@ -176,6 +167,24 @@ function DashboardPage() {
         <Card><Statistic title="Models" value={models.length} /></Card>
         <Card><Statistic title="Detail Guard" value="JWT" /></Card>
       </div>
+
+      <Card title="导航聚合" className="navigation-card">
+        <div className="navigation-groups">
+          {Object.entries(groupedLinks).map(([category, items]) => (
+            <section key={category} className="navigation-group">
+              <Title level={4}>{category}</Title>
+              <div className="navigation-links">
+                {items.map((item) => (
+                  <a href={item.url} key={item.id} target="_blank" rel="noreferrer" className="navigation-link">
+                    <strong>{item.name}</strong>
+                    <span>{item.description}</span>
+                  </a>
+                ))}
+              </div>
+            </section>
+          ))}
+        </div>
+      </Card>
 
       <div className="content-grid">
         <Card title="热门 Agents">
@@ -197,17 +206,23 @@ function DashboardPage() {
   );
 }
 
+function groupLinks(links: RedirectLink[]) {
+  return links.reduce<Record<string, RedirectLink[]>>((groups, item) => {
+    const category = item.category || '导航';
+    return { ...groups, [category]: [...(groups[category] ?? []), item] };
+  }, {});
+}
+
 function LoginPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const setSession = useAuthStore((state) => state.setSession);
-  const setTheme = useThemeStore((state) => state.setTheme);
+  const { data: platform } = useQuery({ queryKey: ['platform-config'], queryFn: () => getData<PlatformConfig>('/platform/config') });
   const from = (location.state as { from?: string } | null)?.from ?? '/';
   const mutation = useMutation({
     mutationFn: (values: { username: string; password: string }) => postData<AuthResponse>('/auth/login', values),
     onSuccess: (data) => {
       setSession(data.token, data.profile);
-      setTheme(data.profile.themePreference);
       navigate(from, { replace: true });
     },
     onError: () => message.error('登录失败，请检查账号密码')
@@ -216,8 +231,8 @@ function LoginPage() {
   return (
     <div className="login-page">
       <Card className="login-card">
-        <Title level={2}>登录星梦 AI 聚合平台</Title>
-        <Paragraph type="secondary">默认管理员账号见 README；也可以通过接口注册开发者账号。</Paragraph>
+        <Title level={2}>登录{platform?.siteName ?? '星梦 AI 聚合平台'}</Title>
+        <Paragraph type="secondary">默认管理员账号见 README；普通用户由管理员在后台创建。</Paragraph>
         <Form layout="vertical" onFinish={(values) => mutation.mutate(values)}>
           <Form.Item name="username" label="用户名或邮箱" rules={[{ required: true }]}>
             <Input placeholder="admin" />
@@ -236,14 +251,13 @@ function AccountProfilePage() {
   const profile = useAuthStore((state) => state.profile);
   return (
     <div className="page">
-      <PageTitle title="个人中心" description="查看当前登录账号、角色和界面偏好。" />
+      <PageTitle title="个人中心" description="查看当前登录账号和角色。" />
       <Card>
         <Space direction="vertical">
           <Text>用户名：{profile?.username}</Text>
           <Text>邮箱：{profile?.email}</Text>
           <Text>显示名：{profile?.displayName}</Text>
           <Text>角色：{profile?.roles.map((role) => <Tag key={role}>{role}</Tag>)}</Text>
-          <Text>界面风格：{profile?.themePreference}</Text>
         </Space>
       </Card>
     </div>
@@ -430,38 +444,17 @@ curl -H "X-API-Key: xma_xxx" http://localhost:8080/api/v1/developer/skills/1/dow
   );
 }
 
-function AppearancePage() {
-  const theme = useThemeStore((state) => state.theme);
+function PlatformThemeBootstrap() {
   const setTheme = useThemeStore((state) => state.setTheme);
-  const setProfile = useAuthStore((state) => state.setProfile);
-  const profile = useAuthStore((state) => state.profile);
-  const mutation = useMutation({
-    mutationFn: (themePreference: ThemeName) => putData('/profile/theme', { themePreference }),
-    onSuccess: (data) => setProfile(data as typeof profile & NonNullable<typeof profile>)
-  });
+  const { data } = useQuery({ queryKey: ['platform-config'], queryFn: () => getData<PlatformConfig>('/platform/config') });
 
-  function chooseTheme(nextTheme: ThemeName) {
-    setTheme(nextTheme);
-    if (profile) {
-      mutation.mutate(nextTheme);
+  useEffect(() => {
+    if (data?.defaultTheme) {
+      setTheme(data.defaultTheme);
     }
-  }
+  }, [data?.defaultTheme, setTheme]);
 
-  return (
-    <div className="page">
-      <PageTitle title="界面风格" description="同一套业务页面，在原型7和原型6之间切换。" />
-      <div className="card-grid">
-        {(Object.keys(themes) as ThemeName[]).map((name) => (
-          <Card key={name} className="theme-card" onClick={() => chooseTheme(name)} hoverable>
-            <div className={`theme-preview ${name}`} />
-            <Title level={4}>{themes[name].label}</Title>
-            <Paragraph>{name === 'minimal-reference' ? '米白、留白、玻璃卡片，适合企业内容秩序。' : '蓝色强调、清晰边界，适合工具平台效率感。'}</Paragraph>
-            {theme === name && <Tag color="success">当前使用</Tag>}
-          </Card>
-        ))}
-      </div>
-    </div>
-  );
+  return null;
 }
 
 function PageTitle({ title, description }: { title: string; description: string }) {
@@ -476,6 +469,7 @@ function PageTitle({ title, description }: { title: string; description: string 
 function App() {
   return (
     <BrowserRouter>
+      <PlatformThemeBootstrap />
       <Routes>
         <Route path="/login" element={<LoginPage />} />
         <Route element={<Shell />}>
@@ -490,7 +484,6 @@ function App() {
             <Route path="/developer" element={<DeveloperPage />} />
             <Route path="/account/profile" element={<AccountProfilePage />} />
             <Route path="/account/api-keys" element={<ApiKeysPage />} />
-            <Route path="/settings/appearance" element={<AppearancePage />} />
             <Route element={<RequireAdmin />}>
               <Route path="/admin" element={<AdminLandingPage />} />
               <Route path="/admin/users" element={<UsersAdminPage />} />
@@ -501,6 +494,7 @@ function App() {
               <Route path="/admin/datasets" element={<DatasetsAdminPage />} />
               <Route path="/admin/finetune-jobs" element={<FinetuneJobsAdminPage />} />
               <Route path="/admin/links" element={<LinksAdminPage />} />
+              <Route path="/admin/settings" element={<SettingsAdminPage />} />
               <Route path="/admin/api-keys" element={<ApiKeysAdminPage />} />
               <Route path="/admin/audit-logs" element={<AuditLogsAdminPage />} />
             </Route>

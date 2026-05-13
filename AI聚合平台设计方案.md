@@ -35,7 +35,7 @@
 - **状态管理**：Zustand + TanStack Query
 - **HTTP客户端**：Axios
 - **Markdown渲染**：react-markdown + react-syntax-highlighter
-- **主题系统**：CSS Variables + Theme Provider（支持多风格切换）
+- **主题系统**：CSS Variables + Theme Provider（后台统一控制全站主题）
 - **原型参考**：`原型7-极简风格参考版.html` 与 `原型6-Minimalist-Modern.html`
 
 ### 部署：Docker + Docker Compose
@@ -290,32 +290,30 @@ ai-platform-frontend/
 - 网络导入能力要限制允许的协议、域名白名单、文件大小和压缩包解压路径，防止SSRF和Zip Slip
 - 后台敏感操作记录审计日志，便于追溯Agent自动操作行为
 
-### 8. 前端风格切换模块
-**功能**：前端支持在两套视觉风格之间切换，分别参考 `原型7-极简风格参考版.html` 和 `原型6-Minimalist-Modern.html`，并保持相同的业务结构、数据接口与页面功能
+### 8. 前端全局主题模块
+**功能**：前端保留两套视觉风格，分别参考 `原型7-极简风格参考版.html` 和 `原型6-Minimalist-Modern.html`，但主题由后台系统设置统一控制，普通前台不展示主题切换入口
 
 **风格定义**：
-- **Style A / 极简参考版**：对应 `原型7-极简风格参考版.html`，强调米白背景、宽留白、玻璃卡片、低饱和褐色点缀，适合强调企业感和内容秩序
-- **Style B / Minimalist Modern**：对应 `原型6-Minimalist-Modern.html`，强调现代卡片、清晰的模块边界、蓝色强调色和更强的产品感，适合偏工具平台和效率场景
+- **极简风**：参考 `原型7-极简风格参考版.html`，强调米白背景、宽留白、玻璃卡片、低饱和褐色点缀，适合强调企业感和内容秩序
+- **现代风**：参考 `原型6-Minimalist-Modern.html`，强调现代卡片、清晰的模块边界、蓝色强调色和更强的产品感，适合偏工具平台和效率场景
 
 **交互设计**：
-- 顶部导航右上角提供“界面风格切换”入口，支持一键在 Style A / Style B 间切换
-- 在 `/settings/appearance` 提供专门的外观设置页，展示两套风格预览卡片
-- 未登录用户切换结果保存在 `localStorage`；已登录用户可同步到个人偏好设置，跨设备保持一致
-- 风格切换不影响业务路由、鉴权、API Key、详情页门禁和后台权限逻辑
+- 普通前台不提供“外观”“主题切换”“原型6/7”入口或可见文案
+- 管理员在 `/admin/settings` 统一设置全站默认主题
+- 前端启动时读取 `GET /api/v1/platform/config`，由服务端配置决定当前主题
+- 主题配置不影响业务路由、鉴权、API Key、详情页门禁和后台权限逻辑
 
 **实现原则**：
 - 使用统一的 `Theme Provider + Design Tokens + Layout Variant` 架构，不复制两套独立业务页面
 - 同一套页面组件根据当前主题动态切换：颜色、圆角、阴影、字体层级、Hero布局、卡片样式、按钮样式
 - 核心列表页、详情页、个人中心、API Key页、后台Dashboard必须支持两种主题
-- 后台管理区可默认继承当前主题，也可以保留更稳健的管理后台子主题
+- 后台管理区继承全站主题，系统设置页负责展示主题说明和保存入口
 
 **建议实现结构**：
-- `src/themes/tokens/minimal-reference.ts` - 原型7主题Token
-- `src/themes/tokens/minimal-modern.ts` - 原型6主题Token
+- `src/themes/tokens.ts` - 极简风、现代风主题Token
 - `src/themes/ThemeProvider.tsx` - 全局主题Provider
-- `src/store/themeStore.ts` - 当前风格状态和持久化逻辑
-- `src/components/layout/ThemeSwitcher.tsx` - 顶部切换器
-- `src/pages/settings/AppearancePage.tsx` - 风格设置页
+- `src/store/themeStore.ts` - 当前主题状态，由平台配置写入
+- `src/pages/AdminPages.tsx` - 后台系统设置页和主题说明
 
 **影响范围**：
 - 首页：Hero区、统计卡片、导航、CTA布局在两种风格下差异化呈现
@@ -428,13 +426,13 @@ services:
 ### Phase 3: 前端开发（Week 4-5）
 16. 创建React + Vite项目
 17. 配置Ant Design和路由
-18. 建立主题系统（Theme Provider、Token、风格切换状态持久化）
-19. 实现布局组件（Header、Footer、Sidebar）和主题切换器
+18. 建立主题系统（Theme Provider、Token、后台配置驱动）
+19. 实现布局组件（Header、Footer、Sidebar）和平台配置加载
 20. 实现登录/注册页和详情页路由守卫
-21. 在右上角接入用户菜单、API Key入口和界面风格切换入口
-22. 实现AI编辑器展示页面，并适配原型6/原型7双风格
-23. 实现Skills市场页面，并适配原型6/原型7双风格
-24. 实现API Key管理页、开发者接入页和外观设置页
+21. 在右上角接入用户菜单、API Key入口和退出登录入口
+22. 实现AI编辑器展示页面，并适配极简风/现代风
+23. 实现Skills市场页面，并适配极简风/现代风
+24. 实现API Key管理页、开发者接入页和后台系统设置页
 25. 实现微调管理页面
 26. 实现管理后台页面并验证主题兼容性
 
@@ -467,8 +465,8 @@ services:
 2. 测试页面路由和导航
 3. 测试未登录点击详情时跳转登录页，登录后正确返回详情页
 4. 测试右上角API Key入口、专门页面和创建流程
-5. 测试前端风格切换，确认可在原型7参考风格和原型6参考风格间切换
-6. 测试刷新页面后主题持久化，以及登录后主题偏好同步
+5. 测试后台系统设置切换默认主题后，刷新全站按新主题生效
+6. 测试普通前台不出现外观入口、主题切换器和原型编号文案
 7. 测试AI编辑器列表和详情页
 8. 测试Skills市场搜索和筛选
 9. 测试管理后台CRUD操作与主题兼容性
@@ -499,11 +497,10 @@ services:
 - `ai-platform-frontend/src/api/client.ts` - API客户端
 - `ai-platform-frontend/src/router/index.tsx` - 路由守卫和鉴权配置
 - `ai-platform-frontend/src/themes/ThemeProvider.tsx` - 全局主题切换和Token注入
-- `ai-platform-frontend/src/store/themeStore.ts` - 前端风格切换状态
-- `ai-platform-frontend/src/components/layout/ThemeSwitcher.tsx` - 原型6/原型7切换器
+- `ai-platform-frontend/src/store/themeStore.ts` - 平台配置驱动的当前主题状态
 - `ai-platform-frontend/src/pages/auth/LoginPage.tsx` - 登录页
 - `ai-platform-frontend/src/pages/account/ApiKeysPage.tsx` - API Key管理页
-- `ai-platform-frontend/src/pages/settings/AppearancePage.tsx` - 外观风格设置页
+- `ai-platform-frontend/src/pages/admin/SettingsPage.tsx` - 后台系统设置页
 - `ai-platform-frontend/src/pages/agents/AgentList.tsx` - Agent列表页
 - `ai-platform-frontend/src/components/layout/MainLayout.tsx` - 主布局
 
@@ -654,7 +651,7 @@ GET  /api/v1/statistics/users          // 用户统计
 3. **安全性**：JWT认证 + RBAC权限控制 + 数据加密
 4. **高性能**：Redis缓存 + 数据库索引优化 + 分页查询
 5. **可扩展性**：模块化设计，易于添加新功能
-6. **双风格前端**：可在原型7极简参考版与原型6 Minimalist Modern 风格之间切换
+6. **双风格前端**：保留极简风与现代风两套视觉体系，由后台统一控制全站生效
 7. **智能运维**：平台自带Skill + API Key，可被AI Agent直接调用后台能力
 8. **开发者友好**：Swagger API文档 + 完整的错误处理 + 开发者接入页
 9. **容器化部署**：Docker一键部署，环境一致性
@@ -1110,7 +1107,7 @@ class AgentServiceTest {
 - 后端模块边界固定为 auth、user、admin、agent、skill、model、finetune、redirect、developer、audit、rbac。
 - 前端模块边界固定为 layout、auth、admin、resources、developer、account、settings、themes。
 - 管理后台必须覆盖用户、角色、Agents、Skills、Skill 分类、模型、微调任务、数据集、跳转链接、API Key 审计、审计日志和统计。
-- 全局风格切换必须覆盖 Ant Design 组件 Token、CSS 变量、布局密度、卡片形态、后台表格和所有业务页面。
+- 全局主题配置必须覆盖 Ant Design 组件 Token、CSS 变量、布局密度、卡片形态、后台表格和所有业务页面。
 
 **验收标准**：
 - `AGENTS.md`、本设计方案、README 和实现技术栈口径一致。
@@ -1158,23 +1155,23 @@ class AgentServiceTest {
 - `npm run build` 通过。
 - 代码提交：`feat: complete admin console`。
 
-### 大阶段 4：全局风格切换真正落地
+### 大阶段 4：后台统一全局主题落地
 
-**目标**：把现有 CSS 变量切换升级为全站风格系统，支持原型7和原型6全局切换。
+**目标**：把现有 CSS 变量升级为服务端配置驱动的全站主题系统，支持后台在“极简风”和“现代风”之间统一切换。
 
 **交付内容**：
 - 接入 Ant Design `ConfigProvider.theme`，统一 Button、Card、Table、Menu、Form、Modal 等组件 Token。
-- 建立 `minimal-reference` 和 `minimal-modern` 两套风格包。
-- 风格切换覆盖颜色、字体、圆角、阴影、布局密度、卡片形态、表格视觉和页面背景。
+- 建立 `minimal-reference` 和 `minimal-modern` 两套内部主题包，对外显示为“极简风”“现代风”。
+- 全站主题覆盖颜色、字体、圆角、阴影、布局密度、卡片形态、表格视觉和页面背景。
 - Shell、Dashboard、列表页、详情页、后台页、登录页、API Key 页全部响应主题。
-- 右上角切换和设置页切换共享状态。
-- 登录后自动加载服务端主题偏好，切换后同步保存；未登录用户使用本地偏好。
+- 前端启动时读取 `/api/v1/platform/config`，按 `defaultTheme` 写入全局 Theme Store。
+- 仅后台系统设置页允许修改默认主题，普通前台不提供主题切换入口。
 
 **验收标准**：
-- 任意页面切换原型6/原型7后视觉明显变化。
-- 刷新页面后主题不丢失。
-- 登录用户跨设备可恢复服务端主题偏好。
-- 代码提交：`feat: add global style system`。
+- 后台修改默认主题后刷新任意页面，视觉按新主题生效。
+- 前台菜单、右上角和个人中心不出现外观设置、主题切换器或原型编号文案。
+- 登录用户和未登录用户看到同一套后台配置主题。
+- 代码提交：`feat: centralize global theme settings`。
 
 ### 大阶段 5：平台自管理 Skill 闭环
 
@@ -1297,7 +1294,7 @@ class AgentServiceTest {
 - **大阶段 1：项目基线与架构对齐**：0.5-1天
 - **大阶段 2：后端完整管理能力落地**：3-5天
 - **大阶段 3：前端完整后台与资源管理落地**：3-5天
-- **大阶段 4：全局风格切换真正落地**：1-2天
+- **大阶段 4：后台统一全局主题落地**：1-2天
 - **大阶段 5：平台自管理 Skill 闭环**：1-2天
 - **大阶段 6：交付、验证与启动闭环**：0.5-1天
 

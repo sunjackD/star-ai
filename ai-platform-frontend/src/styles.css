@@ -222,12 +222,18 @@ pre {
   word-break: break-all;
 }
 
-.theme-card {
-  cursor: pointer;
+.admin-toolbar {
+  width: 100%;
+  margin-bottom: 16px;
+  justify-content: space-between;
 }
 
-.admin-create-button {
-  margin-bottom: 16px;
+.admin-toolbar .ant-input-search {
+  width: min(420px, 100%);
+}
+
+.admin-filter-select {
+  min-width: 150px;
 }
 
 .admin-inline-select {
@@ -236,6 +242,68 @@ pre {
 
 .admin-number-input {
   width: 100%;
+}
+
+.navigation-card {
+  margin-bottom: 24px;
+}
+
+.navigation-groups {
+  display: grid;
+  gap: 18px;
+}
+
+.navigation-group h4 {
+  margin-top: 0;
+}
+
+.navigation-links {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 12px;
+}
+
+.navigation-link {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-height: 96px;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  background: color-mix(in srgb, var(--surface-strong) 78%, transparent);
+  transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+}
+
+.navigation-link:hover {
+  transform: translateY(-2px);
+  border-color: var(--accent);
+  box-shadow: var(--shadow);
+}
+
+.navigation-link span {
+  color: var(--text-soft);
+  font-size: 13px;
+}
+
+.settings-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(320px, 0.9fr);
+  gap: 16px;
+  align-items: start;
+}
+
+.settings-theme-grid {
+  display: grid;
+  gap: 16px;
+}
+
+.settings-theme-card {
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: color-mix(in srgb, var(--surface-strong) 76%, transparent);
 }
 
 .theme-preview {
@@ -302,7 +370,8 @@ html[data-theme='minimal-modern'] .ant-table-wrapper {
   }
 
   .metric-grid,
-  .content-grid {
+  .content-grid,
+  .settings-grid {
     grid-template-columns: 1fr;
   }
 

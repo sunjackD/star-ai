@@ -25,7 +25,7 @@ export type ThemeTokens = {
 export const themes: Record<ThemeName, ThemeTokens> = {
   'minimal-reference': {
     name: 'minimal-reference',
-    label: '原型7 极简参考版',
+    label: '极简风',
     accent: '#85684f',
     background: '#faf9f6',
     surface: 'rgba(255,255,255,0.82)',
@@ -59,7 +59,7 @@ export const themes: Record<ThemeName, ThemeTokens> = {
   },
   'minimal-modern': {
     name: 'minimal-modern',
-    label: '原型6 Minimalist Modern',
+    label: '现代风',
     accent: '#0052ff',
     background: '#fafafa',
     surface: '#ffffff',

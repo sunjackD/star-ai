@@ -20,6 +20,23 @@ export type AuthResponse = {
 
 export type ThemeName = 'minimal-reference' | 'minimal-modern';
 
+export type PlatformConfig = {
+  siteName: string;
+  siteSubtitle: string;
+  defaultTheme: ThemeName;
+  allowPublicRegistration: boolean;
+  themeOptions: { value: ThemeName; label: string }[];
+};
+
+export type AdminSettings = {
+  siteName: string;
+  siteSubtitle: string;
+  defaultTheme: ThemeName;
+  allowPublicRegistration: boolean;
+  defaultUserRole: string;
+  apiKeyDefaultExpireDays: number;
+};
+
 export type Agent = {
   id: number;
   name: string;
@@ -86,6 +103,8 @@ export type RedirectLink = {
   id: number;
   name: string;
   url: string;
+  category: string;
+  sortOrder: number;
   description: string;
   icon?: string;
   status: string;
