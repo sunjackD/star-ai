@@ -67,6 +67,8 @@ export type SkillCategory = {
   description: string;
 };
 
+export type SkillArtifactType = 'TEXT' | 'FILE';
+
 export type Skill = {
   id: number;
   name: string;
@@ -80,7 +82,7 @@ export type Skill = {
   viewCount: number;
   downloadCount: number;
   starCount: number;
-  artifactType?: string;
+  artifactType?: SkillArtifactType;
   artifactPath?: string;
   artifactFileName?: string;
   artifactSize?: number;

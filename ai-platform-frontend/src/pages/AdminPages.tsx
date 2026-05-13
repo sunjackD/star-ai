@@ -352,18 +352,35 @@ export function SkillsAdminPage() {
     columns: [
       { title: '名称', dataIndex: 'name' },
       { title: '分类', render: (row) => row.category.name },
-      { title: '文件', render: (row) => row.artifactFileName ?? '文本 Skill' },
+      { title: '文件', render: (row) => skillArtifactLabel(row) },
       { title: '下载', dataIndex: 'downloadCount' },
       { title: '状态', dataIndex: 'status' }
     ],
     normalizeInitial: (row) => ({ ...row, categoryId: row.category.id }),
     extraToolbar: <SkillUploadButton categories={categories} />,
     rowActions: (row) => (
-      <Button size="small" onClick={() => downloadFile(`/admin/skills/${row.id}/download`, `${row.name}.skill.md`)}>
+      <Button size="small" onClick={() => downloadFile(`/admin/skills/${row.id}/download`, skillDownloadName(row))}>
         下载
       </Button>
     )
   }} />;
+}
+
+function skillDownloadName(skill: Skill): string {
+  return skill.artifactFileName ?? `${skill.name}.skill.md`;
+}
+
+function skillArtifactLabel(skill: Skill): string {
+  if (skill.status !== 'ACTIVE') {
+    return '已废弃';
+  }
+  if (skill.sourceCode?.startsWith('remote:')) {
+    return '远程记录';
+  }
+  if (skill.artifactType === 'FILE') {
+    return `文件包: ${skill.artifactFileName ?? '未命名文件'}`;
+  }
+  return '文本 Skill';
 }
 
 export function ModelsAdminPage() {

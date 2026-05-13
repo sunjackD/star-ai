@@ -428,14 +428,14 @@ function SkillsPage() {
             <Paragraph>{row.description}</Paragraph>
             <Space wrap>
               <Text type="secondary">下载量：{row.downloadCount}</Text>
-              {row.artifactFileName && <Tag color="blue">{row.artifactFileName}</Tag>}
+              <Tag color={row.artifactType === 'FILE' ? 'blue' : 'default'}>{skillArtifactLabel(row)}</Tag>
             </Space>
             <div className="resource-actions">
               <Link to={`/skills/${row.id}`}><Button size="small">详情</Button></Link>
               <Button
                 size="small"
                 icon={<Download size={14} />}
-                onClick={() => requireLogin(() => downloadFile(`/skills/${row.id}/download`, `${row.name}.skill.md`))}
+                onClick={() => requireLogin(() => downloadFile(`/skills/${row.id}/download`, skillDownloadName(row)))}
               >
                 下载
               </Button>
@@ -458,9 +458,37 @@ function SkillDetailPage() {
       description={data.description}
       markdown={data.usageMarkdown}
       stats={[['浏览量', data.viewCount], ['下载量', data.downloadCount], ['收藏数', data.starCount]]}
-      actions={<Button type="primary" icon={<Download size={16} />} onClick={() => downloadFile(`/skills/${data.id}/download`, `${data.name}.skill.md`)}>下载 Skill</Button>}
+      actions={
+        <Space wrap>
+          <Tag color={data.artifactType === 'FILE' ? 'blue' : 'default'}>{skillArtifactLabel(data)}</Tag>
+          <Button
+            type="primary"
+            icon={<Download size={16} />}
+            onClick={() => downloadFile(`/skills/${data.id}/download`, skillDownloadName(data))}
+          >
+            下载 Skill
+          </Button>
+        </Space>
+      }
     />
   );
+}
+
+function skillDownloadName(skill: Skill): string {
+  return skill.artifactFileName ?? `${skill.name}.skill.md`;
+}
+
+function skillArtifactLabel(skill: Skill): string {
+  if (skill.status !== 'ACTIVE') {
+    return '已废弃';
+  }
+  if (skill.sourceCode?.startsWith('remote:')) {
+    return '远程记录';
+  }
+  if (skill.artifactType === 'FILE') {
+    return `文件包: ${skill.artifactFileName ?? '未命名文件'}`;
+  }
+  return '文本 Skill';
 }
 
 function BestPracticesPage() {
@@ -906,8 +934,12 @@ function DeveloperPage() {
 - import_skill：用 JSON 新建文本 Skill
 - upload_skill：上传 SKILL.md 或 zip 包
 - upload_skill_directory：上传类似 .codex/skills/<skill-name> 的文件夹
-- add_remote_skill：添加 HTTPS 网络 Skill
 - update_skill：更新元数据和说明
+- replace_skill_artifact：替换已有 Skill 的 SKILL.md 或 zip 包
+- replace_skill_directory：替换已有 Skill 的文件夹包
+- record_remote_skill：只记录 HTTPS 网络 Skill 地址
+- import_remote_skill：导入 HTTPS 网络 Skill 内容
+- delete_skill：删除 Skill
 - download_skill：下载 Skill 包`;
 
   return (
@@ -939,8 +971,12 @@ tools:
   - import_skill: POST /developer/skills/import
   - upload_skill: POST multipart /developer/skills/upload
   - upload_skill_directory: POST multipart /developer/skills/upload-directory
-  - add_remote_skill: POST /developer/skills/remote
   - update_skill: PUT /developer/skills/{id}
+  - replace_skill_artifact: PUT multipart /developer/skills/{id}/artifact
+  - replace_skill_directory: PUT multipart /developer/skills/{id}/artifact-directory
+  - record_remote_skill: POST /developer/skills/remote
+  - import_remote_skill: POST /developer/skills/remote/import
+  - delete_skill: DELETE /developer/skills/{id}
   - download_skill: GET /developer/skills/{id}/download`}</pre>
       </Card>
       <Card title="Developer API 示例" className="markdown-card">
@@ -979,11 +1015,23 @@ curl -X POST ${apiBaseUrl}/developer/skills/upload-directory \\
   -F "author=agent" \\
   -F "usageMarkdown=# usage"
 
-# 添加远程 Skill
+# 记录远程 Skill 地址（不下载内容）
 curl -X POST ${apiBaseUrl}/developer/skills/remote \\
   -H "X-API-Key: xma_xxx" \\
   -H "Content-Type: application/json" \\
   -d '{"name":"remote-skill","url":"https://example.com/skill.zip"}'
+
+# 替换已有 Skill 为文件夹包
+curl -X PUT ${apiBaseUrl}/developer/skills/1/artifact-directory \\
+  -H "X-API-Key: xma_xxx" \\
+  -F "files=@my-skill/SKILL.md" \\
+  -F "paths=my-skill/SKILL.md" \\
+  -F "name=my-skill" \\
+  -F "categoryId=2" \\
+  -F "description=folder skill" \\
+  -F "tags=folder" \\
+  -F "author=agent" \\
+  -F "usageMarkdown=# usage"
 
 # 更新 Skill
 curl -X PUT ${apiBaseUrl}/developer/skills/1 \\
@@ -992,7 +1040,10 @@ curl -X PUT ${apiBaseUrl}/developer/skills/1 \\
   -d '{"name":"updated","categoryId":2,"description":"desc","tags":"tool","author":"agent","sourceCode":"# updated","usageMarkdown":"# usage"}'
 
 # 下载 Skill
-curl -L -H "X-API-Key: xma_xxx" ${apiBaseUrl}/developer/skills/1/download -o skill.zip`}</pre>
+curl -L -H "X-API-Key: xma_xxx" ${apiBaseUrl}/developer/skills/1/download -o skill.zip
+
+# 删除 Skill
+curl -X DELETE -H "X-API-Key: xma_xxx" ${apiBaseUrl}/developer/skills/1`}</pre>
       </Card>
     </div>
   );
