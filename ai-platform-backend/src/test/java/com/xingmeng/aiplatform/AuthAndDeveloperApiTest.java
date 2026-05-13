@@ -12,6 +12,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
@@ -98,6 +99,59 @@ class AuthAndDeveloperApiTest {
                 .andExpect(status().isForbidden());
     }
 
+    @Test
+    void apiKeyWithWriteScopeCanDeleteSkill() throws Exception {
+        String adminToken = createAdminAndLogin("admin_delete_skill", "admin-delete-skill@example.com");
+        createUser(adminToken, "delete_dev", "delete-dev@example.com", "Delete Dev", "DEVELOPER");
+        String jwt = login("delete_dev", "secret123");
+        String apiKey = createApiKey(jwt, "skills:read", "skills:import", "skills:write", "skills:download");
+
+        String createdJson = mockMvc.perform(post("/api/v1/developer/skills/import")
+                        .header("X-API-Key", apiKey)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "name": "delete-me-skill",
+                                  "categoryId": 1,
+                                  "description": "Temporary Skill",
+                                  "tags": "test,delete",
+                                  "author": "test",
+                                  "sourceCode": "---\\nname: delete-me-skill\\n---\\n# Delete Me",
+                                  "usageMarkdown": "# Delete Me"
+                                }
+                                """))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+        long skillId = objectMapper.readTree(createdJson).path("data").path("id").asLong();
+
+        mockMvc.perform(delete("/api/v1/developer/skills/" + skillId)
+                        .header("X-API-Key", apiKey))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(get("/api/v1/developer/skills")
+                        .header("X-API-Key", apiKey))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data[?(@.name == 'delete-me-skill')]").isEmpty());
+
+        mockMvc.perform(get("/api/v1/developer/skills/" + skillId + "/download")
+                        .header("X-API-Key", apiKey))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void apiKeyWithoutWriteScopeCannotDeleteSkill() throws Exception {
+        String adminToken = createAdminAndLogin("admin_delete_scope", "admin-delete-scope@example.com");
+        createUser(adminToken, "delete_scope_dev", "delete-scope-dev@example.com", "Delete Scope Dev", "DEVELOPER");
+        String jwt = login("delete_scope_dev", "secret123");
+        String apiKey = createApiKey(jwt, "skills:read");
+
+        mockMvc.perform(delete("/api/v1/developer/skills/1")
+                        .header("X-API-Key", apiKey))
+                .andExpect(status().isForbidden());
+    }
+
     private String createAdminAndLogin(String username, String email) throws Exception {
         mockMvc.perform(post("/api/v1/setup/admin")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -144,5 +198,23 @@ class AuthAndDeveloperApiTest {
                 .getResponse()
                 .getContentAsString();
         return objectMapper.readTree(json).path("data").path("token").asText();
+    }
+
+    private String createApiKey(String jwt, String... scopes) throws Exception {
+        String scopeJson = objectMapper.writeValueAsString(scopes);
+        String keyJson = mockMvc.perform(post("/api/v1/developer/api-keys")
+                        .header("Authorization", "Bearer " + jwt)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "name": "agent access",
+                                  "scopes": %s
+                                }
+                                """.formatted(scopeJson)))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+        return objectMapper.readTree(keyJson).path("data").path("plainKey").asText();
     }
 }

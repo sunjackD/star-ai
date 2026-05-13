@@ -22,6 +22,7 @@ import java.util.List;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.startsWith;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -290,6 +291,79 @@ class SetupAndUploadApiTest {
     }
 
     @Test
+    void apiKeyCanReplaceSkillDirectoryAndDownloadAsZipPackage() throws Exception {
+        String jwt = createAdminAndLogin("developer_replace_owner", "developer-replace-owner@example.com");
+        String apiKey = createApiKey(jwt, "skills:read", "skills:download", "skills:import", "skills:write");
+
+        String createdJson = mockMvc.perform(post("/api/v1/developer/skills/import")
+                        .header("X-API-Key", apiKey)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "name": "replace-me",
+                                  "categoryId": 1,
+                                  "description": "Text Skill to replace",
+                                  "tags": "replace,text",
+                                  "author": "tester",
+                                  "sourceCode": "---\\nname: replace-me\\n---\\n# Replace Me",
+                                  "usageMarkdown": "# Replace Me"
+                                }
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.artifactType").value("TEXT"))
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+        long skillId = objectMapper.readTree(createdJson).path("data").path("id").asLong();
+
+        MockMultipartFile skillFile = new MockMultipartFile(
+                "files",
+                "SKILL.md",
+                "text/markdown",
+                """
+                        ---
+                        name: replace-me
+                        description: Replaced by directory
+                        ---
+                        # Replace Me
+                        """.getBytes()
+        );
+        MockMultipartFile readmeFile = new MockMultipartFile(
+                "files",
+                "README.md",
+                "text/markdown",
+                "Replacement directory documentation".getBytes()
+        );
+
+        mockMvc.perform(multipart("/api/v1/developer/skills/" + skillId + "/artifact-directory")
+                        .file(skillFile)
+                        .file(readmeFile)
+                        .param("paths", "replace-me/SKILL.md", "replace-me/README.md")
+                        .param("name", "replace-me")
+                        .param("categoryId", "1")
+                        .param("description", "Replaced by a Skill folder")
+                        .param("tags", "replace,directory")
+                        .param("author", "tester")
+                        .param("usageMarkdown", "# Replace Me")
+                        .header("X-API-Key", apiKey)
+                        .with(request -> {
+                            request.setMethod("PUT");
+                            return request;
+                        }))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.id").value((int) skillId))
+                .andExpect(jsonPath("$.data.artifactType").value("FILE"))
+                .andExpect(jsonPath("$.data.artifactFileName").value("replace-me.zip"))
+                .andExpect(jsonPath("$.data.sourceCode").value(startsWith("artifact:")));
+
+        mockMvc.perform(get("/api/v1/developer/skills/" + skillId + "/download")
+                        .header("X-API-Key", apiKey))
+                .andExpect(status().isOk())
+                .andExpect(header().string("Content-Disposition", containsString("replace-me.zip")))
+                .andExpect(header().string("Content-Type", containsString("application/octet-stream")));
+    }
+
+    @Test
     void authenticatedUserCanUploadAndDownloadSkillFromMarket() throws Exception {
         String jwt = createAdminAndLogin("market_owner", "market-owner@example.com");
         MockMultipartFile skillFile = new MockMultipartFile(
@@ -359,16 +433,20 @@ class SetupAndUploadApiTest {
         return login(username, "safePass123");
     }
 
-    private String createApiKey(String jwt) throws Exception {
+    private String createApiKey(String jwt, String... scopes) throws Exception {
+        String[] requestedScopes = scopes.length == 0
+                ? new String[]{"skills:read", "skills:download", "skills:import"}
+                : scopes;
+        String scopeJson = objectMapper.writeValueAsString(requestedScopes);
         String json = mockMvc.perform(post("/api/v1/developer/api-keys")
                         .header("Authorization", "Bearer " + jwt)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
                                   "name": "skill package access",
-                                  "scopes": ["skills:read", "skills:download", "skills:import"]
+                                  "scopes": %s
                                 }
-                                """))
+                                """.formatted(scopeJson)))
                 .andExpect(status().isOk())
                 .andReturn()
                 .getResponse()

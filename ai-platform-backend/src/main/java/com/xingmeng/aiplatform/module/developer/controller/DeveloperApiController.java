@@ -192,6 +192,49 @@ public class DeveloperApiController {
         return ApiResponse.success(saved);
     }
 
+    @PutMapping(value = "/skills/{id}/artifact", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ApiResponse<Skill> replaceSkillArtifact(
+            Authentication authentication,
+            @PathVariable Long id,
+            @RequestParam("file") MultipartFile file,
+            @RequestParam @NotBlank @Size(max = 120) String name,
+            @RequestParam @NotNull Long categoryId,
+            @RequestParam @NotBlank @Size(max = 800) String description,
+            @RequestParam @NotBlank @Size(max = 500) String tags,
+            @RequestParam @NotBlank @Size(max = 120) String author,
+            @RequestParam @NotBlank String usageMarkdown,
+            @RequestParam(required = false) @Size(max = 600) String icon
+    ) {
+        requireImportAndWrite(authentication);
+        Skill saved = skillArtifactService.replaceUploadedSkill(
+                id, file, name, categoryId, description, tags, author, usageMarkdown, icon
+        );
+        auditService.log(authentication, "DEVELOPER_SKILL_ARTIFACT_REPLACED", "SKILL", id, saved.getName());
+        return ApiResponse.success(saved);
+    }
+
+    @PutMapping(value = "/skills/{id}/artifact-directory", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ApiResponse<Skill> replaceSkillDirectory(
+            Authentication authentication,
+            @PathVariable Long id,
+            @RequestParam("files") MultipartFile[] files,
+            @RequestParam("paths") List<String> paths,
+            @RequestParam @NotBlank @Size(max = 120) String name,
+            @RequestParam @NotNull Long categoryId,
+            @RequestParam @NotBlank @Size(max = 800) String description,
+            @RequestParam @NotBlank @Size(max = 500) String tags,
+            @RequestParam @NotBlank @Size(max = 120) String author,
+            @RequestParam @NotBlank String usageMarkdown,
+            @RequestParam(required = false) @Size(max = 600) String icon
+    ) {
+        requireImportAndWrite(authentication);
+        Skill saved = skillArtifactService.replaceUploadedSkillDirectory(
+                id, files, paths, name, categoryId, description, tags, author, usageMarkdown, icon
+        );
+        auditService.log(authentication, "DEVELOPER_SKILL_DIRECTORY_REPLACED", "SKILL", id, saved.getName());
+        return ApiResponse.success(saved);
+    }
+
     @PostMapping("/skills/remote")
     @Transactional
     public ApiResponse<Skill> addRemoteSkill(Authentication authentication, @Valid @RequestBody RemoteSkillRequest request) {
@@ -253,6 +296,18 @@ public class DeveloperApiController {
         return ApiResponse.success(skill);
     }
 
+    @DeleteMapping("/skills/{id}")
+    @Transactional
+    public ApiResponse<Void> deleteSkill(Authentication authentication, @PathVariable Long id) {
+        apiKeyService.requireScope(authentication, "skills:write");
+        Skill skill = skillRepository.findById(id)
+                .filter(item -> "ACTIVE".equals(item.getStatus()))
+                .orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND, "Skill不存在"));
+        skill.setStatus("DELETED");
+        auditService.log(authentication, "DEVELOPER_SKILL_DELETED", "SKILL", id, skill.getName());
+        return ApiResponse.success(null);
+    }
+
     @GetMapping("/skills/{id}/download")
     @Transactional
     public ResponseEntity<Resource> downloadSkill(Authentication authentication, @PathVariable Long id) {
@@ -300,5 +355,10 @@ public class DeveloperApiController {
     private String safeTextFileName(String name) {
         String baseName = name == null || name.isBlank() ? "skill" : name;
         return baseName.replaceAll("[\\\\/:*?\"<>|]", "_") + ".skill.md";
+    }
+
+    private void requireImportAndWrite(Authentication authentication) {
+        apiKeyService.requireScope(authentication, "skills:import");
+        apiKeyService.requireScope(authentication, "skills:write");
     }
 }

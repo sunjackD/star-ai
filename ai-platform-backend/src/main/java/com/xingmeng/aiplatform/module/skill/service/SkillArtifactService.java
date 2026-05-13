@@ -67,6 +67,43 @@ public class SkillArtifactService {
         return createArtifactSkill(artifact, name, categoryId, description, tags, author, usageMarkdown, icon);
     }
 
+    @Transactional
+    public Skill replaceUploadedSkill(
+            Long id,
+            MultipartFile file,
+            String name,
+            Long categoryId,
+            String description,
+            String tags,
+            String author,
+            String usageMarkdown,
+            String icon
+    ) {
+        Skill skill = activeSkill(id);
+        StoredObject artifact = storageService.storeSkillArtifact(file);
+        applyArtifactSkill(skill, artifact, name, categoryId, description, tags, author, usageMarkdown, icon);
+        return skill;
+    }
+
+    @Transactional
+    public Skill replaceUploadedSkillDirectory(
+            Long id,
+            MultipartFile[] files,
+            List<String> paths,
+            String name,
+            Long categoryId,
+            String description,
+            String tags,
+            String author,
+            String usageMarkdown,
+            String icon
+    ) {
+        Skill skill = activeSkill(id);
+        StoredObject artifact = storageService.storeSkillDirectory(files, paths, name);
+        applyArtifactSkill(skill, artifact, name, categoryId, description, tags, author, usageMarkdown, icon);
+        return skill;
+    }
+
     private Skill createArtifactSkill(
             StoredObject artifact,
             String name,
@@ -78,29 +115,17 @@ public class SkillArtifactService {
             String icon
     ) {
         Skill skill = new Skill();
-        skill.setName(name);
-        skill.setCategory(category(categoryId));
-        skill.setDescription(description);
-        skill.setTags(tags);
-        skill.setAuthor(author);
-        skill.setIcon(icon);
-        skill.setSourceCode("artifact:" + artifact.relativePath());
-        skill.setUsageMarkdown(usageMarkdown);
         skill.setViewCount(0);
         skill.setDownloadCount(0);
         skill.setStarCount(0);
         skill.setStatus("ACTIVE");
-        skill.setArtifactType(FILE_ARTIFACT);
-        skill.setArtifactPath(artifact.relativePath());
-        skill.setArtifactFileName(artifact.originalFileName());
-        skill.setArtifactSize(artifact.size());
+        applyArtifactSkill(skill, artifact, name, categoryId, description, tags, author, usageMarkdown, icon);
         return skillRepository.save(skill);
     }
 
     @Transactional
     public SkillDownload download(Long id) {
-        Skill skill = skillRepository.findById(id)
-                .orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND, "Skill不存在"));
+        Skill skill = activeSkill(id);
         skill.setDownloadCount(skill.getDownloadCount() + 1);
         if (FILE_ARTIFACT.equals(skill.getArtifactType()) && skill.getArtifactPath() != null) {
             Resource resource = storageService.load(skill.getArtifactPath());
@@ -257,6 +282,37 @@ public class SkillArtifactService {
     private SkillCategory category(Long categoryId) {
         return categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND, "分类不存在"));
+    }
+
+    private Skill activeSkill(Long id) {
+        return skillRepository.findById(id)
+                .filter(skill -> "ACTIVE".equals(skill.getStatus()))
+                .orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND, "Skill不存在"));
+    }
+
+    private void applyArtifactSkill(
+            Skill skill,
+            StoredObject artifact,
+            String name,
+            Long categoryId,
+            String description,
+            String tags,
+            String author,
+            String usageMarkdown,
+            String icon
+    ) {
+        skill.setName(name);
+        skill.setCategory(category(categoryId));
+        skill.setDescription(description);
+        skill.setTags(tags);
+        skill.setAuthor(author);
+        skill.setIcon(icon);
+        skill.setSourceCode("artifact:" + artifact.relativePath());
+        skill.setUsageMarkdown(usageMarkdown);
+        skill.setArtifactType(FILE_ARTIFACT);
+        skill.setArtifactPath(artifact.relativePath());
+        skill.setArtifactFileName(artifact.originalFileName());
+        skill.setArtifactSize(artifact.size());
     }
 
     private String safeFileName(Skill skill) {
