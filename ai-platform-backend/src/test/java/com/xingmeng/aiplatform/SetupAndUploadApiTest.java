@@ -415,6 +415,10 @@ class SetupAndUploadApiTest {
                 .andExpect(content().string(containsString("## Agent 调用示例")))
                 .andExpect(content().string(containsString("list_skills")))
                 .andExpect(content().string(containsString("upload_skill_directory")))
+                .andExpect(content().string(containsString("replace_skill_directory")))
+                .andExpect(content().string(containsString("delete_skill")))
+                .andExpect(content().string(containsString("record_remote_skill")))
+                .andExpect(content().string(containsString("import_remote_skill")))
                 .andExpect(content().string(containsString("download_skill")));
     }
 

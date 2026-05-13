@@ -56,6 +56,7 @@ public class SecurityConfig {
                                 HttpMethod.GET,
                                 "/api/v1/platform/config",
                                 "/api/v1/assets/icons/*",
+                                "/api/v1/developer/skill-manifest",
                                 "/api/v1/developer/self-skill/download",
                                 "/api/v1/best-practices",
                                 "/api/v1/agents",

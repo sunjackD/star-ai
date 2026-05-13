@@ -88,16 +88,20 @@ public class DeveloperApiController {
     public ApiResponse<Map<String, Object>> manifest() {
         return ApiResponse.success(Map.of(
                 "name", "ai-platform-manager",
-                "description", "通过 API Key 让 AI Agent 查询、导入、上传、远程添加、更新和下载平台 Skills",
+                "description", "通过 API Key 让 AI Agent 查询、导入、上传、替换、删除和下载平台 Skills",
                 "auth", Map.of("headers", List.of("X-API-Key", "Authorization: Bearer xma_xxx")),
                 "tools", List.of(
                         "list_skills",
                         "get_skill_categories",
+                        "import_skill",
                         "upload_skill",
                         "upload_skill_directory",
-                        "import_skill",
-                        "add_remote_skill",
                         "update_skill",
+                        "replace_skill_artifact",
+                        "replace_skill_directory",
+                        "record_remote_skill",
+                        "import_remote_skill",
+                        "delete_skill",
                         "download_skill"
                 ),
                 "examples", List.of(
@@ -106,8 +110,12 @@ public class DeveloperApiController {
                         "import_skill: POST /api/v1/developer/skills/import JSON",
                         "upload_skill: POST multipart /api/v1/developer/skills/upload file=@SKILL.md",
                         "upload_skill_directory: POST multipart /api/v1/developer/skills/upload-directory files + paths",
-                        "add_remote_skill: POST /api/v1/developer/skills/remote HTTPS URL",
                         "update_skill: PUT /api/v1/developer/skills/{id}",
+                        "replace_skill_artifact: PUT multipart /api/v1/developer/skills/{id}/artifact file=@SKILL.md|zip",
+                        "replace_skill_directory: PUT multipart /api/v1/developer/skills/{id}/artifact-directory files + paths",
+                        "record_remote_skill: POST /api/v1/developer/skills/remote HTTPS URL record only",
+                        "import_remote_skill: POST /api/v1/developer/skills/remote/import HTTPS URL and store content",
+                        "delete_skill: DELETE /api/v1/developer/skills/{id}",
                         "download_skill: GET /api/v1/developer/skills/{id}/download"
                 ),
                 "installPrompt", "请下载并安装 ai-platform-manager Skill，配置 API Base 和包含 skills:read/import/write/download 的 API Key，然后让 Agent 按 examples 调用。"

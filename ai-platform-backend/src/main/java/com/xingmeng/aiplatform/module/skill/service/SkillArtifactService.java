@@ -171,8 +171,12 @@ public class SkillArtifactService {
                 - `import_skill`: 用 JSON 新建文本型 Skill。需要 `skills:import`。
                 - `upload_skill`: 上传单个 `SKILL.md` 或 zip Skill 包。需要 `skills:import`。
                 - `upload_skill_directory`: 上传类似 `.codex/skills/<skill-name>` 的 Skill 文件夹。需要 `skills:import`。
-                - `add_remote_skill`: 记录网络上的 HTTPS Skill 地址。需要 `skills:write`。
                 - `update_skill`: 更新 Skill 元数据和使用说明。需要 `skills:write`。
+                - `replace_skill_artifact`: 用新的 `SKILL.md` 或 zip 包替换已有 Skill 文件。需要 `skills:import` 和 `skills:write`。
+                - `replace_skill_directory`: 用 Skill 文件夹替换已有 Skill 文件包。需要 `skills:import` 和 `skills:write`。
+                - `record_remote_skill`: 只记录网络上的 HTTPS Skill 地址，不下载内容。需要 `skills:write`。
+                - `import_remote_skill`: 下载 HTTPS 远程 Skill 内容并保存为站内文件包。需要 `skills:import` 和 `skills:write`。
+                - `delete_skill`: 删除站内 Skill。需要 `skills:write`。
                 - `download_skill`: 下载某个 Skill 的源码文件或上传包。需要 `skills:download`。
 
                 ## Agent 调用示例
@@ -239,13 +243,37 @@ public class SkillArtifactService {
                   -F "usageMarkdown=# Browser Helper"
                 ```
 
-                ### add_remote_skill
+                ### replace_skill_directory
+
+                ```bash
+                curl -X PUT "http://localhost:8081/api/v1/developer/skills/1/artifact-directory" \\
+                  -H "X-API-Key: xma_xxx" \\
+                  -F "files=@browser-helper/SKILL.md" \\
+                  -F "paths=browser-helper/SKILL.md" \\
+                  -F "name=browser-helper" \\
+                  -F "categoryId=2" \\
+                  -F "description=替换完整 Skill 文件夹" \\
+                  -F "tags=browser,folder" \\
+                  -F "author=agent" \\
+                  -F "usageMarkdown=# Browser Helper"
+                ```
+
+                ### record_remote_skill
 
                 ```bash
                 curl -X POST "http://localhost:8081/api/v1/developer/skills/remote" \\
                   -H "X-API-Key: xma_xxx" \\
                   -H "Content-Type: application/json" \\
                   -d '{"name":"remote-skill","url":"https://example.com/skill.zip","description":"远程 Skill"}'
+                ```
+
+                ### import_remote_skill
+
+                ```bash
+                curl -X POST "http://localhost:8081/api/v1/developer/skills/remote/import" \\
+                  -H "X-API-Key: xma_xxx" \\
+                  -H "Content-Type: application/json" \\
+                  -d '{"name":"remote-skill","categoryId":2,"url":"https://example.com/skill.zip","description":"远程 Skill","tags":"remote,zip","author":"agent","usageMarkdown":"# Remote Skill"}'
                 ```
 
                 ### update_skill
@@ -271,6 +299,13 @@ public class SkillArtifactService {
                 curl -L -H "X-API-Key: xma_xxx" \\
                   "http://localhost:8081/api/v1/developer/skills/1/download" \\
                   -o skill-package.zip
+                ```
+
+                ### delete_skill
+
+                ```bash
+                curl -X DELETE -H "X-API-Key: xma_xxx" \\
+                  "http://localhost:8081/api/v1/developer/skills/1"
                 ```
 
                 ## 可直接给 Agent 的任务提示
