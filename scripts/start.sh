@@ -10,8 +10,11 @@ if [ ! -f ".env" ]; then
   echo "Created .env from .env.example. Review MySQL and JWT settings if needed."
 fi
 
-docker compose build
-docker compose up -d
+APP_PORT_VALUE="$(grep -E '^APP_PORT=' .env | tail -n 1 | cut -d '=' -f 2- || true)"
+APP_PORT_VALUE="${APP_PORT_VALUE:-8081}"
 
-echo "AI Platform started: http://localhost:8081"
-echo "Backend API: http://localhost:8080/swagger-ui.html"
+docker compose build
+docker compose up -d --remove-orphans
+
+echo "AI Platform started: http://localhost:${APP_PORT_VALUE}"
+echo "Swagger: http://localhost:${APP_PORT_VALUE}/swagger-ui.html"

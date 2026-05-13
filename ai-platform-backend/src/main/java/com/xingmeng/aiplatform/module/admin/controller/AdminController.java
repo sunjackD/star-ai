@@ -27,6 +27,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -355,9 +356,15 @@ public class AdminController {
         skill.setDescription(request.description());
         skill.setTags(request.tags());
         skill.setAuthor(request.author());
+        skill.setIcon(request.icon());
         skill.setSourceCode(request.sourceCode());
         skill.setUsageMarkdown(request.usageMarkdown());
         skill.setStatus(request.status());
+        String sourceCode = request.sourceCode() == null ? "" : request.sourceCode();
+        skill.setArtifactType("TEXT");
+        skill.setArtifactPath(null);
+        skill.setArtifactFileName(skill.getName().replaceAll("[\\\\/:*?\"<>|]", "_") + ".skill.md");
+        skill.setArtifactSize((long) sourceCode.getBytes(StandardCharsets.UTF_8).length);
         return skill;
     }
 

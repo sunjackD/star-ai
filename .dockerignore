@@ -1,0 +1,8 @@
+.git
+**/node_modules
+**/dist
+**/target
+logs
+docs/superpowers
+AI聚合平台设计方案.md
+TODO.md

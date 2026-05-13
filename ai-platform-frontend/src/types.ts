@@ -18,6 +18,17 @@ export type AuthResponse = {
   profile: UserProfile;
 };
 
+export type SetupStatus = {
+  setupRequired: boolean;
+};
+
+export type SetupAdminRequest = {
+  username: string;
+  email: string;
+  displayName: string;
+  password: string;
+};
+
 export type ThemeName = 'minimal-reference' | 'minimal-modern';
 
 export type PlatformConfig = {
@@ -63,11 +74,16 @@ export type Skill = {
   description: string;
   tags: string;
   author: string;
+  icon?: string;
   sourceCode: string;
   usageMarkdown: string;
   viewCount: number;
   downloadCount: number;
   starCount: number;
+  artifactType?: string;
+  artifactPath?: string;
+  artifactFileName?: string;
+  artifactSize?: number;
   status: string;
 };
 

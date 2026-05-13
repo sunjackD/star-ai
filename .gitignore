@@ -31,3 +31,8 @@ vite.config.d.ts
 data/
 uploads/
 tmp/
+
+# Local planning / design notes
+AI聚合平台设计方案.md
+docs/superpowers/
+TODO.md

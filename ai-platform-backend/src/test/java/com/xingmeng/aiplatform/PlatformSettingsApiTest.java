@@ -59,7 +59,7 @@ class PlatformSettingsApiTest {
 
     @Test
     void adminCanUpdateSettingsAndPublicConfigReflectsThem() throws Exception {
-        String adminToken = login("admin", "admin123");
+        String adminToken = createAdminAndLogin("settings_admin", "settings-admin@example.com");
 
         mockMvc.perform(put("/api/v1/admin/settings")
                         .header("Authorization", "Bearer " + adminToken)
@@ -88,7 +88,7 @@ class PlatformSettingsApiTest {
 
     @Test
     void publicLinksOnlyReturnActiveLinksOrderedByCategoryAndSortOrder() throws Exception {
-        String adminToken = login("admin", "admin123");
+        String adminToken = createAdminAndLogin("links_admin", "links-admin@example.com");
 
         createLink(adminToken, "Docs B", "https://example.com/docs-b", "文档", 20, "ACTIVE");
         createLink(adminToken, "Docs A", "https://example.com/docs-a", "文档", 10, "ACTIVE");
@@ -124,6 +124,21 @@ class PlatformSettingsApiTest {
                                 }
                                 """.formatted(name, url, category, sortOrder, name, status)))
                 .andExpect(status().isOk());
+    }
+
+    private String createAdminAndLogin(String username, String email) throws Exception {
+        mockMvc.perform(post("/api/v1/setup/admin")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "username": "%s",
+                                  "email": "%s",
+                                  "displayName": "Platform Admin",
+                                  "password": "safePass123"
+                                }
+                                """.formatted(username, email)))
+                .andExpect(status().isOk());
+        return login(username, "safePass123");
     }
 
     private String login(String username, String password) throws Exception {

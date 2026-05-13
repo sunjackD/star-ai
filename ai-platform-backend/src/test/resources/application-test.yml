@@ -16,4 +16,5 @@ app:
     expiration-minutes: 60
   cors:
     allowed-origins: http://localhost:5173
-
+  storage:
+    root: target/test-uploads

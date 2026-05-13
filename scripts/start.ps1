@@ -26,10 +26,17 @@ if (-not (Test-Path ".env")) {
     Write-Host "Created .env from .env.example. Review MySQL and JWT settings if needed."
 }
 
+$AppPort = "8081"
+Get-Content ".env" | ForEach-Object {
+    if ($_ -match "^APP_PORT=(.+)$") {
+        $AppPort = $Matches[1].Trim()
+    }
+}
+
 Invoke-DockerCompose -Arguments @("build") -FailureMessage "docker compose build failed."
 
 if (-not $BuildOnly) {
-    Invoke-DockerCompose -Arguments @("up", "-d") -FailureMessage "docker compose up failed."
-    Write-Host "AI Platform started: http://localhost:8081"
-    Write-Host "Backend API: http://localhost:8080/swagger-ui.html"
+    Invoke-DockerCompose -Arguments @("up", "-d", "--remove-orphans") -FailureMessage "docker compose up failed."
+    Write-Host "AI Platform started: http://localhost:$AppPort"
+    Write-Host "Swagger: http://localhost:$AppPort/swagger-ui.html"
 }

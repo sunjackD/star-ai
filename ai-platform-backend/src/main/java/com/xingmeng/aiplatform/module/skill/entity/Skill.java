@@ -19,6 +19,7 @@ public class Skill extends BaseEntity {
     private String description;
     private String tags;
     private String author;
+    private String icon;
 
     @Column(name = "source_code")
     private String sourceCode;
@@ -35,6 +36,18 @@ public class Skill extends BaseEntity {
     @Column(name = "star_count")
     private Integer starCount;
 
+    @Column(name = "artifact_type")
+    private String artifactType;
+
+    @Column(name = "artifact_path")
+    private String artifactPath;
+
+    @Column(name = "artifact_file_name")
+    private String artifactFileName;
+
+    @Column(name = "artifact_size")
+    private Long artifactSize;
+
     private String status;
 
     public Long getId() { return id; }
@@ -48,6 +61,8 @@ public class Skill extends BaseEntity {
     public void setTags(String tags) { this.tags = tags; }
     public String getAuthor() { return author; }
     public void setAuthor(String author) { this.author = author; }
+    public String getIcon() { return icon; }
+    public void setIcon(String icon) { this.icon = icon; }
     public String getSourceCode() { return sourceCode; }
     public void setSourceCode(String sourceCode) { this.sourceCode = sourceCode; }
     public String getUsageMarkdown() { return usageMarkdown; }
@@ -58,7 +73,14 @@ public class Skill extends BaseEntity {
     public void setDownloadCount(Integer downloadCount) { this.downloadCount = downloadCount; }
     public Integer getStarCount() { return starCount; }
     public void setStarCount(Integer starCount) { this.starCount = starCount; }
+    public String getArtifactType() { return artifactType; }
+    public void setArtifactType(String artifactType) { this.artifactType = artifactType; }
+    public String getArtifactPath() { return artifactPath; }
+    public void setArtifactPath(String artifactPath) { this.artifactPath = artifactPath; }
+    public String getArtifactFileName() { return artifactFileName; }
+    public void setArtifactFileName(String artifactFileName) { this.artifactFileName = artifactFileName; }
+    public Long getArtifactSize() { return artifactSize; }
+    public void setArtifactSize(Long artifactSize) { this.artifactSize = artifactSize; }
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
 }
-

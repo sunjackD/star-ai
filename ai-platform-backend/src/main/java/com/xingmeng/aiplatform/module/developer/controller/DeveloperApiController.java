@@ -14,19 +14,31 @@ import com.xingmeng.aiplatform.module.skill.entity.SkillSource;
 import com.xingmeng.aiplatform.module.skill.repository.SkillCategoryRepository;
 import com.xingmeng.aiplatform.module.skill.repository.SkillRepository;
 import com.xingmeng.aiplatform.module.skill.repository.SkillSourceRepository;
+import com.xingmeng.aiplatform.module.skill.service.SkillArtifactService;
+import com.xingmeng.aiplatform.module.skill.service.SkillDownload;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.nio.charset.StandardCharsets;
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
 
+@Validated
 @RestController
 @RequestMapping("/api/v1/developer")
 public class DeveloperApiController {
@@ -34,6 +46,7 @@ public class DeveloperApiController {
     private final SkillRepository skillRepository;
     private final SkillCategoryRepository categoryRepository;
     private final SkillSourceRepository skillSourceRepository;
+    private final SkillArtifactService skillArtifactService;
     private final AuditService auditService;
 
     public DeveloperApiController(
@@ -41,12 +54,14 @@ public class DeveloperApiController {
             SkillRepository skillRepository,
             SkillCategoryRepository categoryRepository,
             SkillSourceRepository skillSourceRepository,
+            SkillArtifactService skillArtifactService,
             AuditService auditService
     ) {
         this.apiKeyService = apiKeyService;
         this.skillRepository = skillRepository;
         this.categoryRepository = categoryRepository;
         this.skillSourceRepository = skillSourceRepository;
+        this.skillArtifactService = skillArtifactService;
         this.auditService = auditService;
     }
 
@@ -73,16 +88,29 @@ public class DeveloperApiController {
     public ApiResponse<Map<String, Object>> manifest() {
         return ApiResponse.success(Map.of(
                 "name", "ai-platform-manager",
-                "description", "Manage AI platform skills through API Key scoped operations",
+                "description", "通过 API Key 让 AI Agent 查询、导入、上传、远程添加、更新和下载平台 Skills",
                 "auth", Map.of("headers", List.of("X-API-Key", "Authorization: Bearer xma_xxx")),
                 "tools", List.of(
                         "list_skills",
                         "get_skill_categories",
+                        "upload_skill",
+                        "upload_skill_directory",
                         "import_skill",
                         "add_remote_skill",
                         "update_skill",
                         "download_skill"
-                )
+                ),
+                "examples", List.of(
+                        "list_skills: GET /api/v1/developer/skills",
+                        "get_skill_categories: GET /api/v1/developer/skill-categories",
+                        "import_skill: POST /api/v1/developer/skills/import JSON",
+                        "upload_skill: POST multipart /api/v1/developer/skills/upload file=@SKILL.md",
+                        "upload_skill_directory: POST multipart /api/v1/developer/skills/upload-directory files + paths",
+                        "add_remote_skill: POST /api/v1/developer/skills/remote HTTPS URL",
+                        "update_skill: PUT /api/v1/developer/skills/{id}",
+                        "download_skill: GET /api/v1/developer/skills/{id}/download"
+                ),
+                "installPrompt", "请下载并安装 ai-platform-manager Skill，配置 API Base 和包含 skills:read/import/write/download 的 API Key，然后让 Agent 按 examples 调用。"
         ));
     }
 
@@ -117,8 +145,50 @@ public class DeveloperApiController {
         skill.setDownloadCount(0);
         skill.setStarCount(0);
         skill.setStatus("ACTIVE");
+        applyTextArtifact(skill);
         Skill saved = skillRepository.save(skill);
         auditService.log(authentication, "DEVELOPER_SKILL_IMPORTED", "SKILL", saved.getId(), saved.getName());
+        return ApiResponse.success(saved);
+    }
+
+    @PostMapping(value = "/skills/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ApiResponse<Skill> uploadSkill(
+            Authentication authentication,
+            @RequestParam("file") MultipartFile file,
+            @RequestParam @NotBlank @Size(max = 120) String name,
+            @RequestParam @NotNull Long categoryId,
+            @RequestParam @NotBlank @Size(max = 800) String description,
+            @RequestParam @NotBlank @Size(max = 500) String tags,
+            @RequestParam @NotBlank @Size(max = 120) String author,
+            @RequestParam @NotBlank String usageMarkdown,
+            @RequestParam(required = false) @Size(max = 600) String icon
+    ) {
+        apiKeyService.requireScope(authentication, "skills:import");
+        Skill saved = skillArtifactService.createUploadedSkill(
+                file, name, categoryId, description, tags, author, usageMarkdown, icon
+        );
+        auditService.log(authentication, "DEVELOPER_SKILL_UPLOADED", "SKILL", saved.getId(), saved.getName());
+        return ApiResponse.success(saved);
+    }
+
+    @PostMapping(value = "/skills/upload-directory", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ApiResponse<Skill> uploadSkillDirectory(
+            Authentication authentication,
+            @RequestParam("files") MultipartFile[] files,
+            @RequestParam("paths") List<String> paths,
+            @RequestParam @NotBlank @Size(max = 120) String name,
+            @RequestParam @NotNull Long categoryId,
+            @RequestParam @NotBlank @Size(max = 800) String description,
+            @RequestParam @NotBlank @Size(max = 500) String tags,
+            @RequestParam @NotBlank @Size(max = 120) String author,
+            @RequestParam @NotBlank String usageMarkdown,
+            @RequestParam(required = false) @Size(max = 600) String icon
+    ) {
+        apiKeyService.requireScope(authentication, "skills:import");
+        Skill saved = skillArtifactService.createUploadedSkillDirectory(
+                files, paths, name, categoryId, description, tags, author, usageMarkdown, icon
+        );
+        auditService.log(authentication, "DEVELOPER_SKILL_DIRECTORY_UPLOADED", "SKILL", saved.getId(), saved.getName());
         return ApiResponse.success(saved);
     }
 
@@ -147,6 +217,7 @@ public class DeveloperApiController {
         skill.setDownloadCount(0);
         skill.setStarCount(0);
         skill.setStatus("ACTIVE");
+        applyTextArtifact(skill);
         Skill saved = skillRepository.save(skill);
         SkillSource source = new SkillSource();
         source.setSkill(saved);
@@ -177,21 +248,30 @@ public class DeveloperApiController {
         skill.setAuthor(request.author());
         skill.setSourceCode(request.sourceCode());
         skill.setUsageMarkdown(request.usageMarkdown());
+        applyTextArtifact(skill);
         auditService.log(authentication, "DEVELOPER_SKILL_UPDATED", "SKILL", id, skill.getName());
         return ApiResponse.success(skill);
     }
 
-    @GetMapping(value = "/skills/{id}/download", produces = MediaType.TEXT_PLAIN_VALUE)
+    @GetMapping("/skills/{id}/download")
     @Transactional
-    public ResponseEntity<String> downloadSkill(Authentication authentication, @PathVariable Long id) {
+    public ResponseEntity<Resource> downloadSkill(Authentication authentication, @PathVariable Long id) {
         apiKeyService.requireScope(authentication, "skills:download");
-        Skill skill = skillRepository.findById(id)
-                .orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND, "Skill不存在"));
-        skill.setDownloadCount(skill.getDownloadCount() + 1);
-        auditService.log(authentication, "DEVELOPER_SKILL_DOWNLOADED", "SKILL", id, skill.getName());
+        SkillDownload download = skillArtifactService.download(id);
+        auditService.log(authentication, "DEVELOPER_SKILL_DOWNLOADED", "SKILL", id, download.fileName());
         return ResponseEntity.ok()
-                .header("Content-Disposition", "attachment; filename=\"" + skill.getName() + ".skill.md\"")
-                .body(skill.getSourceCode());
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + download.fileName() + "\"")
+                .contentType(MediaType.parseMediaType(download.contentType()))
+                .body(download.resource());
+    }
+
+    @GetMapping(value = "/self-skill/download", produces = "text/markdown; charset=UTF-8")
+    public ResponseEntity<Resource> downloadSelfSkill() {
+        byte[] bytes = skillArtifactService.selfSkillMarkdown().getBytes(StandardCharsets.UTF_8);
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"ai-platform-manager.SKILL.md\"")
+                .contentType(MediaType.parseMediaType("text/markdown; charset=UTF-8"))
+                .body(new ByteArrayResource(bytes));
     }
 
     private boolean isUnsafeHost(String host) {
@@ -207,5 +287,18 @@ public class DeveloperApiController {
                 || normalized.startsWith("192.168.")
                 || normalized.startsWith("169.254.")
                 || normalized.matches("^172\\.(1[6-9]|2\\d|3[0-1])\\..*");
+    }
+
+    private void applyTextArtifact(Skill skill) {
+        String sourceCode = skill.getSourceCode() == null ? "" : skill.getSourceCode();
+        skill.setArtifactType("TEXT");
+        skill.setArtifactPath(null);
+        skill.setArtifactFileName(safeTextFileName(skill.getName()));
+        skill.setArtifactSize((long) sourceCode.getBytes(StandardCharsets.UTF_8).length);
+    }
+
+    private String safeTextFileName(String name) {
+        String baseName = name == null || name.isBlank() ? "skill" : name;
+        return baseName.replaceAll("[\\\\/:*?\"<>|]", "_") + ".skill.md";
     }
 }

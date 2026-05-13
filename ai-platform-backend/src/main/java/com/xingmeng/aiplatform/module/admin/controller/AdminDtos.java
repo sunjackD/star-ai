@@ -62,6 +62,7 @@ record SkillRequest(
         @NotBlank @Size(max = 800) String description,
         @NotBlank @Size(max = 500) String tags,
         @NotBlank @Size(max = 120) String author,
+        @Size(max = 600) String icon,
         @NotBlank String sourceCode,
         @NotBlank String usageMarkdown,
         @NotBlank String status

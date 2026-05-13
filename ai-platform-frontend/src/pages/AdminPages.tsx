@@ -16,10 +16,12 @@ import {
   Table,
   Tag,
   Typography,
+  Upload,
   message
 } from 'antd';
 import type { Rule } from 'antd/es/form';
-import { deleteData, getData, postData, putData } from '../api/client';
+import type { RcFile } from 'antd/es/upload';
+import { deleteData, downloadFile, getData, postData, putData, uploadData } from '../api/client';
 import { themes } from '../themes/tokens';
 import type {
   AdminOverview,
@@ -42,13 +44,14 @@ const STATUS_OPTIONS = ['ACTIVE', 'DISABLED', 'DRAFT', 'RUNNING', 'COMPLETED'];
 const THEME_OPTIONS = Object.values(themes).map((theme) => ({ label: theme.label, value: theme.name }));
 
 type ResourceRecord = { id: number; name: string; status?: string };
-type FieldType = 'text' | 'textarea' | 'number' | 'select';
+type FieldType = 'text' | 'textarea' | 'number' | 'select' | 'icon';
 type FieldDef = {
   name: string;
   label: string;
   type?: FieldType;
   required?: boolean;
   options?: { label: string; value: string | number }[];
+  defaultValue?: unknown;
 };
 
 type ResourceConfig<T extends ResourceRecord> = {
@@ -59,6 +62,8 @@ type ResourceConfig<T extends ResourceRecord> = {
   fields: FieldDef[];
   columns: { title: string; dataIndex?: string; render?: (row: T) => ReactNode }[];
   normalizeInitial?: (row: T) => Record<string, unknown>;
+  extraToolbar?: ReactNode;
+  rowActions?: (row: T) => ReactNode;
 };
 
 export function AdminLandingPage() {
@@ -262,7 +267,7 @@ export function UsersAdminPage() {
                 options={roleOptions}
                 onChange={(roleNames) => roleMutation.mutate({ id: row.id, roleNames })}
               />
-              <Popconfirm title="重置为 admin123？" onConfirm={() => passwordMutation.mutate({ id: row.id, password: 'admin123' })}>
+              <Popconfirm title="重置为临时密码？" onConfirm={() => passwordMutation.mutate({ id: row.id, password: 'ChangeMe123' })}>
                 <Button size="small" danger>重置密码</Button>
               </Popconfirm>
             </Space>
@@ -306,7 +311,7 @@ export function AgentsAdminPage() {
     endpoint: '/admin/agents',
     fields: [
       field('name', '名称'), field('category', '分类'), field('description', '描述', 'textarea'),
-      field('icon', '图标'), field('guideMarkdown', '配置指南', 'textarea'),
+      iconField(), field('guideMarkdown', '配置指南', 'textarea'),
       field('officialUrl', '官网'), statusField()
     ],
     columns: baseColumns<Agent>(['category', 'status'])
@@ -328,22 +333,30 @@ export function SkillsAdminPage() {
   const { data: categories = [] } = useQuery({ queryKey: ['admin-skill-categories'], queryFn: () => getData<SkillCategory[]>('/admin/skill-categories') });
   return <ResourceAdminPage<Skill> config={{
     title: 'Skills 管理',
-    description: '维护站内 Skill，支持分类、源码、使用说明和上下架。',
+    description: '维护站内 Skill，支持文本创建、SKILL.md/zip 上传、下载和上下架。',
     queryKey: 'admin-skills',
     endpoint: '/admin/skills',
     fields: [
       field('name', '名称'),
       selectField('categoryId', '分类', categories.map((item) => ({ label: item.name, value: item.id }))),
       field('description', '描述', 'textarea'), field('tags', '标签'), field('author', '作者'),
+      iconField(),
       field('sourceCode', '源码', 'textarea'), field('usageMarkdown', '使用说明', 'textarea'), statusField()
     ],
     columns: [
       { title: '名称', dataIndex: 'name' },
       { title: '分类', render: (row) => row.category.name },
+      { title: '文件', render: (row) => row.artifactFileName ?? '文本 Skill' },
       { title: '下载', dataIndex: 'downloadCount' },
       { title: '状态', dataIndex: 'status' }
     ],
-    normalizeInitial: (row) => ({ ...row, categoryId: row.category.id })
+    normalizeInitial: (row) => ({ ...row, categoryId: row.category.id }),
+    extraToolbar: <SkillUploadButton categories={categories} />,
+    rowActions: (row) => (
+      <Button size="small" onClick={() => downloadFile(`/admin/skills/${row.id}/download`, `${row.name}.skill.md`)}>
+        下载
+      </Button>
+    )
   }} />;
 }
 
@@ -398,12 +411,12 @@ export function FinetuneJobsAdminPage() {
 export function LinksAdminPage() {
   return <ResourceAdminPage<RedirectLink> config={{
     title: '跳转链接管理',
-    description: '维护首页导航聚合入口，公开端只展示 ACTIVE 链接并按分类与排序展示。',
+    description: '管理首页常用导航链接，可配置分类、排序、图标和启用状态。',
     queryKey: 'admin-links',
     endpoint: '/admin/links',
     fields: [
       field('name', '名称'), field('url', '链接'), field('category', '分类'),
-      numberField('sortOrder', '排序'), field('description', '描述', 'textarea'), field('icon', '图标'), statusField()
+      numberField('sortOrder', '排序', 100), field('description', '描述', 'textarea'), iconField(), statusField()
     ],
     columns: [
       { title: '名称', dataIndex: 'name' },
@@ -521,6 +534,7 @@ function ResourceAdminPage<T extends ResourceRecord>({ config }: { config: Resou
       title: '操作',
       render: (_: unknown, row: T) => (
         <Space>
+          {config.rowActions?.(row)}
           <Button size="small" onClick={() => openEdit(row)}>编辑</Button>
           <Popconfirm title="确认删除？" onConfirm={() => deleteMutation.mutate(row.id)}>
             <Button size="small" danger>删除</Button>
@@ -533,6 +547,7 @@ function ResourceAdminPage<T extends ResourceRecord>({ config }: { config: Resou
   function openCreate() {
     setEditing(undefined);
     form.resetFields();
+    form.setFieldsValue(initialValues(config.fields));
     setModalOpen(true);
   }
 
@@ -557,6 +572,7 @@ function ResourceAdminPage<T extends ResourceRecord>({ config }: { config: Resou
           />
         )}
         <Button type="primary" onClick={openCreate}>新增</Button>
+        {config.extraToolbar}
       </Space>
       <Table
         rowKey="id"
@@ -589,6 +605,9 @@ function renderField(fieldDef: FieldDef) {
   if (fieldDef.type === 'select') {
     return <Select allowClear={fieldDef.required === false} options={fieldDef.options ?? []} />;
   }
+  if (fieldDef.type === 'icon') {
+    return <IconInput />;
+  }
   return <Input />;
 }
 
@@ -596,8 +615,12 @@ function field(name: string, label: string, type: FieldType = 'text', required =
   return { name, label, type, required };
 }
 
-function numberField(name: string, label: string): FieldDef {
-  return field(name, label, 'number');
+function iconField(): FieldDef {
+  return field('icon', '图标', 'icon', false);
+}
+
+function numberField(name: string, label: string, defaultValue = 0): FieldDef {
+  return { ...field(name, label, 'number'), defaultValue };
 }
 
 function selectField(name: string, label: string, options: FieldDef['options'], required = true): FieldDef {
@@ -605,7 +628,7 @@ function selectField(name: string, label: string, options: FieldDef['options'], 
 }
 
 function statusField(): FieldDef {
-  return selectField('status', '状态', STATUS_OPTIONS.map((value) => ({ label: value, value })));
+  return { ...selectField('status', '状态', STATUS_OPTIONS.map((value) => ({ label: value, value }))), defaultValue: 'ACTIVE' };
 }
 
 function baseColumns<T extends ResourceRecord>(keys: string[]) {
@@ -617,16 +640,171 @@ function baseColumns<T extends ResourceRecord>(keys: string[]) {
 
 function rulesForField(fieldDef: FieldDef): Rule[] {
   const rules: Rule[] = [];
+  if (fieldDef.type === 'number') {
+    if (fieldDef.required !== false) {
+      rules.push({ required: true, type: 'number', message: `请输入${fieldDef.label}` });
+    }
+    rules.push({ type: 'number', min: 0, message: `${fieldDef.label}不能小于 0` });
+    return rules;
+  }
   if (fieldDef.required !== false) {
-    rules.push({ required: true, whitespace: fieldDef.type !== 'number', message: `请输入${fieldDef.label}` });
+    rules.push({ required: true, whitespace: true, message: `请输入${fieldDef.label}` });
   }
   if (['url', 'officialUrl', 'endpoint'].includes(fieldDef.name)) {
     rules.push({ type: 'url', message: '请输入有效 URL' });
   }
-  if (fieldDef.type === 'number') {
-    rules.push({ type: 'number', min: 0, message: `${fieldDef.label}不能小于 0` });
-  }
   return rules;
+}
+
+function initialValues(fields: FieldDef[]) {
+  return fields.reduce<Record<string, unknown>>((values, item) => {
+    if (item.defaultValue !== undefined) {
+      values[item.name] = item.defaultValue;
+    }
+    return values;
+  }, {});
+}
+
+function IconInput({ value, onChange }: { value?: string; onChange?: (value?: string) => void }) {
+  const [uploading, setUploading] = useState(false);
+
+  async function uploadIcon(file: RcFile) {
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      const result = await uploadData<{ url: string }>('/admin/assets/icons', formData);
+      onChange?.(result.url);
+      message.success('图标已上传');
+    } finally {
+      setUploading(false);
+    }
+  }
+
+  return (
+    <Space.Compact className="icon-input">
+      <Input value={value} onChange={(event) => onChange?.(event.target.value)} placeholder="输入图标 URL，或上传 PNG/JPG/WEBP/SVG" />
+      <Upload
+        accept="image/png,image/jpeg,image/webp,image/svg+xml"
+        maxCount={1}
+        showUploadList={false}
+        beforeUpload={(file) => {
+          void uploadIcon(file);
+          return false;
+        }}
+      >
+        <Button loading={uploading}>上传</Button>
+      </Upload>
+    </Space.Compact>
+  );
+}
+
+function SkillUploadButton({ categories }: { categories: SkillCategory[] }) {
+  const queryClient = useQueryClient();
+  const [form] = Form.useForm();
+  const [files, setFiles] = useState<RcFile[]>([]);
+  const [directoryMode, setDirectoryMode] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
+  const mutation = useMutation({
+    mutationFn: (values: Record<string, unknown>) => {
+      if (files.length === 0) {
+        throw new Error(directoryMode ? '请选择 Skill 文件夹' : '请选择 Skill 文件');
+      }
+      const formData = new FormData();
+      if (directoryMode) {
+        files.forEach((item) => {
+          formData.append('files', item);
+          formData.append('paths', skillRelativePath(item));
+        });
+      } else {
+        formData.append('file', files[0]);
+      }
+      Object.entries(values).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          formData.append(key, String(value));
+        }
+      });
+      return uploadData<Skill>(directoryMode ? '/admin/skills/upload-directory' : '/admin/skills/upload', formData);
+    },
+    onSuccess: () => {
+      message.success('Skill 已上传');
+      setModalOpen(false);
+      setFiles([]);
+      form.resetFields();
+      queryClient.invalidateQueries({ queryKey: ['admin-skills'] });
+      queryClient.invalidateQueries({ queryKey: ['skills'] });
+    },
+    onError: (error) => message.error(error instanceof Error ? error.message : '上传失败')
+  });
+
+  return (
+    <>
+      <Button onClick={() => setModalOpen(true)}>上传 Skill</Button>
+      <Modal open={modalOpen} title="上传 Skill 包" footer={null} onCancel={() => setModalOpen(false)} width={720}>
+        <Form
+          form={form}
+          layout="vertical"
+          initialValues={{ tags: 'upload', author: '平台用户', usageMarkdown: '# 使用说明' }}
+          onFinish={(values) => mutation.mutate(values)}
+        >
+          <Form.Item label="上传类型">
+            <Switch
+              checked={directoryMode}
+              checkedChildren="文件夹"
+              unCheckedChildren="文件"
+              onChange={(checked) => {
+                setDirectoryMode(checked);
+                setFiles([]);
+              }}
+            />
+          </Form.Item>
+          <Form.Item label="Skill 文件" required>
+            <Upload
+              accept={directoryMode ? undefined : '.md,.zip'}
+              directory={directoryMode}
+              multiple={directoryMode}
+              maxCount={directoryMode ? undefined : 1}
+              beforeUpload={(selectedFile) => {
+                setFiles((current) => directoryMode ? [...current, selectedFile] : [selectedFile]);
+                return false;
+              }}
+              onRemove={(removedFile) => {
+                setFiles((current) => current.filter((item) => item.uid !== removedFile.uid));
+              }}
+            >
+              <Button>{directoryMode ? '选择包含 SKILL.md 的文件夹' : '选择 SKILL.md 或 zip 包'}</Button>
+            </Upload>
+          </Form.Item>
+          <Form.Item name="name" label="名称" rules={[{ required: true, whitespace: true }]}>
+            <Input />
+          </Form.Item>
+          <Form.Item name="categoryId" label="分类" rules={[{ required: true }]}>
+            <Select options={categories.map((item) => ({ label: item.name, value: item.id }))} />
+          </Form.Item>
+          <Form.Item name="description" label="描述" rules={[{ required: true, whitespace: true }]}>
+            <Input.TextArea rows={3} />
+          </Form.Item>
+          <Form.Item name="tags" label="标签" rules={[{ required: true, whitespace: true }]}>
+            <Input />
+          </Form.Item>
+          <Form.Item name="author" label="作者" rules={[{ required: true, whitespace: true }]}>
+            <Input />
+          </Form.Item>
+          <Form.Item name="icon" label="图标">
+            <IconInput />
+          </Form.Item>
+          <Form.Item name="usageMarkdown" label="使用说明" rules={[{ required: true, whitespace: true }]}>
+            <Input.TextArea rows={5} />
+          </Form.Item>
+          <Button type="primary" htmlType="submit" loading={mutation.isPending}>上传并入库</Button>
+        </Form>
+      </Modal>
+    </>
+  );
+}
+
+function skillRelativePath(file: RcFile): string {
+  return (file as RcFile & { webkitRelativePath?: string }).webkitRelativePath || file.name;
 }
 
 function PageHeader({ title, description }: { title: string; description: string }) {

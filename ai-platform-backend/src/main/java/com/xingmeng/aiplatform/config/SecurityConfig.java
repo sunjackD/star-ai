@@ -35,9 +35,27 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
                         .requestMatchers("/api/v1/auth/login", "/api/v1/auth/register").permitAll()
+                        .requestMatchers("/api/v1/setup/status", "/api/v1/setup/admin").permitAll()
+                        .requestMatchers(
+                                HttpMethod.GET,
+                                "/",
+                                "/index.html",
+                                "/assets/**",
+                                "/login",
+                                "/setup",
+                                "/admin/**",
+                                "/account/**",
+                                "/developer",
+                                "/finetune",
+                                "/agents/**",
+                                "/skills/**",
+                                "/models/**"
+                        ).permitAll()
                         .requestMatchers(
                                 HttpMethod.GET,
                                 "/api/v1/platform/config",
+                                "/api/v1/assets/icons/*",
+                                "/api/v1/developer/self-skill/download",
                                 "/api/v1/agents",
                                 "/api/v1/skills",
                                 "/api/v1/skills/categories",

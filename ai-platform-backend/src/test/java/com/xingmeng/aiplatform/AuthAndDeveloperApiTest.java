@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -16,6 +17,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 class AuthAndDeveloperApiTest {
     @Autowired
     private MockMvc mockMvc;
@@ -30,7 +32,7 @@ class AuthAndDeveloperApiTest {
     }
 
     @Test
-    void seededAdminCanLogin() throws Exception {
+    void seededDefaultAdminCannotLogin() throws Exception {
         mockMvc.perform(post("/api/v1/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
@@ -39,12 +41,13 @@ class AuthAndDeveloperApiTest {
                                   "password": "admin123"
                                 }
                                 """))
-                .andExpect(status().isOk());
+                .andExpect(status().isUnauthorized());
     }
 
     @Test
     void adminCreatedUserCanCreateApiKeyAndCallDeveloperSkillList() throws Exception {
-        createUser("dev_user", "dev@example.com", "Developer", "DEVELOPER");
+        String adminToken = createAdminAndLogin("admin_dev", "admin-dev@example.com");
+        createUser(adminToken, "dev_user", "dev@example.com", "Developer", "DEVELOPER");
         String jwt = login("dev_user", "secret123");
 
         String keyBody = """
@@ -71,7 +74,8 @@ class AuthAndDeveloperApiTest {
 
     @Test
     void apiKeyScopeIsRequiredForDeveloperOperations() throws Exception {
-        createUser("limited_user", "limited@example.com", "Limited", "DEVELOPER");
+        String adminToken = createAdminAndLogin("admin_limited", "admin-limited@example.com");
+        createUser(adminToken, "limited_user", "limited@example.com", "Limited", "DEVELOPER");
         String jwt = login("limited_user", "secret123");
 
         String keyJson = mockMvc.perform(post("/api/v1/developer/api-keys")
@@ -94,8 +98,22 @@ class AuthAndDeveloperApiTest {
                 .andExpect(status().isForbidden());
     }
 
-    private void createUser(String username, String email, String displayName, String role) throws Exception {
-        String adminToken = login("admin", "admin123");
+    private String createAdminAndLogin(String username, String email) throws Exception {
+        mockMvc.perform(post("/api/v1/setup/admin")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "username": "%s",
+                                  "email": "%s",
+                                  "displayName": "Platform Admin",
+                                  "password": "safePass123"
+                                }
+                                """.formatted(username, email)))
+                .andExpect(status().isOk());
+        return login(username, "safePass123");
+    }
+
+    private void createUser(String adminToken, String username, String email, String displayName, String role) throws Exception {
         mockMvc.perform(post("/api/v1/admin/users")
                         .header("Authorization", "Bearer " + adminToken)
                         .contentType(MediaType.APPLICATION_JSON)

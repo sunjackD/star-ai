@@ -26,68 +26,68 @@ export const themes: Record<ThemeName, ThemeTokens> = {
   'minimal-reference': {
     name: 'minimal-reference',
     label: '极简风',
-    accent: '#85684f',
-    background: '#faf9f6',
-    surface: 'rgba(255,255,255,0.82)',
+    accent: '#6f5cf7',
+    background: '#f7f3ff',
+    surface: 'rgba(255,255,255,0.78)',
     surfaceStrong: '#ffffff',
-    text: '#1f1c18',
-    textSoft: '#6d675f',
-    border: '#e4ddd2',
-    radius: '8px',
-    shadow: '0 18px 42px rgba(31,28,24,0.08)',
+    text: '#18152f',
+    textSoft: '#6b6682',
+    border: 'rgba(120,108,160,0.18)',
+    radius: '22px',
+    shadow: '0 24px 70px rgba(52,42,110,0.12)',
     font: 'Manrope, "PingFang SC", "Microsoft YaHei", sans-serif',
     displayFont: '"Noto Serif SC", "PingFang SC", serif',
     contentWidth: '1180px',
     cardPadding: '28px',
     antd: {
       token: {
-        colorPrimary: '#85684f',
-        colorBgLayout: '#faf9f6',
-        colorBgContainer: 'rgba(255,255,255,0.86)',
-        colorText: '#1f1c18',
-        colorTextSecondary: '#6d675f',
-        colorBorder: '#e4ddd2',
-        borderRadius: 8,
+        colorPrimary: '#6f5cf7',
+        colorBgLayout: '#f7f3ff',
+        colorBgContainer: 'rgba(255,255,255,0.84)',
+        colorText: '#18152f',
+        colorTextSecondary: '#6b6682',
+        colorBorder: 'rgba(120,108,160,0.20)',
+        borderRadius: 18,
         fontFamily: 'Manrope, "PingFang SC", "Microsoft YaHei", sans-serif'
       },
       components: {
         Card: { paddingLG: 28 },
-        Table: { headerBg: '#f3efe8', rowHoverBg: '#fbfaf7' },
-        Menu: { itemSelectedBg: '#f3efe8', itemSelectedColor: '#1f1c18' }
+        Table: { headerBg: 'rgba(247,243,255,0.82)', rowHoverBg: 'rgba(241,237,255,0.74)' },
+        Menu: { itemSelectedBg: 'rgba(111,92,247,0.12)', itemSelectedColor: '#5b46e8' }
       }
     }
   },
   'minimal-modern': {
     name: 'minimal-modern',
     label: '现代风',
-    accent: '#0052ff',
-    background: '#fafafa',
-    surface: '#ffffff',
+    accent: '#0f8cff',
+    background: '#f7fbff',
+    surface: 'rgba(255,255,255,0.82)',
     surfaceStrong: '#ffffff',
     text: '#0f172a',
     textSoft: '#64748b',
-    border: '#e2e8f0',
-    radius: '8px',
-    shadow: '0 12px 32px rgba(15,23,42,0.08)',
+    border: 'rgba(148,163,184,0.24)',
+    radius: '20px',
+    shadow: '0 18px 48px rgba(15,23,42,0.08)',
     font: 'Inter, "PingFang SC", "Microsoft YaHei", sans-serif',
     displayFont: 'Manrope, "PingFang SC", sans-serif',
     contentWidth: '1280px',
     cardPadding: '20px',
     antd: {
       token: {
-        colorPrimary: '#0052ff',
-        colorBgLayout: '#fafafa',
-        colorBgContainer: '#ffffff',
+        colorPrimary: '#0f8cff',
+        colorBgLayout: '#f7fbff',
+        colorBgContainer: 'rgba(255,255,255,0.86)',
         colorText: '#0f172a',
         colorTextSecondary: '#64748b',
-        colorBorder: '#e2e8f0',
-        borderRadius: 8,
+        colorBorder: 'rgba(148,163,184,0.24)',
+        borderRadius: 18,
         fontFamily: 'Inter, "PingFang SC", "Microsoft YaHei", sans-serif'
       },
       components: {
         Card: { paddingLG: 20 },
-        Table: { headerBg: '#f8fafc', rowHoverBg: '#eff6ff' },
-        Menu: { itemSelectedBg: '#eff6ff', itemSelectedColor: '#0052ff' }
+        Table: { headerBg: 'rgba(248,250,252,0.88)', rowHoverBg: '#eff6ff' },
+        Menu: { itemSelectedBg: 'rgba(14,165,233,0.14)', itemSelectedColor: '#38bdf8' }
       }
     }
   }
