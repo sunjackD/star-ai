@@ -31,6 +31,11 @@ import type {
   AiModel,
   ApiKey,
   AuditLog,
+  BestPracticeArtifact,
+  BestPracticeDetail,
+  BestPracticeRelatedResource,
+  BestPracticeStep,
+  BestPracticeSummary,
   Dataset,
   FinetuneJob,
   RedirectLink,
@@ -75,6 +80,7 @@ export function AdminLandingPage() {
     ['模型', data?.models ?? 0, '/admin/models'],
     ['数据集', data?.datasets ?? 0, '/admin/datasets'],
     ['微调任务', data?.finetuneJobs ?? 0, '/admin/finetune-jobs'],
+    ['最佳实践', data?.bestPractices ?? 0, '/admin/best-practices'],
     ['链接', data?.links ?? 0, '/admin/links'],
     ['系统设置', '配置', '/admin/settings'],
     ['审计日志', data?.auditLogs ?? 0, '/admin/audit-logs']
@@ -427,6 +433,418 @@ export function LinksAdminPage() {
     ],
     normalizeInitial: (row) => ({ ...row, sortOrder: row.sortOrder ?? 0 })
   }} />;
+}
+
+export function BestPracticesAdminPage() {
+  const queryClient = useQueryClient();
+  const [practiceForm] = Form.useForm();
+  const [stepForm] = Form.useForm();
+  const [artifactForm] = Form.useForm();
+  const [resourceForm] = Form.useForm();
+  const [keyword, setKeyword] = useState('');
+  const [statusFilter, setStatusFilter] = useState<string>();
+  const [difficultyFilter, setDifficultyFilter] = useState<string>();
+  const [editing, setEditing] = useState<BestPracticeSummary>();
+  const [selected, setSelected] = useState<BestPracticeSummary>();
+  const [practiceModalOpen, setPracticeModalOpen] = useState(false);
+  const [stepModalOpen, setStepModalOpen] = useState(false);
+  const [artifactModalOpen, setArtifactModalOpen] = useState(false);
+  const [resourceModalOpen, setResourceModalOpen] = useState(false);
+  const [editingStep, setEditingStep] = useState<BestPracticeStep>();
+  const [artifactFile, setArtifactFile] = useState<RcFile>();
+  const [artifactMode, setArtifactMode] = useState<'TEXT' | 'FILE'>('TEXT');
+  const { data = [], isLoading } = useQuery({
+    queryKey: ['admin-best-practices'],
+    queryFn: () => getData<BestPracticeSummary[]>('/admin/best-practices')
+  });
+  const { data: detail } = useQuery({
+    queryKey: ['admin-best-practice', selected?.id],
+    queryFn: () => getData<BestPracticeDetail>(`/admin/best-practices/${selected?.id}`),
+    enabled: Boolean(selected?.id)
+  });
+  const filteredData = data.filter((item) => {
+    const text = `${item.title} ${item.summary} ${item.tags} ${item.category}`.toLowerCase();
+    const keywordMatched = !keyword || text.includes(keyword.toLowerCase());
+    const statusMatched = !statusFilter || item.status === statusFilter;
+    const difficultyMatched = !difficultyFilter || item.difficulty === difficultyFilter;
+    return keywordMatched && statusMatched && difficultyMatched;
+  });
+  const practiceMutation = useMutation({
+    mutationFn: (values: Record<string, unknown>) => editing
+      ? putData<BestPracticeDetail>(`/admin/best-practices/${editing.id}`, values)
+      : postData<BestPracticeDetail>('/admin/best-practices', values),
+    onSuccess: () => {
+      message.success('最佳实践已保存');
+      setPracticeModalOpen(false);
+      setEditing(undefined);
+      queryClient.invalidateQueries({ queryKey: ['admin-best-practices'] });
+      queryClient.invalidateQueries({ queryKey: ['best-practices'] });
+    }
+  });
+  const deletePracticeMutation = useMutation({
+    mutationFn: (id: number) => deleteData(`/admin/best-practices/${id}`),
+    onSuccess: () => {
+      message.success('最佳实践已删除');
+      setSelected(undefined);
+      queryClient.invalidateQueries({ queryKey: ['admin-best-practices'] });
+      queryClient.invalidateQueries({ queryKey: ['best-practices'] });
+    }
+  });
+  const stepMutation = useMutation({
+    mutationFn: (values: Record<string, unknown>) => editingStep
+      ? putData(`/admin/best-practices/${selected?.id}/steps/${editingStep.id}`, values)
+      : postData(`/admin/best-practices/${selected?.id}/steps`, values),
+    onSuccess: () => {
+      message.success('步骤已保存');
+      setStepModalOpen(false);
+      setEditingStep(undefined);
+      invalidateSelected();
+    }
+  });
+  const deleteStepMutation = useMutation({
+    mutationFn: (stepId: number) => deleteData(`/admin/best-practices/${selected?.id}/steps/${stepId}`),
+    onSuccess: () => invalidateSelected()
+  });
+  const artifactMutation = useMutation({
+    mutationFn: (values: Record<string, unknown>) => {
+      if (artifactMode === 'FILE') {
+        if (!artifactFile) {
+          throw new Error('请选择附件文件');
+        }
+        const formData = new FormData();
+        formData.append('file', artifactFile);
+        formData.append('name', String(values.name));
+        formData.append('artifactType', String(values.artifactType));
+        formData.append('sortOrder', String(values.sortOrder ?? 0));
+        return uploadData(`/admin/best-practices/${selected?.id}/artifacts`, formData);
+      }
+      return postData(`/admin/best-practices/${selected?.id}/artifacts`, values);
+    },
+    onSuccess: () => {
+      message.success('附件已保存');
+      setArtifactModalOpen(false);
+      setArtifactFile(undefined);
+      invalidateSelected();
+    },
+    onError: (error) => message.error(error instanceof Error ? error.message : '附件保存失败')
+  });
+  const deleteArtifactMutation = useMutation({
+    mutationFn: (artifactId: number) => deleteData(`/admin/best-practices/${selected?.id}/artifacts/${artifactId}`),
+    onSuccess: () => invalidateSelected()
+  });
+  const resourceMutation = useMutation({
+    mutationFn: (values: Record<string, unknown>) => postData(`/admin/best-practices/${selected?.id}/related-resources`, values),
+    onSuccess: () => {
+      message.success('关联资源已保存');
+      setResourceModalOpen(false);
+      invalidateSelected();
+    }
+  });
+  const deleteResourceMutation = useMutation({
+    mutationFn: (resourceId: number) => deleteData(`/admin/best-practices/${selected?.id}/related-resources/${resourceId}`),
+    onSuccess: () => invalidateSelected()
+  });
+
+  function invalidateSelected() {
+    queryClient.invalidateQueries({ queryKey: ['admin-best-practice', selected?.id] });
+  }
+
+  function openCreate() {
+    setEditing(undefined);
+    practiceForm.resetFields();
+    practiceForm.setFieldsValue({
+      difficulty: 'BEGINNER',
+      estimatedMinutes: 60,
+      status: 'DRAFT',
+      sortOrder: 100
+    });
+    setPracticeModalOpen(true);
+  }
+
+  function openEdit(row: BestPracticeSummary) {
+    setEditing(row);
+    setSelected(row);
+    practiceForm.setFieldsValue(detail && detail.id === row.id ? detail : row);
+    setPracticeModalOpen(true);
+  }
+
+  function openStepCreate() {
+    setEditingStep(undefined);
+    stepForm.resetFields();
+    stepForm.setFieldsValue({ requiredStep: true, sortOrder: 100 });
+    setStepModalOpen(true);
+  }
+
+  function openStepEdit(step: BestPracticeStep) {
+    setEditingStep(step);
+    stepForm.setFieldsValue(step);
+    setStepModalOpen(true);
+  }
+
+  function openArtifactCreate(mode: 'TEXT' | 'FILE') {
+    setArtifactMode(mode);
+    setArtifactFile(undefined);
+    artifactForm.resetFields();
+    artifactForm.setFieldsValue({ artifactType: mode === 'TEXT' ? 'PROMPT' : 'FILE', sortOrder: 100 });
+    setArtifactModalOpen(true);
+  }
+
+  function openResourceCreate() {
+    resourceForm.resetFields();
+    resourceForm.setFieldsValue({ resourceType: 'SKILL', sortOrder: 100 });
+    setResourceModalOpen(true);
+  }
+
+  return (
+    <div className="page">
+      <PageHeader title="最佳实践管理" description="维护可复用 AI 工作流、脚本、Prompt、风险说明和关联资源。" />
+      <Space className="admin-toolbar" wrap>
+        <Input.Search placeholder="搜索标题、摘要、分类或标签" onChange={(event) => setKeyword(event.target.value)} allowClear />
+        <Select
+          allowClear
+          placeholder="状态"
+          className="admin-filter-select"
+          options={['ACTIVE', 'DRAFT', 'ARCHIVED'].map((value) => ({ label: value, value }))}
+          onChange={setStatusFilter}
+        />
+        <Select
+          allowClear
+          placeholder="难度"
+          className="admin-filter-select"
+          options={['BEGINNER', 'INTERMEDIATE', 'ADVANCED'].map((value) => ({ label: value, value }))}
+          onChange={setDifficultyFilter}
+        />
+        <Button type="primary" onClick={openCreate}>新增最佳实践</Button>
+      </Space>
+      <Table
+        rowKey="id"
+        loading={isLoading}
+        dataSource={filteredData}
+        pagination={{ pageSize: 8, showSizeChanger: true }}
+        columns={[
+          { title: '标题', dataIndex: 'title' },
+          { title: '分类', dataIndex: 'category' },
+          { title: '难度', dataIndex: 'difficulty' },
+          { title: '状态', dataIndex: 'status', render: (status) => <Tag>{status}</Tag> },
+          { title: '排序', dataIndex: 'sortOrder' },
+          {
+            title: '操作',
+            render: (_, row: BestPracticeSummary) => (
+              <Space wrap>
+                <Button size="small" onClick={() => setSelected(row)}>内容</Button>
+                <Button size="small" onClick={() => openEdit(row)}>编辑</Button>
+                <Popconfirm title="确认删除该最佳实践？" onConfirm={() => deletePracticeMutation.mutate(row.id)}>
+                  <Button size="small" danger>删除</Button>
+                </Popconfirm>
+              </Space>
+            )
+          }
+        ]}
+      />
+
+      {selected && (
+        <Card title={`内容维护：${selected.title}`} className="admin-detail-card">
+          <Space className="admin-toolbar" wrap>
+            <Button onClick={openStepCreate}>新增步骤</Button>
+            <Button onClick={() => openArtifactCreate('TEXT')}>新增文本附件</Button>
+            <Button onClick={() => openArtifactCreate('FILE')}>上传文件附件</Button>
+            <Button onClick={openResourceCreate}>新增关联资源</Button>
+          </Space>
+          <div className="admin-subgrid">
+            <Card title="步骤">
+              <Table rowKey="id" size="small" pagination={false} dataSource={detail?.steps ?? []} columns={[
+                { title: '标题', dataIndex: 'title' },
+                { title: '排序', dataIndex: 'sortOrder' },
+                {
+                  title: '操作',
+                  render: (_, row: BestPracticeStep) => (
+                    <Space>
+                      <Button size="small" onClick={() => openStepEdit(row)}>编辑</Button>
+                      <Popconfirm title="删除步骤？" onConfirm={() => deleteStepMutation.mutate(row.id)}>
+                        <Button size="small" danger>删除</Button>
+                      </Popconfirm>
+                    </Space>
+                  )
+                }
+              ]} />
+            </Card>
+            <Card title="附件">
+              <Table rowKey="id" size="small" pagination={false} dataSource={detail?.artifacts ?? []} columns={[
+                { title: '名称', dataIndex: 'name' },
+                { title: '类型', dataIndex: 'artifactType' },
+                { title: '文件', render: (row: BestPracticeArtifact) => row.fileName ?? '文本' },
+                {
+                  title: '操作',
+                  render: (_, row: BestPracticeArtifact) => (
+                    <Space>
+                      <Button size="small" onClick={() => downloadFile(`/best-practices/${selected.id}/artifacts/${row.id}/download`, row.fileName ?? `${row.name}.md`)}>下载</Button>
+                      <Popconfirm title="删除附件？" onConfirm={() => deleteArtifactMutation.mutate(row.id)}>
+                        <Button size="small" danger>删除</Button>
+                      </Popconfirm>
+                    </Space>
+                  )
+                }
+              ]} />
+            </Card>
+            <Card title="关联资源">
+              <Table rowKey="id" size="small" pagination={false} dataSource={detail?.relatedResources ?? []} columns={[
+                { title: '标题', dataIndex: 'title' },
+                { title: '类型', dataIndex: 'resourceType' },
+                {
+                  title: '操作',
+                  render: (_, row: BestPracticeRelatedResource) => (
+                    <Popconfirm title="删除关联资源？" onConfirm={() => deleteResourceMutation.mutate(row.id)}>
+                      <Button size="small" danger>删除</Button>
+                    </Popconfirm>
+                  )
+                }
+              ]} />
+            </Card>
+          </div>
+        </Card>
+      )}
+
+      <Modal open={practiceModalOpen} title={editing ? '编辑最佳实践' : '新增最佳实践'} footer={null} onCancel={() => setPracticeModalOpen(false)} width={860}>
+        <Form form={practiceForm} layout="vertical" onFinish={(values) => practiceMutation.mutate(values)}>
+          <Form.Item name="title" label="标题" rules={[{ required: true, whitespace: true }]}>
+            <Input />
+          </Form.Item>
+          <Form.Item name="slug" label="标识" rules={[{ required: true, pattern: /^[a-z0-9][a-z0-9-]*$/ }]}>
+            <Input placeholder="chat-style-finetune-astrbot" />
+          </Form.Item>
+          <Form.Item name="summary" label="摘要" rules={[{ required: true, whitespace: true }]}>
+            <Input.TextArea rows={3} />
+          </Form.Item>
+          <Space wrap>
+            <Form.Item name="category" label="分类" rules={[{ required: true, whitespace: true }]}>
+              <Input className="admin-short-input" />
+            </Form.Item>
+            <Form.Item name="difficulty" label="难度" rules={[{ required: true }]}>
+              <Select className="admin-filter-select" options={['BEGINNER', 'INTERMEDIATE', 'ADVANCED'].map((value) => ({ label: value, value }))} />
+            </Form.Item>
+            <Form.Item name="estimatedMinutes" label="预计分钟" rules={[{ required: true, type: 'number', min: 1 }]}>
+              <InputNumber min={1} max={10080} className="admin-number-input" />
+            </Form.Item>
+            <Form.Item name="status" label="状态" rules={[{ required: true }]}>
+              <Select className="admin-filter-select" options={['ACTIVE', 'DRAFT', 'ARCHIVED'].map((value) => ({ label: value, value }))} />
+            </Form.Item>
+            <Form.Item name="sortOrder" label="排序" rules={[{ required: true, type: 'number', min: 0 }]}>
+              <InputNumber min={0} className="admin-number-input" />
+            </Form.Item>
+          </Space>
+          <Form.Item name="tags" label="标签" rules={[{ required: true, whitespace: true }]}>
+            <Input placeholder="逗号分隔" />
+          </Form.Item>
+          <Form.Item name="sourceUrl" label="来源链接" rules={[{ type: 'url' }]}>
+            <Input />
+          </Form.Item>
+          <Form.Item name="coverIcon" label="封面图标">
+            <Input />
+          </Form.Item>
+          <Form.Item name="outcomeMarkdown" label="最终产物" rules={[{ required: true, whitespace: true }]}>
+            <Input.TextArea rows={3} />
+          </Form.Item>
+          <Form.Item name="prerequisitesMarkdown" label="前置条件" rules={[{ required: true, whitespace: true }]}>
+            <Input.TextArea rows={3} />
+          </Form.Item>
+          <Form.Item name="safetyMarkdown" label="安全说明" rules={[{ required: true, whitespace: true }]}>
+            <Input.TextArea rows={3} />
+          </Form.Item>
+          <Form.Item name="bodyMarkdown" label="正文说明" rules={[{ required: true, whitespace: true }]}>
+            <Input.TextArea rows={6} />
+          </Form.Item>
+          <Button type="primary" htmlType="submit" loading={practiceMutation.isPending}>保存</Button>
+        </Form>
+      </Modal>
+
+      <Modal open={stepModalOpen} title={editingStep ? '编辑步骤' : '新增步骤'} footer={null} onCancel={() => setStepModalOpen(false)} width={760}>
+        <Form form={stepForm} layout="vertical" onFinish={(values) => stepMutation.mutate(values)}>
+          <Form.Item name="title" label="标题" rules={[{ required: true, whitespace: true }]}>
+            <Input />
+          </Form.Item>
+          <Form.Item name="description" label="说明" rules={[{ required: true, whitespace: true }]}>
+            <Input.TextArea rows={3} />
+          </Form.Item>
+          <Form.Item name="checklistMarkdown" label="检查清单" rules={[{ required: true, whitespace: true }]}>
+            <Input.TextArea rows={4} />
+          </Form.Item>
+          <Form.Item name="acceptanceMarkdown" label="验收标准" rules={[{ required: true, whitespace: true }]}>
+            <Input.TextArea rows={3} />
+          </Form.Item>
+          <Form.Item name="sortOrder" label="排序" rules={[{ required: true, type: 'number', min: 0 }]}>
+            <InputNumber min={0} className="admin-number-input" />
+          </Form.Item>
+          <Form.Item name="requiredStep" label="必做步骤" valuePropName="checked">
+            <Switch checkedChildren="必做" unCheckedChildren="可选" />
+          </Form.Item>
+          <Button type="primary" htmlType="submit" loading={stepMutation.isPending}>保存步骤</Button>
+        </Form>
+      </Modal>
+
+      <Modal open={artifactModalOpen} title={artifactMode === 'FILE' ? '上传文件附件' : '新增文本附件'} footer={null} onCancel={() => setArtifactModalOpen(false)} width={720}>
+        <Form form={artifactForm} layout="vertical" onFinish={(values) => artifactMutation.mutate(values)}>
+          <Form.Item name="name" label="名称" rules={[{ required: true, whitespace: true }]}>
+            <Input />
+          </Form.Item>
+          <Form.Item name="artifactType" label="类型" rules={[{ required: true }]}>
+            <Select options={['SCRIPT', 'PROMPT', 'IMAGE', 'CONFIG', 'FILE', 'LINK'].map((value) => ({ label: value, value }))} />
+          </Form.Item>
+          {artifactMode === 'TEXT' ? (
+            <>
+              <Form.Item name="contentText" label="文本内容">
+                <Input.TextArea rows={6} />
+              </Form.Item>
+              <Form.Item name="externalUrl" label="外部链接" rules={[{ type: 'url' }]}>
+                <Input />
+              </Form.Item>
+            </>
+          ) : (
+            <Form.Item label="文件" required>
+              <Upload
+                accept=".py,.md,.json,.jsonl,.yaml,.yml,.txt,.png,.jpg,.jpeg,.webp,.zip"
+                maxCount={1}
+                beforeUpload={(file) => {
+                  setArtifactFile(file);
+                  return false;
+                }}
+                onRemove={() => setArtifactFile(undefined)}
+              >
+                <Button>选择附件文件</Button>
+              </Upload>
+            </Form.Item>
+          )}
+          <Form.Item name="sortOrder" label="排序" rules={[{ required: true, type: 'number', min: 0 }]}>
+            <InputNumber min={0} className="admin-number-input" />
+          </Form.Item>
+          <Button type="primary" htmlType="submit" loading={artifactMutation.isPending}>保存附件</Button>
+        </Form>
+      </Modal>
+
+      <Modal open={resourceModalOpen} title="新增关联资源" footer={null} onCancel={() => setResourceModalOpen(false)} width={720}>
+        <Form form={resourceForm} layout="vertical" onFinish={(values) => resourceMutation.mutate(values)}>
+          <Form.Item name="resourceType" label="资源类型" rules={[{ required: true }]}>
+            <Select options={['SKILL', 'MODEL', 'DATASET', 'FINETUNE_JOB', 'REDIRECT_LINK'].map((value) => ({ label: value, value }))} />
+          </Form.Item>
+          <Form.Item name="resourceId" label="站内资源 ID">
+            <InputNumber min={1} className="admin-number-input" />
+          </Form.Item>
+          <Form.Item name="title" label="标题" rules={[{ required: true, whitespace: true }]}>
+            <Input />
+          </Form.Item>
+          <Form.Item name="url" label="跳转链接">
+            <Input placeholder="/skills/1 或 https://example.com" />
+          </Form.Item>
+          <Form.Item name="description" label="说明" rules={[{ required: true, whitespace: true }]}>
+            <Input.TextArea rows={3} />
+          </Form.Item>
+          <Form.Item name="sortOrder" label="排序" rules={[{ required: true, type: 'number', min: 0 }]}>
+            <InputNumber min={0} className="admin-number-input" />
+          </Form.Item>
+          <Button type="primary" htmlType="submit" loading={resourceMutation.isPending}>保存关联资源</Button>
+        </Form>
+      </Modal>
+    </div>
+  );
 }
 
 export function ApiKeysAdminPage() {

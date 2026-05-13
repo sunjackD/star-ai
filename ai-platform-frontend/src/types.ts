@@ -202,6 +202,7 @@ export type AdminOverview = {
   models: number;
   datasets: number;
   finetuneJobs: number;
+  bestPractices: number;
   links: number;
   apiKeys: number;
   auditLogs: number;

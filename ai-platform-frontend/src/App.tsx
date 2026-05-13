@@ -45,6 +45,7 @@ import {
   AgentsAdminPage,
   ApiKeysAdminPage,
   AuditLogsAdminPage,
+  BestPracticesAdminPage,
   DatasetsAdminPage,
   FinetuneJobsAdminPage,
   LinksAdminPage,
@@ -125,6 +126,7 @@ function Shell() {
         { key: '/admin/models', label: <Link to="/admin/models">模型</Link> },
         { key: '/admin/datasets', label: <Link to="/admin/datasets">数据集</Link> },
         { key: '/admin/finetune-jobs', label: <Link to="/admin/finetune-jobs">微调任务</Link> },
+        { key: '/admin/best-practices', label: <Link to="/admin/best-practices">最佳实践</Link> },
         { key: '/admin/links', label: <Link to="/admin/links">跳转链接</Link> },
         { key: '/admin/settings', label: <Link to="/admin/settings">系统设置</Link> },
         { key: '/admin/api-keys', label: <Link to="/admin/api-keys">Key 审计</Link> },
@@ -1049,6 +1051,7 @@ function App() {
                 <Route path="/admin/models" element={<ModelsAdminPage />} />
                 <Route path="/admin/datasets" element={<DatasetsAdminPage />} />
                 <Route path="/admin/finetune-jobs" element={<FinetuneJobsAdminPage />} />
+                <Route path="/admin/best-practices" element={<BestPracticesAdminPage />} />
                 <Route path="/admin/links" element={<LinksAdminPage />} />
                 <Route path="/admin/settings" element={<SettingsAdminPage />} />
                 <Route path="/admin/api-keys" element={<ApiKeysAdminPage />} />

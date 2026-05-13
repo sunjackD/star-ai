@@ -538,6 +538,20 @@ pre {
   width: 100%;
 }
 
+.admin-detail-card {
+  margin-top: 18px;
+}
+
+.admin-subgrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+.admin-short-input {
+  width: 180px;
+}
+
 .boot-screen {
   min-height: 100vh;
   display: grid;
