@@ -1,6 +1,7 @@
 # 星梦 AI 聚合平台
 
 AI 聚合平台用于集中管理 AI Agents、Skills、模型入口、导航链接、用户和 API Key。平台自带 Developer API，可把平台自身作为 Skill 交给 AI Agent 调用，用于查询、上传、导入和下载站内 Skills。
+平台还提供最佳实践库，用于沉淀可复用的 AI 工作流、脚本、Prompt、微调参数和安全注意事项。
 
 ## 快速启动
 
@@ -55,6 +56,7 @@ sh scripts/start.sh
 - Swagger：http://localhost:8081/swagger-ui.html
 
 首次访问会进入初始化页面，请手动创建第一个管理员账号。
+初始化管理员后，可在“最佳实践”查看内置的聊天记录风格微调与 AstrBot 接入实践。
 
 ## 常用命令
 
