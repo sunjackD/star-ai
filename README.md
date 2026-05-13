@@ -9,8 +9,9 @@
 - 登录鉴权：JWT 登录，详情页和后台接口后端强制鉴权。
 - API Key：登录用户可生成带 scope 的 API Key，明文只展示一次。
 - 平台自管理 Skill：AI Agent 可通过 API Key 查询、导入、远程添加和下载 Skills。
-- 完整管理后台：用户、Agents、Skills、分类、模型、数据集、微调任务、跳转链接、API Key 和审计日志。
-- 全局双风格：可在 `原型7-极简风格参考版` 和 `原型6-Minimalist Modern` 两套风格间切换，覆盖 Ant Design 组件和业务页面。
+- 完整管理后台：用户新增/编辑、Agents、Skills、分类、模型、数据集、微调任务、导航链接、系统设置、API Key 和审计日志。
+- 首页导航聚合：后台配置外部跳转链接，前台首页按分类展示常用入口。
+- 全站统一风格：管理员在后台设置“极简风”或“现代风”，普通前台不展示样式切换入口。
 - Docker 部署：配置 `.env` 后执行脚本构建并启动。
 
 ## 技术栈
@@ -134,14 +135,22 @@ curl -H "X-API-Key: xma_your_key" http://localhost:8080/api/v1/developer/skills/
 
 管理员登录后可以访问 `/admin`，后台包含：
 
-- `/admin/users`：用户状态、角色和密码重置。
+- `/admin/users`：用户新增、编辑、状态、角色和密码重置。
 - `/admin/agents`：AI Agents 创建、编辑、删除、上下架。
 - `/admin/skills` 与 `/admin/skill-categories`：Skill 和分类管理。
 - `/admin/models`：模型与 newapi 跳转入口管理。
 - `/admin/datasets` 与 `/admin/finetune-jobs`：数据集和微调任务管理。
-- `/admin/links`：外部资源跳转链接管理。
+- `/admin/links`：首页导航聚合链接管理，支持分类、排序、图标和上下架。
+- `/admin/settings`：站点名称、默认主题、注册开关、默认角色和 API Key 默认过期策略。
 - `/admin/api-keys`：API Key 状态和 scope 审计。
 - `/admin/audit-logs`：后台写操作和 Developer API 调用审计。
+
+## 全站主题和导航聚合
+
+- 主题由后台系统设置统一控制，可选“极简风”和“现代风”。
+- 普通用户和未登录用户只看到最终主题，不显示主题切换器。
+- 首页“导航聚合”读取后台配置的 ACTIVE 链接，按分类和排序展示。
+- 默认关闭公开注册，用户主要由管理员在 `/admin/users` 创建。
 
 ## 验证命令
 
