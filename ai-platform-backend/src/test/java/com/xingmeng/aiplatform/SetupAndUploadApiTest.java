@@ -364,6 +364,24 @@ class SetupAndUploadApiTest {
     }
 
     @Test
+    void remoteSkillImportRejectsUnsafeUrls() throws Exception {
+        String jwt = createAdminAndLogin("remote_import_owner", "remote-import-owner@example.com");
+        String apiKey = createApiKey(jwt, "skills:read", "skills:download", "skills:import", "skills:write");
+
+        mockMvc.perform(post("/api/v1/developer/skills/remote/import")
+                        .header("X-API-Key", apiKey)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(remoteImportBody("http://example.com/skill.zip")))
+                .andExpect(status().isBadRequest());
+
+        mockMvc.perform(post("/api/v1/developer/skills/remote/import")
+                        .header("X-API-Key", apiKey)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(remoteImportBody("https://localhost/skill.zip")))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
     void authenticatedUserCanUploadAndDownloadSkillFromMarket() throws Exception {
         String jwt = createAdminAndLogin("market_owner", "market-owner@example.com");
         MockMultipartFile skillFile = new MockMultipartFile(
@@ -456,6 +474,20 @@ class SetupAndUploadApiTest {
                 .getResponse()
                 .getContentAsString();
         return objectMapper.readTree(json).path("data").path("plainKey").asText();
+    }
+
+    private String remoteImportBody(String url) {
+        return """
+                {
+                  "name": "remote-import",
+                  "categoryId": 1,
+                  "url": "%s",
+                  "description": "Remote import",
+                  "tags": "remote,import",
+                  "author": "tester",
+                  "usageMarkdown": "# Remote Import"
+                }
+                """.formatted(url);
     }
 
     private String login(String username, String password) throws Exception {

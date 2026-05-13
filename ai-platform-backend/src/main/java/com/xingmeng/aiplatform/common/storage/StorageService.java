@@ -10,6 +10,8 @@ public interface StorageService {
 
     StoredObject storeSkillArtifact(MultipartFile file);
 
+    StoredObject storeSkillArtifact(byte[] bytes, String originalName, String contentType);
+
     StoredObject storeBestPracticeArtifact(MultipartFile file);
 
     StoredObject storeSkillDirectory(MultipartFile[] files, List<String> relativePaths, String packageName);

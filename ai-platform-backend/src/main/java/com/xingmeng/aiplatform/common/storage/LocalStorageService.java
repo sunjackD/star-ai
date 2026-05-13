@@ -55,14 +55,29 @@ public class LocalStorageService implements StorageService {
     public StoredObject storeSkillArtifact(MultipartFile file) {
         ensureFile(file, MAX_SKILL_SIZE);
         String filename = cleanOriginalName(file);
+        return storeSkillArtifactBytes(readBytes(file), filename, file.getContentType());
+    }
+
+    @Override
+    public StoredObject storeSkillArtifact(byte[] bytes, String originalName, String contentType) {
+        if (bytes == null || bytes.length == 0) {
+            throw new BusinessException(HttpStatus.BAD_REQUEST, "文件不能为空");
+        }
+        if (bytes.length > MAX_SKILL_SIZE) {
+            throw new BusinessException(HttpStatus.BAD_REQUEST, "文件超过大小限制");
+        }
+        return storeSkillArtifactBytes(bytes, originalName, contentType);
+    }
+
+    private StoredObject storeSkillArtifactBytes(byte[] bytes, String filename, String contentType) {
         String lowerName = filename.toLowerCase(Locale.ROOT);
         if (!lowerName.equals("skill.md") && !lowerName.endsWith(".zip")) {
             throw new BusinessException(HttpStatus.BAD_REQUEST, "仅支持上传 SKILL.md 或 zip 包");
         }
         if (lowerName.endsWith(".zip")) {
-            validateZip(file);
+            validateZip(bytes);
         }
-        return store("skills", file, file.getContentType());
+        return storeBytes("skills", bytes, filename, contentType);
     }
 
     @Override
@@ -179,9 +194,9 @@ public class LocalStorageService implements StorageService {
         }
     }
 
-    private void validateZip(MultipartFile file) {
+    private void validateZip(byte[] bytes) {
         boolean hasSkill = false;
-        try (ZipInputStream zip = new ZipInputStream(file.getInputStream())) {
+        try (ZipInputStream zip = new ZipInputStream(new ByteArrayInputStream(bytes))) {
             ZipEntry entry;
             while ((entry = zip.getNextEntry()) != null) {
                 Path normalized = Paths.get(entry.getName()).normalize();
@@ -196,6 +211,14 @@ public class LocalStorageService implements StorageService {
         }
         if (!hasSkill) {
             throw new BusinessException(HttpStatus.BAD_REQUEST, "Skill 包必须包含 SKILL.md");
+        }
+    }
+
+    private byte[] readBytes(MultipartFile file) {
+        try {
+            return file.getBytes();
+        } catch (IOException exception) {
+            throw new BusinessException(HttpStatus.BAD_REQUEST, "文件读取失败");
         }
     }
 

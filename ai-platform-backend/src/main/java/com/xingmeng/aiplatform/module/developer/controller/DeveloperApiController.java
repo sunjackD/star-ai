@@ -6,6 +6,7 @@ import com.xingmeng.aiplatform.module.auth.security.AuthenticatedUser;
 import com.xingmeng.aiplatform.module.audit.service.AuditService;
 import com.xingmeng.aiplatform.module.developer.dto.ApiKeyCreateRequest;
 import com.xingmeng.aiplatform.module.developer.dto.ApiKeyResponse;
+import com.xingmeng.aiplatform.module.developer.dto.RemoteSkillImportRequest;
 import com.xingmeng.aiplatform.module.developer.dto.RemoteSkillRequest;
 import com.xingmeng.aiplatform.module.developer.service.ApiKeyService;
 import com.xingmeng.aiplatform.module.skill.dto.SkillCreateRequest;
@@ -280,6 +281,27 @@ public class DeveloperApiController {
         return ApiResponse.success(saved);
     }
 
+    @PostMapping("/skills/remote/import")
+    public ApiResponse<Skill> importRemoteSkill(
+            Authentication authentication,
+            @Valid @RequestBody RemoteSkillImportRequest request
+    ) {
+        requireImportAndWrite(authentication);
+        URI uri = safeRemoteUri(request.url());
+        Skill saved = skillArtifactService.importRemoteSkill(
+                uri,
+                request.name(),
+                request.categoryId(),
+                request.description(),
+                request.tags(),
+                request.author(),
+                request.usageMarkdown(),
+                request.icon()
+        );
+        auditService.log(authentication, "DEVELOPER_REMOTE_SKILL_IMPORTED", "SKILL", saved.getId(), request.url());
+        return ApiResponse.success(saved);
+    }
+
     @PutMapping("/skills/{id}")
     @Transactional
     public ApiResponse<Skill> updateSkill(
@@ -350,6 +372,17 @@ public class DeveloperApiController {
                 || normalized.startsWith("192.168.")
                 || normalized.startsWith("169.254.")
                 || normalized.matches("^172\\.(1[6-9]|2\\d|3[0-1])\\..*");
+    }
+
+    private URI safeRemoteUri(String url) {
+        URI uri = URI.create(url);
+        if (!"https".equalsIgnoreCase(uri.getScheme())) {
+            throw new BusinessException(HttpStatus.BAD_REQUEST, "仅允许导入HTTPS地址");
+        }
+        if (isUnsafeHost(uri.getHost())) {
+            throw new BusinessException(HttpStatus.BAD_REQUEST, "不允许导入内网或本机地址");
+        }
+        return uri;
     }
 
     private void applyTextArtifact(Skill skill) {

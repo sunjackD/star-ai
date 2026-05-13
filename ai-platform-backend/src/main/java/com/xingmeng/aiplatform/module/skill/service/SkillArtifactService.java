@@ -14,17 +14,32 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.List;
+import java.util.Locale;
 
 @Service
 public class SkillArtifactService {
     private static final String TEXT_ARTIFACT = "TEXT";
     private static final String FILE_ARTIFACT = "FILE";
+    private static final long MAX_REMOTE_SKILL_SIZE = 20L * 1024 * 1024;
+    private static final int MAX_REMOTE_REDIRECTS = 5;
 
     private final SkillRepository skillRepository;
     private final SkillCategoryRepository categoryRepository;
     private final StorageService storageService;
+    private final HttpClient httpClient = HttpClient.newBuilder()
+            .connectTimeout(Duration.ofSeconds(10))
+            .followRedirects(HttpClient.Redirect.NEVER)
+            .build();
 
     public SkillArtifactService(
             SkillRepository skillRepository,
@@ -102,6 +117,26 @@ public class SkillArtifactService {
         StoredObject artifact = storageService.storeSkillDirectory(files, paths, name);
         applyArtifactSkill(skill, artifact, name, categoryId, description, tags, author, usageMarkdown, icon);
         return skill;
+    }
+
+    @Transactional
+    public Skill importRemoteSkill(
+            URI uri,
+            String name,
+            Long categoryId,
+            String description,
+            String tags,
+            String author,
+            String usageMarkdown,
+            String icon
+    ) {
+        RemoteArtifact remoteArtifact = downloadRemoteArtifact(uri, name);
+        StoredObject artifact = storageService.storeSkillArtifact(
+                remoteArtifact.bytes(),
+                remoteArtifact.fileName(),
+                remoteArtifact.contentType()
+        );
+        return createArtifactSkill(artifact, name, categoryId, description, tags, author, usageMarkdown, icon);
     }
 
     private Skill createArtifactSkill(
@@ -358,5 +393,124 @@ public class SkillArtifactService {
             name = skill.getName() + "-" + name;
         }
         return name.replaceAll("[\\\\/:*?\"<>|]", "_");
+    }
+
+    private RemoteArtifact downloadRemoteArtifact(URI originalUri, String name) {
+        URI uri = normalizeRemoteUri(originalUri);
+        validateRemoteDownloadUri(uri);
+        for (int redirectCount = 0; redirectCount <= MAX_REMOTE_REDIRECTS; redirectCount++) {
+            HttpRequest request = HttpRequest.newBuilder(uri)
+                    .timeout(Duration.ofSeconds(30))
+                    .GET()
+                    .build();
+            HttpResponse<InputStream> response = sendRemoteRequest(request);
+            if (isRedirect(response.statusCode())) {
+                uri = redirectUri(uri, response);
+                validateRemoteDownloadUri(uri);
+                continue;
+            }
+            if (response.statusCode() < 200 || response.statusCode() >= 300) {
+                throw new BusinessException(HttpStatus.BAD_GATEWAY, "远程 Skill 下载失败");
+            }
+            ensureRemoteContentLength(response);
+            String contentType = response.headers().firstValue("Content-Type").orElse("application/octet-stream");
+            return new RemoteArtifact(readRemoteBytes(response.body()), remoteArtifactFileName(originalUri, name), contentType);
+        }
+        throw new BusinessException(HttpStatus.BAD_GATEWAY, "远程 Skill 重定向过多");
+    }
+
+    private HttpResponse<InputStream> sendRemoteRequest(HttpRequest request) {
+        try {
+            return httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
+        } catch (IOException exception) {
+            throw new BusinessException(HttpStatus.BAD_GATEWAY, "远程 Skill 下载失败");
+        } catch (InterruptedException exception) {
+            Thread.currentThread().interrupt();
+            throw new BusinessException(HttpStatus.BAD_GATEWAY, "远程 Skill 下载失败");
+        }
+    }
+
+    private URI normalizeRemoteUri(URI uri) {
+        String host = uri.getHost() == null ? "" : uri.getHost().toLowerCase(Locale.ROOT);
+        if (!"github.com".equals(host)) {
+            return uri;
+        }
+        String[] parts = uri.getPath().split("/");
+        if (parts.length >= 3 && !uri.getPath().contains("/blob/") && !uri.getPath().contains("/raw/")) {
+            return URI.create("https://codeload.github.com/" + parts[1] + "/" + parts[2] + "/zip/refs/heads/main");
+        }
+        return uri;
+    }
+
+    private boolean isRedirect(int statusCode) {
+        return statusCode >= 300 && statusCode < 400;
+    }
+
+    private URI redirectUri(URI currentUri, HttpResponse<?> response) {
+        String location = response.headers().firstValue("Location")
+                .orElseThrow(() -> new BusinessException(HttpStatus.BAD_GATEWAY, "远程 Skill 重定向地址缺失"));
+        return currentUri.resolve(URI.create(location));
+    }
+
+    private void validateRemoteDownloadUri(URI uri) {
+        if (!"https".equalsIgnoreCase(uri.getScheme()) || isUnsafeRemoteHost(uri.getHost())) {
+            throw new BusinessException(HttpStatus.BAD_REQUEST, "不允许导入不安全的远程 Skill 地址");
+        }
+    }
+
+    private boolean isUnsafeRemoteHost(String host) {
+        if (host == null || host.isBlank()) {
+            return true;
+        }
+        String normalized = host.toLowerCase(Locale.ROOT);
+        return normalized.equals("localhost")
+                || normalized.equals("127.0.0.1")
+                || normalized.equals("0.0.0.0")
+                || normalized.equals("::1")
+                || normalized.startsWith("10.")
+                || normalized.startsWith("192.168.")
+                || normalized.startsWith("169.254.")
+                || normalized.matches("^172\\.(1[6-9]|2\\d|3[0-1])\\..*");
+    }
+
+    private void ensureRemoteContentLength(HttpResponse<?> response) {
+        var contentLength = response.headers().firstValueAsLong("Content-Length");
+        if (contentLength.isPresent() && contentLength.getAsLong() > MAX_REMOTE_SKILL_SIZE) {
+            throw new BusinessException(HttpStatus.BAD_REQUEST, "远程 Skill 文件超过大小限制");
+        }
+    }
+
+    private byte[] readRemoteBytes(InputStream inputStream) {
+        try (InputStream input = inputStream; ByteArrayOutputStream output = new ByteArrayOutputStream()) {
+            byte[] buffer = new byte[8192];
+            long total = 0;
+            int read;
+            while ((read = input.read(buffer)) != -1) {
+                total += read;
+                if (total > MAX_REMOTE_SKILL_SIZE) {
+                    throw new BusinessException(HttpStatus.BAD_REQUEST, "远程 Skill 文件超过大小限制");
+                }
+                output.write(buffer, 0, read);
+            }
+            return output.toByteArray();
+        } catch (IOException exception) {
+            throw new BusinessException(HttpStatus.BAD_GATEWAY, "远程 Skill 下载失败");
+        }
+    }
+
+    private String remoteArtifactFileName(URI uri, String name) {
+        String path = uri.getPath() == null ? "" : uri.getPath().toLowerCase(Locale.ROOT);
+        if (path.endsWith(".zip") || "github.com".equalsIgnoreCase(uri.getHost())) {
+            return safeBaseName(name) + ".zip";
+        }
+        return "SKILL.md";
+    }
+
+    private String safeBaseName(String name) {
+        String baseName = name == null || name.isBlank() ? "skill" : name;
+        return baseName.replaceAll("[\\\\/:*?\"<>|]", "_");
+    }
+
+    private record RemoteArtifact(byte[] bytes, String fileName, String contentType) {
     }
 }
