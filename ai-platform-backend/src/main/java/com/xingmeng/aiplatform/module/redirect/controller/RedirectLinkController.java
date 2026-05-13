@@ -18,7 +18,6 @@ public class RedirectLinkController {
 
     @GetMapping
     public ApiResponse<List<RedirectLink>> list() {
-        return ApiResponse.success(redirectLinkRepository.findAll());
+        return ApiResponse.success(redirectLinkRepository.findByStatusOrderByCategoryAscSortOrderAscIdAsc("ACTIVE"));
     }
 }
-

@@ -5,6 +5,7 @@ import com.xingmeng.aiplatform.module.auth.dto.AuthResponse;
 import com.xingmeng.aiplatform.module.auth.dto.LoginRequest;
 import com.xingmeng.aiplatform.module.auth.dto.RegisterRequest;
 import com.xingmeng.aiplatform.module.auth.security.JwtService;
+import com.xingmeng.aiplatform.module.platform.service.PlatformSettingsService;
 import com.xingmeng.aiplatform.module.user.entity.Role;
 import com.xingmeng.aiplatform.module.user.entity.User;
 import com.xingmeng.aiplatform.module.user.repository.RoleRepository;
@@ -20,25 +21,31 @@ public class AuthService {
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
+    private final PlatformSettingsService settingsService;
 
     public AuthService(
             UserRepository userRepository,
             RoleRepository roleRepository,
             PasswordEncoder passwordEncoder,
-            JwtService jwtService
+            JwtService jwtService,
+            PlatformSettingsService settingsService
     ) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
+        this.settingsService = settingsService;
     }
 
     @Transactional
     public AuthResponse register(RegisterRequest request) {
+        if (!settingsService.allowPublicRegistration()) {
+            throw new BusinessException(HttpStatus.FORBIDDEN, "公开注册已关闭，请联系管理员创建账号");
+        }
         if (userRepository.existsByUsernameOrEmail(request.username(), request.email())) {
             throw new BusinessException(HttpStatus.CONFLICT, "用户名或邮箱已存在");
         }
-        Role role = roleRepository.findByName("DEVELOPER")
+        Role role = roleRepository.findByName(settingsService.defaultUserRole())
                 .orElseThrow(() -> new BusinessException(HttpStatus.INTERNAL_SERVER_ERROR, "默认角色不存在"));
         User user = new User();
         user.setUsername(request.username());
@@ -76,4 +83,3 @@ public class AuthService {
         return new AuthResponse(jwtService.createToken(user.getId(), user.getUsername()), toProfile(user));
     }
 }
-

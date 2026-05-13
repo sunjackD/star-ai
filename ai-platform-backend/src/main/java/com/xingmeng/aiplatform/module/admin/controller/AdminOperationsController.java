@@ -127,7 +127,7 @@ public class AdminOperationsController {
 
     @GetMapping("/links")
     public ApiResponse<List<RedirectLink>> links() {
-        return ApiResponse.success(linkRepository.findAll());
+        return ApiResponse.success(linkRepository.findAllByOrderByCategoryAscSortOrderAscIdAsc());
     }
 
     @PostMapping("/links")
@@ -212,6 +212,8 @@ public class AdminOperationsController {
     private RedirectLink applyLink(RedirectLink link, RedirectLinkRequest request) {
         link.setName(request.name());
         link.setUrl(request.url());
+        link.setCategory(request.category());
+        link.setSortOrder(request.sortOrder());
         link.setDescription(request.description());
         link.setIcon(request.icon());
         link.setStatus(request.status());

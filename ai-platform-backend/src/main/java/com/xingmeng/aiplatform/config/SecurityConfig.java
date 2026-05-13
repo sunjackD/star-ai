@@ -35,7 +35,15 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
                         .requestMatchers("/api/v1/auth/login", "/api/v1/auth/register").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/v1/agents", "/api/v1/skills", "/api/v1/skills/categories", "/api/v1/models", "/api/v1/links").permitAll()
+                        .requestMatchers(
+                                HttpMethod.GET,
+                                "/api/v1/platform/config",
+                                "/api/v1/agents",
+                                "/api/v1/skills",
+                                "/api/v1/skills/categories",
+                                "/api/v1/models",
+                                "/api/v1/links"
+                        ).permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/agents/*", "/api/v1/skills/*", "/api/v1/models/*").authenticated()
                         .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/v1/developer/**").authenticated()
@@ -56,4 +64,3 @@ public class SecurityConfig {
         return configuration.getAuthenticationManager();
     }
 }
-

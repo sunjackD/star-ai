@@ -13,6 +13,7 @@ import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasItem;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -29,6 +30,39 @@ class AdminManagementApiTest {
     @Test
     void adminCanManageUsersAgentsAndAuditLogs() throws Exception {
         String adminToken = login("admin", "admin123");
+
+        mockMvc.perform(post("/api/v1/admin/users")
+                        .header("Authorization", "Bearer " + adminToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "username": "ops_user",
+                                  "email": "ops@example.com",
+                                  "displayName": "Operations",
+                                  "password": "secret123",
+                                  "status": "ACTIVE",
+                                  "roles": ["VIEWER"]
+                                }
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.username").value("ops_user"))
+                .andExpect(jsonPath("$.data.roles", hasItem("VIEWER")));
+
+        mockMvc.perform(put("/api/v1/admin/users/2")
+                        .header("Authorization", "Bearer " + adminToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "email": "ops-updated@example.com",
+                                  "displayName": "Operations Updated",
+                                  "status": "DISABLED",
+                                  "roles": ["VIEWER", "DEVELOPER"]
+                                }
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.email").value("ops-updated@example.com"))
+                .andExpect(jsonPath("$.data.status").value("DISABLED"))
+                .andExpect(jsonPath("$.data.roles", hasItem("DEVELOPER")));
 
         mockMvc.perform(get("/api/v1/admin/users")
                         .header("Authorization", "Bearer " + adminToken))
@@ -63,21 +97,22 @@ class AdminManagementApiTest {
 
     @Test
     void nonAdminCannotUseAdminManagementApis() throws Exception {
-        String registerJson = mockMvc.perform(post("/api/v1/auth/register")
+        String adminToken = login("admin", "admin123");
+        mockMvc.perform(post("/api/v1/admin/users")
+                        .header("Authorization", "Bearer " + adminToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
                                   "username": "viewer_user",
                                   "email": "viewer@example.com",
+                                  "displayName": "Viewer",
                                   "password": "secret123",
-                                  "displayName": "Viewer"
+                                  "status": "ACTIVE",
+                                  "roles": ["VIEWER"]
                                 }
                                 """))
-                .andExpect(status().isOk())
-                .andReturn()
-                .getResponse()
-                .getContentAsString();
-        String token = objectMapper.readTree(registerJson).path("data").path("token").asText();
+                .andExpect(status().isOk());
+        String token = login("viewer_user", "secret123");
 
         mockMvc.perform(get("/api/v1/admin/users")
                         .header("Authorization", "Bearer " + token))

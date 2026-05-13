@@ -98,6 +98,48 @@ public class AdminController {
         return ApiResponse.success(userRepository.findAll().stream().map(this::toUserSummary).toList());
     }
 
+    @PostMapping("/users")
+    public ApiResponse<UserSummary> createUser(
+            Authentication authentication,
+            @Valid @RequestBody UserCreateRequest request
+    ) {
+        if (userRepository.existsByUsernameOrEmail(request.username(), request.email())) {
+            throw new BusinessException(HttpStatus.CONFLICT, "用户名或邮箱已存在");
+        }
+        User user = new User();
+        user.setUsername(request.username());
+        user.setEmail(request.email());
+        user.setDisplayName(request.displayName());
+        user.setPasswordHash(passwordEncoder.encode(request.password()));
+        user.setStatus(request.status());
+        user.setThemePreference("minimal-reference");
+        user.setRoles(new HashSet<>(request.roles().stream().map(this::role).toList()));
+        User saved = userRepository.save(user);
+        auditService.log(authentication, "USER_CREATED", "USER", saved.getId(), saved.getUsername());
+        return ApiResponse.success(toUserSummary(saved));
+    }
+
+    @PutMapping("/users/{id}")
+    @Transactional
+    public ApiResponse<UserSummary> updateUser(
+            Authentication authentication,
+            @PathVariable Long id,
+            @Valid @RequestBody UserUpdateRequest request
+    ) {
+        User user = user(id);
+        userRepository.findByEmail(request.email())
+                .filter(existing -> !existing.getId().equals(id))
+                .ifPresent(existing -> {
+                    throw new BusinessException(HttpStatus.CONFLICT, "邮箱已存在");
+                });
+        user.setEmail(request.email());
+        user.setDisplayName(request.displayName());
+        user.setStatus(request.status());
+        user.setRoles(new HashSet<>(request.roles().stream().map(this::role).toList()));
+        auditService.log(authentication, "USER_UPDATED", "USER", id, user.getUsername());
+        return ApiResponse.success(toUserSummary(user));
+    }
+
     @PutMapping("/users/{id}/status")
     @Transactional
     public ApiResponse<UserSummary> updateUserStatus(

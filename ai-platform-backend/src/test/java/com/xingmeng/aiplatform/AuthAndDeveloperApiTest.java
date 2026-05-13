@@ -43,24 +43,9 @@ class AuthAndDeveloperApiTest {
     }
 
     @Test
-    void userCanRegisterCreateApiKeyAndCallDeveloperSkillList() throws Exception {
-        String registerBody = """
-                {
-                  "username": "dev_user",
-                  "email": "dev@example.com",
-                  "password": "secret123",
-                  "displayName": "Developer"
-                }
-                """;
-
-        String registerJson = mockMvc.perform(post("/api/v1/auth/register")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(registerBody))
-                .andExpect(status().isOk())
-                .andReturn()
-                .getResponse()
-                .getContentAsString();
-        String jwt = objectMapper.readTree(registerJson).path("data").path("token").asText();
+    void adminCreatedUserCanCreateApiKeyAndCallDeveloperSkillList() throws Exception {
+        createUser("dev_user", "dev@example.com", "Developer", "DEVELOPER");
+        String jwt = login("dev_user", "secret123");
 
         String keyBody = """
                 {
@@ -86,22 +71,8 @@ class AuthAndDeveloperApiTest {
 
     @Test
     void apiKeyScopeIsRequiredForDeveloperOperations() throws Exception {
-        String registerBody = """
-                {
-                  "username": "limited_user",
-                  "email": "limited@example.com",
-                  "password": "secret123",
-                  "displayName": "Limited"
-                }
-                """;
-        String registerJson = mockMvc.perform(post("/api/v1/auth/register")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(registerBody))
-                .andExpect(status().isOk())
-                .andReturn()
-                .getResponse()
-                .getContentAsString();
-        String jwt = objectMapper.readTree(registerJson).path("data").path("token").asText();
+        createUser("limited_user", "limited@example.com", "Limited", "DEVELOPER");
+        String jwt = login("limited_user", "secret123");
 
         String keyJson = mockMvc.perform(post("/api/v1/developer/api-keys")
                         .header("Authorization", "Bearer " + jwt)
@@ -121,5 +92,39 @@ class AuthAndDeveloperApiTest {
         mockMvc.perform(get("/api/v1/developer/skills/1/download")
                         .header("X-API-Key", plainKey))
                 .andExpect(status().isForbidden());
+    }
+
+    private void createUser(String username, String email, String displayName, String role) throws Exception {
+        String adminToken = login("admin", "admin123");
+        mockMvc.perform(post("/api/v1/admin/users")
+                        .header("Authorization", "Bearer " + adminToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "username": "%s",
+                                  "email": "%s",
+                                  "displayName": "%s",
+                                  "password": "secret123",
+                                  "status": "ACTIVE",
+                                  "roles": ["%s"]
+                                }
+                                """.formatted(username, email, displayName, role)))
+                .andExpect(status().isOk());
+    }
+
+    private String login(String username, String password) throws Exception {
+        String json = mockMvc.perform(post("/api/v1/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "username": "%s",
+                                  "password": "%s"
+                                }
+                                """.formatted(username, password)))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+        return objectMapper.readTree(json).path("data").path("token").asText();
     }
 }

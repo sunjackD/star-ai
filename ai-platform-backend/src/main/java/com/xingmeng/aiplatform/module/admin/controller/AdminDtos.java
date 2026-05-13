@@ -24,6 +24,24 @@ record RolesRequest(@NotEmpty List<@NotBlank String> roles) {
 record PasswordResetRequest(@NotBlank @Size(min = 6, max = 64) String password) {
 }
 
+record UserCreateRequest(
+        @NotBlank @Size(max = 64) String username,
+        @NotBlank @Email @Size(max = 160) String email,
+        @NotBlank @Size(max = 120) String displayName,
+        @NotBlank @Size(min = 6, max = 64) String password,
+        @NotBlank String status,
+        @NotEmpty List<@NotBlank String> roles
+) {
+}
+
+record UserUpdateRequest(
+        @NotBlank @Email @Size(max = 160) String email,
+        @NotBlank @Size(max = 120) String displayName,
+        @NotBlank String status,
+        @NotEmpty List<@NotBlank String> roles
+) {
+}
+
 record AgentRequest(
         @NotBlank @Size(max = 120) String name,
         @NotBlank @Size(max = 80) String category,
@@ -81,6 +99,8 @@ record FinetuneJobRequest(
 record RedirectLinkRequest(
         @NotBlank @Size(max = 120) String name,
         @NotBlank @Size(max = 255) String url,
+        @NotBlank @Size(max = 80) String category,
+        @NotNull @Min(0) Integer sortOrder,
         @NotBlank @Size(max = 500) String description,
         @Size(max = 255) String icon,
         @NotBlank String status
