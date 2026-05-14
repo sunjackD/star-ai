@@ -82,31 +82,31 @@ INSERT INTO best_practices (
     cover_icon, status, sort_order, outcome_markdown, prerequisites_markdown,
     safety_markdown, body_markdown
 ) VALUES (
-    '聊天记录风格微调与 AstrBot 接入实践',
+    '让AI“成为”你熟悉的那个他/她',
     'chat-style-finetune-astrbot',
-    '把聊天记录导出、清洗为 JSONL，完成风格微调，并接入 AstrBot 形成可验证的对话机器人实践。',
+    '把授权聊天记录整理为可训练数据，让 AI 学会熟悉对象的表达习惯、回应节奏和相处方式，并接入 AstrBot 形成可验证的陪伴式对话机器人。',
     '模型微调',
-    '聊天记录,jsonl,模型微调,AstrBot,Prompt,隐私脱敏',
+    '聊天记录,jsonl,人格复刻,模型微调,AstrBot,Prompt,隐私脱敏',
     'ADVANCED',
     180,
     'https://linux.do/t/topic/1603785',
     'MessageCircle',
     'ACTIVE',
     10,
-    '最终产物：训练集 JSONL、验证集 JSONL、微调参数建议、系统提示词、AstrBot 模型配置和插件配置清单。',
-    '需要准备：合法取得且已授权使用的聊天记录、可用的微调平台或本地训练环境、AstrBot 运行环境、模型 API 入口。',
-    '必须先脱敏姓名、手机号、身份证号、地址、账号凭证和私人关系信息。不要把生成结果冒充真实本人，不要在未经授权的情况下上传他人聊天记录。',
-    '该实践把原始教程整理为可复用工作流：数据导出、数据清洗、微调参数选择、系统提示词制作、AstrBot 接入、插件配置和验收风险控制。'
+    '最终产物：脱敏后的训练集 JSONL、验证集 JSONL、角色画像说明、微调参数建议、系统提示词、AstrBot 模型配置和插件配置清单。',
+    '需要准备：本人或已明确授权对象的聊天记录、可用的微调平台或本地训练环境、AstrBot 运行环境、模型 API 入口，以及用于验收语气相似度的固定问题集。',
+    '必须先脱敏姓名、手机号、身份证号、地址、账号凭证和私人关系信息。不要把生成结果冒充真实本人，不要在未经授权的情况下上传、训练或公开他人聊天记录。',
+    '该实践把“想让 AI 像熟悉的那个人一样聊天”拆成可复用流程：授权确认、数据导出、隐私脱敏、JSONL 构造、角色画像提炼、微调参数选择、系统提示词制作、AstrBot 接入和验收风险控制。'
 );
 
 INSERT INTO best_practice_steps (
     practice_id, title, description, checklist_markdown, acceptance_markdown,
     required_step, sort_order
 )
-SELECT id, '准备工作',
-       '确认聊天记录来源合法，准备导出工具、微调平台、AstrBot 和模型服务入口。',
-       '- 确认数据使用授权\n- 准备 JSON 格式聊天记录\n- 准备微调平台或本地训练环境\n- 准备 AstrBot 环境',
-       '能够说明数据来源、训练目标、部署位置和风险边界。',
+SELECT id, '确认授权与目标角色边界',
+       '先明确要复现的是谁的表达习惯，以及哪些内容绝不能被模型学习、输出或对外展示。',
+       '- 确认本人数据或明确授权\n- 定义目标角色的语气、称呼和回应边界\n- 准备 JSON 格式聊天记录\n- 准备微调平台或本地训练环境\n- 准备 AstrBot 环境',
+       '能够说明数据来源、训练目标、角色边界、部署位置和风险边界。',
        TRUE, 10
 FROM best_practices WHERE slug = 'chat-style-finetune-astrbot';
 
@@ -114,10 +114,10 @@ INSERT INTO best_practice_steps (
     practice_id, title, description, checklist_markdown, acceptance_markdown,
     required_step, sort_order
 )
-SELECT id, '数据导出与清洗',
-       '将聊天记录导出为 JSON，再通过脚本转换为训练集和验证集 JSONL。',
-       '- 导出 JSON\n- 修改脚本中的输入路径和目标用户\n- 运行脚本生成 train.jsonl 和 val.jsonl\n- 检查并脱敏敏感信息',
-       '得到可上传微调平台的 JSONL 文件，样本中不存在明显隐私字段。',
+SELECT id, '聊天记录导出与脱敏清洗',
+       '将授权聊天记录导出为 JSON，清理无效消息和敏感字段，再转换为训练集与验证集 JSONL。',
+       '- 导出 JSON\n- 删除系统通知、转账、定位和无关媒体消息\n- 修改脚本中的输入路径和目标用户\n- 运行脚本生成 train.jsonl 和 val.jsonl\n- 检查并脱敏敏感信息',
+       '得到可上传微调平台的 JSONL 文件，样本中不存在明显隐私字段，且对话仍保留目标对象的表达习惯。',
        TRUE, 20
 FROM best_practices WHERE slug = 'chat-style-finetune-astrbot';
 
@@ -125,10 +125,10 @@ INSERT INTO best_practice_steps (
     practice_id, title, description, checklist_markdown, acceptance_markdown,
     required_step, sort_order
 )
-SELECT id, '模型微调',
-       '根据数据量、基础模型、预算和拟合目标选择微调参数。',
-       '- 统计训练集行数和文件大小\n- 选择基础模型\n- 选择 epoch、learning rate、batch size\n- 保留验证集用于观察过拟合',
-       '微调任务能启动，并能基于验证结果判断是否需要调参或重新清洗数据。',
+SELECT id, '角色画像与模型微调',
+       '基于数据量、目标语气、基础模型和预算选择微调参数，同时整理角色画像，避免只学到口头禅。',
+       '- 统计训练集行数和文件大小\n- 提炼称呼习惯、句长、情绪表达和禁区\n- 选择基础模型\n- 选择 epoch、learning rate、batch size\n- 保留验证集用于观察过拟合',
+       '微调任务能启动，并能基于验证结果判断是否需要补充样本、调参或重新清洗数据。',
        TRUE, 30
 FROM best_practices WHERE slug = 'chat-style-finetune-astrbot';
 
@@ -137,9 +137,9 @@ INSERT INTO best_practice_steps (
     required_step, sort_order
 )
 SELECT id, '系统提示词与 AstrBot 接入',
-       '整理短提示词和长提示词，在 AstrBot 中添加模型、人格和消息渠道。',
+       '把微调模型、角色画像和行为边界写入提示词，在 AstrBot 中添加模型、人格和消息渠道。',
        '- 准备短系统提示词\n- 准备长系统提示词\n- 配置 AstrBot 模型\n- 配置人格\n- 配置消息渠道',
-       'AstrBot 可以调用微调后的模型完成基础对话。',
+       'AstrBot 可以调用微调后的模型完成基础对话，并能稳定维持目标语气和边界。',
        TRUE, 40
 FROM best_practices WHERE slug = 'chat-style-finetune-astrbot';
 
@@ -147,10 +147,10 @@ INSERT INTO best_practice_steps (
     practice_id, title, description, checklist_markdown, acceptance_markdown,
     required_step, sort_order
 )
-SELECT id, '插件配置与验收',
-       '按需要配置分段回复、主动回复和记忆插件，并用固定问题集验证输出风格。',
-       '- 配置分段回复\n- 配置主动回复\n- 配置记忆插件\n- 用固定问题集测试\n- 记录失败样例并回到数据或参数阶段修正',
-       '输出具备目标风格特征，且不会泄露训练数据中的隐私信息。',
+SELECT id, '插件配置与相似度验收',
+       '按需要配置分段回复、主动回复和记忆插件，并用固定问题集验证“像不像”、是否越界和是否泄露隐私。',
+       '- 配置分段回复\n- 配置主动回复\n- 配置记忆插件\n- 用固定问题集测试\n- 记录不像、过拟合、冒充真人和隐私泄露样例\n- 回到数据、提示词或参数阶段修正',
+       '输出具备目标风格特征，但不会冒充真实本人，也不会泄露训练数据中的隐私信息。',
        TRUE, 50
 FROM best_practices WHERE slug = 'chat-style-finetune-astrbot';
 
@@ -171,7 +171,7 @@ INSERT INTO best_practice_artifacts (
     content_type, external_url, sort_order
 )
 SELECT id, '微调参数顾问 Prompt', 'PROMPT',
-       '你现在是大模型微调参数顾问。请基于训练集行数、训练集文件大小、基础模型、拟合目标，输出推荐 epoch、learning rate、batch size、验证集比例、风险观察点和降成本方案。',
+       '你现在是人格风格微调顾问。请基于训练集行数、训练集文件大小、基础模型、目标角色风格、拟合目标和隐私约束，输出推荐 epoch、learning rate、batch size、验证集比例、风险观察点和降成本方案。',
        NULL,
        NULL,
        'text/markdown',
@@ -184,7 +184,7 @@ INSERT INTO best_practice_artifacts (
     content_type, external_url, sort_order
 )
 SELECT id, '短系统提示词模板', 'PROMPT',
-       '你是目标角色，用聊天口吻回复：短句、多换行，先回答问题再补充个人风格；避免编造事实，不确定时反问一个具体问题。',
+       '你是一个经过授权训练的风格化聊天助手，需要学习目标对象的表达习惯和回应节奏，但不能声称自己就是真实本人。用聊天口吻回复：短句、多换行，先回应情绪再回答问题；不确定时反问一个具体问题。',
        NULL,
        NULL,
        'text/markdown',

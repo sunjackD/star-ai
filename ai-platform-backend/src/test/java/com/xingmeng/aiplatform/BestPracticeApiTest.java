@@ -49,7 +49,7 @@ class BestPracticeApiTest {
         mockMvc.perform(get("/api/v1/best-practices"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data[0].slug").value("chat-style-finetune-astrbot"))
-                .andExpect(jsonPath("$.data[0].title").value("聊天记录风格微调与 AstrBot 接入实践"))
+                .andExpect(jsonPath("$.data[0].title").value("让AI“成为”你熟悉的那个他/她"))
                 .andExpect(jsonPath("$.data[0].safetyMarkdown").doesNotExist());
     }
 
@@ -68,6 +68,7 @@ class BestPracticeApiTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.safetyMarkdown", containsString("必须先脱敏")))
                 .andExpect(jsonPath("$.data.steps.length()", greaterThanOrEqualTo(5)))
+                .andExpect(jsonPath("$.data.bodyMarkdown", containsString("角色画像提炼")))
                 .andExpect(jsonPath("$.data.artifacts[0].name").value("数据转换脚本"))
                 .andExpect(jsonPath("$.data.relatedResources[*].title", hasItem("AstrBot 项目")));
 
