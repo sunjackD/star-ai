@@ -1,4 +1,4 @@
-package com.xingmeng.aiplatform.module.bestpractice.dto;
+package com.xingmeng.aiplatform.module.article.dto;
 
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -10,8 +10,8 @@ import jakarta.validation.constraints.Size;
 import java.time.LocalDateTime;
 import java.util.List;
 
-public final class BestPracticeDtos {
-    private BestPracticeDtos() {
+public final class ArticleDtos {
+    private ArticleDtos() {
     }
 
     public record SummaryResponse(
@@ -44,31 +44,17 @@ public final class BestPracticeDtos {
             String coverIcon,
             String status,
             Integer sortOrder,
-            String outcomeMarkdown,
-            String prerequisitesMarkdown,
             String safetyMarkdown,
             String bodyMarkdown,
-            List<StepResponse> steps,
-            List<ArtifactResponse> artifacts,
-            List<RelatedResourceResponse> relatedResources
+            List<AssetResponse> assets,
+            List<LinkResponse> links
     ) {
     }
 
-    public record StepResponse(
-            Long id,
-            String title,
-            String description,
-            String checklistMarkdown,
-            String acceptanceMarkdown,
-            Boolean requiredStep,
-            Integer sortOrder
-    ) {
-    }
-
-    public record ArtifactResponse(
+    public record AssetResponse(
             Long id,
             String name,
-            String artifactType,
+            String assetType,
             String contentText,
             String fileName,
             String contentType,
@@ -77,10 +63,9 @@ public final class BestPracticeDtos {
     ) {
     }
 
-    public record RelatedResourceResponse(
+    public record LinkResponse(
             Long id,
-            String resourceType,
-            Long resourceId,
+            String linkType,
             String title,
             String url,
             String description,
@@ -100,35 +85,22 @@ public final class BestPracticeDtos {
             @Size(max = 600) String coverIcon,
             @NotBlank @Pattern(regexp = "ACTIVE|DRAFT|ARCHIVED") String status,
             @NotNull Integer sortOrder,
-            @NotBlank String outcomeMarkdown,
-            @NotBlank String prerequisitesMarkdown,
             @NotBlank String safetyMarkdown,
             @NotBlank String bodyMarkdown
     ) {
     }
 
-    public record StepSaveRequest(
-            @NotBlank @Size(max = 160) String title,
-            @NotBlank String description,
-            @NotBlank String checklistMarkdown,
-            @NotBlank String acceptanceMarkdown,
-            @NotNull Boolean requiredStep,
-            @NotNull Integer sortOrder
-    ) {
-    }
-
-    public record ArtifactSaveRequest(
+    public record AssetSaveRequest(
             @NotBlank @Size(max = 160) String name,
-            @NotBlank @Pattern(regexp = "SCRIPT|PROMPT|IMAGE|CONFIG|FILE|LINK") String artifactType,
+            @NotBlank @Pattern(regexp = "SCRIPT|PROMPT|IMAGE|CONFIG|FILE|LINK") String assetType,
             String contentText,
             @Size(max = 600) String externalUrl,
             @NotNull Integer sortOrder
     ) {
     }
 
-    public record RelatedResourceSaveRequest(
-            @NotBlank @Pattern(regexp = "SKILL|MODEL|DATASET|FINETUNE_JOB|REDIRECT_LINK") String resourceType,
-            Long resourceId,
+    public record LinkSaveRequest(
+            @NotBlank @Pattern(regexp = "EXTERNAL|INTERNAL") String linkType,
             @NotBlank @Size(max = 160) String title,
             @Size(max = 600) String url,
             @NotBlank @Size(max = 500) String description,

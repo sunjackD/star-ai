@@ -47,7 +47,7 @@ public class SecurityConfig {
                                 "/account/**",
                                 "/developer",
                                 "/finetune",
-                                "/best-practices/**",
+                                "/articles/**",
                                 "/agents/**",
                                 "/skills/**",
                                 "/models/**"
@@ -58,7 +58,7 @@ public class SecurityConfig {
                                 "/api/v1/assets/icons/*",
                                 "/api/v1/developer/skill-manifest",
                                 "/api/v1/developer/self-skill/download",
-                                "/api/v1/best-practices",
+                                "/api/v1/articles",
                                 "/api/v1/agents",
                                 "/api/v1/skills",
                                 "/api/v1/skills/categories",
@@ -67,8 +67,8 @@ public class SecurityConfig {
                         ).permitAll()
                         .requestMatchers(
                                 HttpMethod.GET,
-                                "/api/v1/best-practices/*",
-                                "/api/v1/best-practices/*/artifacts/*/download"
+                                "/api/v1/articles/*",
+                                "/api/v1/articles/*/assets/*/download"
                         ).authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/v1/agents/*", "/api/v1/skills/*", "/api/v1/models/*").authenticated()
                         .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")

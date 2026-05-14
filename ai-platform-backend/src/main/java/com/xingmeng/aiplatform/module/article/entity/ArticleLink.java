@@ -1,4 +1,4 @@
-package com.xingmeng.aiplatform.module.bestpractice.entity;
+package com.xingmeng.aiplatform.module.article.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -13,21 +13,18 @@ import jakarta.persistence.Table;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "best_practice_related_resources")
-public class BestPracticeRelatedResource {
+@Table(name = "article_links")
+public class ArticleLink {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "practice_id")
-    private BestPractice practice;
+    @JoinColumn(name = "article_id")
+    private Article article;
 
-    @Column(name = "resource_type")
-    private String resourceType;
-
-    @Column(name = "resource_id")
-    private Long resourceId;
+    @Column(name = "link_type")
+    private String linkType;
 
     private String title;
     private String url;
@@ -40,12 +37,10 @@ public class BestPracticeRelatedResource {
     private LocalDateTime createdAt;
 
     public Long getId() { return id; }
-    public BestPractice getPractice() { return practice; }
-    public void setPractice(BestPractice practice) { this.practice = practice; }
-    public String getResourceType() { return resourceType; }
-    public void setResourceType(String resourceType) { this.resourceType = resourceType; }
-    public Long getResourceId() { return resourceId; }
-    public void setResourceId(Long resourceId) { this.resourceId = resourceId; }
+    public Article getArticle() { return article; }
+    public void setArticle(Article article) { this.article = article; }
+    public String getLinkType() { return linkType; }
+    public void setLinkType(String linkType) { this.linkType = linkType; }
     public String getTitle() { return title; }
     public void setTitle(String title) { this.title = title; }
     public String getUrl() { return url; }

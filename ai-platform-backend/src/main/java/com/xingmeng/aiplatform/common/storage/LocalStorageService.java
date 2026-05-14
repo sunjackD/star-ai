@@ -29,9 +29,9 @@ import java.util.zip.ZipOutputStream;
 public class LocalStorageService implements StorageService {
     private static final long MAX_ICON_SIZE = 2L * 1024 * 1024;
     private static final long MAX_SKILL_SIZE = 20L * 1024 * 1024;
-    private static final long MAX_BEST_PRACTICE_ARTIFACT_SIZE = 20L * 1024 * 1024;
+    private static final long MAX_ARTICLE_ASSET_SIZE = 20L * 1024 * 1024;
     private static final Set<String> ICON_TYPES = Set.of("image/png", "image/jpeg", "image/webp", "image/svg+xml");
-    private static final Set<String> BEST_PRACTICE_SUFFIXES = Set.of(
+    private static final Set<String> ARTICLE_ASSET_SUFFIXES = Set.of(
             ".py", ".md", ".json", ".jsonl", ".yaml", ".yml", ".txt", ".png", ".jpg", ".jpeg", ".webp", ".zip"
     );
 
@@ -81,18 +81,18 @@ public class LocalStorageService implements StorageService {
     }
 
     @Override
-    public StoredObject storeBestPracticeArtifact(MultipartFile file) {
-        ensureFile(file, MAX_BEST_PRACTICE_ARTIFACT_SIZE);
+    public StoredObject storeArticleAsset(MultipartFile file) {
+        ensureFile(file, MAX_ARTICLE_ASSET_SIZE);
         String filename = cleanOriginalName(file);
         String lowerName = filename.toLowerCase(Locale.ROOT);
-        boolean allowed = BEST_PRACTICE_SUFFIXES.stream().anyMatch(lowerName::endsWith);
+        boolean allowed = ARTICLE_ASSET_SUFFIXES.stream().anyMatch(lowerName::endsWith);
         if (!allowed) {
-            throw new BusinessException(HttpStatus.BAD_REQUEST, "不支持的最佳实践附件类型");
+            throw new BusinessException(HttpStatus.BAD_REQUEST, "不支持的文章附件类型");
         }
         if (lowerName.endsWith(".zip")) {
             validateZipPaths(file);
         }
-        return store("best-practices", file, file.getContentType());
+        return store("articles", file, file.getContentType());
     }
 
     @Override

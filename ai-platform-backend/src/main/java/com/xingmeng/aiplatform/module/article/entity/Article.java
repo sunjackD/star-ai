@@ -1,4 +1,4 @@
-package com.xingmeng.aiplatform.module.bestpractice.entity;
+package com.xingmeng.aiplatform.module.article.entity;
 
 import com.xingmeng.aiplatform.common.entity.BaseEntity;
 import jakarta.persistence.Column;
@@ -9,8 +9,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "best_practices")
-public class BestPractice extends BaseEntity {
+@Table(name = "articles")
+public class Article extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -36,17 +36,11 @@ public class BestPractice extends BaseEntity {
     @Column(name = "sort_order")
     private Integer sortOrder;
 
-    @Column(name = "outcome_markdown")
-    private String outcomeMarkdown;
-
-    @Column(name = "prerequisites_markdown")
-    private String prerequisitesMarkdown;
+    @Column(name = "body_markdown")
+    private String bodyMarkdown;
 
     @Column(name = "safety_markdown")
     private String safetyMarkdown;
-
-    @Column(name = "body_markdown")
-    private String bodyMarkdown;
 
     public Long getId() { return id; }
     public String getTitle() { return title; }
@@ -71,12 +65,8 @@ public class BestPractice extends BaseEntity {
     public void setStatus(String status) { this.status = status; }
     public Integer getSortOrder() { return sortOrder; }
     public void setSortOrder(Integer sortOrder) { this.sortOrder = sortOrder; }
-    public String getOutcomeMarkdown() { return outcomeMarkdown; }
-    public void setOutcomeMarkdown(String outcomeMarkdown) { this.outcomeMarkdown = outcomeMarkdown; }
-    public String getPrerequisitesMarkdown() { return prerequisitesMarkdown; }
-    public void setPrerequisitesMarkdown(String prerequisitesMarkdown) { this.prerequisitesMarkdown = prerequisitesMarkdown; }
-    public String getSafetyMarkdown() { return safetyMarkdown; }
-    public void setSafetyMarkdown(String safetyMarkdown) { this.safetyMarkdown = safetyMarkdown; }
     public String getBodyMarkdown() { return bodyMarkdown; }
     public void setBodyMarkdown(String bodyMarkdown) { this.bodyMarkdown = bodyMarkdown; }
+    public String getSafetyMarkdown() { return safetyMarkdown; }
+    public void setSafetyMarkdown(String safetyMarkdown) { this.safetyMarkdown = safetyMarkdown; }
 }

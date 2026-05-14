@@ -12,7 +12,7 @@ public interface StorageService {
 
     StoredObject storeSkillArtifact(byte[] bytes, String originalName, String contentType);
 
-    StoredObject storeBestPracticeArtifact(MultipartFile file);
+    StoredObject storeArticleAsset(MultipartFile file);
 
     StoredObject storeSkillDirectory(MultipartFile[] files, List<String> relativePaths, String packageName);
 

@@ -1,8 +1,8 @@
-package com.xingmeng.aiplatform.module.bestpractice.controller;
+package com.xingmeng.aiplatform.module.article.controller;
 
 import com.xingmeng.aiplatform.common.response.ApiResponse;
-import com.xingmeng.aiplatform.module.bestpractice.dto.BestPracticeDtos;
-import com.xingmeng.aiplatform.module.bestpractice.service.BestPracticeService;
+import com.xingmeng.aiplatform.module.article.dto.ArticleDtos;
+import com.xingmeng.aiplatform.module.article.service.ArticleService;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -17,27 +17,27 @@ import java.util.List;
 
 @Validated
 @RestController
-@RequestMapping("/api/v1/best-practices")
-public class BestPracticeController {
-    private final BestPracticeService service;
+@RequestMapping("/api/v1/articles")
+public class ArticleController {
+    private final ArticleService service;
 
-    public BestPracticeController(BestPracticeService service) {
+    public ArticleController(ArticleService service) {
         this.service = service;
     }
 
     @GetMapping
-    public ApiResponse<List<BestPracticeDtos.SummaryResponse>> list() {
+    public ApiResponse<List<ArticleDtos.SummaryResponse>> list() {
         return ApiResponse.success(service.listActive());
     }
 
     @GetMapping("/{id}")
-    public ApiResponse<BestPracticeDtos.DetailResponse> detail(@PathVariable Long id) {
+    public ApiResponse<ArticleDtos.DetailResponse> detail(@PathVariable Long id) {
         return ApiResponse.success(service.detail(id));
     }
 
-    @GetMapping("/{id}/artifacts/{artifactId}/download")
-    public ResponseEntity<Resource> download(@PathVariable Long id, @PathVariable Long artifactId) {
-        BestPracticeService.ArtifactDownload download = service.downloadArtifact(id, artifactId);
+    @GetMapping("/{id}/assets/{assetId}/download")
+    public ResponseEntity<Resource> download(@PathVariable Long id, @PathVariable Long assetId) {
+        ArticleService.AssetDownload download = service.downloadAsset(id, assetId);
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + download.fileName() + "\"")
                 .contentType(MediaType.parseMediaType(download.contentType()))

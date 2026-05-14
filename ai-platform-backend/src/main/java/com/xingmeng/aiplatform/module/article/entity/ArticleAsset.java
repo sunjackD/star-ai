@@ -1,4 +1,4 @@
-package com.xingmeng.aiplatform.module.bestpractice.entity;
+package com.xingmeng.aiplatform.module.article.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -13,20 +13,20 @@ import jakarta.persistence.Table;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "best_practice_artifacts")
-public class BestPracticeArtifact {
+@Table(name = "article_assets")
+public class ArticleAsset {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "practice_id")
-    private BestPractice practice;
+    @JoinColumn(name = "article_id")
+    private Article article;
 
     private String name;
 
-    @Column(name = "artifact_type")
-    private String artifactType;
+    @Column(name = "asset_type")
+    private String assetType;
 
     @Column(name = "content_text")
     private String contentText;
@@ -50,12 +50,12 @@ public class BestPracticeArtifact {
     private LocalDateTime createdAt;
 
     public Long getId() { return id; }
-    public BestPractice getPractice() { return practice; }
-    public void setPractice(BestPractice practice) { this.practice = practice; }
+    public Article getArticle() { return article; }
+    public void setArticle(Article article) { this.article = article; }
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
-    public String getArtifactType() { return artifactType; }
-    public void setArtifactType(String artifactType) { this.artifactType = artifactType; }
+    public String getAssetType() { return assetType; }
+    public void setAssetType(String assetType) { this.assetType = assetType; }
     public String getContentText() { return contentText; }
     public void setContentText(String contentText) { this.contentText = contentText; }
     public String getFilePath() { return filePath; }
