@@ -27,11 +27,11 @@ import type {
   Agent,
   AiModel,
   ApiKey,
+  ArticleAsset,
+  ArticleDetail,
+  ArticleLink,
+  ArticleSummary,
   AuthResponse,
-  BestPracticeArtifact,
-  BestPracticeDetail,
-  BestPracticeRelatedResource,
-  BestPracticeSummary,
   FinetuneJob,
   PlatformConfig,
   RedirectLink,
@@ -45,7 +45,7 @@ import {
   AgentsAdminPage,
   ApiKeysAdminPage,
   AuditLogsAdminPage,
-  BestPracticesAdminPage,
+  ArticlesAdminPage,
   DatasetsAdminPage,
   FinetuneJobsAdminPage,
   LinksAdminPage,
@@ -109,7 +109,7 @@ function Shell() {
     { key: '/', icon: <LayoutDashboard size={18} />, label: <Link to="/">总览</Link> },
     { key: '/agents', icon: <Bot size={18} />, label: <Link to="/agents">AI Agents</Link> },
     { key: '/skills', icon: <Boxes size={18} />, label: <Link to="/skills">Skills</Link> },
-    { key: '/best-practices', icon: <BookOpenCheck size={18} />, label: <Link to="/best-practices">最佳实践</Link> },
+    { key: '/articles', icon: <BookOpenCheck size={18} />, label: <Link to="/articles">文章</Link> },
     { key: '/models', icon: <BrainCircuit size={18} />, label: <Link to="/models">模型</Link> },
     { key: '/finetune', icon: <Database size={18} />, label: <Link to="/finetune">微调</Link> },
     { key: '/developer', icon: <Code2 size={18} />, label: <Link to="/developer">开发者</Link> },
@@ -126,7 +126,7 @@ function Shell() {
         { key: '/admin/models', label: <Link to="/admin/models">模型</Link> },
         { key: '/admin/datasets', label: <Link to="/admin/datasets">数据集</Link> },
         { key: '/admin/finetune-jobs', label: <Link to="/admin/finetune-jobs">微调任务</Link> },
-        { key: '/admin/best-practices', label: <Link to="/admin/best-practices">最佳实践</Link> },
+        { key: '/admin/articles', label: <Link to="/admin/articles">教程文章</Link> },
         { key: '/admin/links', label: <Link to="/admin/links">跳转链接</Link> },
         { key: '/admin/settings', label: <Link to="/admin/settings">系统设置</Link> },
         { key: '/admin/api-keys', label: <Link to="/admin/api-keys">Key 审计</Link> },
@@ -491,42 +491,42 @@ function skillArtifactLabel(skill: Skill): string {
   return '文本 Skill';
 }
 
-function BestPracticesPage() {
+function ArticlesPage() {
   const navigate = useNavigate();
   const token = useAuthStore((state) => state.token);
   const { data = [] } = useQuery({
-    queryKey: ['best-practices'],
-    queryFn: () => getPublicData<BestPracticeSummary[]>('/best-practices')
+    queryKey: ['articles'],
+    queryFn: () => getPublicData<ArticleSummary[]>('/articles')
   });
 
   function openDetail(id: number) {
     if (!token) {
-      navigate('/login', { state: { from: `/best-practices/${id}` } });
+      navigate('/login', { state: { from: `/articles/${id}` } });
       return;
     }
-    navigate(`/best-practices/${id}`);
+    navigate(`/articles/${id}`);
   }
 
   return (
     <div className="page">
-      <PageTitle title="最佳实践库" description="把教程、脚本、Prompt 和配置沉淀成可复用的 AI 工作流。" />
-      <div className="practice-grid">
-        {data.map((practice) => (
+      <PageTitle title="教程文章" description="沉淀可阅读、可下载、可复用的 AI 教程、脚本、Prompt 和参考资料。" />
+      <div className="article-grid">
+        {data.map((article) => (
           <Card
             hoverable
-            key={practice.id}
-            className="practice-card"
-            onClick={() => openDetail(practice.id)}
+            key={article.id}
+            className="article-card"
+            onClick={() => openDetail(article.id)}
           >
-            <div className="practice-meta">
-              <Tag color="blue">{practice.category}</Tag>
-              <Tag color={difficultyColor(practice.difficulty)}>{difficultyLabel(practice.difficulty)}</Tag>
-              <Tag>{practice.estimatedMinutes} 分钟</Tag>
+            <div className="article-meta">
+              <Tag color="blue">{article.category}</Tag>
+              <Tag color={difficultyColor(article.difficulty)}>{difficultyLabel(article.difficulty)}</Tag>
+              <Tag>{article.estimatedMinutes} 分钟</Tag>
             </div>
-            <Title level={3}>{practice.title}</Title>
-            <Paragraph>{practice.summary}</Paragraph>
+            <Title level={3}>{article.title}</Title>
+            <Paragraph>{article.summary}</Paragraph>
             <Space wrap>
-              {practice.tags.split(',').map((tag) => <Tag key={tag}>{tag}</Tag>)}
+              {article.tags.split(',').map((tag) => <Tag key={tag}>{tag}</Tag>)}
             </Space>
           </Card>
         ))}
@@ -535,11 +535,11 @@ function BestPracticesPage() {
   );
 }
 
-function BestPracticeDetailPage() {
+function ArticleDetailPage() {
   const { id } = useParams();
   const { data } = useQuery({
-    queryKey: ['best-practice', id],
-    queryFn: () => getData<BestPracticeDetail>(`/best-practices/${id}`),
+    queryKey: ['article', id],
+    queryFn: () => getData<ArticleDetail>(`/articles/${id}`),
     enabled: Boolean(id)
   });
 
@@ -548,91 +548,72 @@ function BestPracticeDetailPage() {
   }
 
   return (
-    <div className="page">
-      <Card className="practice-detail-hero">
-        <div className="practice-meta">
+    <div className="page article-page">
+      <header className="article-hero">
+        <div className="article-meta">
           <Tag color="blue">{data.category}</Tag>
           <Tag color={difficultyColor(data.difficulty)}>{difficultyLabel(data.difficulty)}</Tag>
           <Tag>{data.estimatedMinutes} 分钟</Tag>
-          <Tag>{data.status}</Tag>
         </div>
         <Title>{data.title}</Title>
         <Paragraph>{data.summary}</Paragraph>
         <Space wrap>
           {data.sourceUrl && <Button href={data.sourceUrl} target="_blank" icon={<ExternalLink size={16} />}>来源</Button>}
-          <Link to="/admin/finetune-jobs"><Button>创建微调任务草稿</Button></Link>
         </Space>
-      </Card>
+      </header>
 
-      <Alert
-        showIcon
-        type="warning"
-        className="practice-safety"
-        message="安全与隐私边界"
-        description={data.safetyMarkdown}
-      />
+      {data.safetyMarkdown && (
+        <Alert
+          showIcon
+          type="warning"
+          className="article-safety"
+          message="安全与隐私边界"
+          description={<MarkdownBlock value={data.safetyMarkdown} compact />}
+        />
+      )}
 
-      <div className="content-grid">
-        <Card title="最终产物"><MarkdownBlock value={data.outcomeMarkdown} /></Card>
-        <Card title="前置条件"><MarkdownBlock value={data.prerequisitesMarkdown} /></Card>
-      </div>
-
-      <Card title="实践说明">
+      <article className="article-reader">
         <MarkdownBlock value={data.bodyMarkdown} />
-      </Card>
+      </article>
 
-      <Card title="流程步骤">
-        <div className="practice-step-list">
-          {data.steps.map((step, index) => (
-            <Card key={step.id} className="practice-step-card">
-              <div className="practice-step-index">{index + 1}</div>
-              <Title level={4}>{step.title}</Title>
-              <Paragraph>{step.description}</Paragraph>
-              <Text strong>清单</Text>
-              <MarkdownBlock value={step.checklistMarkdown} />
-              <Text strong>验收</Text>
-              <MarkdownBlock value={step.acceptanceMarkdown} />
-            </Card>
+      <section className="article-tail">
+        <Title level={2}>附件与 Prompt</Title>
+        <div className="article-assets">
+          {data.assets.map((asset) => (
+            <ArticleAssetCard key={asset.id} articleId={data.id} asset={asset} />
           ))}
         </div>
-      </Card>
+      </section>
 
-      <Card title="脚本、Prompt 与附件">
-        <div className="practice-artifacts">
-          {data.artifacts.map((artifact) => (
-            <PracticeArtifactCard key={artifact.id} practiceId={data.id} artifact={artifact} />
-          ))}
+      <section className="article-tail">
+        <Title level={2}>参考链接</Title>
+        <div className="article-links">
+          {data.links.map((link) => <ArticleLinkCard key={link.id} link={link} />)}
         </div>
-      </Card>
-
-      <Card title="关联资源">
-        <div className="practice-related">
-          {data.relatedResources.map((resource) => <RelatedResourceCard key={resource.id} resource={resource} />)}
-        </div>
-      </Card>
+      </section>
     </div>
   );
 }
 
-function PracticeArtifactCard(props: { practiceId: number; artifact: BestPracticeArtifact }) {
-  const { artifact } = props;
-  const canCopy = Boolean(artifact.contentText);
-  const canDownload = Boolean(artifact.fileName || artifact.contentText);
+function ArticleAssetCard(props: { articleId: number; asset: ArticleAsset }) {
+  const { asset } = props;
+  const canCopy = Boolean(asset.contentText);
+  const canDownload = Boolean(asset.fileName || asset.contentText);
 
   return (
-    <Card className="practice-artifact-card">
-      <div className="practice-meta">
-        <Tag color="purple">{artifact.artifactType}</Tag>
-        {artifact.fileName && <Tag>{artifact.fileName}</Tag>}
+    <Card className="article-asset-card">
+      <div className="article-meta">
+        <Tag color="purple">{asset.assetType}</Tag>
+        {asset.fileName && <Tag>{asset.fileName}</Tag>}
       </div>
-      <Title level={4}>{artifact.name}</Title>
-      {artifact.contentText && <pre className="practice-code">{artifact.contentText}</pre>}
+      <Title level={4}>{asset.name}</Title>
+      {asset.contentText && <pre className="article-code">{asset.contentText}</pre>}
       <Space wrap>
         {canCopy && (
           <Button
             icon={<Copy size={14} />}
             onClick={() => {
-              navigator.clipboard.writeText(artifact.contentText ?? '');
+              navigator.clipboard.writeText(asset.contentText ?? '');
               message.success('已复制');
             }}
           >
@@ -643,47 +624,143 @@ function PracticeArtifactCard(props: { practiceId: number; artifact: BestPractic
           <Button
             icon={<Download size={14} />}
             onClick={() => downloadFile(
-              `/best-practices/${props.practiceId}/artifacts/${artifact.id}/download`,
-              artifact.fileName ?? `${artifact.name}.md`
+              `/articles/${props.articleId}/assets/${asset.id}/download`,
+              asset.fileName ?? `${asset.name}.md`
             )}
           >
             下载
           </Button>
         )}
-        {artifact.externalUrl && (
-          <Button href={artifact.externalUrl} target="_blank" icon={<ExternalLink size={14} />}>打开链接</Button>
+        {asset.externalUrl && (
+          <Button href={asset.externalUrl} target="_blank" icon={<ExternalLink size={14} />}>打开链接</Button>
         )}
       </Space>
     </Card>
   );
 }
 
-function RelatedResourceCard({ resource }: { resource: BestPracticeRelatedResource }) {
-  const action = resource.url?.startsWith('/') ? (
-    <Link to={resource.url}><Button size="small">打开</Button></Link>
-  ) : resource.url ? (
-    <Button size="small" href={resource.url} target="_blank" icon={<ExternalLink size={14} />}>打开</Button>
+function ArticleLinkCard({ link }: { link: ArticleLink }) {
+  const action = link.url?.startsWith('/') ? (
+    <Link to={link.url}><Button size="small">打开</Button></Link>
+  ) : link.url ? (
+    <Button size="small" href={link.url} target="_blank" icon={<ExternalLink size={14} />}>打开</Button>
   ) : null;
 
   return (
-    <Card className="practice-related-card">
-      <Tag>{resource.resourceType}</Tag>
-      <Title level={4}>{resource.title}</Title>
-      <Paragraph>{resource.description}</Paragraph>
+    <Card className="article-link-card">
+      <Tag>{link.linkType}</Tag>
+      <Title level={4}>{link.title}</Title>
+      <Paragraph>{link.description}</Paragraph>
       {action}
     </Card>
   );
 }
 
-function MarkdownBlock({ value }: { value: string }) {
-  return <pre className="practice-markdown">{value}</pre>;
+function MarkdownBlock({ value, compact = false }: { value: string; compact?: boolean }) {
+  const lines = value.split(/\r?\n/);
+  const nodes: ReactNode[] = [];
+  let index = 0;
+
+  while (index < lines.length) {
+    const line = lines[index];
+    if (!line.trim()) {
+      index += 1;
+      continue;
+    }
+    if (line.startsWith('```')) {
+      const code: string[] = [];
+      index += 1;
+      while (index < lines.length && !lines[index].startsWith('```')) {
+        code.push(lines[index]);
+        index += 1;
+      }
+      index += 1;
+      nodes.push(<pre className="article-code" key={nodes.length}>{code.join('\n')}</pre>);
+      continue;
+    }
+    const heading = /^(#{1,4})\s+(.+)$/.exec(line);
+    if (heading) {
+      const level = Math.min(heading[1].length + (compact ? 2 : 0), 4);
+      nodes.push(<Title level={level as 1 | 2 | 3 | 4} key={nodes.length}>{heading[2]}</Title>);
+      index += 1;
+      continue;
+    }
+    if (/^\|.+\|$/.test(line) && index + 1 < lines.length && /^\|?\s*:?-{3,}/.test(lines[index + 1])) {
+      const rows: string[][] = [];
+      const headers = splitMarkdownTableRow(line);
+      index += 2;
+      while (index < lines.length && /^\|.+\|$/.test(lines[index])) {
+        rows.push(splitMarkdownTableRow(lines[index]));
+        index += 1;
+      }
+      nodes.push(
+        <div className="article-table-wrap" key={nodes.length}>
+          <table>
+            <thead><tr>{headers.map((cell) => <th key={cell}>{cell}</th>)}</tr></thead>
+            <tbody>{rows.map((row, rowIndex) => (
+              <tr key={rowIndex}>{row.map((cell, cellIndex) => <td key={`${rowIndex}-${cellIndex}`}>{cell}</td>)}</tr>
+            ))}</tbody>
+          </table>
+        </div>
+      );
+      continue;
+    }
+    if (/^\s*[-*]\s+/.test(line)) {
+      const items: string[] = [];
+      while (index < lines.length && /^\s*[-*]\s+/.test(lines[index])) {
+        items.push(lines[index].replace(/^\s*[-*]\s+/, ''));
+        index += 1;
+      }
+      nodes.push(<ul key={nodes.length}>{items.map((item) => <li key={item}>{item}</li>)}</ul>);
+      continue;
+    }
+    if (/^\s*\d+\.\s+/.test(line)) {
+      const items: string[] = [];
+      while (index < lines.length && /^\s*\d+\.\s+/.test(lines[index])) {
+        items.push(lines[index].replace(/^\s*\d+\.\s+/, ''));
+        index += 1;
+      }
+      nodes.push(<ol key={nodes.length}>{items.map((item) => <li key={item}>{item}</li>)}</ol>);
+      continue;
+    }
+    if (/^\s*>\s+/.test(line)) {
+      const quotes: string[] = [];
+      while (index < lines.length && /^\s*>\s+/.test(lines[index])) {
+        quotes.push(lines[index].replace(/^\s*>\s+/, ''));
+        index += 1;
+      }
+      nodes.push(<blockquote key={nodes.length}>{quotes.join('\n')}</blockquote>);
+      continue;
+    }
+
+    const paragraph: string[] = [];
+    while (
+      index < lines.length
+      && lines[index].trim()
+      && !/^(#{1,4})\s+/.test(lines[index])
+      && !lines[index].startsWith('```')
+      && !/^\s*[-*]\s+/.test(lines[index])
+      && !/^\s*\d+\.\s+/.test(lines[index])
+      && !/^\s*>\s+/.test(lines[index])
+    ) {
+      paragraph.push(lines[index]);
+      index += 1;
+    }
+    nodes.push(<Paragraph key={nodes.length}>{paragraph.join('\n')}</Paragraph>);
+  }
+
+  return <div className={compact ? 'article-markdown compact' : 'article-markdown'}>{nodes}</div>;
 }
 
-function difficultyLabel(value: BestPracticeSummary['difficulty']) {
+function splitMarkdownTableRow(line: string) {
+  return line.replace(/^\|/, '').replace(/\|$/, '').split('|').map((cell) => cell.trim());
+}
+
+function difficultyLabel(value: ArticleSummary['difficulty']) {
   return { BEGINNER: '入门', INTERMEDIATE: '进阶', ADVANCED: '高级' }[value];
 }
 
-function difficultyColor(value: BestPracticeSummary['difficulty']) {
+function difficultyColor(value: ArticleSummary['difficulty']) {
   return { BEGINNER: 'green', INTERMEDIATE: 'gold', ADVANCED: 'red' }[value];
 }
 
@@ -1083,12 +1160,12 @@ function App() {
             <Route index element={<DashboardPage />} />
             <Route path="/agents" element={<AgentsPage />} />
             <Route path="/skills" element={<SkillsPage />} />
-            <Route path="/best-practices" element={<BestPracticesPage />} />
+            <Route path="/articles" element={<ArticlesPage />} />
             <Route path="/models" element={<ModelsPage />} />
             <Route element={<RequireAuth />}>
               <Route path="/agents/:id" element={<AgentDetailPage />} />
               <Route path="/skills/:id" element={<SkillDetailPage />} />
-              <Route path="/best-practices/:id" element={<BestPracticeDetailPage />} />
+              <Route path="/articles/:id" element={<ArticleDetailPage />} />
               <Route path="/finetune" element={<FinetunePage />} />
               <Route path="/developer" element={<DeveloperPage />} />
               <Route path="/account/profile" element={<AccountProfilePage />} />
@@ -1102,7 +1179,7 @@ function App() {
                 <Route path="/admin/models" element={<ModelsAdminPage />} />
                 <Route path="/admin/datasets" element={<DatasetsAdminPage />} />
                 <Route path="/admin/finetune-jobs" element={<FinetuneJobsAdminPage />} />
-                <Route path="/admin/best-practices" element={<BestPracticesAdminPage />} />
+                <Route path="/admin/articles" element={<ArticlesAdminPage />} />
                 <Route path="/admin/links" element={<LinksAdminPage />} />
                 <Route path="/admin/settings" element={<SettingsAdminPage />} />
                 <Route path="/admin/api-keys" element={<ApiKeysAdminPage />} />

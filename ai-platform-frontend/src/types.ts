@@ -128,7 +128,7 @@ export type RedirectLink = {
   status: string;
 };
 
-export type BestPracticeSummary = {
+export type ArticleSummary = {
   id: number;
   title: string;
   slug: string;
@@ -144,20 +144,10 @@ export type BestPracticeSummary = {
   updatedAt: string;
 };
 
-export type BestPracticeStep = {
-  id: number;
-  title: string;
-  description: string;
-  checklistMarkdown: string;
-  acceptanceMarkdown: string;
-  requiredStep: boolean;
-  sortOrder: number;
-};
-
-export type BestPracticeArtifact = {
+export type ArticleAsset = {
   id: number;
   name: string;
-  artifactType: 'SCRIPT' | 'PROMPT' | 'IMAGE' | 'CONFIG' | 'FILE' | 'LINK';
+  assetType: 'SCRIPT' | 'PROMPT' | 'IMAGE' | 'CONFIG' | 'FILE' | 'LINK';
   contentText?: string;
   fileName?: string;
   contentType?: string;
@@ -165,25 +155,21 @@ export type BestPracticeArtifact = {
   sortOrder: number;
 };
 
-export type BestPracticeRelatedResource = {
+export type ArticleLink = {
   id: number;
-  resourceType: 'SKILL' | 'MODEL' | 'DATASET' | 'FINETUNE_JOB' | 'REDIRECT_LINK';
-  resourceId?: number;
+  linkType: 'EXTERNAL' | 'INTERNAL';
   title: string;
   url?: string;
   description: string;
   sortOrder: number;
 };
 
-export type BestPracticeDetail = BestPracticeSummary & {
+export type ArticleDetail = ArticleSummary & {
   sourceUrl?: string;
-  outcomeMarkdown: string;
-  prerequisitesMarkdown: string;
   safetyMarkdown: string;
   bodyMarkdown: string;
-  steps: BestPracticeStep[];
-  artifacts: BestPracticeArtifact[];
-  relatedResources: BestPracticeRelatedResource[];
+  assets: ArticleAsset[];
+  links: ArticleLink[];
 };
 
 export type ApiKey = {
@@ -204,7 +190,7 @@ export type AdminOverview = {
   models: number;
   datasets: number;
   finetuneJobs: number;
-  bestPractices: number;
+  articles: number;
   links: number;
   apiKeys: number;
   auditLogs: number;
