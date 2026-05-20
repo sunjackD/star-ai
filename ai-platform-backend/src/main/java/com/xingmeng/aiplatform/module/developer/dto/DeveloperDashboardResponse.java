@@ -11,6 +11,7 @@ public record DeveloperDashboardResponse(
         long recentlyUsedKeys,
         List<String> requiredScopes,
         List<String> missingRequiredScopes,
+        List<DeveloperPlaybookReadinessResponse> playbookReadiness,
         List<DeveloperAuditEventResponse> recentEvents
 ) {
 }

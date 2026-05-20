@@ -394,6 +394,29 @@ class AuthAndDeveloperApiTest {
     }
 
     @Test
+    void developerDashboardReportsPlaybookReadinessByActiveScopes() throws Exception {
+        String adminToken = createAdminAndLogin("admin_playbook_ready", "admin-playbook-ready@example.com");
+        createUser(adminToken, "playbook_ready_dev", "playbook-ready@example.com", "Playbook Ready", "DEVELOPER");
+        String jwt = login("playbook_ready_dev", "secret123");
+        createApiKey(jwt, "skills:read");
+
+        mockMvc.perform(get("/api/v1/developer/dashboard")
+                        .header("Authorization", "Bearer " + jwt))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath(
+                        "$.data.playbookReadiness[?(@.key == 'discover_skill_inventory' && @.ready == true)]"
+                ).isNotEmpty())
+                .andExpect(jsonPath(
+                        "$.data.playbookReadiness[?(@.key == 'import_remote_skill_safely' "
+                                + "&& @.missingScopes[?(@ == 'skills:import')])]"
+                ).isNotEmpty())
+                .andExpect(jsonPath(
+                        "$.data.playbookReadiness[?(@.key == 'retire_skill_with_gate' "
+                                + "&& @.risk == 'destructive' && @.ready == false)]"
+                ).isNotEmpty());
+    }
+
+    @Test
     void apiKeyCredentialCannotReadDeveloperDashboard() throws Exception {
         String adminToken = createAdminAndLogin("admin_dashboard_guard", "admin-dashboard-guard@example.com");
         createUser(adminToken, "dashboard_guard_dev", "dashboard-guard@example.com", "Dashboard Guard", "DEVELOPER");

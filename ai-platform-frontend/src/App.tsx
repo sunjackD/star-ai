@@ -1053,6 +1053,8 @@ function ApiKeysPage() {
     .map((item) => item.value);
   const requiredScopes = dashboard?.requiredScopes ?? defaultRequiredScopes;
   const missingScopes = dashboard?.missingRequiredScopes ?? requiredScopes;
+  const playbookReadiness = dashboard?.playbookReadiness ?? [];
+  const readyPlaybooks = playbookReadiness.filter((item) => item.ready).length;
   const scopeCoverage = Math.round(
     ((requiredScopes.length - missingScopes.length) / Math.max(requiredScopes.length, 1)) * 100
   );
@@ -1089,7 +1091,7 @@ function ApiKeysPage() {
         </Card>
         <Card className="agent-health-card">
           <Statistic title="权限覆盖" value={scopeCoverage} suffix="%" prefix={<ShieldCheck size={18} />} />
-          <Text type="secondary">覆盖自管理 Skill 必需 scopes</Text>
+          <Text type="secondary">剧本可运行 {readyPlaybooks}/{playbookReadiness.length || '-'}</Text>
         </Card>
       </div>
 
@@ -1136,6 +1138,45 @@ function ApiKeysPage() {
           />
         </Card>
       </div>
+
+      {playbookReadiness.length > 0 && (
+        <Card title="Agent 运行剧本准备度" className="playbook-readiness-card">
+          <div className="playbook-readiness-grid">
+            {playbookReadiness.map((playbook) => (
+              <section
+                key={playbook.key}
+                className={`playbook-readiness-item ${playbook.ready ? 'is-ready' : 'is-blocked'}`}
+              >
+                <div className="playbook-readiness-heading">
+                  <Space direction="vertical" size={2}>
+                    <Text strong>{playbook.title}</Text>
+                    <Text type="secondary">{playbook.key}</Text>
+                  </Space>
+                  <Space size={4} wrap>
+                    <Tag color={playbook.ready ? 'green' : 'orange'} icon={
+                      playbook.ready ? <CheckCircle2 size={12} /> : <AlertTriangle size={12} />
+                    }>
+                      {playbook.ready ? 'Ready' : '缺权限'}
+                    </Tag>
+                    <Tag color={riskTagColor(playbook.risk)}>{playbook.risk}</Tag>
+                  </Space>
+                </div>
+                <div className="playbook-readiness-scopes">
+                  {playbook.requiredScopes.map((scope) => {
+                    const missing = playbook.missingScopes.includes(scope);
+                    return <Tag key={scope} color={missing ? 'orange' : 'green'}>{scope}</Tag>;
+                  })}
+                </div>
+                {playbook.missingScopes.length > 0 ? (
+                  <Text type="secondary">补齐 {playbook.missingScopes.join(', ')} 后可执行</Text>
+                ) : (
+                  <Text type="secondary">当前有效 Key 已覆盖运行所需 scope</Text>
+                )}
+              </section>
+            ))}
+          </div>
+        </Card>
+      )}
 
       {createdKey && (
         <Alert

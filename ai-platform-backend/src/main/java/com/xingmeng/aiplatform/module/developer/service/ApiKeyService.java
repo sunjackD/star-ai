@@ -10,6 +10,7 @@ import com.xingmeng.aiplatform.module.developer.dto.ApiKeyCreateRequest;
 import com.xingmeng.aiplatform.module.developer.dto.ApiKeyResponse;
 import com.xingmeng.aiplatform.module.developer.dto.DeveloperAuditEventResponse;
 import com.xingmeng.aiplatform.module.developer.dto.DeveloperDashboardResponse;
+import com.xingmeng.aiplatform.module.developer.dto.DeveloperPlaybookReadinessResponse;
 import com.xingmeng.aiplatform.module.developer.entity.ApiKey;
 import com.xingmeng.aiplatform.module.developer.repository.ApiKeyRepository;
 import com.xingmeng.aiplatform.module.user.entity.User;
@@ -45,16 +46,19 @@ public class ApiKeyService {
     private final ApiKeyRepository apiKeyRepository;
     private final UserRepository userRepository;
     private final AuditLogRepository auditLogRepository;
+    private final DeveloperPlaybookCatalog playbookCatalog;
     private final SecureRandom secureRandom = new SecureRandom();
 
     public ApiKeyService(
             ApiKeyRepository apiKeyRepository,
             UserRepository userRepository,
-            AuditLogRepository auditLogRepository
+            AuditLogRepository auditLogRepository,
+            DeveloperPlaybookCatalog playbookCatalog
     ) {
         this.apiKeyRepository = apiKeyRepository;
         this.userRepository = userRepository;
         this.auditLogRepository = auditLogRepository;
+        this.playbookCatalog = playbookCatalog;
     }
 
     public List<ApiKeyResponse> list(AuthenticatedUser principal) {
@@ -138,8 +142,27 @@ public class ApiKeyService {
                 recentlyUsedKeys,
                 REQUIRED_AGENT_SCOPES,
                 missingScopes,
+                playbookReadiness(activeScopes),
                 recentEvents(user.getUsername())
         );
+    }
+
+    private List<DeveloperPlaybookReadinessResponse> playbookReadiness(Set<String> activeScopes) {
+        return playbookCatalog.list().stream()
+                .map(playbook -> {
+                    List<String> missingScopes = playbook.requiredScopes().stream()
+                            .filter(scope -> !activeScopes.contains(scope))
+                            .toList();
+                    return new DeveloperPlaybookReadinessResponse(
+                            playbook.key(),
+                            playbook.title(),
+                            playbook.risk(),
+                            playbook.requiredScopes(),
+                            missingScopes,
+                            missingScopes.isEmpty()
+                    );
+                })
+                .toList();
     }
 
     private User loadUser(AuthenticatedUser principal) {

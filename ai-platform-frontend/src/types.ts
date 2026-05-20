@@ -204,6 +204,15 @@ export type DeveloperPlaybook = {
   verification: string;
 };
 
+export type DeveloperPlaybookReadiness = {
+  key: string;
+  title: string;
+  risk: string;
+  requiredScopes: string[];
+  missingScopes: string[];
+  ready: boolean;
+};
+
 export type DeveloperSkillManifest = {
   schemaVersion?: string;
   apiVersion?: string;
@@ -239,6 +248,7 @@ export type DeveloperDashboard = {
   recentlyUsedKeys: number;
   requiredScopes: string[];
   missingRequiredScopes: string[];
+  playbookReadiness: DeveloperPlaybookReadiness[];
   recentEvents: DeveloperAuditEvent[];
 };
 
