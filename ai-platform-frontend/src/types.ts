@@ -194,6 +194,28 @@ export type DeveloperSkillManifest = {
   installPrompt: string;
 };
 
+export type DeveloperAuditEvent = {
+  id: number;
+  actor: string;
+  action: string;
+  resourceType: string;
+  resourceId: string;
+  detail: string;
+  createdAt?: string;
+};
+
+export type DeveloperDashboard = {
+  totalKeys: number;
+  activeKeys: number;
+  revokedKeys: number;
+  expiredKeys: number;
+  expiringSoonKeys: number;
+  recentlyUsedKeys: number;
+  requiredScopes: string[];
+  missingRequiredScopes: string[];
+  recentEvents: DeveloperAuditEvent[];
+};
+
 export type AdminOverview = {
   users: number;
   agents: number;

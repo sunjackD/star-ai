@@ -261,6 +261,56 @@ class AuthAndDeveloperApiTest {
                         && String.valueOf(apiKeyId).equals(log.getResourceId())));
     }
 
+    @Test
+    void developerDashboardSummarizesApiKeyHealthAndActivity() throws Exception {
+        String adminToken = createAdminAndLogin("admin_dashboard", "admin-dashboard@example.com");
+        createUser(adminToken, "dashboard_dev", "dashboard@example.com", "Dashboard Dev", "DEVELOPER");
+        String jwt = login("dashboard_dev", "secret123");
+
+        String keyJson = mockMvc.perform(post("/api/v1/developer/api-keys")
+                        .header("Authorization", "Bearer " + jwt)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "name": "dashboard read key",
+                                  "scopes": ["skills:read"],
+                                  "expiresAt": "2099-01-01T00:00:00"
+                                }
+                                """))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+        String plainKey = objectMapper.readTree(keyJson).path("data").path("plainKey").asText();
+
+        mockMvc.perform(get("/api/v1/developer/skills")
+                        .header("X-API-Key", plainKey))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(get("/api/v1/developer/dashboard")
+                        .header("Authorization", "Bearer " + jwt))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.totalKeys").value(1))
+                .andExpect(jsonPath("$.data.activeKeys").value(1))
+                .andExpect(jsonPath("$.data.recentlyUsedKeys").value(1))
+                .andExpect(jsonPath("$.data.missingRequiredScopes[?(@ == 'skills:import')]").isNotEmpty())
+                .andExpect(jsonPath("$.data.missingRequiredScopes[?(@ == 'skills:write')]").isNotEmpty())
+                .andExpect(jsonPath("$.data.missingRequiredScopes[?(@ == 'skills:download')]").isNotEmpty())
+                .andExpect(jsonPath("$.data.recentEvents[?(@.action == 'DEVELOPER_SKILLS_LISTED')]").isNotEmpty());
+    }
+
+    @Test
+    void apiKeyCredentialCannotReadDeveloperDashboard() throws Exception {
+        String adminToken = createAdminAndLogin("admin_dashboard_guard", "admin-dashboard-guard@example.com");
+        createUser(adminToken, "dashboard_guard_dev", "dashboard-guard@example.com", "Dashboard Guard", "DEVELOPER");
+        String jwt = login("dashboard_guard_dev", "secret123");
+        String apiKey = createApiKey(jwt, "skills:read");
+
+        mockMvc.perform(get("/api/v1/developer/dashboard")
+                        .header("X-API-Key", apiKey))
+                .andExpect(status().isForbidden());
+    }
+
     private String createAdminAndLogin(String username, String email) throws Exception {
         mockMvc.perform(post("/api/v1/setup/admin")
                         .contentType(MediaType.APPLICATION_JSON)

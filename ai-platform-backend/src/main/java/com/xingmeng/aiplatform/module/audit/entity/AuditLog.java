@@ -2,6 +2,8 @@ package com.xingmeng.aiplatform.module.audit.entity;
 
 import jakarta.persistence.*;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Table(name = "audit_logs")
 public class AuditLog {
@@ -20,6 +22,9 @@ public class AuditLog {
 
     private String detail;
 
+    @Column(name = "created_at", insertable = false, updatable = false)
+    private LocalDateTime createdAt;
+
     public Long getId() { return id; }
     public String getActor() { return actor; }
     public void setActor(String actor) { this.actor = actor; }
@@ -31,5 +36,5 @@ public class AuditLog {
     public void setResourceId(String resourceId) { this.resourceId = resourceId; }
     public String getDetail() { return detail; }
     public void setDetail(String detail) { this.detail = detail; }
+    public LocalDateTime getCreatedAt() { return createdAt; }
 }
-

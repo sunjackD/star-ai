@@ -4,10 +4,14 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Alert, Button, Card, Form, Input, Layout, Menu, Modal, Popconfirm, Progress, Select, Space, Spin, Statistic, Steps, Switch, Table, Tag, Typography, Upload, message } from 'antd';
 import type { RcFile } from 'antd/es/upload';
 import {
+  Activity,
+  AlertTriangle,
   Bot,
   Boxes,
   BrainCircuit,
   BookOpenCheck,
+  CheckCircle2,
+  Clock3,
   Code2,
   Copy,
   Database,
@@ -33,6 +37,7 @@ import type {
   ArticleLink,
   ArticleSummary,
   AuthResponse,
+  DeveloperDashboard,
   DeveloperSkillManifest,
   FinetuneJob,
   PlatformConfig,
@@ -1014,16 +1019,23 @@ function ApiKeysPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [createdKey, setCreatedKey] = useState<string>();
   const { data = [] } = useQuery({ queryKey: ['api-keys'], queryFn: () => getData<ApiKey[]>('/developer/api-keys') });
+  const { data: dashboard } = useQuery({
+    queryKey: ['developer-dashboard'],
+    queryFn: () => getData<DeveloperDashboard>('/developer/dashboard')
+  });
   const mutation = useMutation({
-    mutationFn: (values: { name: string; scopes: string[]; expireDays: number }) => postData<ApiKey>('/developer/api-keys', {
-      name: values.name,
-      scopes: values.scopes,
-      expiresAt: values.expireDays > 0 ? localDateTimeAfterDays(values.expireDays) : undefined
-    }),
+    mutationFn: (values: { name: string; scopes: string[]; expireDays: number }) => {
+      return postData<ApiKey>('/developer/api-keys', {
+        name: values.name,
+        scopes: values.scopes,
+        expiresAt: values.expireDays > 0 ? localDateTimeAfterDays(values.expireDays) : undefined
+      });
+    },
     onSuccess: (data) => {
       setCreatedKey(data.plainKey);
       setModalOpen(false);
       queryClient.invalidateQueries({ queryKey: ['api-keys'] });
+      queryClient.invalidateQueries({ queryKey: ['developer-dashboard'] });
     }
   });
   const revokeMutation = useMutation({
@@ -1031,19 +1043,123 @@ function ApiKeysPage() {
     onSuccess: () => {
       message.success('API Key 已撤销');
       queryClient.invalidateQueries({ queryKey: ['api-keys'] });
+      queryClient.invalidateQueries({ queryKey: ['developer-dashboard'] });
     }
   });
+  const defaultRequiredScopes = API_KEY_SCOPE_OPTIONS
+    .filter((item) => item.value.startsWith('skills:'))
+    .map((item) => item.value);
+  const requiredScopes = dashboard?.requiredScopes ?? defaultRequiredScopes;
+  const missingScopes = dashboard?.missingRequiredScopes ?? requiredScopes;
+  const scopeCoverage = Math.round(
+    ((requiredScopes.length - missingScopes.length) / Math.max(requiredScopes.length, 1)) * 100
+  );
 
   return (
     <div className="page">
-      <PageTitle title="API Key 管理" description="创建给 AI Agent 使用的受限访问凭证，请按实际场景选择最小权限。" />
-      {createdKey && <Alert type="success" showIcon message="请立即记录 API Key" description={<code>{createdKey}</code>} className="one-time-key" />}
-      <Button type="primary" icon={<KeyRound size={16} />} onClick={() => setModalOpen(true)}>创建 API Key</Button>
+      <PageTitle title="Agent 控制面板" description="管理 AI Agent 的 API Key、权限覆盖和近期调用痕迹，按最小权限把平台能力交给自动化工具。" />
+      <section className="agent-control-panel">
+        <div>
+          <Tag color="processing" icon={<Activity size={14} />}>Runtime Control</Tag>
+          <Title level={2}>凭据健康与 Agent 调用可见性</Title>
+          <Paragraph>
+            这里聚合 API Key 生命周期、必需 scope 覆盖和最近审计事件，用于判断 Agent 是否具备稳定、安全的 Skills 管理能力。
+          </Paragraph>
+        </div>
+        <Space wrap>
+          <Link to="/developer"><Button icon={<Workflow size={16} />}>接入指南</Button></Link>
+          <Button type="primary" icon={<KeyRound size={16} />} onClick={() => setModalOpen(true)}>创建 API Key</Button>
+        </Space>
+      </section>
+
+      <div className="agent-health-grid">
+        <Card className="agent-health-card">
+          <Statistic title="Active Keys" value={dashboard?.activeKeys ?? 0} prefix={<CheckCircle2 size={18} />} />
+          <Text type="secondary">总数 {dashboard?.totalKeys ?? data.length}</Text>
+        </Card>
+        <Card className="agent-health-card">
+          <Statistic title="近期调用" value={dashboard?.recentlyUsedKeys ?? 0} prefix={<Clock3 size={18} />} />
+          <Text type="secondary">最近 7 天有使用记录</Text>
+        </Card>
+        <Card className="agent-health-card">
+          <Statistic title="即将过期" value={dashboard?.expiringSoonKeys ?? 0} prefix={<AlertTriangle size={18} />} />
+          <Text type="secondary">未来 14 天内到期</Text>
+        </Card>
+        <Card className="agent-health-card">
+          <Statistic title="权限覆盖" value={scopeCoverage} suffix="%" prefix={<ShieldCheck size={18} />} />
+          <Text type="secondary">覆盖自管理 Skill 必需 scopes</Text>
+        </Card>
+      </div>
+
+      {missingScopes.length > 0 ? (
+        <Alert
+          type="warning"
+          showIcon
+          className="agent-dashboard-alert"
+          message="Agent 自管理权限未完整覆盖"
+          description={`缺少 ${missingScopes.join(', ')}。创建或更新 Key 时只授予当前任务所需 scope。`}
+        />
+      ) : (
+        <Alert
+          type="success"
+          showIcon
+          className="agent-dashboard-alert"
+          message="Agent 自管理权限已覆盖"
+          description="当前至少有一个有效 Key 覆盖 Skills 发现、导入、维护和下载所需 scope。"
+        />
+      )}
+
+      <div className="agent-dashboard-grid">
+        <Card title="Scope 覆盖">
+          <Progress percent={scopeCoverage} />
+          <div className="scope-coverage-tags">
+            {requiredScopes.map((scope) => {
+              const missing = missingScopes.includes(scope);
+              return <Tag key={scope} color={missing ? 'orange' : 'green'}>{scope}</Tag>;
+            })}
+          </div>
+        </Card>
+        <Card title="近期 Agent 活动">
+          <Table
+            rowKey="id"
+            size="small"
+            dataSource={dashboard?.recentEvents ?? []}
+            pagination={false}
+            columns={[
+              { title: '动作', dataIndex: 'action' },
+              { title: '资源', render: (_, row) => `${row.resourceType}#${row.resourceId}` },
+              { title: 'Actor', dataIndex: 'actor' },
+              { title: '时间', dataIndex: 'createdAt', render: formatDateTime }
+            ]}
+          />
+        </Card>
+      </div>
+
+      {createdKey && (
+        <Alert
+          type="success"
+          showIcon
+          message="请立即记录 API Key"
+          description={<code>{createdKey}</code>}
+          className="one-time-key"
+        />
+      )}
+      <div className="account-key-toolbar">
+        <Button type="primary" icon={<KeyRound size={16} />} onClick={() => setModalOpen(true)}>创建 API Key</Button>
+      </div>
       <Table rowKey="id" dataSource={data} columns={[
         { title: '名称', dataIndex: 'name' },
         { title: '前缀', dataIndex: 'keyPrefix' },
-        { title: 'Scopes', dataIndex: 'scopes', render: (scopes: string[]) => scopes.map((scope) => <Tag key={scope}>{scope}</Tag>) },
-        { title: '状态', dataIndex: 'status', render: (status) => <Tag color={status === 'ACTIVE' ? 'green' : 'default'}>{status}</Tag> },
+        {
+          title: 'Scopes',
+          dataIndex: 'scopes',
+          render: (scopes: string[]) => scopes.map((scope) => <Tag key={scope}>{scope}</Tag>)
+        },
+        {
+          title: '状态',
+          dataIndex: 'status',
+          render: (status) => <Tag color={status === 'ACTIVE' ? 'green' : 'default'}>{status}</Tag>
+        },
         { title: '过期时间', dataIndex: 'expiresAt', render: formatDateTime },
         { title: '最后使用', dataIndex: 'lastUsedAt', render: formatDateTime },
         {

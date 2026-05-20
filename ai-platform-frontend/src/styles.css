@@ -439,6 +439,64 @@ pre {
   word-break: break-all;
 }
 
+.agent-control-panel {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) auto;
+  gap: 18px;
+  align-items: center;
+  padding: clamp(24px, 4vw, 38px);
+  margin-bottom: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.74);
+  border-radius: var(--radius-lg);
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.86), rgba(248, 250, 255, 0.62)),
+    linear-gradient(112deg, rgba(20, 184, 166, 0.13), transparent 40%, rgba(245, 158, 11, 0.10));
+  box-shadow: var(--glow);
+  backdrop-filter: blur(24px) saturate(155%);
+}
+
+.agent-control-panel h2 {
+  margin: 12px 0 10px !important;
+  font-family: var(--display-font);
+  font-weight: 800;
+  letter-spacing: 0;
+}
+
+.agent-health-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 18px;
+  margin-bottom: 18px;
+}
+
+.agent-health-card .ant-card-body {
+  min-height: 132px;
+}
+
+.agent-dashboard-alert,
+.account-key-toolbar,
+.agent-dashboard-grid {
+  margin-bottom: 18px;
+}
+
+.account-key-toolbar {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.agent-dashboard-grid {
+  display: grid;
+  grid-template-columns: minmax(300px, 0.8fr) minmax(0, 1.2fr);
+  gap: 18px;
+}
+
+.scope-coverage-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
+}
+
 .admin-toolbar {
   width: 100%;
   margin-bottom: 18px;
@@ -964,6 +1022,9 @@ pre {
   .metric-grid,
   .content-grid,
   .settings-grid,
+  .agent-control-panel,
+  .agent-health-grid,
+  .agent-dashboard-grid,
   .developer-grid,
   .developer-hero-panel,
   .developer-two-column {

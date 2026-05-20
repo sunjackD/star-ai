@@ -7,6 +7,7 @@ import com.xingmeng.aiplatform.module.auth.security.AuthenticatedUser;
 import com.xingmeng.aiplatform.module.audit.service.AuditService;
 import com.xingmeng.aiplatform.module.developer.dto.ApiKeyCreateRequest;
 import com.xingmeng.aiplatform.module.developer.dto.ApiKeyResponse;
+import com.xingmeng.aiplatform.module.developer.dto.DeveloperDashboardResponse;
 import com.xingmeng.aiplatform.module.developer.dto.RemoteSkillImportRequest;
 import com.xingmeng.aiplatform.module.developer.dto.RemoteSkillRequest;
 import com.xingmeng.aiplatform.module.developer.service.ApiKeyService;
@@ -101,6 +102,15 @@ public class DeveloperApiController {
         apiKeyService.revoke(principal, id);
         auditService.log(authentication, "API_KEY_REVOKED", "API_KEY", id, "revoked");
         return ApiResponse.success(null);
+    }
+
+    @GetMapping("/dashboard")
+    public ApiResponse<DeveloperDashboardResponse> dashboard(
+            @AuthenticationPrincipal AuthenticatedUser principal,
+            Authentication authentication
+    ) {
+        apiKeyService.requireUserSession(authentication);
+        return ApiResponse.success(apiKeyService.dashboard(principal));
     }
 
     @GetMapping("/skill-manifest")
