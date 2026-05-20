@@ -715,10 +715,19 @@ function skillArtifactLabel(skill: Skill): string {
 function ArticlesPage() {
   const navigate = useNavigate();
   const token = useAuthStore((state) => state.token);
+  const [categoryFilter, setCategoryFilter] = useState('all');
+  const [difficultyFilter, setDifficultyFilter] = useState('all');
   const { data = [] } = useQuery({
     queryKey: ['articles'],
     queryFn: () => getPublicData<ArticleSummary[]>('/articles')
   });
+  const categories = Array.from(new Set(data.map((article) => article.category))).sort();
+  const filteredArticles = data.filter((article) => {
+    const matchesCategory = categoryFilter === 'all' || article.category === categoryFilter;
+    const matchesDifficulty = difficultyFilter === 'all' || article.difficulty === difficultyFilter;
+    return matchesCategory && matchesDifficulty;
+  });
+  const estimatedMinutes = data.reduce((sum, article) => sum + article.estimatedMinutes, 0);
 
   function openDetail(id: number) {
     if (!token) {
@@ -730,11 +739,46 @@ function ArticlesPage() {
 
   return (
     <div className="page">
-      <PageTitle title="教程文章" description="沉淀可阅读、可下载、可复用的 AI 教程、脚本、Prompt 和参考资料。" />
+      <section className="knowledge-base-header">
+        <div>
+          <Tag color="processing" icon={<BookOpenCheck size={14} />}>Knowledge Base</Tag>
+          <Title level={1}>Knowledge Base</Title>
+          <Paragraph>
+            沉淀可阅读、可下载、可复用的 AI 教程、脚本、Prompt 和参考资料，作为 Agent 执行复杂任务前的上下文资产。
+          </Paragraph>
+        </div>
+        <div className="knowledge-base-metrics">
+          <Statistic title="Articles" value={data.length} />
+          <Statistic title="分类" value={categories.length} />
+          <Statistic title="阅读分钟" value={estimatedMinutes} />
+          <Statistic title="高级内容" value={data.filter((article) => article.difficulty === 'ADVANCED').length} />
+        </div>
+      </section>
+
+      <div className="knowledge-base-toolbar">
+        <Select
+          value={categoryFilter}
+          onChange={setCategoryFilter}
+          options={[
+            { value: 'all', label: '全部分类' },
+            ...categories.map((category) => ({ value: category, label: category }))
+          ]}
+        />
+        <Select
+          value={difficultyFilter}
+          onChange={setDifficultyFilter}
+          options={[
+            { value: 'all', label: '全部难度' },
+            { value: 'BEGINNER', label: difficultyLabel('BEGINNER') },
+            { value: 'INTERMEDIATE', label: difficultyLabel('INTERMEDIATE') },
+            { value: 'ADVANCED', label: difficultyLabel('ADVANCED') }
+          ]}
+        />
+      </div>
+
       <div className="article-grid">
-        {data.map((article) => (
-          <Card
-            hoverable
+        {filteredArticles.map((article) => (
+          <section
             key={article.id}
             className="article-card"
             onClick={() => openDetail(article.id)}
@@ -749,7 +793,7 @@ function ArticlesPage() {
             <Space wrap>
               {article.tags.split(',').map((tag) => <Tag key={tag}>{tag}</Tag>)}
             </Space>
-          </Card>
+          </section>
         ))}
       </div>
     </div>
