@@ -185,34 +185,112 @@ function DashboardPage() {
   const { data: agents = [] } = useQuery({ queryKey: ['agents'], queryFn: () => getData<Agent[]>('/agents') });
   const { data: skills = [] } = useQuery({ queryKey: ['skills'], queryFn: () => getData<Skill[]>('/skills') });
   const { data: models = [] } = useQuery({ queryKey: ['models'], queryFn: () => getData<AiModel[]>('/models') });
+  const { data: articles = [] } = useQuery({ queryKey: ['articles'], queryFn: () => getData<ArticleSummary[]>('/articles') });
   const { data: links = [] } = useQuery({ queryKey: ['links'], queryFn: () => getData<RedirectLink[]>('/links') });
   const { data: platform } = useQuery({ queryKey: ['platform-config'], queryFn: () => getData<PlatformConfig>('/platform/config') });
+  const profile = useAuthStore((state) => state.profile);
+  const isAdmin = profile?.roles.includes('ADMIN');
   const groupedLinks = groupLinks(links);
+  const activeSkills = skills.filter((skill) => skill.status === 'ACTIVE').length;
+  const activeAgents = agents.filter((agent) => agent.status === 'ACTIVE').length;
+  const consoleModules = [
+    {
+      title: 'Agent Fleet',
+      description: '统一维护团队正在使用的 IDE Agent、CLI Agent 与自动化助手。',
+      metric: activeAgents,
+      unit: 'active',
+      path: '/agents',
+      icon: <Bot size={20} />,
+      status: '运行目录'
+    },
+    {
+      title: 'Skill Registry',
+      description: '沉淀可复用能力包，支持发现、下载、上传、替换和远程导入。',
+      metric: activeSkills,
+      unit: 'skills',
+      path: '/skills',
+      icon: <Boxes size={20} />,
+      status: '资产仓库'
+    },
+    {
+      title: 'Model Layer',
+      description: '跟踪模型供应商、能力标签、调用入口和微调数据链路。',
+      metric: models.length,
+      unit: 'models',
+      path: '/models',
+      icon: <BrainCircuit size={20} />,
+      status: '能力底座'
+    },
+    {
+      title: 'Knowledge Base',
+      description: '把教程、最佳实践和操作资产结构化，作为 Agent 执行前上下文。',
+      metric: articles.length,
+      unit: 'articles',
+      path: '/articles',
+      icon: <BookOpenCheck size={20} />,
+      status: '知识资产'
+    },
+    {
+      title: 'Agent Control Plane',
+      description: '暴露 Manifest、Agent 工作流、最小权限和审计链路。',
+      metric: 4,
+      unit: 'scopes',
+      path: '/developer',
+      icon: <Workflow size={20} />,
+      status: '接入控制'
+    },
+    {
+      title: 'Governance',
+      description: '管理用户、角色、系统设置、API Key 审计和操作日志。',
+      metric: isAdmin ? 1 : 0,
+      unit: isAdmin ? 'admin' : 'limited',
+      path: isAdmin ? '/admin' : '/account/api-keys',
+      icon: <ShieldCheck size={20} />,
+      status: isAdmin ? '治理入口' : '权限受限'
+    }
+  ];
 
   return (
     <div className="page">
       <section className="workspace-hero">
         <div>
-          <Tag color="processing" icon={<Sparkles size={14} />}>一站式 AI 工作台</Tag>
-          <Title level={1}>{platform?.siteName ?? 'AI 工具、Skills 与模型的统一工作台'}</Title>
+          <Tag color="processing" icon={<Sparkles size={14} />}>Agent Control Console</Tag>
+          <Title level={1}>{platform?.siteName ?? '星梦 AI Agent 控制台'}</Title>
           <Paragraph>
-            {platform?.siteSubtitle ?? '聚合 Agent、Skills、模型服务和常用入口，让团队在一个工作台内完成发现、接入与管理。'}
+            {platform?.siteSubtitle ?? '围绕 Agent、Skill Registry、模型层、知识资产和治理链路组织工作，让团队在同一控制台完成发现、接入、授权和审计。'}
           </Paragraph>
-          <Space wrap>
-            <Link to="/skills"><Button type="primary">进入 Skills 市场</Button></Link>
-            <Link to="/account/api-keys"><Button>生成 API Key</Button></Link>
+          <Space wrap className="console-hero-actions">
+            <Link to="/agents"><Button type="primary" icon={<Bot size={16} />}>查看 Agent Fleet</Button></Link>
+            <Link to="/skills"><Button icon={<Boxes size={16} />}>进入 Skill Registry</Button></Link>
+            <Link to="/developer"><Button icon={<Workflow size={16} />}>Developer 接入</Button></Link>
           </Space>
+        </div>
+        <div className="console-kpi-strip">
+          <div><strong>{activeAgents}</strong><span>Agents</span></div>
+          <div><strong>{activeSkills}</strong><span>Skills</span></div>
+          <div><strong>{models.length}</strong><span>Models</span></div>
+          <div><strong>{links.length}</strong><span>Connectors</span></div>
         </div>
       </section>
 
-      <div className="metric-grid">
-        <Card><Statistic title="Agents" value={agents.length} /></Card>
-        <Card><Statistic title="Skills" value={skills.length} /></Card>
-        <Card><Statistic title="Models" value={models.length} /></Card>
-        <Card><Statistic title="访问控制" value="已启用" /></Card>
+      <div className="console-module-grid">
+        {consoleModules.map((module) => (
+          <Link to={module.path} key={module.title} className="console-module-card">
+            <div className="console-module-heading">
+              <span>{module.icon}</span>
+              <Tag>{module.status}</Tag>
+            </div>
+            <strong>{module.title}</strong>
+            <p>{module.description}</p>
+            <div className="console-module-metric">
+              <span>{module.metric}</span>
+              <small>{module.unit}</small>
+            </div>
+          </Link>
+        ))}
       </div>
 
-      <Card title="导航聚合" className="navigation-card">
+      <Card title="外部系统连接器" className="navigation-card">
         <div className="navigation-groups">
           {Object.keys(groupedLinks).length === 0 && <Text type="secondary">暂无导航入口，请在后台跳转链接中维护。</Text>}
           {Object.entries(groupedLinks).map(([category, items]) => (
@@ -232,14 +310,14 @@ function DashboardPage() {
       </Card>
 
       <div className="content-grid">
-        <Card title="热门 Agents">
+        <Card title="Agent Fleet 热度">
           <Table rowKey="id" dataSource={agents.slice(0, 5)} pagination={false} columns={[
             { title: '名称', dataIndex: 'name', render: (name, row) => <Link to={`/agents/${row.id}`}>{name}</Link> },
             { title: '分类', dataIndex: 'category' },
             { title: '浏览', dataIndex: 'viewCount' }
           ]} />
         </Card>
-        <Card title="热门 Skills">
+        <Card title="Skill Registry 下载">
           <Table rowKey="id" dataSource={skills.slice(0, 5)} pagination={false} columns={[
             { title: '名称', dataIndex: 'name', render: (name, row) => <Link to={`/skills/${row.id}`}>{name}</Link> },
             { title: '分类', render: (_, row) => row.category.name },
