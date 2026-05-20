@@ -46,6 +46,13 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/v1/developer")
 public class DeveloperApiController {
+    private static final List<String> REQUIRED_SKILL_SCOPES = List.of(
+            "skills:read",
+            "skills:import",
+            "skills:write",
+            "skills:download"
+    );
+
     private final ApiKeyService apiKeyService;
     private final SkillRepository skillRepository;
     private final SkillCategoryRepository categoryRepository;
@@ -116,11 +123,15 @@ public class DeveloperApiController {
 
     @GetMapping("/skill-manifest")
     public ApiResponse<Map<String, Object>> manifest() {
-        return ApiResponse.success(Map.of(
-                "name", "ai-platform-manager",
-                "description", "通过 API Key 让 AI Agent 查询、导入、上传、替换、删除和下载平台 Skills",
-                "auth", Map.of("headers", List.of("X-API-Key", "Authorization: Bearer xma_xxx")),
-                "tools", List.of(
+        return ApiResponse.success(Map.<String, Object>ofEntries(
+                Map.entry("schemaVersion", "1.0"),
+                Map.entry("apiVersion", "v1"),
+                Map.entry("apiBasePath", "/api/v1"),
+                Map.entry("name", "ai-platform-manager"),
+                Map.entry("description", "通过 API Key 让 AI Agent 查询、导入、上传、替换、删除和下载平台 Skills"),
+                Map.entry("auth", Map.of("headers", List.of("X-API-Key", "Authorization: Bearer xma_xxx"))),
+                Map.entry("requiredScopes", REQUIRED_SKILL_SCOPES),
+                Map.entry("tools", List.of(
                         "list_skills",
                         "get_skill_categories",
                         "import_skill",
@@ -133,9 +144,9 @@ public class DeveloperApiController {
                         "import_remote_skill",
                         "delete_skill",
                         "download_skill"
-                ),
-                "toolSpecs", toolSpecs(),
-                "examples", List.of(
+                )),
+                Map.entry("toolSpecs", toolSpecs()),
+                Map.entry("examples", List.of(
                         "list_skills: GET /api/v1/developer/skills",
                         "get_skill_categories: GET /api/v1/developer/skill-categories",
                         "import_skill: POST /api/v1/developer/skills/import JSON",
@@ -148,8 +159,12 @@ public class DeveloperApiController {
                         "import_remote_skill: POST /api/v1/developer/skills/remote/import HTTPS URL and store content",
                         "delete_skill: DELETE /api/v1/developer/skills/{id}",
                         "download_skill: GET /api/v1/developer/skills/{id}/download"
-                ),
-                "installPrompt", "请下载并安装 ai-platform-manager Skill，配置 API Base 和包含 skills:read/import/write/download 的 API Key，然后让 Agent 按 examples 调用。"
+                )),
+                Map.entry(
+                        "installPrompt",
+                        "请下载并安装 ai-platform-manager Skill，配置 API Base 和包含 skills:read/import/write/download "
+                                + "的 API Key，然后让 Agent 读取 toolSpecs 后按 method/path/scope/risk 调用。"
+                )
         ));
     }
 

@@ -12,6 +12,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
+import static org.hamcrest.Matchers.containsString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -106,6 +107,20 @@ class AuthAndDeveloperApiTest {
                         "$.data.toolSpecs[?(@.name == 'download_skill' "
                                 + "&& @.path == '/api/v1/developer/skills/{id}/download')]"
                 ).isNotEmpty());
+    }
+
+    @Test
+    void developerSkillManifestExposesVersionedAgentContract() throws Exception {
+        mockMvc.perform(get("/api/v1/developer/skill-manifest"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.schemaVersion").value("1.0"))
+                .andExpect(jsonPath("$.data.apiVersion").value("v1"))
+                .andExpect(jsonPath("$.data.apiBasePath").value("/api/v1"))
+                .andExpect(jsonPath("$.data.requiredScopes[?(@ == 'skills:read')]").isNotEmpty())
+                .andExpect(jsonPath("$.data.requiredScopes[?(@ == 'skills:import')]").isNotEmpty())
+                .andExpect(jsonPath("$.data.requiredScopes[?(@ == 'skills:write')]").isNotEmpty())
+                .andExpect(jsonPath("$.data.requiredScopes[?(@ == 'skills:download')]").isNotEmpty())
+                .andExpect(jsonPath("$.data.installPrompt").value(containsString("toolSpecs")));
     }
 
     @Test

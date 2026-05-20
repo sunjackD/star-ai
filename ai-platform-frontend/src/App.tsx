@@ -1228,6 +1228,8 @@ function DeveloperPage() {
     queryFn: () => getPublicData<DeveloperSkillManifest>('/developer/skill-manifest')
   });
   const tools = manifest?.tools ?? DEFAULT_DEVELOPER_TOOLS;
+  const manifestRequiredScopes = manifest?.requiredScopes
+    ?? API_KEY_SCOPE_OPTIONS.filter((item) => item.value.startsWith('skills:')).map((item) => item.value);
   const toolSpecs = manifest?.toolSpecs?.length
     ? manifest.toolSpecs
     : tools.map((tool) => ({
@@ -1250,9 +1252,10 @@ ${selfSkillUrl}
 连接配置：
 - API Base: ${apiBaseUrl}
 - API Key: 使用平台 API Key 页面生成的 Key
-- 最小 scopes: skills:read, skills:import, skills:write, skills:download
+- 最小 scopes: ${manifestRequiredScopes.join(', ')}
 
 执行顺序：
+0. 先读取 skill-manifest 的 toolSpecs，确认 method/path/scope/risk
 1. list_skills 与 get_skill_categories 先读取现状
 2. import_skill/upload_skill/import_remote_skill 写入新增 Skill
 3. update_skill/replace_skill_artifact/replace_skill_directory 做迭代维护
@@ -1277,8 +1280,9 @@ ${selfSkillUrl}
           </Space>
         </div>
         <div className="developer-manifest-meta">
+          <Statistic title="Version" value={manifest?.schemaVersion ?? '1.0'} />
           <Statistic title="Tools" value={toolSpecs.length} />
-          <Statistic title="Scopes" value={API_KEY_SCOPE_OPTIONS.filter((item) => item.value.startsWith('skills:')).length} />
+          <Statistic title="Scopes" value={manifestRequiredScopes.length} />
           <Statistic title="Auth" value={authHeaders.length} />
         </div>
       </section>
@@ -1393,8 +1397,12 @@ ${selfSkillUrl}
       <Card title="Skill Manifest" className="markdown-card">
         <pre>{JSON.stringify({
           endpoint: '/api/v1/developer/skill-manifest',
+          schemaVersion: manifest?.schemaVersion ?? '1.0',
+          apiVersion: manifest?.apiVersion ?? 'v1',
+          apiBasePath: manifest?.apiBasePath ?? '/api/v1',
           name: manifest?.name ?? 'ai-platform-manager',
           auth: authHeaders,
+          requiredScopes: manifestRequiredScopes,
           tools,
           toolSpecs
         }, null, 2)}</pre>

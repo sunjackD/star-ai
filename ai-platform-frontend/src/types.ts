@@ -193,11 +193,15 @@ export type DeveloperToolSpec = {
 };
 
 export type DeveloperSkillManifest = {
+  schemaVersion?: string;
+  apiVersion?: string;
+  apiBasePath?: string;
   name: string;
   description: string;
   auth: {
     headers: string[];
   };
+  requiredScopes?: string[];
   tools: string[];
   toolSpecs?: DeveloperToolSpec[];
   examples: string[];
