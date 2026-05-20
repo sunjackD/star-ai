@@ -1143,16 +1143,73 @@ function DetailView(props: { title: string; label: string; description: string; 
 
 function ModelsPage() {
   const { data = [] } = useQuery({ queryKey: ['models'], queryFn: () => getData<AiModel[]>('/models') });
+  const [providerFilter, setProviderFilter] = useState('all');
+  const [typeFilter, setTypeFilter] = useState('all');
+  const providers = Array.from(new Set(data.map((model) => model.provider))).sort();
+  const modelTypes = Array.from(new Set(data.map((model) => model.modelType))).sort();
+  const filteredModels = data.filter((model) => {
+    const matchesProvider = providerFilter === 'all' || model.provider === providerFilter;
+    const matchesType = typeFilter === 'all' || model.modelType === typeFilter;
+    return matchesProvider && matchesType;
+  });
+
   return (
     <div className="page">
-      <PageTitle title="模型聚合" description="统一查看模型能力、供应商和服务入口，便于快速选择调用渠道。" />
-      <Table rowKey="id" dataSource={data} columns={[
-        { title: '模型', dataIndex: 'name' },
-        { title: '提供商', dataIndex: 'provider' },
-        { title: '类型', dataIndex: 'modelType' },
-        { title: '能力', dataIndex: 'capabilities' },
-        { title: '入口', dataIndex: 'endpoint', render: (url) => <a href={url} target="_blank">打开</a> }
-      ]} />
+      <section className="model-layer-header">
+        <div>
+          <Tag color="processing" icon={<BrainCircuit size={14} />}>Model Layer</Tag>
+          <Title level={1}>Model Layer</Title>
+          <Paragraph>
+            统一查看模型供应商、能力标签、价格说明和服务入口，为 Agent 工作流选择合适的推理与工具调用底座。
+          </Paragraph>
+        </div>
+        <div className="model-layer-metrics">
+          <Statistic title="Models" value={data.length} />
+          <Statistic title="供应商" value={providers.length} />
+          <Statistic title="类型" value={modelTypes.length} />
+          <Statistic title="可用入口" value={data.filter((model) => Boolean(model.endpoint)).length} />
+        </div>
+      </section>
+
+      <div className="model-layer-toolbar">
+        <Select
+          value={providerFilter}
+          onChange={setProviderFilter}
+          options={[
+            { value: 'all', label: '全部供应商' },
+            ...providers.map((provider) => ({ value: provider, label: provider }))
+          ]}
+        />
+        <Select
+          value={typeFilter}
+          onChange={setTypeFilter}
+          options={[
+            { value: 'all', label: '全部模型类型' },
+            ...modelTypes.map((type) => ({ value: type, label: type }))
+          ]}
+        />
+      </div>
+
+      <div className="model-layer-grid">
+        {filteredModels.map((model) => (
+          <section key={model.id} className="model-layer-card">
+            <div className="model-layer-card-heading">
+              <Tag color="blue">{model.provider}</Tag>
+              <Tag>{model.modelType}</Tag>
+            </div>
+            <Title level={4}>{model.name}</Title>
+            <div className="model-layer-capabilities">
+              {model.capabilities.split(',').map((capability) => (
+                <Tag key={capability.trim()}>{capability.trim()}</Tag>
+              ))}
+            </div>
+            <Text type="secondary">{model.pricing}</Text>
+            <Button size="small" icon={<ExternalLink size={14} />} href={model.endpoint} target="_blank">
+              服务入口
+            </Button>
+          </section>
+        ))}
+      </div>
     </div>
   );
 }
