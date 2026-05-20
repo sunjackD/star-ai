@@ -2,6 +2,7 @@ package com.xingmeng.aiplatform.module.audit.service;
 
 import com.xingmeng.aiplatform.module.audit.entity.AuditLog;
 import com.xingmeng.aiplatform.module.audit.repository.AuditLogRepository;
+import com.xingmeng.aiplatform.module.auth.security.ApiKeyAuthenticationDetails;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
@@ -28,8 +29,8 @@ public class AuditService {
             return "anonymous";
         }
         Object details = authentication.getDetails();
-        if (details instanceof String keyPrefix && !keyPrefix.isBlank()) {
-            return authentication.getName() + "#" + keyPrefix;
+        if (details instanceof ApiKeyAuthenticationDetails apiKeyDetails && !apiKeyDetails.keyPrefix().isBlank()) {
+            return authentication.getName() + "#" + apiKeyDetails.keyPrefix();
         }
         return authentication.getName();
     }

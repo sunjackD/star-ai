@@ -169,6 +169,63 @@ class AuthAndDeveloperApiTest {
     }
 
     @Test
+    void apiKeyCredentialCannotListApiKeys() throws Exception {
+        String adminToken = createAdminAndLogin("admin_key_list_guard", "admin-key-list-guard@example.com");
+        createUser(adminToken, "key_list_guard_dev", "key-list-guard@example.com", "Key List Guard", "DEVELOPER");
+        String jwt = login("key_list_guard_dev", "secret123");
+        String apiKey = createApiKey(jwt, "skills:read");
+
+        mockMvc.perform(get("/api/v1/developer/api-keys")
+                        .header("X-API-Key", apiKey))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void apiKeyCredentialCannotCreateApiKeys() throws Exception {
+        String adminToken = createAdminAndLogin("admin_key_create_guard", "admin-key-create-guard@example.com");
+        createUser(adminToken, "key_create_guard_dev", "key-create-guard@example.com", "Key Create Guard", "DEVELOPER");
+        String jwt = login("key_create_guard_dev", "secret123");
+        String apiKey = createApiKey(jwt, "skills:read");
+
+        mockMvc.perform(post("/api/v1/developer/api-keys")
+                        .header("X-API-Key", apiKey)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "name": "escalated key",
+                                  "scopes": ["skills:write"]
+                                }
+                                """))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void apiKeyCredentialCannotRevokeApiKeys() throws Exception {
+        String adminToken = createAdminAndLogin("admin_key_revoke_guard", "admin-key-revoke-guard@example.com");
+        createUser(adminToken, "key_revoke_guard_dev", "key-revoke-guard@example.com", "Key Revoke Guard", "DEVELOPER");
+        String jwt = login("key_revoke_guard_dev", "secret123");
+        String apiKey = createApiKey(jwt, "skills:read");
+        String targetJson = mockMvc.perform(post("/api/v1/developer/api-keys")
+                        .header("Authorization", "Bearer " + jwt)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "name": "target key",
+                                  "scopes": ["skills:read"]
+                                }
+                                """))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+        long targetKeyId = objectMapper.readTree(targetJson).path("data").path("id").asLong();
+
+        mockMvc.perform(post("/api/v1/developer/api-keys/" + targetKeyId + "/revoke")
+                        .header("X-API-Key", apiKey))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
     void apiKeyCreateAndRevokeAreAudited() throws Exception {
         String adminToken = createAdminAndLogin("admin_key_audit", "admin-key-audit@example.com");
         createUser(adminToken, "key_audit_dev", "key-audit@example.com", "Key Audit Dev", "DEVELOPER");

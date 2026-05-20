@@ -40,7 +40,7 @@ public class ApiKeyAuthenticationFilter extends OncePerRequestFilter {
                         .toList();
                 var principal = new AuthenticatedUser(apiKey.getUser().getId(), apiKey.getUser().getUsername(), "", authorities);
                 var authentication = new UsernamePasswordAuthenticationToken(principal, null, authorities);
-                authentication.setDetails(apiKey.getKeyPrefix());
+                authentication.setDetails(new ApiKeyAuthenticationDetails(apiKey.getKeyPrefix()));
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             });
         }

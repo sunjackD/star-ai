@@ -2,6 +2,7 @@ package com.xingmeng.aiplatform.module.developer.service;
 
 import com.xingmeng.aiplatform.common.exception.BusinessException;
 import com.xingmeng.aiplatform.common.util.HashUtils;
+import com.xingmeng.aiplatform.module.auth.security.ApiKeyAuthenticationDetails;
 import com.xingmeng.aiplatform.module.auth.security.AuthenticatedUser;
 import com.xingmeng.aiplatform.module.developer.dto.ApiKeyCreateRequest;
 import com.xingmeng.aiplatform.module.developer.dto.ApiKeyResponse;
@@ -70,6 +71,13 @@ public class ApiKeyService {
         }
     }
 
+    public void requireUserSession(Authentication authentication) {
+        Object details = authentication == null ? null : authentication.getDetails();
+        if (details instanceof ApiKeyAuthenticationDetails) {
+            throw new BusinessException(HttpStatus.FORBIDDEN, "API Key凭据不能管理API Key");
+        }
+    }
+
     private User loadUser(AuthenticatedUser principal) {
         return userRepository.findByUsername(principal.username())
                 .orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND, "用户不存在"));
@@ -94,4 +102,3 @@ public class ApiKeyService {
         return Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
     }
 }
-

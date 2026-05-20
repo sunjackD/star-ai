@@ -71,7 +71,11 @@ public class DeveloperApiController {
     }
 
     @GetMapping("/api-keys")
-    public ApiResponse<List<ApiKeyResponse>> apiKeys(@AuthenticationPrincipal AuthenticatedUser principal) {
+    public ApiResponse<List<ApiKeyResponse>> apiKeys(
+            @AuthenticationPrincipal AuthenticatedUser principal,
+            Authentication authentication
+    ) {
+        apiKeyService.requireUserSession(authentication);
         return ApiResponse.success(apiKeyService.list(principal));
     }
 
@@ -81,6 +85,7 @@ public class DeveloperApiController {
             Authentication authentication,
             @Valid @RequestBody ApiKeyCreateRequest request
     ) {
+        apiKeyService.requireUserSession(authentication);
         ApiKeyResponse response = apiKeyService.create(principal, request);
         auditService.log(authentication, "API_KEY_CREATED", "API_KEY", response.id(), response.name());
         return ApiResponse.success(response);
@@ -92,6 +97,7 @@ public class DeveloperApiController {
             Authentication authentication,
             @PathVariable Long id
     ) {
+        apiKeyService.requireUserSession(authentication);
         apiKeyService.revoke(principal, id);
         auditService.log(authentication, "API_KEY_REVOKED", "API_KEY", id, "revoked");
         return ApiResponse.success(null);
