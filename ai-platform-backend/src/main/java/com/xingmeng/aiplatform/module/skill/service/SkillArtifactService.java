@@ -1,6 +1,7 @@
 package com.xingmeng.aiplatform.module.skill.service;
 
 import com.xingmeng.aiplatform.common.exception.BusinessException;
+import com.xingmeng.aiplatform.common.security.RemoteUrlGuard;
 import com.xingmeng.aiplatform.common.storage.StorageService;
 import com.xingmeng.aiplatform.common.storage.StoredObject;
 import com.xingmeng.aiplatform.module.skill.entity.Skill;
@@ -36,6 +37,7 @@ public class SkillArtifactService {
     private final SkillRepository skillRepository;
     private final SkillCategoryRepository categoryRepository;
     private final StorageService storageService;
+    private final RemoteUrlGuard remoteUrlGuard;
     private final HttpClient httpClient = HttpClient.newBuilder()
             .connectTimeout(Duration.ofSeconds(10))
             .followRedirects(HttpClient.Redirect.NEVER)
@@ -44,11 +46,13 @@ public class SkillArtifactService {
     public SkillArtifactService(
             SkillRepository skillRepository,
             SkillCategoryRepository categoryRepository,
-            StorageService storageService
+            StorageService storageService,
+            RemoteUrlGuard remoteUrlGuard
     ) {
         this.skillRepository = skillRepository;
         this.categoryRepository = categoryRepository;
         this.storageService = storageService;
+        this.remoteUrlGuard = remoteUrlGuard;
     }
 
     @Transactional
@@ -453,24 +457,7 @@ public class SkillArtifactService {
     }
 
     private void validateRemoteDownloadUri(URI uri) {
-        if (!"https".equalsIgnoreCase(uri.getScheme()) || isUnsafeRemoteHost(uri.getHost())) {
-            throw new BusinessException(HttpStatus.BAD_REQUEST, "不允许导入不安全的远程 Skill 地址");
-        }
-    }
-
-    private boolean isUnsafeRemoteHost(String host) {
-        if (host == null || host.isBlank()) {
-            return true;
-        }
-        String normalized = host.toLowerCase(Locale.ROOT);
-        return normalized.equals("localhost")
-                || normalized.equals("127.0.0.1")
-                || normalized.equals("0.0.0.0")
-                || normalized.equals("::1")
-                || normalized.startsWith("10.")
-                || normalized.startsWith("192.168.")
-                || normalized.startsWith("169.254.")
-                || normalized.matches("^172\\.(1[6-9]|2\\d|3[0-1])\\..*");
+        remoteUrlGuard.requireSafeHttps(uri);
     }
 
     private void ensureRemoteContentLength(HttpResponse<?> response) {

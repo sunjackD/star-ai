@@ -379,6 +379,30 @@ class SetupAndUploadApiTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(remoteImportBody("https://localhost/skill.zip")))
                 .andExpect(status().isBadRequest());
+
+        mockMvc.perform(post("/api/v1/developer/skills/remote/import")
+                        .header("X-API-Key", apiKey)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(remoteImportBody("https://2130706433/skill.zip")))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void remoteSkillRecordRejectsLoopbackAddressAliases() throws Exception {
+        String jwt = createAdminAndLogin("remote_record_owner", "remote-record-owner@example.com");
+        String apiKey = createApiKey(jwt, "skills:write");
+
+        mockMvc.perform(post("/api/v1/developer/skills/remote")
+                        .header("X-API-Key", apiKey)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "name": "remote-record",
+                                  "url": "https://2130706433/skill.zip",
+                                  "description": "Remote record"
+                                }
+                                """))
+                .andExpect(status().isBadRequest());
     }
 
     @Test

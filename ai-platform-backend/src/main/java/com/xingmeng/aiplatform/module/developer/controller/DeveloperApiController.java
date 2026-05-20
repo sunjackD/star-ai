@@ -2,6 +2,7 @@ package com.xingmeng.aiplatform.module.developer.controller;
 
 import com.xingmeng.aiplatform.common.exception.BusinessException;
 import com.xingmeng.aiplatform.common.response.ApiResponse;
+import com.xingmeng.aiplatform.common.security.RemoteUrlGuard;
 import com.xingmeng.aiplatform.module.auth.security.AuthenticatedUser;
 import com.xingmeng.aiplatform.module.audit.service.AuditService;
 import com.xingmeng.aiplatform.module.developer.dto.ApiKeyCreateRequest;
@@ -49,6 +50,7 @@ public class DeveloperApiController {
     private final SkillSourceRepository skillSourceRepository;
     private final SkillArtifactService skillArtifactService;
     private final AuditService auditService;
+    private final RemoteUrlGuard remoteUrlGuard;
 
     public DeveloperApiController(
             ApiKeyService apiKeyService,
@@ -56,7 +58,8 @@ public class DeveloperApiController {
             SkillCategoryRepository categoryRepository,
             SkillSourceRepository skillSourceRepository,
             SkillArtifactService skillArtifactService,
-            AuditService auditService
+            AuditService auditService,
+            RemoteUrlGuard remoteUrlGuard
     ) {
         this.apiKeyService = apiKeyService;
         this.skillRepository = skillRepository;
@@ -64,6 +67,7 @@ public class DeveloperApiController {
         this.skillSourceRepository = skillSourceRepository;
         this.skillArtifactService = skillArtifactService;
         this.auditService = auditService;
+        this.remoteUrlGuard = remoteUrlGuard;
     }
 
     @GetMapping("/api-keys")
@@ -248,13 +252,7 @@ public class DeveloperApiController {
     @Transactional
     public ApiResponse<Skill> addRemoteSkill(Authentication authentication, @Valid @RequestBody RemoteSkillRequest request) {
         apiKeyService.requireScope(authentication, "skills:write");
-        URI uri = URI.create(request.url());
-        if (!"https".equalsIgnoreCase(uri.getScheme())) {
-            throw new BusinessException(HttpStatus.BAD_REQUEST, "仅允许导入HTTPS地址");
-        }
-        if (isUnsafeHost(uri.getHost())) {
-            throw new BusinessException(HttpStatus.BAD_REQUEST, "不允许导入内网或本机地址");
-        }
+        URI uri = remoteUrlGuard.requireSafeHttps(request.url());
         var category = categoryRepository.findByName("平台管理")
                 .orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND, "默认分类不存在"));
         Skill skill = new Skill();
@@ -287,7 +285,7 @@ public class DeveloperApiController {
             @Valid @RequestBody RemoteSkillImportRequest request
     ) {
         requireImportAndWrite(authentication);
-        URI uri = safeRemoteUri(request.url());
+        URI uri = remoteUrlGuard.requireSafeHttps(request.url());
         Skill saved = skillArtifactService.importRemoteSkill(
                 uri,
                 request.name(),
@@ -357,32 +355,6 @@ public class DeveloperApiController {
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"ai-platform-manager.SKILL.md\"")
                 .contentType(MediaType.parseMediaType("text/markdown; charset=UTF-8"))
                 .body(new ByteArrayResource(bytes));
-    }
-
-    private boolean isUnsafeHost(String host) {
-        if (host == null || host.isBlank()) {
-            return true;
-        }
-        String normalized = host.toLowerCase();
-        return normalized.equals("localhost")
-                || normalized.equals("127.0.0.1")
-                || normalized.equals("0.0.0.0")
-                || normalized.equals("::1")
-                || normalized.startsWith("10.")
-                || normalized.startsWith("192.168.")
-                || normalized.startsWith("169.254.")
-                || normalized.matches("^172\\.(1[6-9]|2\\d|3[0-1])\\..*");
-    }
-
-    private URI safeRemoteUri(String url) {
-        URI uri = URI.create(url);
-        if (!"https".equalsIgnoreCase(uri.getScheme())) {
-            throw new BusinessException(HttpStatus.BAD_REQUEST, "仅允许导入HTTPS地址");
-        }
-        if (isUnsafeHost(uri.getHost())) {
-            throw new BusinessException(HttpStatus.BAD_REQUEST, "不允许导入内网或本机地址");
-        }
-        return uri;
     }
 
     private void applyTextArtifact(Skill skill) {
