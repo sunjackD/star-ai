@@ -1,7 +1,7 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import { BrowserRouter, Link, Navigate, Outlet, Route, Routes, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Alert, Button, Card, Form, Input, Layout, Menu, Modal, Progress, Select, Space, Spin, Statistic, Steps, Switch, Table, Tag, Typography, Upload, message } from 'antd';
+import { Alert, Button, Card, Form, Input, Layout, Menu, Modal, Popconfirm, Progress, Select, Space, Spin, Statistic, Steps, Switch, Table, Tag, Typography, Upload, message } from 'antd';
 import type { RcFile } from 'antd/es/upload';
 import {
   Bot,
@@ -964,6 +964,13 @@ const API_KEY_SCOPE_OPTIONS = [
   { value: 'admin:manage', label: '平台管理', description: '预留给管理类自动化能力' }
 ];
 
+const API_KEY_EXPIRE_OPTIONS = [
+  { value: 30, label: '30 天' },
+  { value: 90, label: '90 天' },
+  { value: 365, label: '365 天' },
+  { value: 0, label: '永不过期' }
+];
+
 const DEFAULT_DEVELOPER_TOOLS = [
   'list_skills',
   'get_skill_categories',
@@ -1008,10 +1015,21 @@ function ApiKeysPage() {
   const [createdKey, setCreatedKey] = useState<string>();
   const { data = [] } = useQuery({ queryKey: ['api-keys'], queryFn: () => getData<ApiKey[]>('/developer/api-keys') });
   const mutation = useMutation({
-    mutationFn: (values: { name: string; scopes: string[] }) => postData<ApiKey>('/developer/api-keys', values),
+    mutationFn: (values: { name: string; scopes: string[]; expireDays: number }) => postData<ApiKey>('/developer/api-keys', {
+      name: values.name,
+      scopes: values.scopes,
+      expiresAt: values.expireDays > 0 ? localDateTimeAfterDays(values.expireDays) : undefined
+    }),
     onSuccess: (data) => {
       setCreatedKey(data.plainKey);
       setModalOpen(false);
+      queryClient.invalidateQueries({ queryKey: ['api-keys'] });
+    }
+  });
+  const revokeMutation = useMutation({
+    mutationFn: (id: number) => postData(`/developer/api-keys/${id}/revoke`),
+    onSuccess: () => {
+      message.success('API Key 已撤销');
       queryClient.invalidateQueries({ queryKey: ['api-keys'] });
     }
   });
@@ -1025,11 +1043,27 @@ function ApiKeysPage() {
         { title: '名称', dataIndex: 'name' },
         { title: '前缀', dataIndex: 'keyPrefix' },
         { title: 'Scopes', dataIndex: 'scopes', render: (scopes: string[]) => scopes.map((scope) => <Tag key={scope}>{scope}</Tag>) },
-        { title: '状态', dataIndex: 'status' },
-        { title: '最后使用', dataIndex: 'lastUsedAt', render: (value) => value ?? '-' }
+        { title: '状态', dataIndex: 'status', render: (status) => <Tag color={status === 'ACTIVE' ? 'green' : 'default'}>{status}</Tag> },
+        { title: '过期时间', dataIndex: 'expiresAt', render: formatDateTime },
+        { title: '最后使用', dataIndex: 'lastUsedAt', render: formatDateTime },
+        {
+          title: '操作',
+          render: (_, row) => row.status === 'ACTIVE' ? (
+            <Popconfirm title="撤销后该 Key 将立即失效，确认撤销？" onConfirm={() => revokeMutation.mutate(row.id)}>
+              <Button danger size="small" loading={revokeMutation.isPending}>撤销</Button>
+            </Popconfirm>
+          ) : '-'
+        }
       ]} />
       <Modal open={modalOpen} title="创建 API Key" footer={null} onCancel={() => setModalOpen(false)}>
-        <Form layout="vertical" onFinish={(values) => mutation.mutate(values)}>
+        <Form
+          layout="vertical"
+          initialValues={{
+            scopes: ['skills:read', 'skills:import', 'skills:write', 'skills:download'],
+            expireDays: 90
+          }}
+          onFinish={(values) => mutation.mutate(values)}
+        >
           <Form.Item name="name" label="名称" rules={[{ required: true }]}>
             <Input placeholder="Claude Code 后台管理" />
           </Form.Item>
@@ -1042,11 +1076,31 @@ function ApiKeysPage() {
               }))}
             />
           </Form.Item>
+          <Form.Item name="expireDays" label="有效期" rules={[{ required: true }]}>
+            <Select options={API_KEY_EXPIRE_OPTIONS} />
+          </Form.Item>
           <Button type="primary" htmlType="submit" loading={mutation.isPending}>创建</Button>
         </Form>
       </Modal>
     </div>
   );
+}
+
+function localDateTimeAfterDays(days: number): string {
+  const date = new Date(Date.now() + days * 24 * 60 * 60 * 1000);
+  const pad = (value: number) => String(value).padStart(2, '0');
+  return [
+    date.getFullYear(),
+    pad(date.getMonth() + 1),
+    pad(date.getDate())
+  ].join('-') + `T${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
+}
+
+function formatDateTime(value?: string): string {
+  if (!value) {
+    return '-';
+  }
+  return value.replace('T', ' ').slice(0, 19);
 }
 
 function DeveloperPage() {
