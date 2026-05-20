@@ -124,6 +124,28 @@ class AuthAndDeveloperApiTest {
     }
 
     @Test
+    void developerPlaybooksExposeStructuredAgentWorkflowsWithoutAuthentication() throws Exception {
+        mockMvc.perform(get("/api/v1/developer/playbooks"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data[?(@.key == 'discover_skill_inventory')]").isNotEmpty())
+                .andExpect(jsonPath(
+                        "$.data[?(@.key == 'import_remote_skill_safely' "
+                                + "&& @.tools[0] == 'get_skill_categories')]"
+                ).isNotEmpty())
+                .andExpect(jsonPath(
+                        "$.data[?(@.key == 'import_remote_skill_safely' "
+                                + "&& @.requiredScopes[?(@ == 'skills:import')])]"
+                ).isNotEmpty())
+                .andExpect(jsonPath(
+                        "$.data[?(@.key == 'retire_skill_with_gate' && @.risk == 'destructive')]"
+                ).isNotEmpty())
+                .andExpect(jsonPath(
+                        "$.data[?(@.key == 'download_and_reuse_skill' "
+                                + "&& @.verification == '校验下载文件名和大小')]"
+                ).isNotEmpty());
+    }
+
+    @Test
     void apiKeyScopeIsRequiredForDeveloperOperations() throws Exception {
         String adminToken = createAdminAndLogin("admin_limited", "admin-limited@example.com");
         createUser(adminToken, "limited_user", "limited@example.com", "Limited", "DEVELOPER");

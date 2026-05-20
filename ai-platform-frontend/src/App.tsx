@@ -38,6 +38,7 @@ import type {
   ArticleSummary,
   AuthResponse,
   DeveloperDashboard,
+  DeveloperPlaybook,
   DeveloperSkillManifest,
   DeveloperToolSpec,
   FinetuneJob,
@@ -1227,6 +1228,10 @@ function DeveloperPage() {
     queryKey: ['developer-skill-manifest'],
     queryFn: () => getPublicData<DeveloperSkillManifest>('/developer/skill-manifest')
   });
+  const { data: playbooks = [] } = useQuery({
+    queryKey: ['developer-playbooks'],
+    queryFn: () => getPublicData<DeveloperPlaybook[]>('/developer/playbooks')
+  });
   const tools = manifest?.tools ?? DEFAULT_DEVELOPER_TOOLS;
   const manifestRequiredScopes = manifest?.requiredScopes
     ?? API_KEY_SCOPE_OPTIONS.filter((item) => item.value.startsWith('skills:')).map((item) => item.value);
@@ -1299,6 +1304,44 @@ ${selfSkillUrl}
             { title: '审计', description: '后台查看 API Key 与操作日志' }
           ]}
         />
+      </Card>
+
+      <Card title="Agent 运行剧本" className="developer-section-card">
+        <div className="developer-playbook-grid">
+          {playbooks.map((playbook) => (
+            <section key={playbook.key} className="developer-playbook-card">
+              <div className="developer-playbook-heading">
+                <Space direction="vertical" size={2}>
+                  <Text strong>{playbook.title}</Text>
+                  <Text type="secondary">{playbook.trigger}</Text>
+                </Space>
+                <Tag color={riskTagColor(playbook.risk)}>{playbook.risk}</Tag>
+              </div>
+              <div className="developer-playbook-tools">
+                {playbook.tools.map((tool) => <Tag key={tool}>{formatToolName(tool)}</Tag>)}
+              </div>
+              <ol className="developer-playbook-steps">
+                {playbook.steps.map((step) => <li key={step}>{step}</li>)}
+              </ol>
+              <div className="developer-playbook-footer">
+                <div>
+                  <Text type="secondary">Scopes</Text>
+                  <div>
+                    {playbook.requiredScopes.map((scope) => <Tag key={scope}>{scope}</Tag>)}
+                  </div>
+                </div>
+                <div>
+                  <Text type="secondary">Gate</Text>
+                  <Text>{playbook.riskGate}</Text>
+                </div>
+                <div>
+                  <Text type="secondary">Verify</Text>
+                  <Text>{playbook.verification}</Text>
+                </div>
+              </div>
+            </section>
+          ))}
+        </div>
       </Card>
 
       <div className="developer-grid">

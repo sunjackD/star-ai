@@ -192,6 +192,18 @@ export type DeveloperToolSpec = {
   description: string;
 };
 
+export type DeveloperPlaybook = {
+  key: string;
+  title: string;
+  trigger: string;
+  tools: string[];
+  requiredScopes: string[];
+  steps: string[];
+  risk: string;
+  riskGate: string;
+  verification: string;
+};
+
 export type DeveloperSkillManifest = {
   schemaVersion?: string;
   apiVersion?: string;

@@ -653,6 +653,55 @@ pre {
   color: var(--text-soft) !important;
 }
 
+.developer-playbook-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 14px;
+}
+
+.developer-playbook-card {
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid rgba(104, 119, 160, 0.14);
+  border-radius: var(--radius);
+  background: rgba(255, 255, 255, 0.56);
+}
+
+.developer-playbook-heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.developer-playbook-tools,
+.developer-playbook-footer > div > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.developer-playbook-steps {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding-left: 18px;
+  color: var(--text);
+}
+
+.developer-playbook-footer {
+  display: grid;
+  gap: 10px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(104, 119, 160, 0.14);
+}
+
+.developer-playbook-footer > div {
+  display: grid;
+  gap: 4px;
+}
+
 .developer-two-column {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(320px, 0.9fr);
