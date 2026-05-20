@@ -1578,6 +1578,10 @@ function formatDateTime(value?: string): string {
 function DeveloperPage() {
   const selfSkillUrl = apiUrl('/developer/self-skill/download');
   const apiBaseUrl = apiUrl('').replace(/\/$/, '');
+  const { data: dashboard } = useQuery({
+    queryKey: ['developer-dashboard'],
+    queryFn: () => getData<DeveloperDashboard>('/developer/dashboard')
+  });
   const { data: manifest } = useQuery({
     queryKey: ['developer-skill-manifest'],
     queryFn: () => getPublicData<DeveloperSkillManifest>('/developer/skill-manifest')
@@ -1605,6 +1609,15 @@ function DeveloperPage() {
     ...group,
     tools: group.tools.filter((tool) => tools.includes(tool))
   })).filter((group) => group.tools.length > 0);
+  const agentWorkflowReadiness = dashboard?.agentWorkflowReadiness ?? [];
+  const controlPlaneModules = dashboard?.controlPlaneModules ?? [];
+  const governanceChecks = dashboard?.governanceChecks ?? [];
+  const readyAgentWorkflows = agentWorkflowReadiness.filter((item) => item.ready).length;
+  const requiredScopes = dashboard?.requiredScopes ?? manifestRequiredScopes;
+  const missingScopes = dashboard?.missingRequiredScopes ?? manifestRequiredScopes;
+  const scopeCoverage = Math.round(
+    ((requiredScopes.length - missingScopes.length) / Math.max(requiredScopes.length, 1)) * 100
+  );
   const installPrompt = `请安装并使用 ${manifest?.name ?? 'ai-platform-manager'}：
 ${selfSkillUrl}
 
@@ -1622,15 +1635,14 @@ ${selfSkillUrl}
 
   return (
     <div className="page">
-      <PageTitle
-        title="开发者接入"
-        description="把平台作为自管理 Skill 接入 Agent，通过 API Key、Manifest 和审计链路管理站内 Skills。"
-      />
-      <section className="developer-hero-panel">
+      <section className="developer-control-plane-hero">
         <div>
           <Tag color="processing" icon={<Workflow size={14} />}>Agent Control Plane</Tag>
-          <Title level={2}>{manifest?.name ?? 'ai-platform-manager'}</Title>
-          <Paragraph>{manifest?.description ?? '通过 API Key 让 AI Agent 管理站内 Skills。'}</Paragraph>
+          <Title level={1}>Agent Control Plane</Title>
+          <Paragraph>
+            把 Agent Fleet、Skill Registry、Model Layer、Knowledge Base、权限覆盖和审计信号组织成统一控制面，
+            让 Agent 在可授权、可审计、可回滚的边界内使用平台能力。
+          </Paragraph>
           <Space wrap>
             <Button type="primary" icon={<Download size={16} />} href={selfSkillUrl}>
               下载自管理 Skill
@@ -1638,24 +1650,58 @@ ${selfSkillUrl}
             <Link to="/account/api-keys"><Button icon={<KeyRound size={16} />}>创建 API Key</Button></Link>
           </Space>
         </div>
-        <div className="developer-manifest-meta">
-          <Statistic title="Version" value={manifest?.schemaVersion ?? '1.0'} />
-          <Statistic title="Tools" value={toolSpecs.length} />
-          <Statistic title="Scopes" value={manifestRequiredScopes.length} />
-          <Statistic title="Auth" value={authHeaders.length} />
+        <div className="developer-control-plane-kpis">
+          <Statistic title="Modules" value={controlPlaneModules.length} />
+          <Statistic title="Ready Modules" value={controlPlaneModules.filter((item) => item.status === 'READY').length} />
+          <Statistic title="Workflow Ready" value={`${readyAgentWorkflows}/${agentWorkflowReadiness.length || agentWorkflows.length}`} />
+          <Statistic title="Scope Coverage" value={scopeCoverage} suffix="%" />
         </div>
       </section>
 
-      <Card title="接入流程" className="developer-section-card">
+      <section className="developer-module-grid">
+        {controlPlaneModules.map((module) => (
+          <div key={module.key} className="developer-module-card">
+            <div className="developer-module-heading">
+              <Tag color={statusTagColor(module.status)}>{module.status}</Tag>
+              <Text type="secondary">{module.signal}</Text>
+            </div>
+            <Title level={4}>{module.title}</Title>
+            <Paragraph>{module.description}</Paragraph>
+            <div className="developer-module-metrics">
+              <Statistic title="Total" value={module.total} />
+              <Statistic title="Active" value={module.active} />
+            </div>
+            <Link to={module.route}>
+              <Button size="small" icon={<ExternalLink size={14} />}>打开模块</Button>
+            </Link>
+          </div>
+        ))}
+      </section>
+
+      <section className="developer-governance-grid">
+        {governanceChecks.map((check) => (
+          <div key={check.key} className="developer-governance-card">
+            <div className="developer-governance-heading">
+              {check.status === 'PASS' ? <CheckCircle2 size={18} /> : <AlertTriangle size={18} />}
+              <Text strong>{check.title}</Text>
+              <Tag color={statusTagColor(check.status)}>{check.status}</Tag>
+            </div>
+            <Text>{check.description}</Text>
+            <Text type="secondary">{check.action}</Text>
+          </div>
+        ))}
+      </section>
+
+      <Card title="运行流程" className="developer-section-card">
         <Steps
           className="developer-steps"
           responsive
           items={[
-            { title: '安装', description: '下载 Skill 并放入 Agent 的 Skills 目录' },
-            { title: '授权', description: '创建最小权限 API Key' },
-            { title: '发现', description: '读取 Manifest、分类和现有 Skills' },
-            { title: '执行', description: '导入、上传、替换或下载 Skill 包' },
-            { title: '审计', description: '后台查看 API Key 与操作日志' }
+            { title: '接入', description: '下载自管理 Skill 并读取 Manifest 契约' },
+            { title: '授权', description: '创建最小权限 API Key 并检查 scope coverage' },
+            { title: '编排', description: '按 Agent Workflow 选择工具、门禁和验证方式' },
+            { title: '执行', description: '管理 Skill 资产并复核模块 readiness' },
+            { title: '审计', description: '在治理检查和审计日志中追踪高风险动作' }
           ]}
         />
       </Card>
@@ -1699,10 +1745,16 @@ ${selfSkillUrl}
       </Card>
 
       <div className="developer-grid">
-        <Card title="自管理 Skill">
+        <Card title={manifest?.name ?? 'ai-platform-manager'}>
           <Paragraph>
-            Skill 包内置工具契约，Agent 只需要 API Base、API Key 和明确的任务目标即可开始管理平台资源。
+            {manifest?.description ?? 'Skill 包内置工具契约，Agent 只需要 API Base、API Key 和明确任务目标即可管理平台资源。'}
           </Paragraph>
+          <div className="developer-manifest-meta compact">
+            <Statistic title="Version" value={manifest?.schemaVersion ?? '1.0'} />
+            <Statistic title="Tools" value={toolSpecs.length} />
+            <Statistic title="Scopes" value={manifestRequiredScopes.length} />
+            <Statistic title="Auth" value={authHeaders.length} />
+          </div>
           <Space wrap>
             <Button type="primary" icon={<Download size={16} />} href={selfSkillUrl}>下载 ai-platform-manager</Button>
             <Link to="/account/api-keys"><Button icon={<KeyRound size={16} />}>创建 API Key</Button></Link>
@@ -1845,6 +1897,19 @@ function riskTagColor(risk: string): string {
   }
   if (risk === 'read') {
     return 'blue';
+  }
+  return 'default';
+}
+
+function statusTagColor(status: string): string {
+  if (status === 'READY' || status === 'PASS' || status === 'ACTIVE') {
+    return 'green';
+  }
+  if (status === 'ATTENTION' || status === 'WARN') {
+    return 'gold';
+  }
+  if (status === 'BLOCKED' || status === 'REVOKED') {
+    return 'red';
   }
   return 'default';
 }

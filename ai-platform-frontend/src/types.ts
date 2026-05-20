@@ -239,6 +239,25 @@ export type DeveloperAuditEvent = {
   createdAt?: string;
 };
 
+export type DeveloperControlPlaneModule = {
+  key: string;
+  title: string;
+  description: string;
+  total: number;
+  active: number;
+  status: string;
+  route: string;
+  signal: string;
+};
+
+export type DeveloperGovernanceCheck = {
+  key: string;
+  title: string;
+  status: string;
+  description: string;
+  action: string;
+};
+
 export type DeveloperDashboard = {
   totalKeys: number;
   activeKeys: number;
@@ -249,6 +268,8 @@ export type DeveloperDashboard = {
   requiredScopes: string[];
   missingRequiredScopes: string[];
   agentWorkflowReadiness: DeveloperAgentWorkflowReadiness[];
+  controlPlaneModules: DeveloperControlPlaneModule[];
+  governanceChecks: DeveloperGovernanceCheck[];
   recentEvents: DeveloperAuditEvent[];
 };
 

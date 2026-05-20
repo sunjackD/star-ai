@@ -417,6 +417,39 @@ class AuthAndDeveloperApiTest {
     }
 
     @Test
+    void developerDashboardReportsCrossModuleControlPlaneReadiness() throws Exception {
+        String adminToken = createAdminAndLogin("admin_control_plane", "admin-control-plane@example.com");
+        createUser(adminToken, "control_plane_dev", "control-plane@example.com", "Control Plane Dev", "DEVELOPER");
+        String jwt = login("control_plane_dev", "secret123");
+        String apiKey = createApiKey(jwt, "skills:read");
+
+        mockMvc.perform(get("/api/v1/developer/skills")
+                        .header("X-API-Key", apiKey))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(get("/api/v1/developer/dashboard")
+                        .header("Authorization", "Bearer " + jwt))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath(
+                        "$.data.controlPlaneModules[?(@.key == 'agent_fleet' && @.title == 'Agent Fleet' "
+                                + "&& @.route == '/agents')]"
+                ).isNotEmpty())
+                .andExpect(jsonPath(
+                        "$.data.controlPlaneModules[?(@.key == 'skill_registry' && @.title == 'Skill Registry' "
+                                + "&& @.route == '/skills')]"
+                ).isNotEmpty())
+                .andExpect(jsonPath(
+                        "$.data.controlPlaneModules[?(@.key == 'agent_workflows' && @.total == 5 && @.active == 1)]"
+                ).isNotEmpty())
+                .andExpect(jsonPath(
+                        "$.data.governanceChecks[?(@.key == 'scope_coverage' && @.status == 'ATTENTION')]"
+                ).isNotEmpty())
+                .andExpect(jsonPath(
+                        "$.data.governanceChecks[?(@.key == 'audit_trail' && @.status == 'PASS')]"
+                ).isNotEmpty());
+    }
+
+    @Test
     void apiKeyCredentialCannotReadDeveloperDashboard() throws Exception {
         String adminToken = createAdminAndLogin("admin_dashboard_guard", "admin-dashboard-guard@example.com");
         createUser(adminToken, "dashboard_guard_dev", "dashboard-guard@example.com", "Dashboard Guard", "DEVELOPER");

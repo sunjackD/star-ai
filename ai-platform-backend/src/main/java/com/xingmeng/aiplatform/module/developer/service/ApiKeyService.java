@@ -6,13 +6,19 @@ import com.xingmeng.aiplatform.module.audit.entity.AuditLog;
 import com.xingmeng.aiplatform.module.audit.repository.AuditLogRepository;
 import com.xingmeng.aiplatform.module.auth.security.ApiKeyAuthenticationDetails;
 import com.xingmeng.aiplatform.module.auth.security.AuthenticatedUser;
+import com.xingmeng.aiplatform.module.agent.repository.AgentRepository;
+import com.xingmeng.aiplatform.module.article.repository.ArticleRepository;
+import com.xingmeng.aiplatform.module.model.repository.AiModelRepository;
 import com.xingmeng.aiplatform.module.developer.dto.ApiKeyCreateRequest;
 import com.xingmeng.aiplatform.module.developer.dto.ApiKeyResponse;
 import com.xingmeng.aiplatform.module.developer.dto.DeveloperAgentWorkflowReadinessResponse;
 import com.xingmeng.aiplatform.module.developer.dto.DeveloperAuditEventResponse;
+import com.xingmeng.aiplatform.module.developer.dto.DeveloperControlPlaneModuleResponse;
 import com.xingmeng.aiplatform.module.developer.dto.DeveloperDashboardResponse;
+import com.xingmeng.aiplatform.module.developer.dto.DeveloperGovernanceCheckResponse;
 import com.xingmeng.aiplatform.module.developer.entity.ApiKey;
 import com.xingmeng.aiplatform.module.developer.repository.ApiKeyRepository;
+import com.xingmeng.aiplatform.module.skill.repository.SkillRepository;
 import com.xingmeng.aiplatform.module.user.entity.User;
 import com.xingmeng.aiplatform.module.user.repository.UserRepository;
 import org.springframework.http.HttpStatus;
@@ -47,18 +53,30 @@ public class ApiKeyService {
     private final UserRepository userRepository;
     private final AuditLogRepository auditLogRepository;
     private final DeveloperAgentWorkflowCatalog agentWorkflowCatalog;
+    private final AgentRepository agentRepository;
+    private final SkillRepository skillRepository;
+    private final AiModelRepository aiModelRepository;
+    private final ArticleRepository articleRepository;
     private final SecureRandom secureRandom = new SecureRandom();
 
     public ApiKeyService(
             ApiKeyRepository apiKeyRepository,
             UserRepository userRepository,
             AuditLogRepository auditLogRepository,
-            DeveloperAgentWorkflowCatalog agentWorkflowCatalog
+            DeveloperAgentWorkflowCatalog agentWorkflowCatalog,
+            AgentRepository agentRepository,
+            SkillRepository skillRepository,
+            AiModelRepository aiModelRepository,
+            ArticleRepository articleRepository
     ) {
         this.apiKeyRepository = apiKeyRepository;
         this.userRepository = userRepository;
         this.auditLogRepository = auditLogRepository;
         this.agentWorkflowCatalog = agentWorkflowCatalog;
+        this.agentRepository = agentRepository;
+        this.skillRepository = skillRepository;
+        this.aiModelRepository = aiModelRepository;
+        this.articleRepository = articleRepository;
     }
 
     public List<ApiKeyResponse> list(AuthenticatedUser principal) {
@@ -133,6 +151,7 @@ public class ApiKeyService {
                 .filter(key -> !key.getLastUsedAt().isBefore(recentThreshold))
                 .count();
         List<DeveloperAgentWorkflowReadinessResponse> agentWorkflowReadiness = agentWorkflowReadiness(activeScopes);
+        List<DeveloperAuditEventResponse> recentEvents = recentEvents(user.getUsername());
 
         return new DeveloperDashboardResponse(
                 keys.size(),
@@ -144,8 +163,107 @@ public class ApiKeyService {
                 REQUIRED_AGENT_SCOPES,
                 missingScopes,
                 agentWorkflowReadiness,
-                recentEvents(user.getUsername())
+                controlPlaneModules(agentWorkflowReadiness),
+                governanceChecks(missingScopes, recentEvents),
+                recentEvents
         );
+    }
+
+    private List<DeveloperControlPlaneModuleResponse> controlPlaneModules(
+            List<DeveloperAgentWorkflowReadinessResponse> workflowReadiness
+    ) {
+        long activeAgents = agentRepository.findByStatusOrderByViewCountDesc("ACTIVE").size();
+        long activeSkills = skillRepository.findByStatusOrderByDownloadCountDesc("ACTIVE").size();
+        long activeArticles = articleRepository.findByStatusOrderBySortOrderAscCreatedAtDesc("PUBLISHED").size();
+        long totalModels = aiModelRepository.count();
+        long readyWorkflows = workflowReadiness.stream().filter(DeveloperAgentWorkflowReadinessResponse::ready).count();
+        return List.of(
+                module("agent_fleet", "Agent Fleet", "Agent 运行入口与配置指南", agentRepository.count(),
+                        activeAgents, "/agents", activeAgents + " active agents"),
+                module("skill_registry", "Skill Registry", "可复用 Skill 资产与包分发", skillRepository.count(),
+                        activeSkills, "/skills", activeSkills + " active skills"),
+                module("model_layer", "Model Layer", "模型供应商、能力标签与服务入口", totalModels,
+                        totalModels, "/models", totalModels + " configured models"),
+                module("knowledge_base", "Knowledge Base", "教程、Prompt、脚本和执行前上下文", articleRepository.count(),
+                        activeArticles, "/articles", activeArticles + " published articles"),
+                module("agent_workflows", "Agent Workflows", "Agent 可执行流程、权限和风险门禁",
+                        workflowReadiness.size(), readyWorkflows, "/developer",
+                        readyWorkflows + "/" + workflowReadiness.size() + " workflows ready")
+        );
+    }
+
+    private DeveloperControlPlaneModuleResponse module(
+            String key,
+            String title,
+            String description,
+            long total,
+            long active,
+            String route,
+            String signal
+    ) {
+        return new DeveloperControlPlaneModuleResponse(
+                key,
+                title,
+                description,
+                total,
+                active,
+                active > 0 ? "READY" : "ATTENTION",
+                route,
+                signal
+        );
+    }
+
+    private List<DeveloperGovernanceCheckResponse> governanceChecks(
+            List<String> missingScopes,
+            List<DeveloperAuditEventResponse> recentEvents
+    ) {
+        boolean destructiveGateConfigured = agentWorkflowCatalog.list().stream()
+                .filter(workflow -> "destructive".equals(workflow.risk()))
+                .allMatch(workflow -> workflow.riskGate().contains("确认"));
+        boolean remoteImportGuarded = agentWorkflowCatalog.list().stream()
+                .filter(workflow -> workflow.tools().contains("import_remote_skill"))
+                .allMatch(workflow -> workflow.riskGate().contains("HTTPS"));
+        return List.of(
+                governanceCheck(
+                        "scope_coverage",
+                        "Scope Coverage",
+                        missingScopes.isEmpty(),
+                        missingScopes.isEmpty() ? "所有 Agent 工作流的最小权限已覆盖" : "仍缺少 "
+                                + String.join(", ", missingScopes),
+                        "前往 API Key 页面补齐最小权限"
+                ),
+                governanceCheck(
+                        "destructive_gate",
+                        "Destructive Gate",
+                        destructiveGateConfigured,
+                        "删除类 Agent Workflow 必须带明确人工确认门禁",
+                        "保留删除前的目标 ID 与名称确认"
+                ),
+                governanceCheck(
+                        "remote_import_guard",
+                        "Remote Import Guard",
+                        remoteImportGuarded,
+                        "远程 Skill 导入路径要求 HTTPS 并依赖服务端安全校验",
+                        "仅接收可信 HTTPS 来源"
+                ),
+                governanceCheck(
+                        "audit_trail",
+                        "Audit Trail",
+                        !recentEvents.isEmpty(),
+                        recentEvents.isEmpty() ? "最近没有可展示的 Agent 调用事件" : "最近调用事件已进入审计链路",
+                        "在后台审计日志复核高风险操作"
+                )
+        );
+    }
+
+    private DeveloperGovernanceCheckResponse governanceCheck(
+            String key,
+            String title,
+            boolean pass,
+            String description,
+            String action
+    ) {
+        return new DeveloperGovernanceCheckResponse(key, title, pass ? "PASS" : "ATTENTION", description, action);
     }
 
     private List<DeveloperAgentWorkflowReadinessResponse> agentWorkflowReadiness(Set<String> activeScopes) {
