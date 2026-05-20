@@ -2,6 +2,7 @@ package com.xingmeng.aiplatform;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.xingmeng.aiplatform.module.audit.repository.AuditLogRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -14,6 +15,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -25,6 +27,9 @@ class AuthAndDeveloperApiTest {
 
     @Autowired
     private ObjectMapper objectMapper;
+
+    @Autowired
+    private AuditLogRepository auditLogRepository;
 
     @Test
     void protectedAgentDetailRequiresLogin() throws Exception {
@@ -161,6 +166,42 @@ class AuthAndDeveloperApiTest {
         mockMvc.perform(delete("/api/v1/developer/skills/1")
                         .header("X-API-Key", apiKey))
                 .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void apiKeyCreateAndRevokeAreAudited() throws Exception {
+        String adminToken = createAdminAndLogin("admin_key_audit", "admin-key-audit@example.com");
+        createUser(adminToken, "key_audit_dev", "key-audit@example.com", "Key Audit Dev", "DEVELOPER");
+        String jwt = login("key_audit_dev", "secret123");
+
+        String keyJson = mockMvc.perform(post("/api/v1/developer/api-keys")
+                        .header("Authorization", "Bearer " + jwt)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "name": "audited key",
+                                  "scopes": ["skills:read"],
+                                  "expiresAt": "2099-01-01T00:00:00"
+                                }
+                                """))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+        long apiKeyId = objectMapper.readTree(keyJson).path("data").path("id").asLong();
+
+        mockMvc.perform(post("/api/v1/developer/api-keys/" + apiKeyId + "/revoke")
+                        .header("Authorization", "Bearer " + jwt))
+                .andExpect(status().isOk());
+
+        assertTrue(auditLogRepository.findAll().stream()
+                .anyMatch(log -> "API_KEY_CREATED".equals(log.getAction())
+                        && "API_KEY".equals(log.getResourceType())
+                        && String.valueOf(apiKeyId).equals(log.getResourceId())));
+        assertTrue(auditLogRepository.findAll().stream()
+                .anyMatch(log -> "API_KEY_REVOKED".equals(log.getAction())
+                        && "API_KEY".equals(log.getResourceType())
+                        && String.valueOf(apiKeyId).equals(log.getResourceId())));
     }
 
     private String createAdminAndLogin(String username, String email) throws Exception {

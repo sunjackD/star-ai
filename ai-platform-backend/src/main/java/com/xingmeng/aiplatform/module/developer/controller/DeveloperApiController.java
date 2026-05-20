@@ -78,14 +78,22 @@ public class DeveloperApiController {
     @PostMapping("/api-keys")
     public ApiResponse<ApiKeyResponse> createApiKey(
             @AuthenticationPrincipal AuthenticatedUser principal,
+            Authentication authentication,
             @Valid @RequestBody ApiKeyCreateRequest request
     ) {
-        return ApiResponse.success(apiKeyService.create(principal, request));
+        ApiKeyResponse response = apiKeyService.create(principal, request);
+        auditService.log(authentication, "API_KEY_CREATED", "API_KEY", response.id(), response.name());
+        return ApiResponse.success(response);
     }
 
     @PostMapping("/api-keys/{id}/revoke")
-    public ApiResponse<Void> revokeApiKey(@AuthenticationPrincipal AuthenticatedUser principal, @PathVariable Long id) {
+    public ApiResponse<Void> revokeApiKey(
+            @AuthenticationPrincipal AuthenticatedUser principal,
+            Authentication authentication,
+            @PathVariable Long id
+    ) {
         apiKeyService.revoke(principal, id);
+        auditService.log(authentication, "API_KEY_REVOKED", "API_KEY", id, "revoked");
         return ApiResponse.success(null);
     }
 
