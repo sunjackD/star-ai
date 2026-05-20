@@ -945,6 +945,34 @@ pre {
   letter-spacing: 0;
 }
 
+.api-management-hero {
+  grid-template-columns: minmax(0, 1.1fr) minmax(320px, 0.74fr);
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.90), rgba(248, 251, 255, 0.64)),
+    linear-gradient(112deg, rgba(91, 140, 255, 0.14), transparent 42%, rgba(124, 108, 255, 0.12));
+}
+
+.api-management-quick-panel {
+  display: grid;
+  gap: 12px;
+}
+
+.api-management-quick-panel > div:not(.ant-space) {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+  padding: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.72);
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.58);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.72);
+}
+
+.api-management-quick-panel code {
+  white-space: normal;
+  word-break: break-all;
+}
+
 .agent-health-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -959,6 +987,7 @@ pre {
 .agent-dashboard-alert,
 .account-key-toolbar,
 .agent-dashboard-grid,
+.api-key-policy-card,
 .agent-workflow-readiness-card {
   margin-bottom: 18px;
 }
@@ -979,6 +1008,52 @@ pre {
   flex-wrap: wrap;
   gap: 8px;
   margin-top: 16px;
+}
+
+.api-key-policy-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.api-key-policy-item,
+.permission-coverage-item {
+  display: grid;
+  gap: 10px;
+  padding: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.72);
+  border-radius: var(--radius);
+  background:
+    var(--glass),
+    linear-gradient(145deg, rgba(159, 211, 255, 0.14), transparent 54%, rgba(124, 108, 255, 0.08));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.72);
+}
+
+.api-key-policy-item > div:first-child,
+.permission-coverage-item > div:first-child {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: center;
+}
+
+.permission-coverage-list {
+  display: grid;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.permission-coverage-item {
+  border-left: 3px solid rgba(34, 197, 94, 0.76);
+}
+
+.permission-coverage-item.is-missing {
+  border-left-color: rgba(245, 158, 11, 0.78);
+}
+
+.api-key-preset-panel {
+  display: grid;
+  gap: 10px;
 }
 
 .agent-workflow-readiness-grid {
@@ -1859,6 +1934,7 @@ pre {
   .knowledge-base-toolbar,
   .agent-health-grid,
   .agent-dashboard-grid,
+  .api-key-policy-grid,
   .developer-grid,
   .developer-hero-panel,
   .developer-control-plane-hero,

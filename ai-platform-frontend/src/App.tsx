@@ -1,7 +1,7 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import { BrowserRouter, Link, Navigate, Outlet, Route, Routes, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Alert, Button, Card, Form, Input, Layout, Menu, Modal, Popconfirm, Progress, Select, Space, Spin, Statistic, Steps, Switch, Table, Tag, Typography, Upload, message } from 'antd';
+import { Alert, Button, Card, Form, Input, Layout, Menu, Modal, Popconfirm, Progress, Segmented, Select, Space, Spin, Statistic, Steps, Switch, Table, Tag, Typography, Upload, message } from 'antd';
 import type { RcFile } from 'antd/es/upload';
 import {
   Activity,
@@ -1329,6 +1329,27 @@ const API_KEY_EXPIRE_OPTIONS = [
   { value: 0, label: '永不过期' }
 ];
 
+const API_KEY_PERMISSION_PRESETS = [
+  {
+    key: 'full',
+    label: 'Skill 管理',
+    description: '覆盖发现、导入、维护和下载，适合受信任的后台 Agent。',
+    scopes: ['skills:read', 'skills:import', 'skills:write', 'skills:download']
+  },
+  {
+    key: 'read',
+    label: '只读发现',
+    description: '仅允许查询 Skill 与分类，适合检索、推荐和审计场景。',
+    scopes: ['skills:read']
+  },
+  {
+    key: 'custom',
+    label: '自定义',
+    description: '按单次任务选择最小权限，适合临时接入或高风险动作拆分。',
+    scopes: []
+  }
+];
+
 const DEFAULT_DEVELOPER_TOOLS = [
   'list_skills',
   'get_skill_categories',
@@ -1369,8 +1390,10 @@ const DEVELOPER_TOOL_GROUPS = [
 
 function ApiKeysPage() {
   const queryClient = useQueryClient();
+  const [form] = Form.useForm<{ name: string; scopes: string[]; expireDays: number }>();
   const [modalOpen, setModalOpen] = useState(false);
   const [createdKey, setCreatedKey] = useState<string>();
+  const [selectedPreset, setSelectedPreset] = useState('full');
   const { data = [] } = useQuery({ queryKey: ['api-keys'], queryFn: () => getData<ApiKey[]>('/developer/api-keys') });
   const { data: dashboard } = useQuery({
     queryKey: ['developer-dashboard'],
@@ -1409,22 +1432,44 @@ function ApiKeysPage() {
   const scopeCoverage = Math.round(
     ((requiredScopes.length - missingScopes.length) / Math.max(requiredScopes.length, 1)) * 100
   );
+  const apiBaseUrl = apiUrl('').replace(/\/$/, '');
+  const selectedPresetOption = API_KEY_PERMISSION_PRESETS.find((item) => item.key === selectedPreset)
+    ?? API_KEY_PERMISSION_PRESETS[0];
+
+  const applyPermissionPreset = (presetKey: string | number) => {
+    const nextKey = String(presetKey);
+    setSelectedPreset(nextKey);
+    const preset = API_KEY_PERMISSION_PRESETS.find((item) => item.key === nextKey);
+    if (preset && nextKey !== 'custom') {
+      form.setFieldValue('scopes', preset.scopes);
+    }
+  };
 
   return (
     <div className="page">
-      <PageTitle title="Agent 控制面板" description="管理 AI Agent 的 API Key、权限覆盖和近期调用痕迹，按最小权限把平台能力交给自动化工具。" />
-      <section className="agent-control-panel">
+      <PageTitle title="API 管理" description="管理 Agent 调用凭据、权限策略、过期风险和审计信号，让自动化接入保持最小权限和可追踪。" />
+      <section className="agent-control-panel api-management-hero">
         <div>
-          <Tag color="processing" icon={<Activity size={14} />}>运行控制</Tag>
-          <Title level={2}>凭据健康与 Agent 调用可见性</Title>
+          <Tag color="processing" icon={<Activity size={14} />}>凭据控制台</Tag>
+          <Title level={2}>API Key 生命周期与 Agent 调用治理</Title>
           <Paragraph>
-            这里聚合 API Key 生命周期、必需权限覆盖和最近审计事件，用于判断 Agent 是否具备稳定、安全的 Skill 管理能力。
+            这里聚合 API Key 生命周期、权限覆盖、工作流准备度和最近调用痕迹，用于判断 Agent 是否具备稳定、安全的 Skill 管理能力。
           </Paragraph>
         </div>
-        <Space wrap>
-          <Link to="/developer"><Button icon={<Workflow size={16} />}>接入指南</Button></Link>
-          <Button type="primary" icon={<KeyRound size={16} />} onClick={() => setModalOpen(true)}>创建 API Key</Button>
-        </Space>
+        <div className="api-management-quick-panel">
+          <div>
+            <Text type="secondary">API Base</Text>
+            <Text code>{apiBaseUrl}</Text>
+          </div>
+          <div>
+            <Text type="secondary">Manifest</Text>
+            <Text code>/developer/skill-manifest</Text>
+          </div>
+          <Space wrap>
+            <Link to="/developer"><Button icon={<Workflow size={16} />}>接入指南</Button></Link>
+            <Button type="primary" icon={<KeyRound size={16} />} onClick={() => setModalOpen(true)}>创建 API Key</Button>
+          </Space>
+        </div>
       </section>
 
       <div className="agent-health-grid">
@@ -1452,7 +1497,7 @@ function ApiKeysPage() {
           showIcon
           className="agent-dashboard-alert"
           message="Agent 自管理权限未完整覆盖"
-          description={`缺少 ${missingScopes.join(', ')}。创建或更新 Key 时只授予当前任务所需权限。`}
+          description={`缺少 ${formatScopeList(missingScopes)}。创建或更新 Key 时只授予当前任务所需权限。`}
         />
       ) : (
         <Alert
@@ -1464,13 +1509,37 @@ function ApiKeysPage() {
         />
       )}
 
+      <Card title="权限策略模板" className="api-key-policy-card">
+        <div className="api-key-policy-grid">
+          {API_KEY_PERMISSION_PRESETS.map((preset) => (
+            <section key={preset.key} className="api-key-policy-item">
+              <div>
+                <Text strong>{preset.label}</Text>
+                {preset.key === 'full' && <Tag color="blue">推荐</Tag>}
+              </div>
+              <Text type="secondary">{preset.description}</Text>
+              <div className="scope-coverage-tags">{renderScopeTags(preset.scopes)}</div>
+            </section>
+          ))}
+        </div>
+      </Card>
+
       <div className="agent-dashboard-grid">
         <Card title="权限覆盖">
           <Progress percent={scopeCoverage} />
-          <div className="scope-coverage-tags">
+          <div className="permission-coverage-list">
             {requiredScopes.map((scope) => {
               const missing = missingScopes.includes(scope);
-              return <Tag key={scope} color={missing ? 'orange' : 'green'}>{scope}</Tag>;
+              return (
+                <section key={scope} className={`permission-coverage-item ${missing ? 'is-missing' : 'is-ready'}`}>
+                  <div>
+                    <Text strong>{scopeLabel(scope)}</Text>
+                    <Tag color={missing ? 'orange' : 'green'}>{missing ? '待补齐' : '已覆盖'}</Tag>
+                  </div>
+                  <Text type="secondary">{scopeDescription(scope)}</Text>
+                  <Text code>{scope}</Text>
+                </section>
+              );
             })}
           </div>
         </Card>
@@ -1513,13 +1582,10 @@ function ApiKeysPage() {
                   </Space>
                 </div>
                 <div className="agent-workflow-readiness-scopes">
-                  {workflow.requiredScopes.map((scope) => {
-                    const missing = workflow.missingScopes.includes(scope);
-                    return <Tag key={scope} color={missing ? 'orange' : 'green'}>{scope}</Tag>;
-                  })}
+                  {workflow.requiredScopes.map((scope) => renderScopeTag(scope, workflow.missingScopes.includes(scope)))}
                 </div>
                 {workflow.missingScopes.length > 0 ? (
-                  <Text type="secondary">补齐 {workflow.missingScopes.join(', ')} 后可执行</Text>
+                  <Text type="secondary">补齐 {formatScopeList(workflow.missingScopes)} 后可执行</Text>
                 ) : (
                   <Text type="secondary">当前有效 Key 已覆盖运行所需权限</Text>
                 )}
@@ -1547,7 +1613,7 @@ function ApiKeysPage() {
         {
           title: '权限',
           dataIndex: 'scopes',
-          render: (scopes: string[]) => scopes.map((scope) => <Tag key={scope}>{scope}</Tag>)
+          render: (scopes: string[]) => <Space size={[4, 4]} wrap>{renderScopeTags(scopes)}</Space>
         },
         {
           title: '状态',
@@ -1567,6 +1633,7 @@ function ApiKeysPage() {
       ]} />
       <Modal open={modalOpen} title="创建 API Key" footer={null} onCancel={() => setModalOpen(false)}>
         <Form
+          form={form}
           layout="vertical"
           initialValues={{
             scopes: ['skills:read', 'skills:import', 'skills:write', 'skills:download'],
@@ -1577,12 +1644,24 @@ function ApiKeysPage() {
           <Form.Item name="name" label="名称" rules={[{ required: true }]}>
             <Input placeholder="Agent 后台管理" />
           </Form.Item>
+          <Form.Item label="权限预设">
+            <div className="api-key-preset-panel">
+              <Segmented
+                block
+                value={selectedPreset}
+                options={API_KEY_PERMISSION_PRESETS.map((item) => ({ label: item.label, value: item.key }))}
+                onChange={applyPermissionPreset}
+              />
+              <Text type="secondary">{selectedPresetOption.description}</Text>
+            </div>
+          </Form.Item>
           <Form.Item name="scopes" label="权限范围" rules={[{ required: true }]}>
             <Select
               mode="multiple"
+              onChange={() => setSelectedPreset('custom')}
               options={API_KEY_SCOPE_OPTIONS.map((item) => ({
                 value: item.value,
-                label: `${item.value} · ${item.label}`
+                label: `${item.label} · ${item.value}`
               }))}
             />
           </Form.Item>
@@ -1604,6 +1683,40 @@ function localDateTimeAfterDays(days: number): string {
     pad(date.getMonth() + 1),
     pad(date.getDate())
   ].join('-') + `T${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
+}
+
+function scopeOption(scope: string) {
+  return API_KEY_SCOPE_OPTIONS.find((item) => item.value === scope);
+}
+
+function scopeLabel(scope: string): string {
+  return scopeOption(scope)?.label ?? scope;
+}
+
+function scopeDescription(scope: string): string {
+  return scopeOption(scope)?.description ?? '自定义权限';
+}
+
+function formatScopeList(scopes: string[]): string {
+  if (scopes.length === 0) {
+    return '无';
+  }
+  return scopes.map((scope) => `${scopeLabel(scope)}（${scope}）`).join('、');
+}
+
+function renderScopeTag(scope: string, missing = false): ReactNode {
+  return (
+    <Tag key={scope} color={missing ? 'orange' : 'green'}>
+      {scopeLabel(scope)} · {scope}
+    </Tag>
+  );
+}
+
+function renderScopeTags(scopes: string[]): ReactNode {
+  if (scopes.length === 0) {
+    return <Text type="secondary">按需选择</Text>;
+  }
+  return scopes.map((scope) => renderScopeTag(scope));
 }
 
 function formatDateTime(value?: string): string {
@@ -1765,7 +1878,7 @@ ${selfSkillUrl}
                 <div>
                   <Text type="secondary">权限</Text>
                   <div>
-                    {workflow.requiredScopes.map((scope) => <Tag key={scope}>{scope}</Tag>)}
+                    {workflow.requiredScopes.map((scope) => renderScopeTag(scope))}
                   </div>
                 </div>
                 <div>
@@ -1812,7 +1925,7 @@ ${selfSkillUrl}
               <section key={group.title} className="developer-tool-group">
                 <div className="developer-tool-heading">
                   <strong>{group.title}</strong>
-                  <Tag>{group.scope}</Tag>
+                  <Tag>{scopeLabel(group.scope)} · {group.scope}</Tag>
                 </div>
                 <div className="developer-tool-tags">
                   {group.tools.map((tool) => <Tag key={tool}>{formatToolName(tool)}</Tag>)}
@@ -1854,7 +1967,7 @@ ${selfSkillUrl}
                 dataIndex: 'scope',
                 render: (scope: string) => (
                   <Space size={[4, 4]} wrap>
-                    {scope.split(',').map((item) => <Tag key={item}>{item.trim()}</Tag>)}
+                    {scope.split(',').map((item) => renderScopeTag(item.trim()))}
                   </Space>
                 )
               },
@@ -1874,7 +1987,7 @@ ${selfSkillUrl}
             pagination={false}
             size="small"
             columns={[
-              { title: '权限', dataIndex: 'value', render: (value) => <Tag>{value}</Tag> },
+              { title: '权限', dataIndex: 'value', render: (value) => renderScopeTag(value) },
               { title: '用途', dataIndex: 'description' }
             ]}
           />
