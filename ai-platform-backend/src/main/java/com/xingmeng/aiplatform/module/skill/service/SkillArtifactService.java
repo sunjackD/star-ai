@@ -203,6 +203,14 @@ public class SkillArtifactService {
                 API Base: http://localhost:8081/api/v1（按实际部署地址替换）
                 Auth Header: X-API-Key: xma_xxx
 
+                ## 运行规则
+
+                1. 每次会话先读取 `GET /api/v1/developer/skill-manifest`，优先使用返回的 `toolSpecs`。
+                2. 从 `toolSpecs` 中匹配工具的 `method`、`path`、`scope`、`risk` 和 `description`，不要只凭示例字符串猜测接口。
+                3. 调用前确认 API Key 覆盖对应 `scope`；`skills:import,skills:write` 表示两个 scope 都必须具备。
+                4. `risk` 为 `destructive` 的工具会改变或删除资源，执行 `delete_skill` 前必须确认目标 Skill 与用户意图。
+                5. 写操作完成后重新读取列表或下载结果做校验，遇到 401/403 时先提示用户更新 API Key scopes。
+
                 ## Tools
 
                 - `list_skills`: 查询平台中已发布的 Skills。需要 `skills:read`。

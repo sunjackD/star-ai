@@ -464,6 +464,18 @@ class SetupAndUploadApiTest {
                 .andExpect(content().string(containsString("download_skill")));
     }
 
+    @Test
+    void selfSkillGuidesAgentsToReadStructuredToolSpecsBeforeCalling() throws Exception {
+        mockMvc.perform(get("/api/v1/developer/self-skill/download"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("/api/v1/developer/skill-manifest")))
+                .andExpect(content().string(containsString("toolSpecs")))
+                .andExpect(content().string(containsString("scope")))
+                .andExpect(content().string(containsString("risk")))
+                .andExpect(content().string(containsString("destructive")))
+                .andExpect(content().string(containsString("执行 `delete_skill` 前必须确认")));
+    }
+
     private String createAdminAndLogin(String username, String email) throws Exception {
         mockMvc.perform(post("/api/v1/setup/admin")
                         .contentType(MediaType.APPLICATION_JSON)
