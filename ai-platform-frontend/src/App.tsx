@@ -1329,8 +1329,18 @@ const API_KEY_SCOPE_OPTIONS = [
   { value: 'skills:import', label: '导入 Skill', description: '创建文本 Skill、上传文件包和远程导入' },
   { value: 'skills:write', label: '维护 Skill', description: '更新、替换、删除和记录远程地址' },
   { value: 'skills:download', label: '下载 Skill', description: '下载 Skill 源码文件或 zip 包' },
+  { value: 'agents:read', label: '读取 Agent', description: '查询 Agent 资产、运行入口和状态' },
+  { value: 'agents:write', label: '维护 Agent', description: '创建和更新 Agent 资产' },
+  { value: 'articles:read', label: '读取文章', description: '查询知识库文章和内容元数据' },
+  { value: 'articles:write', label: '维护文章', description: '创建和更新知识库文章' },
+  { value: 'users:read', label: '读取用户', description: '查询用户、角色和账号状态' },
+  { value: 'users:write', label: '维护用户', description: '创建用户并更新资料、状态和角色' },
   { value: 'admin:manage', label: '平台管理', description: '预留给管理类自动化能力' }
 ];
+
+const DEFAULT_PLATFORM_SCOPES = API_KEY_SCOPE_OPTIONS
+  .filter((item) => item.value !== 'admin:manage')
+  .map((item) => item.value);
 
 const API_KEY_EXPIRE_OPTIONS = [
   { value: 30, label: '30 天' },
@@ -1341,16 +1351,34 @@ const API_KEY_EXPIRE_OPTIONS = [
 
 const API_KEY_PERMISSION_PRESETS = [
   {
-    key: 'full',
+    key: 'platform',
+    label: '平台模块管理',
+    description: '覆盖 Skill、Agent、文章和用户模块，适合受信任的后台 Agent。',
+    scopes: DEFAULT_PLATFORM_SCOPES
+  },
+  {
+    key: 'content',
+    label: '内容与 Agent',
+    description: '允许维护 Agent 资产和知识库文章，不触碰用户账号。',
+    scopes: ['agents:read', 'agents:write', 'articles:read', 'articles:write']
+  },
+  {
+    key: 'skill',
     label: 'Skill 管理',
-    description: '覆盖发现、导入、维护和下载，适合受信任的后台 Agent。',
+    description: '覆盖发现、导入、维护和下载，适合 Skill 资产维护任务。',
     scopes: ['skills:read', 'skills:import', 'skills:write', 'skills:download']
+  },
+  {
+    key: 'users',
+    label: '用户管理',
+    description: '仅开放用户查询、创建和更新，适合账号维护任务。',
+    scopes: ['users:read', 'users:write']
   },
   {
     key: 'read',
     label: '只读发现',
-    description: '仅允许查询 Skill 与分类，适合检索、推荐和审计场景。',
-    scopes: ['skills:read']
+    description: '仅允许查询平台模块，适合检索、推荐和审计场景。',
+    scopes: ['skills:read', 'agents:read', 'articles:read', 'users:read']
   },
   {
     key: 'custom',
@@ -1372,7 +1400,16 @@ const DEFAULT_DEVELOPER_TOOLS = [
   'record_remote_skill',
   'import_remote_skill',
   'delete_skill',
-  'download_skill'
+  'download_skill',
+  'list_agents',
+  'create_agent',
+  'update_agent',
+  'list_articles',
+  'create_article',
+  'update_article',
+  'list_users',
+  'create_user',
+  'update_user'
 ];
 
 const DEVELOPER_TOOL_GROUPS = [
@@ -1395,6 +1432,21 @@ const DEVELOPER_TOOL_GROUPS = [
     title: '分发',
     scope: 'skills:download',
     tools: ['download_skill']
+  },
+  {
+    title: 'Agent 资产',
+    scope: 'agents:write',
+    tools: ['list_agents', 'create_agent', 'update_agent']
+  },
+  {
+    title: '知识库',
+    scope: 'articles:write',
+    tools: ['list_articles', 'create_article', 'update_article']
+  },
+  {
+    title: '用户',
+    scope: 'users:write',
+    tools: ['list_users', 'create_user', 'update_user']
   }
 ];
 
@@ -1403,7 +1455,7 @@ function ApiKeysPage() {
   const [form] = Form.useForm<{ name: string; scopes: string[]; expireDays: number }>();
   const [modalOpen, setModalOpen] = useState(false);
   const [createdKey, setCreatedKey] = useState<string>();
-  const [selectedPreset, setSelectedPreset] = useState('full');
+  const [selectedPreset, setSelectedPreset] = useState('platform');
   const { data = [] } = useQuery({ queryKey: ['api-keys'], queryFn: () => getData<ApiKey[]>('/developer/api-keys') });
   const { data: dashboard } = useQuery({
     queryKey: ['developer-dashboard'],
@@ -1432,9 +1484,7 @@ function ApiKeysPage() {
       queryClient.invalidateQueries({ queryKey: ['developer-dashboard'] });
     }
   });
-  const defaultRequiredScopes = API_KEY_SCOPE_OPTIONS
-    .filter((item) => item.value.startsWith('skills:'))
-    .map((item) => item.value);
+  const defaultRequiredScopes = DEFAULT_PLATFORM_SCOPES;
   const requiredScopes = dashboard?.requiredScopes ?? defaultRequiredScopes;
   const missingScopes = dashboard?.missingRequiredScopes ?? requiredScopes;
   const agentWorkflowReadiness = dashboard?.agentWorkflowReadiness ?? [];
@@ -1463,7 +1513,7 @@ function ApiKeysPage() {
           <Tag color="processing" icon={<Activity size={14} />}>凭据控制台</Tag>
           <Title level={2}>API Key 生命周期与 Agent 调用治理</Title>
           <Paragraph>
-            这里聚合 API Key 生命周期、权限覆盖、工作流准备度和最近调用痕迹，用于判断 Agent 是否具备稳定、安全的 Skill 管理能力。
+            这里聚合 API Key 生命周期、权限覆盖、工作流准备度和最近调用痕迹，用于判断 Agent 是否具备稳定、安全的平台模块管理能力。
           </Paragraph>
         </div>
         <div className="api-management-quick-panel">
@@ -1515,7 +1565,7 @@ function ApiKeysPage() {
           showIcon
           className="agent-dashboard-alert"
           message="Agent 自管理权限已覆盖"
-          description="当前至少有一个有效 Key 覆盖 Skill 发现、导入、维护和下载所需权限。"
+          description="当前至少有一个有效 Key 覆盖平台自管理所需权限。"
         />
       )}
 
@@ -1525,7 +1575,7 @@ function ApiKeysPage() {
             <section key={preset.key} className="api-key-policy-item">
               <div>
                 <Text strong>{preset.label}</Text>
-                {preset.key === 'full' && <Tag color="blue">推荐</Tag>}
+                {preset.key === 'platform' && <Tag color="blue">推荐</Tag>}
               </div>
               <Text type="secondary">{preset.description}</Text>
               <div className="scope-coverage-tags">{renderScopeTags(preset.scopes)}</div>
@@ -1646,7 +1696,7 @@ function ApiKeysPage() {
           form={form}
           layout="vertical"
           initialValues={{
-            scopes: ['skills:read', 'skills:import', 'skills:write', 'skills:download'],
+            scopes: DEFAULT_PLATFORM_SCOPES,
             expireDays: 90
           }}
           onFinish={(values) => mutation.mutate(values)}
@@ -1752,8 +1802,7 @@ function DeveloperPage() {
     queryFn: () => getPublicData<DeveloperAgentWorkflow[]>('/developer/agent-workflows')
   });
   const tools = manifest?.tools ?? DEFAULT_DEVELOPER_TOOLS;
-  const manifestRequiredScopes = manifest?.requiredScopes
-    ?? API_KEY_SCOPE_OPTIONS.filter((item) => item.value.startsWith('skills:')).map((item) => item.value);
+  const manifestRequiredScopes = manifest?.requiredScopes ?? DEFAULT_PLATFORM_SCOPES;
   const toolSpecs = manifest?.toolSpecs?.length
     ? manifest.toolSpecs
     : tools.map((tool) => ({
@@ -1789,10 +1838,10 @@ ${selfSkillUrl}
 
 执行顺序：
 0. 先读取 skill-manifest 的工具清单，确认方法、路径、权限和风险
-1. list_skills 与 get_skill_categories 先读取现状
-2. import_skill/upload_skill/import_remote_skill 写入新增 Skill
-3. update_skill/replace_skill_artifact/replace_skill_directory 做迭代维护
-4. download_skill 复用包，delete_skill 只处理确认废弃的资源`;
+1. 先用 list_* 工具读取目标模块现状
+2. 按任务调用 create_* 或 update_* 写入变更
+3. 用户相关工具属于敏感操作，执行前确认邮箱、角色和状态
+4. 写入后重新读取对应模块，确认结果可见且状态正确`;
 
   return (
     <div className="page">
@@ -1861,7 +1910,7 @@ ${selfSkillUrl}
             { title: '接入', description: '下载自管理 Skill 并读取 Manifest 契约' },
             { title: '授权', description: '创建最小权限 API Key 并检查权限覆盖' },
             { title: '编排', description: '按 Agent Workflow 选择工具、门禁和验证方式' },
-            { title: '执行', description: '管理 Skill 资产并复核模块可用性' },
+            { title: '执行', description: '管理 Skill、Agent、文章和用户等平台模块' },
             { title: '审计', description: '在治理检查和审计日志中追踪高风险动作' }
           ]}
         />
@@ -1993,7 +2042,7 @@ ${selfSkillUrl}
         <Card title="最小权限">
           <Table
             rowKey="value"
-            dataSource={API_KEY_SCOPE_OPTIONS.filter((item) => item.value.startsWith('skills:'))}
+            dataSource={API_KEY_SCOPE_OPTIONS.filter((item) => item.value !== 'admin:manage')}
             pagination={false}
             size="small"
             columns={[
@@ -2004,7 +2053,7 @@ ${selfSkillUrl}
         </Card>
       </div>
 
-      <Card title="Skill 清单" className="markdown-card">
+      <Card title="平台管理清单" className="markdown-card">
         <pre>{JSON.stringify({
           endpoint: '/api/v1/developer/skill-manifest',
           schemaVersion: manifest?.schemaVersion ?? '1.0',
@@ -2056,6 +2105,9 @@ function riskTagColor(risk: string): string {
   if (risk === 'write') {
     return 'gold';
   }
+  if (risk === 'sensitive') {
+    return 'purple';
+  }
   if (risk === 'read') {
     return 'blue';
   }
@@ -2066,6 +2118,7 @@ function riskLabel(risk: string): string {
   const labels: Record<string, string> = {
     read: '读取',
     write: '写入',
+    sensitive: '敏感',
     destructive: '高风险'
   };
   return labels[risk] ?? risk;
@@ -2107,9 +2160,7 @@ function ObservabilityPage() {
   const governanceChecks = dashboard?.governanceChecks ?? [];
   const attentionChecks = governanceChecks.filter((check) => check.status !== 'PASS');
   const recentEvents = dashboard?.recentEvents ?? [];
-  const requiredScopes = dashboard?.requiredScopes ?? API_KEY_SCOPE_OPTIONS
-    .filter((item) => item.value.startsWith('skills:'))
-    .map((item) => item.value);
+  const requiredScopes = dashboard?.requiredScopes ?? DEFAULT_PLATFORM_SCOPES;
   const missingScopes = dashboard?.missingRequiredScopes ?? requiredScopes;
   const scopeCoverage = Math.round(
     ((requiredScopes.length - missingScopes.length) / Math.max(requiredScopes.length, 1)) * 100

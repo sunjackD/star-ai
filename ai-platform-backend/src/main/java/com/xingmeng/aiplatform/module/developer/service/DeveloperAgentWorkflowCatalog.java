@@ -63,6 +63,39 @@ public class DeveloperAgentWorkflowCatalog {
                         "read",
                         "无需人工确认",
                         "校验下载文件名和大小"
+                ),
+                new DeveloperAgentWorkflowResponse(
+                        "maintain_agent_assets",
+                        "维护 Agent 资产",
+                        "用户要求新增或更新 Agent 入口、说明和状态",
+                        List.of("list_agents", "create_agent", "update_agent"),
+                        List.of("agents:read", "agents:write"),
+                        List.of("读取现有 Agent", "判断新增或更新", "写入 Agent 信息", "重新读取列表确认"),
+                        "write",
+                        "更新前确认目标 Agent ID 与名称",
+                        "确认 Agent 名称、分类和状态已更新"
+                ),
+                new DeveloperAgentWorkflowResponse(
+                        "maintain_knowledge_articles",
+                        "维护知识库文章",
+                        "用户要求新增教程、规范、Prompt 或最佳实践内容",
+                        List.of("list_articles", "create_article", "update_article"),
+                        List.of("articles:read", "articles:write"),
+                        List.of("读取文章清单", "检查 slug 唯一性", "创建或更新文章", "重新读取列表确认"),
+                        "write",
+                        "发布前确认标题、slug、状态和正文摘要",
+                        "确认文章标题、slug 和状态已更新"
+                ),
+                new DeveloperAgentWorkflowResponse(
+                        "maintain_user_accounts",
+                        "维护用户账号",
+                        "用户明确要求创建或更新平台账号、角色和状态",
+                        List.of("list_users", "create_user", "update_user"),
+                        List.of("users:read", "users:write"),
+                        List.of("读取用户列表", "确认用户名、邮箱和角色", "创建或更新用户", "复核用户状态"),
+                        "sensitive",
+                        "执行前必须确认目标用户、邮箱、角色和状态",
+                        "确认用户信息、角色和状态已更新"
                 )
         );
     }

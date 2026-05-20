@@ -39,13 +39,28 @@ import java.util.stream.Collectors;
 @Service
 public class ApiKeyService {
     private static final List<String> REQUIRED_AGENT_SCOPES = List.of(
-            "skills:read", "skills:import", "skills:write", "skills:download"
+            "skills:read",
+            "skills:import",
+            "skills:write",
+            "skills:download",
+            "agents:read",
+            "agents:write",
+            "articles:read",
+            "articles:write",
+            "users:read",
+            "users:write"
     );
     private static final Set<String> ALLOWED_API_KEY_SCOPES = Set.of(
             "skills:read",
             "skills:import",
             "skills:write",
             "skills:download",
+            "agents:read",
+            "agents:write",
+            "articles:read",
+            "articles:write",
+            "users:read",
+            "users:write",
             "admin:manage"
     );
 
@@ -186,6 +201,9 @@ public class ApiKeyService {
                         totalModels, "/models", totalModels + " 个模型已配置"),
                 module("knowledge_base", "知识库", "教程、Prompt、脚本和执行前上下文", articleRepository.count(),
                         activeArticles, "/articles", activeArticles + " 篇内容已发布"),
+                module("user_control", "用户管理", "用户、角色和登录状态的自动化维护", userRepository.count(),
+                        userRepository.findAll().stream().filter(user -> "ACTIVE".equals(user.getStatus())).count(),
+                        "/admin/users", "用户与角色可由授权 Agent 维护"),
                 module("agent_workflows", "Agent 工作流", "Agent 可执行流程、权限和风险门禁",
                         workflowReadiness.size(), readyWorkflows, "/developer",
                         readyWorkflows + "/" + workflowReadiness.size() + " 个工作流可运行")

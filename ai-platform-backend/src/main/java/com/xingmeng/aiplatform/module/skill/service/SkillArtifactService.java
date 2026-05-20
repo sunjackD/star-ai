@@ -188,16 +188,17 @@ public class SkillArtifactService {
         return """
                 ---
                 name: ai-platform-manager
-                description: 通过 AI 聚合平台 API Key 管理站内 Skills
+                description: 通过 AI 聚合平台 API Key 管理 Skill、Agent、文章和用户等平台模块
                 ---
                 # AI Platform Manager
 
-                该 Skill 让 AI Agent 通过 AI 聚合平台 Developer API 管理站内 Skills。适合在 Codex、Claude Code、Roo Code 等 Agent 中安装后使用。
+                该 Skill 让 AI Agent 通过 AI 聚合平台 Developer API 管理站内模块。
+                它适合在 Codex、Claude Code、Roo Code 等 Agent 中安装后使用。
 
                 ## 初始化
 
                 1. 在平台右上角进入 API Key 页面。
-                2. 创建包含以下 scopes 的 API Key：`skills:read`、`skills:import`、`skills:write`、`skills:download`。
+                2. 按任务选择最小 scopes，例如 `skills:read`、`agents:write`、`articles:write`、`users:write`。
                 3. 在 Agent 中保存平台地址和 API Key。
 
                 API Base: http://localhost:8081/api/v1（按实际部署地址替换）
@@ -208,10 +209,12 @@ public class SkillArtifactService {
                 1. 每次会话先读取 `GET /api/v1/developer/skill-manifest`，优先使用返回的 `toolSpecs`。
                 2. 从 `toolSpecs` 中匹配工具的 `method`、`path`、`scope`、`risk` 和 `description`，不要只凭示例字符串猜测接口。
                 3. 调用前确认 API Key 覆盖对应 `scope`；`skills:import,skills:write` 表示两个 scope 都必须具备。
-                4. `risk` 为 `destructive` 的工具会改变或删除资源，执行 `delete_skill` 前必须确认目标 Skill 与用户意图。
-                5. 写操作完成后重新读取列表或下载结果做校验，遇到 401/403 时先提示用户更新 API Key scopes。
+                4. `risk` 为 `sensitive` 或 `destructive` 的工具必须先确认目标、影响范围和回滚方式。
+                5. 写操作完成后重新读取列表或详情做校验，遇到 401/403 时先提示用户更新 API Key scopes。
 
                 ## Tools
+
+                ### Skill 资产
 
                 - `list_skills`: 查询平台中已发布的 Skills。需要 `skills:read`。
                 - `get_skill_categories`: 查询 Skill 分类。需要 `skills:read`。
@@ -226,138 +229,51 @@ public class SkillArtifactService {
                 - `delete_skill`: 删除站内 Skill。需要 `skills:write`。
                 - `download_skill`: 下载某个 Skill 的源码文件或上传包。需要 `skills:download`。
 
-                ## Agent 调用示例
+                执行 `delete_skill` 前必须确认目标 Skill ID、名称和用户意图。
 
-                ### list_skills
+                ### Agent 资产
+
+                - `list_agents`: 查询 Agent 资产。需要 `agents:read`。
+                - `create_agent`: 创建 Agent 资产。需要 `agents:write`。
+                - `update_agent`: 更新 Agent 资产。需要 `agents:write`。
+
+                ### 知识库文章
+
+                - `list_articles`: 查询文章。需要 `articles:read`。
+                - `create_article`: 创建文章。需要 `articles:write`。
+                - `update_article`: 更新文章。需要 `articles:write`。
+
+                ### 用户管理
+
+                - `list_users`: 查询用户。需要 `users:read`，风险为 `sensitive`。
+                - `create_user`: 创建用户并分配角色。需要 `users:write`，风险为 `sensitive`。
+                - `update_user`: 更新用户资料、状态和角色。需要 `users:write`，风险为 `sensitive`。
+
+                ## Agent 调用示例
 
                 ```bash
                 curl -H "X-API-Key: xma_xxx" \\
                   "http://localhost:8081/api/v1/developer/skills"
                 ```
 
-                ### get_skill_categories
-
                 ```bash
-                curl -H "X-API-Key: xma_xxx" \\
-                  "http://localhost:8081/api/v1/developer/skill-categories"
-                ```
-
-                ### import_skill
-
-                ```bash
-                curl -X POST "http://localhost:8081/api/v1/developer/skills/import" \\
+                curl -X POST "http://localhost:8081/api/v1/developer/agents" \\
                   -H "X-API-Key: xma_xxx" \\
                   -H "Content-Type: application/json" \\
-                  -d '{
-                    "name": "browser-helper",
-                    "categoryId": 2,
-                    "description": "浏览器自动化辅助 Skill",
-                    "tags": "browser,automation",
-                    "author": "agent",
-                    "sourceCode": "---\\nname: browser-helper\\ndescription: Browser helper\\n---\\n# Browser Helper",
-                    "usageMarkdown": "# Browser Helper\\n用于浏览器自动化任务。"
-                  }'
+                  -d '{"name":"Research Agent","category":"研究","description":"资料收集 Agent","guideMarkdown":"# Guide","status":"ACTIVE"}'
                 ```
 
-                ### upload_skill
-
                 ```bash
-                curl -X POST "http://localhost:8081/api/v1/developer/skills/upload" \\
-                  -H "X-API-Key: xma_xxx" \\
-                  -F "file=@SKILL.md" \\
-                  -F "name=browser-helper" \\
-                  -F "categoryId=2" \\
-                  -F "description=浏览器自动化辅助 Skill" \\
-                  -F "tags=browser,automation" \\
-                  -F "author=agent" \\
-                  -F "usageMarkdown=# Browser Helper"
-                ```
-
-                ### upload_skill_directory
-
-                ```bash
-                curl -X POST "http://localhost:8081/api/v1/developer/skills/upload-directory" \\
-                  -H "X-API-Key: xma_xxx" \\
-                  -F "files=@browser-helper/SKILL.md" \\
-                  -F "paths=browser-helper/SKILL.md" \\
-                  -F "files=@browser-helper/README.md" \\
-                  -F "paths=browser-helper/README.md" \\
-                  -F "name=browser-helper" \\
-                  -F "categoryId=2" \\
-                  -F "description=上传完整 Skill 文件夹" \\
-                  -F "tags=browser,folder" \\
-                  -F "author=agent" \\
-                  -F "usageMarkdown=# Browser Helper"
-                ```
-
-                ### replace_skill_directory
-
-                ```bash
-                curl -X PUT "http://localhost:8081/api/v1/developer/skills/1/artifact-directory" \\
-                  -H "X-API-Key: xma_xxx" \\
-                  -F "files=@browser-helper/SKILL.md" \\
-                  -F "paths=browser-helper/SKILL.md" \\
-                  -F "name=browser-helper" \\
-                  -F "categoryId=2" \\
-                  -F "description=替换完整 Skill 文件夹" \\
-                  -F "tags=browser,folder" \\
-                  -F "author=agent" \\
-                  -F "usageMarkdown=# Browser Helper"
-                ```
-
-                ### record_remote_skill
-
-                ```bash
-                curl -X POST "http://localhost:8081/api/v1/developer/skills/remote" \\
+                curl -X POST "http://localhost:8081/api/v1/developer/articles" \\
                   -H "X-API-Key: xma_xxx" \\
                   -H "Content-Type: application/json" \\
-                  -d '{"name":"remote-skill","url":"https://example.com/skill.zip","description":"远程 Skill"}'
-                ```
-
-                ### import_remote_skill
-
-                ```bash
-                curl -X POST "http://localhost:8081/api/v1/developer/skills/remote/import" \\
-                  -H "X-API-Key: xma_xxx" \\
-                  -H "Content-Type: application/json" \\
-                  -d '{"name":"remote-skill","categoryId":2,"url":"https://example.com/skill.zip","description":"远程 Skill","tags":"remote,zip","author":"agent","usageMarkdown":"# Remote Skill"}'
-                ```
-
-                ### update_skill
-
-                ```bash
-                curl -X PUT "http://localhost:8081/api/v1/developer/skills/1" \\
-                  -H "X-API-Key: xma_xxx" \\
-                  -H "Content-Type: application/json" \\
-                  -d '{
-                    "name": "browser-helper",
-                    "categoryId": 2,
-                    "description": "更新后的说明",
-                    "tags": "browser,automation",
-                    "author": "agent",
-                    "sourceCode": "---\\nname: browser-helper\\n---\\n# Browser Helper",
-                    "usageMarkdown": "# Browser Helper"
-                  }'
-                ```
-
-                ### download_skill
-
-                ```bash
-                curl -L -H "X-API-Key: xma_xxx" \\
-                  "http://localhost:8081/api/v1/developer/skills/1/download" \\
-                  -o skill-package.zip
-                ```
-
-                ### delete_skill
-
-                ```bash
-                curl -X DELETE -H "X-API-Key: xma_xxx" \\
-                  "http://localhost:8081/api/v1/developer/skills/1"
+                  -d '{"title":"Agent 规范","slug":"agent-policy","summary":"运行规范","category":"治理","tags":"agent","difficulty":"BEGINNER","estimatedMinutes":8,"status":"ACTIVE","sortOrder":10,"safetyMarkdown":"# Safety","bodyMarkdown":"# Body"}'
                 ```
 
                 ## 可直接给 Agent 的任务提示
 
-                “使用 ai-platform-manager，先列出平台 Skills 和分类；如果我给你本地 `SKILL.md`、zip 包或 Skill 文件夹，就上传到合适分类；如果我给你 HTTPS Skill 地址，就添加为远程 Skill；需要复用时下载对应 Skill 包。”
+                “使用 ai-platform-manager，先读取 Manifest 和 toolSpecs；按我的任务选择最小 scope；
+                创建或更新 Skill、Agent、文章、用户后重新读取对应列表并汇报校验结果。”
                 """;
     }
 

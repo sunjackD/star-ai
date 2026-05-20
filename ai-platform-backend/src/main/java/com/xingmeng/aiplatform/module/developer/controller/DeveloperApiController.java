@@ -48,11 +48,17 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/v1/developer")
 public class DeveloperApiController {
-    private static final List<String> REQUIRED_SKILL_SCOPES = List.of(
+    private static final List<String> REQUIRED_PLATFORM_SCOPES = List.of(
             "skills:read",
             "skills:import",
             "skills:write",
-            "skills:download"
+            "skills:download",
+            "agents:read",
+            "agents:write",
+            "articles:read",
+            "articles:write",
+            "users:read",
+            "users:write"
     );
 
     private final ApiKeyService apiKeyService;
@@ -133,9 +139,9 @@ public class DeveloperApiController {
                 Map.entry("apiVersion", "v1"),
                 Map.entry("apiBasePath", "/api/v1"),
                 Map.entry("name", "ai-platform-manager"),
-                Map.entry("description", "通过 API Key 让 AI Agent 查询、导入、上传、替换、删除和下载平台 Skills"),
+                Map.entry("description", "通过 API Key 让 AI Agent 管理 Skill、Agent、文章和用户等平台模块"),
                 Map.entry("auth", Map.of("headers", List.of("X-API-Key", "Authorization: Bearer xma_xxx"))),
-                Map.entry("requiredScopes", REQUIRED_SKILL_SCOPES),
+                Map.entry("requiredScopes", REQUIRED_PLATFORM_SCOPES),
                 Map.entry("tools", List.of(
                         "list_skills",
                         "get_skill_categories",
@@ -148,7 +154,16 @@ public class DeveloperApiController {
                         "record_remote_skill",
                         "import_remote_skill",
                         "delete_skill",
-                        "download_skill"
+                        "download_skill",
+                        "list_agents",
+                        "create_agent",
+                        "update_agent",
+                        "list_articles",
+                        "create_article",
+                        "update_article",
+                        "list_users",
+                        "create_user",
+                        "update_user"
                 )),
                 Map.entry("toolSpecs", toolSpecs()),
                 Map.entry("examples", List.of(
@@ -163,12 +178,18 @@ public class DeveloperApiController {
                         "record_remote_skill: POST /api/v1/developer/skills/remote HTTPS URL record only",
                         "import_remote_skill: POST /api/v1/developer/skills/remote/import HTTPS URL and store content",
                         "delete_skill: DELETE /api/v1/developer/skills/{id}",
-                        "download_skill: GET /api/v1/developer/skills/{id}/download"
+                        "download_skill: GET /api/v1/developer/skills/{id}/download",
+                        "create_agent: POST /api/v1/developer/agents JSON",
+                        "update_agent: PUT /api/v1/developer/agents/{id} JSON",
+                        "create_article: POST /api/v1/developer/articles JSON",
+                        "update_article: PUT /api/v1/developer/articles/{id} JSON",
+                        "create_user: POST /api/v1/developer/users JSON",
+                        "update_user: PUT /api/v1/developer/users/{id} JSON"
                 )),
                 Map.entry(
                         "installPrompt",
-                        "请下载并安装 ai-platform-manager Skill，配置 API Base 和包含 skills:read/import/write/download "
-                                + "的 API Key，然后让 Agent 读取 toolSpecs 后按 method/path/scope/risk 调用。"
+                        "请下载并安装 ai-platform-manager Skill，配置 API Base 和覆盖目标模块 scopes 的 API Key，"
+                                + "然后让 Agent 读取 toolSpecs 后按 method/path/scope/risk 调用。"
                 )
         ));
     }
@@ -474,6 +495,42 @@ public class DeveloperApiController {
                 new DeveloperToolSpecResponse(
                         "download_skill", "GET", "/api/v1/developer/skills/{id}/download",
                         "skills:download", "read", "下载 Skill 包"
+                ),
+                new DeveloperToolSpecResponse(
+                        "list_agents", "GET", "/api/v1/developer/agents",
+                        "agents:read", "read", "查询 Agent 资产"
+                ),
+                new DeveloperToolSpecResponse(
+                        "create_agent", "POST", "/api/v1/developer/agents",
+                        "agents:write", "write", "创建 Agent 资产"
+                ),
+                new DeveloperToolSpecResponse(
+                        "update_agent", "PUT", "/api/v1/developer/agents/{id}",
+                        "agents:write", "write", "更新 Agent 资产"
+                ),
+                new DeveloperToolSpecResponse(
+                        "list_articles", "GET", "/api/v1/developer/articles",
+                        "articles:read", "read", "查询知识库文章"
+                ),
+                new DeveloperToolSpecResponse(
+                        "create_article", "POST", "/api/v1/developer/articles",
+                        "articles:write", "write", "创建知识库文章"
+                ),
+                new DeveloperToolSpecResponse(
+                        "update_article", "PUT", "/api/v1/developer/articles/{id}",
+                        "articles:write", "write", "更新知识库文章"
+                ),
+                new DeveloperToolSpecResponse(
+                        "list_users", "GET", "/api/v1/developer/users",
+                        "users:read", "sensitive", "查询用户和角色"
+                ),
+                new DeveloperToolSpecResponse(
+                        "create_user", "POST", "/api/v1/developer/users",
+                        "users:write", "sensitive", "创建用户并分配角色"
+                ),
+                new DeveloperToolSpecResponse(
+                        "update_user", "PUT", "/api/v1/developer/users/{id}",
+                        "users:write", "sensitive", "更新用户资料、状态和角色"
                 )
         );
     }

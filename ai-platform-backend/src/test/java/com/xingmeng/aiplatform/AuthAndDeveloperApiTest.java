@@ -91,6 +91,26 @@ class AuthAndDeveloperApiTest {
     }
 
     @Test
+    void developerManifestExposesPlatformModuleManagementTools() throws Exception {
+        mockMvc.perform(get("/api/v1/developer/skill-manifest"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.description").value(containsString("平台模块")))
+                .andExpect(jsonPath("$.data.requiredScopes[?(@ == 'agents:write')]").isNotEmpty())
+                .andExpect(jsonPath("$.data.requiredScopes[?(@ == 'articles:write')]").isNotEmpty())
+                .andExpect(jsonPath("$.data.requiredScopes[?(@ == 'users:write')]").isNotEmpty())
+                .andExpect(jsonPath(
+                        "$.data.toolSpecs[?(@.name == 'create_agent' && @.scope == 'agents:write')]"
+                ).isNotEmpty())
+                .andExpect(jsonPath(
+                        "$.data.toolSpecs[?(@.name == 'update_article' && @.scope == 'articles:write')]"
+                ).isNotEmpty())
+                .andExpect(jsonPath(
+                        "$.data.toolSpecs[?(@.name == 'create_user' && @.scope == 'users:write' "
+                                + "&& @.risk == 'sensitive')]"
+                ).isNotEmpty());
+    }
+
+    @Test
     void developerSkillManifestExposesStructuredToolSpecs() throws Exception {
         mockMvc.perform(get("/api/v1/developer/skill-manifest"))
                 .andExpect(status().isOk())
@@ -188,6 +208,201 @@ class AuthAndDeveloperApiTest {
                                 """))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value(containsString("不支持的Scope")));
+    }
+
+    @Test
+    void apiKeyCanManageAgentArticleAndUserModules() throws Exception {
+        String adminToken = createAdminAndLogin("admin_platform_modules", "admin-platform-modules@example.com");
+        createUser(adminToken, "platform_module_dev", "platform-module@example.com", "Platform Module Dev", "DEVELOPER");
+        String jwt = login("platform_module_dev", "secret123");
+        String apiKey = createApiKey(
+                jwt,
+                "agents:read",
+                "agents:write",
+                "articles:read",
+                "articles:write",
+                "users:read",
+                "users:write"
+        );
+
+        String agentJson = mockMvc.perform(post("/api/v1/developer/agents")
+                        .header("X-API-Key", apiKey)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "name": "Research Agent",
+                                  "category": "研究",
+                                  "description": "面向资料收集的 Agent",
+                                  "icon": "Bot",
+                                  "guideMarkdown": "# Research Agent",
+                                  "officialUrl": "https://example.com/research-agent",
+                                  "status": "ACTIVE"
+                                }
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.name").value("Research Agent"))
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+        long agentId = objectMapper.readTree(agentJson).path("data").path("id").asLong();
+
+        mockMvc.perform(put("/api/v1/developer/agents/" + agentId)
+                        .header("X-API-Key", apiKey)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "name": "Research Agent Pro",
+                                  "category": "研究",
+                                  "description": "面向资料收集和整理的 Agent",
+                                  "icon": "Bot",
+                                  "guideMarkdown": "# Research Agent Pro",
+                                  "officialUrl": "https://example.com/research-agent",
+                                  "status": "ACTIVE"
+                                }
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.name").value("Research Agent Pro"));
+
+        String articleJson = mockMvc.perform(post("/api/v1/developer/articles")
+                        .header("X-API-Key", apiKey)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "title": "Agent 运行规范",
+                                  "slug": "agent-runtime-policy",
+                                  "summary": "面向 Agent 接入的运行规范",
+                                  "category": "治理",
+                                  "tags": "agent,governance",
+                                  "difficulty": "BEGINNER",
+                                  "estimatedMinutes": 8,
+                                  "sourceUrl": "https://example.com/policy",
+                                  "coverIcon": "ShieldCheck",
+                                  "status": "ACTIVE",
+                                  "sortOrder": 10,
+                                  "safetyMarkdown": "# Safety",
+                                  "bodyMarkdown": "# Body"
+                                }
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.slug").value("agent-runtime-policy"))
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+        long articleId = objectMapper.readTree(articleJson).path("data").path("id").asLong();
+
+        mockMvc.perform(put("/api/v1/developer/articles/" + articleId)
+                        .header("X-API-Key", apiKey)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "title": "Agent 运行规范更新",
+                                  "slug": "agent-runtime-policy-updated",
+                                  "summary": "面向 Agent 接入的运行规范更新",
+                                  "category": "治理",
+                                  "tags": "agent,governance",
+                                  "difficulty": "INTERMEDIATE",
+                                  "estimatedMinutes": 12,
+                                  "sourceUrl": "https://example.com/policy",
+                                  "coverIcon": "ShieldCheck",
+                                  "status": "ACTIVE",
+                                  "sortOrder": 11,
+                                  "safetyMarkdown": "# Safety Updated",
+                                  "bodyMarkdown": "# Body Updated"
+                                }
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.slug").value("agent-runtime-policy-updated"));
+
+        String userJson = mockMvc.perform(post("/api/v1/developer/users")
+                        .header("X-API-Key", apiKey)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "username": "agent_created_user",
+                                  "email": "agent-created-user@example.com",
+                                  "displayName": "Agent Created User",
+                                  "password": "secret123",
+                                  "status": "ACTIVE",
+                                  "roles": ["DEVELOPER"]
+                                }
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.username").value("agent_created_user"))
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+        long userId = objectMapper.readTree(userJson).path("data").path("id").asLong();
+
+        mockMvc.perform(put("/api/v1/developer/users/" + userId)
+                        .header("X-API-Key", apiKey)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "email": "agent-created-user-updated@example.com",
+                                  "displayName": "Agent Created User Updated",
+                                  "status": "ACTIVE",
+                                  "roles": ["DEVELOPER"]
+                                }
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.email").value("agent-created-user-updated@example.com"));
+    }
+
+    @Test
+    void moduleWriteScopesAreRequiredForDeveloperApi() throws Exception {
+        String adminToken = createAdminAndLogin("admin_module_scope", "admin-module-scope@example.com");
+        createUser(adminToken, "module_scope_dev", "module-scope@example.com", "Module Scope Dev", "DEVELOPER");
+        String jwt = login("module_scope_dev", "secret123");
+        String apiKey = createApiKey(jwt, "agents:read", "articles:read", "users:read");
+
+        mockMvc.perform(post("/api/v1/developer/agents")
+                        .header("X-API-Key", apiKey)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "name": "Blocked Agent",
+                                  "category": "测试",
+                                  "description": "缺少写权限",
+                                  "guideMarkdown": "# Blocked",
+                                  "status": "ACTIVE"
+                                }
+                                """))
+                .andExpect(status().isForbidden());
+
+        mockMvc.perform(post("/api/v1/developer/articles")
+                        .header("X-API-Key", apiKey)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "title": "Blocked Article",
+                                  "slug": "blocked-article",
+                                  "summary": "缺少写权限",
+                                  "category": "测试",
+                                  "tags": "blocked",
+                                  "difficulty": "BEGINNER",
+                                  "estimatedMinutes": 5,
+                                  "status": "ACTIVE",
+                                  "sortOrder": 99,
+                                  "safetyMarkdown": "# Safety",
+                                  "bodyMarkdown": "# Body"
+                                }
+                                """))
+                .andExpect(status().isForbidden());
+
+        mockMvc.perform(post("/api/v1/developer/users")
+                        .header("X-API-Key", apiKey)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "username": "blocked_user",
+                                  "email": "blocked-user@example.com",
+                                  "displayName": "Blocked User",
+                                  "password": "secret123",
+                                  "status": "ACTIVE",
+                                  "roles": ["DEVELOPER"]
+                                }
+                                """))
+                .andExpect(status().isForbidden());
     }
 
     @Test
@@ -439,7 +654,7 @@ class AuthAndDeveloperApiTest {
                                 + "&& @.route == '/skills')]"
                 ).isNotEmpty())
                 .andExpect(jsonPath(
-                        "$.data.controlPlaneModules[?(@.key == 'agent_workflows' && @.total == 5 && @.active == 1)]"
+                        "$.data.controlPlaneModules[?(@.key == 'agent_workflows' && @.total == 8 && @.active == 1)]"
                 ).isNotEmpty())
                 .andExpect(jsonPath(
                         "$.data.governanceChecks[?(@.key == 'scope_coverage' && @.status == 'ATTENTION')]"
