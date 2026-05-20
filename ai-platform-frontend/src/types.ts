@@ -183,6 +183,17 @@ export type ApiKey = {
   lastUsedAt?: string;
 };
 
+export type DeveloperSkillManifest = {
+  name: string;
+  description: string;
+  auth: {
+    headers: string[];
+  };
+  tools: string[];
+  examples: string[];
+  installPrompt: string;
+};
+
 export type AdminOverview = {
   users: number;
   agents: number;

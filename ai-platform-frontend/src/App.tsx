@@ -1,7 +1,7 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import { BrowserRouter, Link, Navigate, Outlet, Route, Routes, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Alert, Button, Card, Form, Input, Layout, Menu, Modal, Progress, Select, Space, Spin, Statistic, Switch, Table, Tag, Typography, Upload, message } from 'antd';
+import { Alert, Button, Card, Form, Input, Layout, Menu, Modal, Progress, Select, Space, Spin, Statistic, Steps, Switch, Table, Tag, Typography, Upload, message } from 'antd';
 import type { RcFile } from 'antd/es/upload';
 import {
   Bot,
@@ -17,7 +17,8 @@ import {
   LayoutDashboard,
   LogOut,
   ShieldCheck,
-  Sparkles
+  Sparkles,
+  Workflow
 } from 'lucide-react';
 import { apiUrl, downloadFile, getData, getPublicData, postData, postPublicData, uploadData } from './api/client';
 import { useAuthStore } from './store/authStore';
@@ -32,6 +33,7 @@ import type {
   ArticleLink,
   ArticleSummary,
   AuthResponse,
+  DeveloperSkillManifest,
   FinetuneJob,
   PlatformConfig,
   RedirectLink,
@@ -954,6 +956,52 @@ function FinetunePage() {
   );
 }
 
+const API_KEY_SCOPE_OPTIONS = [
+  { value: 'skills:read', label: '读取 Skills', description: '查询 Skills、分类和元数据' },
+  { value: 'skills:import', label: '导入 Skills', description: '创建文本 Skill、上传文件包和远程导入' },
+  { value: 'skills:write', label: '维护 Skills', description: '更新、替换、删除和记录远程地址' },
+  { value: 'skills:download', label: '下载 Skills', description: '下载 Skill 源码文件或 zip 包' },
+  { value: 'admin:manage', label: '平台管理', description: '预留给管理类自动化能力' }
+];
+
+const DEFAULT_DEVELOPER_TOOLS = [
+  'list_skills',
+  'get_skill_categories',
+  'import_skill',
+  'upload_skill',
+  'upload_skill_directory',
+  'update_skill',
+  'replace_skill_artifact',
+  'replace_skill_directory',
+  'record_remote_skill',
+  'import_remote_skill',
+  'delete_skill',
+  'download_skill'
+];
+
+const DEVELOPER_TOOL_GROUPS = [
+  {
+    title: '发现',
+    scope: 'skills:read',
+    tools: ['list_skills', 'get_skill_categories']
+  },
+  {
+    title: '导入',
+    scope: 'skills:import',
+    tools: ['import_skill', 'upload_skill', 'upload_skill_directory', 'import_remote_skill']
+  },
+  {
+    title: '治理',
+    scope: 'skills:write',
+    tools: ['update_skill', 'replace_skill_artifact', 'replace_skill_directory', 'record_remote_skill', 'delete_skill']
+  },
+  {
+    title: '分发',
+    scope: 'skills:download',
+    tools: ['download_skill']
+  }
+];
+
 function ApiKeysPage() {
   const queryClient = useQueryClient();
   const [modalOpen, setModalOpen] = useState(false);
@@ -986,7 +1034,13 @@ function ApiKeysPage() {
             <Input placeholder="Claude Code 后台管理" />
           </Form.Item>
           <Form.Item name="scopes" label="权限范围" rules={[{ required: true }]}>
-            <Select mode="multiple" options={['skills:read', 'skills:import', 'skills:write', 'skills:download', 'admin:manage'].map((value) => ({ value, label: value }))} />
+            <Select
+              mode="multiple"
+              options={API_KEY_SCOPE_OPTIONS.map((item) => ({
+                value: item.value,
+                label: `${item.value} · ${item.label}`
+              }))}
+            />
           </Form.Item>
           <Button type="primary" htmlType="submit" loading={mutation.isPending}>创建</Button>
         </Form>
@@ -998,34 +1052,74 @@ function ApiKeysPage() {
 function DeveloperPage() {
   const selfSkillUrl = apiUrl('/developer/self-skill/download');
   const apiBaseUrl = apiUrl('').replace(/\/$/, '');
-  const installPrompt = `请安装 AI 聚合平台自管理 Skill：${selfSkillUrl}
+  const { data: manifest } = useQuery({
+    queryKey: ['developer-skill-manifest'],
+    queryFn: () => getPublicData<DeveloperSkillManifest>('/developer/skill-manifest')
+  });
+  const tools = manifest?.tools ?? DEFAULT_DEVELOPER_TOOLS;
+  const authHeaders = manifest?.auth?.headers ?? ['X-API-Key', 'Authorization: Bearer xma_xxx'];
+  const manifestExamples = manifest?.examples ?? [];
+  const toolGroups = DEVELOPER_TOOL_GROUPS.map((group) => ({
+    ...group,
+    tools: group.tools.filter((tool) => tools.includes(tool))
+  })).filter((group) => group.tools.length > 0);
+  const installPrompt = `请安装并使用 ${manifest?.name ?? 'ai-platform-manager'}：
+${selfSkillUrl}
 
-安装后在 Agent 中配置：
+连接配置：
 - API Base: ${apiBaseUrl}
-- API Key: 使用我在平台右上角 API Key 页面生成的 Key
-- 需要的 scopes: skills:read, skills:import, skills:write, skills:download
+- API Key: 使用平台 API Key 页面生成的 Key
+- 最小 scopes: skills:read, skills:import, skills:write, skills:download
 
-然后按以下工具管理站内 Skills：
-- list_skills：查询 Skills
-- get_skill_categories：查询分类
-- import_skill：用 JSON 新建文本 Skill
-- upload_skill：上传 SKILL.md 或 zip 包
-- upload_skill_directory：上传类似 .codex/skills/<skill-name> 的文件夹
-- update_skill：更新元数据和说明
-- replace_skill_artifact：替换已有 Skill 的 SKILL.md 或 zip 包
-- replace_skill_directory：替换已有 Skill 的文件夹包
-- record_remote_skill：只记录 HTTPS 网络 Skill 地址
-- import_remote_skill：导入 HTTPS 网络 Skill 内容
-- delete_skill：删除 Skill
-- download_skill：下载 Skill 包`;
+执行顺序：
+1. list_skills 与 get_skill_categories 先读取现状
+2. import_skill/upload_skill/import_remote_skill 写入新增 Skill
+3. update_skill/replace_skill_artifact/replace_skill_directory 做迭代维护
+4. download_skill 复用包，delete_skill 只处理确认废弃的资源`;
 
   return (
     <div className="page">
-      <PageTitle title="开发者接入" description="把平台作为自管理 Skill 接入 Agent，通过 API Key 完成 Skills 的查询、导入、上传和下载。" />
+      <PageTitle
+        title="开发者接入"
+        description="把平台作为自管理 Skill 接入 Agent，通过 API Key、Manifest 和审计链路管理站内 Skills。"
+      />
+      <section className="developer-hero-panel">
+        <div>
+          <Tag color="processing" icon={<Workflow size={14} />}>Agent Control Plane</Tag>
+          <Title level={2}>{manifest?.name ?? 'ai-platform-manager'}</Title>
+          <Paragraph>{manifest?.description ?? '通过 API Key 让 AI Agent 管理站内 Skills。'}</Paragraph>
+          <Space wrap>
+            <Button type="primary" icon={<Download size={16} />} href={selfSkillUrl}>
+              下载自管理 Skill
+            </Button>
+            <Link to="/account/api-keys"><Button icon={<KeyRound size={16} />}>创建 API Key</Button></Link>
+          </Space>
+        </div>
+        <div className="developer-manifest-meta">
+          <Statistic title="Tools" value={tools.length} />
+          <Statistic title="Scopes" value={API_KEY_SCOPE_OPTIONS.filter((item) => item.value.startsWith('skills:')).length} />
+          <Statistic title="Auth" value={authHeaders.length} />
+        </div>
+      </section>
+
+      <Card title="接入流程" className="developer-section-card">
+        <Steps
+          className="developer-steps"
+          responsive
+          items={[
+            { title: '安装', description: '下载 Skill 并放入 Agent 的 Skills 目录' },
+            { title: '授权', description: '创建最小权限 API Key' },
+            { title: '发现', description: '读取 Manifest、分类和现有 Skills' },
+            { title: '执行', description: '导入、上传、替换或下载 Skill 包' },
+            { title: '审计', description: '后台查看 API Key 与操作日志' }
+          ]}
+        />
+      </Card>
+
       <div className="developer-grid">
         <Card title="自管理 Skill">
           <Paragraph>
-            下载平台内置 Skill 后交给 Agent 安装，再提供 API Key 即可让 Agent 操作站内 Skills。
+            Skill 包内置工具契约，Agent 只需要 API Base、API Key 和明确的任务目标即可开始管理平台资源。
           </Paragraph>
           <Space wrap>
             <Button type="primary" icon={<Download size={16} />} href={selfSkillUrl}>下载 ai-platform-manager</Button>
@@ -1038,92 +1132,58 @@ function DeveloperPage() {
           </Paragraph>
         </Card>
       </div>
-      <Card title="Skill Manifest">
-        <pre>{`GET /api/v1/developer/skill-manifest
-X-API-Key: xma_xxx
 
-tools:
-  - list_skills: GET /developer/skills
-  - get_skill_categories: GET /developer/skill-categories
-  - import_skill: POST /developer/skills/import
-  - upload_skill: POST multipart /developer/skills/upload
-  - upload_skill_directory: POST multipart /developer/skills/upload-directory
-  - update_skill: PUT /developer/skills/{id}
-  - replace_skill_artifact: PUT multipart /developer/skills/{id}/artifact
-  - replace_skill_directory: PUT multipart /developer/skills/{id}/artifact-directory
-  - record_remote_skill: POST /developer/skills/remote
-  - import_remote_skill: POST /developer/skills/remote/import
-  - delete_skill: DELETE /developer/skills/{id}
-  - download_skill: GET /developer/skills/{id}/download`}</pre>
+      <div className="developer-two-column">
+        <Card title="能力矩阵">
+          <div className="developer-tool-groups">
+            {toolGroups.map((group) => (
+              <section key={group.title} className="developer-tool-group">
+                <div className="developer-tool-heading">
+                  <strong>{group.title}</strong>
+                  <Tag>{group.scope}</Tag>
+                </div>
+                <div className="developer-tool-tags">
+                  {group.tools.map((tool) => <Tag key={tool}>{formatToolName(tool)}</Tag>)}
+                </div>
+              </section>
+            ))}
+          </div>
+        </Card>
+        <Card title="最小权限">
+          <Table
+            rowKey="value"
+            dataSource={API_KEY_SCOPE_OPTIONS.filter((item) => item.value.startsWith('skills:'))}
+            pagination={false}
+            size="small"
+            columns={[
+              { title: 'Scope', dataIndex: 'value', render: (value) => <Tag>{value}</Tag> },
+              { title: '用途', dataIndex: 'description' }
+            ]}
+          />
+        </Card>
+      </div>
+
+      <Card title="Skill Manifest" className="markdown-card">
+        <pre>{JSON.stringify({
+          endpoint: '/api/v1/developer/skill-manifest',
+          name: manifest?.name ?? 'ai-platform-manager',
+          auth: authHeaders,
+          tools
+        }, null, 2)}</pre>
       </Card>
       <Card title="Developer API 示例" className="markdown-card">
-        <pre>{`# 查询 Skills
-curl -H "X-API-Key: xma_xxx" ${apiBaseUrl}/developer/skills
-
-# 查询分类
-curl -H "X-API-Key: xma_xxx" ${apiBaseUrl}/developer/skill-categories
-
-# 文本导入 Skill
-curl -X POST ${apiBaseUrl}/developer/skills/import \\
-  -H "X-API-Key: xma_xxx" \\
-  -H "Content-Type: application/json" \\
-  -d '{"name":"my-skill","categoryId":2,"description":"desc","tags":"tool","author":"agent","sourceCode":"---\\nname: my-skill\\n---\\n# My Skill","usageMarkdown":"# usage"}'
-
-# 上传 SKILL.md 或 zip
-curl -X POST ${apiBaseUrl}/developer/skills/upload \\
-  -H "X-API-Key: xma_xxx" \\
-  -F "file=@SKILL.md" \\
-  -F "name=my-skill" \\
-  -F "categoryId=2" \\
-  -F "description=uploaded skill" \\
-  -F "tags=upload" \\
-  -F "author=agent" \\
-  -F "usageMarkdown=# usage"
-
-# 上传 Skill 文件夹
-curl -X POST ${apiBaseUrl}/developer/skills/upload-directory \\
-  -H "X-API-Key: xma_xxx" \\
-  -F "files=@my-skill/SKILL.md" \\
-  -F "paths=my-skill/SKILL.md" \\
-  -F "name=my-skill" \\
-  -F "categoryId=2" \\
-  -F "description=folder skill" \\
-  -F "tags=folder" \\
-  -F "author=agent" \\
-  -F "usageMarkdown=# usage"
-
-# 记录远程 Skill 地址（不下载内容）
-curl -X POST ${apiBaseUrl}/developer/skills/remote \\
-  -H "X-API-Key: xma_xxx" \\
-  -H "Content-Type: application/json" \\
-  -d '{"name":"remote-skill","url":"https://example.com/skill.zip"}'
-
-# 替换已有 Skill 为文件夹包
-curl -X PUT ${apiBaseUrl}/developer/skills/1/artifact-directory \\
-  -H "X-API-Key: xma_xxx" \\
-  -F "files=@my-skill/SKILL.md" \\
-  -F "paths=my-skill/SKILL.md" \\
-  -F "name=my-skill" \\
-  -F "categoryId=2" \\
-  -F "description=folder skill" \\
-  -F "tags=folder" \\
-  -F "author=agent" \\
-  -F "usageMarkdown=# usage"
-
-# 更新 Skill
-curl -X PUT ${apiBaseUrl}/developer/skills/1 \\
-  -H "X-API-Key: xma_xxx" \\
-  -H "Content-Type: application/json" \\
-  -d '{"name":"updated","categoryId":2,"description":"desc","tags":"tool","author":"agent","sourceCode":"# updated","usageMarkdown":"# usage"}'
-
-# 下载 Skill
-curl -L -H "X-API-Key: xma_xxx" ${apiBaseUrl}/developer/skills/1/download -o skill.zip
-
-# 删除 Skill
-curl -X DELETE -H "X-API-Key: xma_xxx" ${apiBaseUrl}/developer/skills/1`}</pre>
+        <pre>{manifestExamples.length > 0
+          ? manifestExamples.join('\n')
+          : `list_skills: GET ${apiBaseUrl}/developer/skills\n` +
+            `upload_skill: POST multipart ${apiBaseUrl}/developer/skills/upload\n` +
+            `download_skill: GET ${apiBaseUrl}/developer/skills/{id}/download`}</pre>
       </Card>
     </div>
   );
+}
+
+function formatToolName(tool: string): string {
+  return tool.replace(/_/g, ' ');
 }
 
 function PlatformThemeBootstrap() {
