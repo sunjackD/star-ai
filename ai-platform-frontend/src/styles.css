@@ -476,7 +476,7 @@ pre {
 .agent-dashboard-alert,
 .account-key-toolbar,
 .agent-dashboard-grid,
-.playbook-readiness-card {
+.agent-workflow-readiness-card {
   margin-bottom: 18px;
 }
 
@@ -498,13 +498,13 @@ pre {
   margin-top: 16px;
 }
 
-.playbook-readiness-grid {
+.agent-workflow-readiness-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   gap: 12px;
 }
 
-.playbook-readiness-item {
+.agent-workflow-readiness-item {
   display: grid;
   gap: 10px;
   padding: 14px;
@@ -514,18 +514,18 @@ pre {
   background: rgba(255, 255, 255, 0.58);
 }
 
-.playbook-readiness-item.is-ready {
+.agent-workflow-readiness-item.is-ready {
   border-left-color: rgba(34, 197, 94, 0.76);
 }
 
-.playbook-readiness-heading {
+.agent-workflow-readiness-heading {
   display: flex;
   justify-content: space-between;
   gap: 10px;
   align-items: flex-start;
 }
 
-.playbook-readiness-scopes {
+.agent-workflow-readiness-scopes {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
@@ -687,13 +687,13 @@ pre {
   color: var(--text-soft) !important;
 }
 
-.developer-playbook-grid {
+.developer-agent-workflow-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   gap: 14px;
 }
 
-.developer-playbook-card {
+.developer-agent-workflow-card {
   display: grid;
   gap: 12px;
   padding: 14px;
@@ -702,21 +702,21 @@ pre {
   background: rgba(255, 255, 255, 0.56);
 }
 
-.developer-playbook-heading {
+.developer-agent-workflow-heading {
   display: flex;
   justify-content: space-between;
   gap: 10px;
   align-items: flex-start;
 }
 
-.developer-playbook-tools,
-.developer-playbook-footer > div > div {
+.developer-agent-workflow-tools,
+.developer-agent-workflow-footer > div > div {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
 }
 
-.developer-playbook-steps {
+.developer-agent-workflow-steps {
   display: grid;
   gap: 6px;
   margin: 0;
@@ -724,14 +724,14 @@ pre {
   color: var(--text);
 }
 
-.developer-playbook-footer {
+.developer-agent-workflow-footer {
   display: grid;
   gap: 10px;
   padding-top: 10px;
   border-top: 1px solid rgba(104, 119, 160, 0.14);
 }
 
-.developer-playbook-footer > div {
+.developer-agent-workflow-footer > div {
   display: grid;
   gap: 4px;
 }

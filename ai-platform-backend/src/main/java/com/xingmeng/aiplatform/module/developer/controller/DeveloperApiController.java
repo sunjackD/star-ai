@@ -7,13 +7,13 @@ import com.xingmeng.aiplatform.module.auth.security.AuthenticatedUser;
 import com.xingmeng.aiplatform.module.audit.service.AuditService;
 import com.xingmeng.aiplatform.module.developer.dto.ApiKeyCreateRequest;
 import com.xingmeng.aiplatform.module.developer.dto.ApiKeyResponse;
+import com.xingmeng.aiplatform.module.developer.dto.DeveloperAgentWorkflowResponse;
 import com.xingmeng.aiplatform.module.developer.dto.DeveloperDashboardResponse;
-import com.xingmeng.aiplatform.module.developer.dto.DeveloperPlaybookResponse;
 import com.xingmeng.aiplatform.module.developer.dto.DeveloperToolSpecResponse;
 import com.xingmeng.aiplatform.module.developer.dto.RemoteSkillImportRequest;
 import com.xingmeng.aiplatform.module.developer.dto.RemoteSkillRequest;
 import com.xingmeng.aiplatform.module.developer.service.ApiKeyService;
-import com.xingmeng.aiplatform.module.developer.service.DeveloperPlaybookCatalog;
+import com.xingmeng.aiplatform.module.developer.service.DeveloperAgentWorkflowCatalog;
 import com.xingmeng.aiplatform.module.skill.dto.SkillCreateRequest;
 import com.xingmeng.aiplatform.module.skill.entity.Skill;
 import com.xingmeng.aiplatform.module.skill.entity.SkillSource;
@@ -62,7 +62,7 @@ public class DeveloperApiController {
     private final SkillArtifactService skillArtifactService;
     private final AuditService auditService;
     private final RemoteUrlGuard remoteUrlGuard;
-    private final DeveloperPlaybookCatalog playbookCatalog;
+    private final DeveloperAgentWorkflowCatalog agentWorkflowCatalog;
 
     public DeveloperApiController(
             ApiKeyService apiKeyService,
@@ -72,7 +72,7 @@ public class DeveloperApiController {
             SkillArtifactService skillArtifactService,
             AuditService auditService,
             RemoteUrlGuard remoteUrlGuard,
-            DeveloperPlaybookCatalog playbookCatalog
+            DeveloperAgentWorkflowCatalog agentWorkflowCatalog
     ) {
         this.apiKeyService = apiKeyService;
         this.skillRepository = skillRepository;
@@ -81,7 +81,7 @@ public class DeveloperApiController {
         this.skillArtifactService = skillArtifactService;
         this.auditService = auditService;
         this.remoteUrlGuard = remoteUrlGuard;
-        this.playbookCatalog = playbookCatalog;
+        this.agentWorkflowCatalog = agentWorkflowCatalog;
     }
 
     @GetMapping("/api-keys")
@@ -173,9 +173,9 @@ public class DeveloperApiController {
         ));
     }
 
-    @GetMapping("/playbooks")
-    public ApiResponse<List<DeveloperPlaybookResponse>> playbooks() {
-        return ApiResponse.success(playbookCatalog.list());
+    @GetMapping("/agent-workflows")
+    public ApiResponse<List<DeveloperAgentWorkflowResponse>> agentWorkflows() {
+        return ApiResponse.success(agentWorkflowCatalog.list());
     }
 
     @GetMapping("/skill-categories")

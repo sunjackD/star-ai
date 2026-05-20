@@ -2,7 +2,7 @@ package com.xingmeng.aiplatform.module.developer.dto;
 
 import java.util.List;
 
-public record DeveloperPlaybookResponse(
+public record DeveloperAgentWorkflowResponse(
         String key,
         String title,
         String trigger,

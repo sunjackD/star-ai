@@ -2,7 +2,7 @@ package com.xingmeng.aiplatform.module.developer.dto;
 
 import java.util.List;
 
-public record DeveloperPlaybookReadinessResponse(
+public record DeveloperAgentWorkflowReadinessResponse(
         String key,
         String title,
         String risk,

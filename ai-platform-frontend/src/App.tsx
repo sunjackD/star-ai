@@ -37,8 +37,8 @@ import type {
   ArticleLink,
   ArticleSummary,
   AuthResponse,
+  DeveloperAgentWorkflow,
   DeveloperDashboard,
-  DeveloperPlaybook,
   DeveloperSkillManifest,
   DeveloperToolSpec,
   FinetuneJob,
@@ -1053,8 +1053,8 @@ function ApiKeysPage() {
     .map((item) => item.value);
   const requiredScopes = dashboard?.requiredScopes ?? defaultRequiredScopes;
   const missingScopes = dashboard?.missingRequiredScopes ?? requiredScopes;
-  const playbookReadiness = dashboard?.playbookReadiness ?? [];
-  const readyPlaybooks = playbookReadiness.filter((item) => item.ready).length;
+  const agentWorkflowReadiness = dashboard?.agentWorkflowReadiness ?? [];
+  const readyAgentWorkflows = agentWorkflowReadiness.filter((item) => item.ready).length;
   const scopeCoverage = Math.round(
     ((requiredScopes.length - missingScopes.length) / Math.max(requiredScopes.length, 1)) * 100
   );
@@ -1091,7 +1091,7 @@ function ApiKeysPage() {
         </Card>
         <Card className="agent-health-card">
           <Statistic title="权限覆盖" value={scopeCoverage} suffix="%" prefix={<ShieldCheck size={18} />} />
-          <Text type="secondary">剧本可运行 {readyPlaybooks}/{playbookReadiness.length || '-'}</Text>
+          <Text type="secondary">工作流可运行 {readyAgentWorkflows}/{agentWorkflowReadiness.length || '-'}</Text>
         </Card>
       </div>
 
@@ -1139,36 +1139,36 @@ function ApiKeysPage() {
         </Card>
       </div>
 
-      {playbookReadiness.length > 0 && (
-        <Card title="Agent 运行剧本准备度" className="playbook-readiness-card">
-          <div className="playbook-readiness-grid">
-            {playbookReadiness.map((playbook) => (
+      {agentWorkflowReadiness.length > 0 && (
+        <Card title="Agent 工作流准备度" className="agent-workflow-readiness-card">
+          <div className="agent-workflow-readiness-grid">
+            {agentWorkflowReadiness.map((workflow) => (
               <section
-                key={playbook.key}
-                className={`playbook-readiness-item ${playbook.ready ? 'is-ready' : 'is-blocked'}`}
+                key={workflow.key}
+                className={`agent-workflow-readiness-item ${workflow.ready ? 'is-ready' : 'is-blocked'}`}
               >
-                <div className="playbook-readiness-heading">
+                <div className="agent-workflow-readiness-heading">
                   <Space direction="vertical" size={2}>
-                    <Text strong>{playbook.title}</Text>
-                    <Text type="secondary">{playbook.key}</Text>
+                    <Text strong>{workflow.title}</Text>
+                    <Text type="secondary">{workflow.key}</Text>
                   </Space>
                   <Space size={4} wrap>
-                    <Tag color={playbook.ready ? 'green' : 'orange'} icon={
-                      playbook.ready ? <CheckCircle2 size={12} /> : <AlertTriangle size={12} />
+                    <Tag color={workflow.ready ? 'green' : 'orange'} icon={
+                      workflow.ready ? <CheckCircle2 size={12} /> : <AlertTriangle size={12} />
                     }>
-                      {playbook.ready ? 'Ready' : '缺权限'}
+                      {workflow.ready ? 'Ready' : '缺权限'}
                     </Tag>
-                    <Tag color={riskTagColor(playbook.risk)}>{playbook.risk}</Tag>
+                    <Tag color={riskTagColor(workflow.risk)}>{workflow.risk}</Tag>
                   </Space>
                 </div>
-                <div className="playbook-readiness-scopes">
-                  {playbook.requiredScopes.map((scope) => {
-                    const missing = playbook.missingScopes.includes(scope);
+                <div className="agent-workflow-readiness-scopes">
+                  {workflow.requiredScopes.map((scope) => {
+                    const missing = workflow.missingScopes.includes(scope);
                     return <Tag key={scope} color={missing ? 'orange' : 'green'}>{scope}</Tag>;
                   })}
                 </div>
-                {playbook.missingScopes.length > 0 ? (
-                  <Text type="secondary">补齐 {playbook.missingScopes.join(', ')} 后可执行</Text>
+                {workflow.missingScopes.length > 0 ? (
+                  <Text type="secondary">补齐 {workflow.missingScopes.join(', ')} 后可执行</Text>
                 ) : (
                   <Text type="secondary">当前有效 Key 已覆盖运行所需 scope</Text>
                 )}
@@ -1269,9 +1269,9 @@ function DeveloperPage() {
     queryKey: ['developer-skill-manifest'],
     queryFn: () => getPublicData<DeveloperSkillManifest>('/developer/skill-manifest')
   });
-  const { data: playbooks = [] } = useQuery({
-    queryKey: ['developer-playbooks'],
-    queryFn: () => getPublicData<DeveloperPlaybook[]>('/developer/playbooks')
+  const { data: agentWorkflows = [] } = useQuery({
+    queryKey: ['developer-agent-workflows'],
+    queryFn: () => getPublicData<DeveloperAgentWorkflow[]>('/developer/agent-workflows')
   });
   const tools = manifest?.tools ?? DEFAULT_DEVELOPER_TOOLS;
   const manifestRequiredScopes = manifest?.requiredScopes
@@ -1347,37 +1347,37 @@ ${selfSkillUrl}
         />
       </Card>
 
-      <Card title="Agent 运行剧本" className="developer-section-card">
-        <div className="developer-playbook-grid">
-          {playbooks.map((playbook) => (
-            <section key={playbook.key} className="developer-playbook-card">
-              <div className="developer-playbook-heading">
+      <Card title="Agent 工作流" className="developer-section-card">
+        <div className="developer-agent-workflow-grid">
+          {agentWorkflows.map((workflow) => (
+            <section key={workflow.key} className="developer-agent-workflow-card">
+              <div className="developer-agent-workflow-heading">
                 <Space direction="vertical" size={2}>
-                  <Text strong>{playbook.title}</Text>
-                  <Text type="secondary">{playbook.trigger}</Text>
+                  <Text strong>{workflow.title}</Text>
+                  <Text type="secondary">{workflow.trigger}</Text>
                 </Space>
-                <Tag color={riskTagColor(playbook.risk)}>{playbook.risk}</Tag>
+                <Tag color={riskTagColor(workflow.risk)}>{workflow.risk}</Tag>
               </div>
-              <div className="developer-playbook-tools">
-                {playbook.tools.map((tool) => <Tag key={tool}>{formatToolName(tool)}</Tag>)}
+              <div className="developer-agent-workflow-tools">
+                {workflow.tools.map((tool) => <Tag key={tool}>{formatToolName(tool)}</Tag>)}
               </div>
-              <ol className="developer-playbook-steps">
-                {playbook.steps.map((step) => <li key={step}>{step}</li>)}
+              <ol className="developer-agent-workflow-steps">
+                {workflow.steps.map((step) => <li key={step}>{step}</li>)}
               </ol>
-              <div className="developer-playbook-footer">
+              <div className="developer-agent-workflow-footer">
                 <div>
                   <Text type="secondary">Scopes</Text>
                   <div>
-                    {playbook.requiredScopes.map((scope) => <Tag key={scope}>{scope}</Tag>)}
+                    {workflow.requiredScopes.map((scope) => <Tag key={scope}>{scope}</Tag>)}
                   </div>
                 </div>
                 <div>
                   <Text type="secondary">Gate</Text>
-                  <Text>{playbook.riskGate}</Text>
+                  <Text>{workflow.riskGate}</Text>
                 </div>
                 <div>
                   <Text type="secondary">Verify</Text>
-                  <Text>{playbook.verification}</Text>
+                  <Text>{workflow.verification}</Text>
                 </div>
               </div>
             </section>

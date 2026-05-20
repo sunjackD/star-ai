@@ -8,9 +8,9 @@ import com.xingmeng.aiplatform.module.auth.security.ApiKeyAuthenticationDetails;
 import com.xingmeng.aiplatform.module.auth.security.AuthenticatedUser;
 import com.xingmeng.aiplatform.module.developer.dto.ApiKeyCreateRequest;
 import com.xingmeng.aiplatform.module.developer.dto.ApiKeyResponse;
+import com.xingmeng.aiplatform.module.developer.dto.DeveloperAgentWorkflowReadinessResponse;
 import com.xingmeng.aiplatform.module.developer.dto.DeveloperAuditEventResponse;
 import com.xingmeng.aiplatform.module.developer.dto.DeveloperDashboardResponse;
-import com.xingmeng.aiplatform.module.developer.dto.DeveloperPlaybookReadinessResponse;
 import com.xingmeng.aiplatform.module.developer.entity.ApiKey;
 import com.xingmeng.aiplatform.module.developer.repository.ApiKeyRepository;
 import com.xingmeng.aiplatform.module.user.entity.User;
@@ -46,19 +46,19 @@ public class ApiKeyService {
     private final ApiKeyRepository apiKeyRepository;
     private final UserRepository userRepository;
     private final AuditLogRepository auditLogRepository;
-    private final DeveloperPlaybookCatalog playbookCatalog;
+    private final DeveloperAgentWorkflowCatalog agentWorkflowCatalog;
     private final SecureRandom secureRandom = new SecureRandom();
 
     public ApiKeyService(
             ApiKeyRepository apiKeyRepository,
             UserRepository userRepository,
             AuditLogRepository auditLogRepository,
-            DeveloperPlaybookCatalog playbookCatalog
+            DeveloperAgentWorkflowCatalog agentWorkflowCatalog
     ) {
         this.apiKeyRepository = apiKeyRepository;
         this.userRepository = userRepository;
         this.auditLogRepository = auditLogRepository;
-        this.playbookCatalog = playbookCatalog;
+        this.agentWorkflowCatalog = agentWorkflowCatalog;
     }
 
     public List<ApiKeyResponse> list(AuthenticatedUser principal) {
@@ -132,6 +132,7 @@ public class ApiKeyService {
                 .filter(key -> key.getLastUsedAt() != null)
                 .filter(key -> !key.getLastUsedAt().isBefore(recentThreshold))
                 .count();
+        List<DeveloperAgentWorkflowReadinessResponse> agentWorkflowReadiness = agentWorkflowReadiness(activeScopes);
 
         return new DeveloperDashboardResponse(
                 keys.size(),
@@ -142,22 +143,22 @@ public class ApiKeyService {
                 recentlyUsedKeys,
                 REQUIRED_AGENT_SCOPES,
                 missingScopes,
-                playbookReadiness(activeScopes),
+                agentWorkflowReadiness,
                 recentEvents(user.getUsername())
         );
     }
 
-    private List<DeveloperPlaybookReadinessResponse> playbookReadiness(Set<String> activeScopes) {
-        return playbookCatalog.list().stream()
-                .map(playbook -> {
-                    List<String> missingScopes = playbook.requiredScopes().stream()
+    private List<DeveloperAgentWorkflowReadinessResponse> agentWorkflowReadiness(Set<String> activeScopes) {
+        return agentWorkflowCatalog.list().stream()
+                .map(workflow -> {
+                    List<String> missingScopes = workflow.requiredScopes().stream()
                             .filter(scope -> !activeScopes.contains(scope))
                             .toList();
-                    return new DeveloperPlaybookReadinessResponse(
-                            playbook.key(),
-                            playbook.title(),
-                            playbook.risk(),
-                            playbook.requiredScopes(),
+                    return new DeveloperAgentWorkflowReadinessResponse(
+                            workflow.key(),
+                            workflow.title(),
+                            workflow.risk(),
+                            workflow.requiredScopes(),
                             missingScopes,
                             missingScopes.isEmpty()
                     );

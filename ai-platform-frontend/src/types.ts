@@ -192,7 +192,7 @@ export type DeveloperToolSpec = {
   description: string;
 };
 
-export type DeveloperPlaybook = {
+export type DeveloperAgentWorkflow = {
   key: string;
   title: string;
   trigger: string;
@@ -204,7 +204,7 @@ export type DeveloperPlaybook = {
   verification: string;
 };
 
-export type DeveloperPlaybookReadiness = {
+export type DeveloperAgentWorkflowReadiness = {
   key: string;
   title: string;
   risk: string;
@@ -248,7 +248,7 @@ export type DeveloperDashboard = {
   recentlyUsedKeys: number;
   requiredScopes: string[];
   missingRequiredScopes: string[];
-  playbookReadiness: DeveloperPlaybookReadiness[];
+  agentWorkflowReadiness: DeveloperAgentWorkflowReadiness[];
   recentEvents: DeveloperAuditEvent[];
 };
 

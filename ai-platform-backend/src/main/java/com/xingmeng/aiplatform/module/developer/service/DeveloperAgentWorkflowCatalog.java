@@ -1,15 +1,15 @@
 package com.xingmeng.aiplatform.module.developer.service;
 
-import com.xingmeng.aiplatform.module.developer.dto.DeveloperPlaybookResponse;
+import com.xingmeng.aiplatform.module.developer.dto.DeveloperAgentWorkflowResponse;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
-public class DeveloperPlaybookCatalog {
-    public List<DeveloperPlaybookResponse> list() {
+public class DeveloperAgentWorkflowCatalog {
+    public List<DeveloperAgentWorkflowResponse> list() {
         return List.of(
-                new DeveloperPlaybookResponse(
+                new DeveloperAgentWorkflowResponse(
                         "discover_skill_inventory",
                         "发现现有 Skill 资产",
                         "Agent 接到新增、替换或复用任务前",
@@ -20,7 +20,7 @@ public class DeveloperPlaybookCatalog {
                         "无需人工确认",
                         "返回分类列表和候选 Skill 清单"
                 ),
-                new DeveloperPlaybookResponse(
+                new DeveloperAgentWorkflowResponse(
                         "import_remote_skill_safely",
                         "安全导入远程 Skill",
                         "用户提供 HTTPS Skill 地址或 zip 包地址",
@@ -31,7 +31,7 @@ public class DeveloperPlaybookCatalog {
                         "仅允许 HTTPS，服务端执行 SSRF 与文件安全校验",
                         "确认新 Skill 出现在列表中"
                 ),
-                new DeveloperPlaybookResponse(
+                new DeveloperAgentWorkflowResponse(
                         "replace_skill_with_review",
                         "评审后替换 Skill 包",
                         "用户要求迭代已有 Skill 文件或目录",
@@ -42,7 +42,7 @@ public class DeveloperPlaybookCatalog {
                         "替换前确认目标 Skill ID 与名称",
                         "下载替换结果并核对文件名和大小"
                 ),
-                new DeveloperPlaybookResponse(
+                new DeveloperAgentWorkflowResponse(
                         "retire_skill_with_gate",
                         "下线废弃 Skill",
                         "用户明确要求删除或下线某个 Skill",
@@ -53,7 +53,7 @@ public class DeveloperPlaybookCatalog {
                         "执行 delete_skill 前必须获得明确确认",
                         "确认列表不再返回该 Skill"
                 ),
-                new DeveloperPlaybookResponse(
+                new DeveloperAgentWorkflowResponse(
                         "download_and_reuse_skill",
                         "下载复用 Skill 包",
                         "用户要求复用或迁移已有 Skill",
