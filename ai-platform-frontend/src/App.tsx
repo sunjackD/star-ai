@@ -551,10 +551,18 @@ function SkillsPage() {
   const { data = [] } = useQuery({ queryKey: ['skills'], queryFn: () => getData<Skill[]>('/skills') });
   const { data: categories = [] } = useQuery({ queryKey: ['skill-categories'], queryFn: () => getData<SkillCategory[]>('/skills/categories') });
   const [keyword, setKeyword] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState('all');
+  const [artifactFilter, setArtifactFilter] = useState('all');
   const rows = data.filter((row) => {
     const text = `${row.name} ${row.description} ${row.tags} ${row.category.name}`.toLowerCase();
-    return text.includes(keyword.toLowerCase());
-  });
+    const matchesKeyword = text.includes(keyword.toLowerCase());
+    const matchesCategory = categoryFilter === 'all' || String(row.category.id) === categoryFilter;
+    const matchesArtifact = artifactFilter === 'all' || row.artifactType === artifactFilter;
+    return matchesKeyword && matchesCategory && matchesArtifact;
+  }).sort((left, right) => right.downloadCount - left.downloadCount);
+  const totalDownloads = data.reduce((sum, skill) => sum + skill.downloadCount, 0);
+  const totalStars = data.reduce((sum, skill) => sum + skill.starCount, 0);
+  const fileSkills = data.filter((skill) => skill.artifactType === 'FILE').length;
 
   function requireLogin(action: () => void) {
     if (!token) {
@@ -566,32 +574,72 @@ function SkillsPage() {
 
   return (
     <div className="page">
-      <div className="market-header">
-        <PageTitle title="Skills 市场" description="上传、下载和复用团队沉淀的 Skills，登录后可获取完整 Skill 包。" />
-        <MarketSkillUploadButton
-          categories={categories}
-          onUploaded={() => queryClient.invalidateQueries({ queryKey: ['skills'] })}
-          requireLogin={requireLogin}
+      <section className="skill-registry-header">
+        <div>
+          <Tag color="processing" icon={<Boxes size={14} />}>Skill Registry</Tag>
+          <Title level={1}>Skill Registry</Title>
+          <Paragraph>
+            管理团队可复用 Skill 资产，按分类、包类型、下载热度和标签定位可直接交给 Agent 使用的能力包。
+          </Paragraph>
+          <MarketSkillUploadButton
+            categories={categories}
+            onUploaded={() => queryClient.invalidateQueries({ queryKey: ['skills'] })}
+            requireLogin={requireLogin}
+          />
+        </div>
+        <div className="skill-registry-metrics">
+          <Statistic title="Skills" value={data.length} />
+          <Statistic title="文件包" value={fileSkills} />
+          <Statistic title="下载" value={totalDownloads} />
+          <Statistic title="收藏" value={totalStars} />
+        </div>
+      </section>
+
+      <div className="skill-registry-toolbar">
+        <Input.Search
+          className="skill-registry-search"
+          placeholder="搜索名称、描述、标签或分类"
+          allowClear
+          onChange={(event) => setKeyword(event.target.value)}
+        />
+        <Select
+          value={categoryFilter}
+          onChange={setCategoryFilter}
+          options={[
+            { value: 'all', label: '全部分类' },
+            ...categories.map((item) => ({ value: String(item.id), label: item.name }))
+          ]}
+        />
+        <Select
+          value={artifactFilter}
+          onChange={setArtifactFilter}
+          options={[
+            { value: 'all', label: '全部包类型' },
+            { value: 'TEXT', label: '文本 Skill' },
+            { value: 'FILE', label: '文件包 Skill' }
+          ]}
         />
       </div>
-      <Input.Search
-        className="search-input"
-        placeholder="搜索名称、描述、标签或分类"
-        allowClear
-        onChange={(event) => setKeyword(event.target.value)}
-      />
-      <div className="card-grid">
+
+      <div className="skill-registry-grid">
         {rows.map((row) => (
-          <Card hoverable className="resource-card" key={row.id}>
-            <Tag>{row.category.name}</Tag>
+          <section className="skill-registry-card" key={row.id}>
+            <div className="skill-registry-card-heading">
+              <Tag>{row.category.name}</Tag>
+              <Tag color={row.artifactType === 'FILE' ? 'blue' : 'default'}>{skillArtifactLabel(row)}</Tag>
+            </div>
             <Title level={4}>{row.name}</Title>
             <Paragraph>{row.description}</Paragraph>
-            <Space wrap>
-              <Text type="secondary">下载量：{row.downloadCount}</Text>
-              <Tag color={row.artifactType === 'FILE' ? 'blue' : 'default'}>{skillArtifactLabel(row)}</Tag>
-            </Space>
-            <div className="resource-actions">
-              <Link to={`/skills/${row.id}`}><Button size="small">详情</Button></Link>
+            <div className="skill-registry-tags">
+              {row.tags.split(',').map((tag) => <Tag key={tag.trim()}>{tag.trim()}</Tag>)}
+            </div>
+            <div className="skill-registry-card-stats">
+              <span><Download size={14} /> {row.downloadCount}</span>
+              <span><CheckCircle2 size={14} /> {row.starCount}</span>
+              <span>{formatFileSize(row.artifactSize)}</span>
+            </div>
+            <Space wrap className="skill-registry-actions">
+              <Link to={`/skills/${row.id}`}><Button size="small" type="primary">资产详情</Button></Link>
               <Button
                 size="small"
                 icon={<Download size={14} />}
@@ -599,8 +647,8 @@ function SkillsPage() {
               >
                 下载
               </Button>
-            </div>
-          </Card>
+            </Space>
+          </section>
         ))}
       </div>
     </div>
@@ -636,6 +684,19 @@ function SkillDetailPage() {
 
 function skillDownloadName(skill: Skill): string {
   return skill.artifactFileName ?? `${skill.name}.skill.md`;
+}
+
+function formatFileSize(size?: number): string {
+  if (!size || size <= 0) {
+    return '未记录大小';
+  }
+  if (size < 1024) {
+    return `${size} B`;
+  }
+  if (size < 1024 * 1024) {
+    return `${(size / 1024).toFixed(1)} KB`;
+  }
+  return `${(size / 1024 / 1024).toFixed(1)} MB`;
 }
 
 function skillArtifactLabel(skill: Skill): string {
