@@ -482,6 +482,109 @@ html[data-theme='minimal-modern'] .app-sider .ant-menu-submenu-title {
   gap: 18px;
 }
 
+.agent-fleet-header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 0.72fr);
+  gap: 18px;
+  align-items: stretch;
+  margin-bottom: 18px;
+}
+
+.agent-fleet-header > div:first-child {
+  padding: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.74);
+  border-radius: var(--radius-lg);
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.86), rgba(248, 250, 255, 0.62)),
+    linear-gradient(112deg, rgba(79, 108, 255, 0.12), transparent 42%, rgba(6, 182, 212, 0.10));
+  box-shadow: var(--glow);
+}
+
+.agent-fleet-header h1 {
+  margin: 12px 0 10px !important;
+  font-family: var(--display-font);
+  font-weight: 800;
+  letter-spacing: 0;
+}
+
+.agent-fleet-metrics {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.agent-fleet-metrics .ant-statistic {
+  min-height: 112px;
+  display: grid;
+  align-content: center;
+  padding: 16px;
+  border: 1px solid rgba(104, 119, 160, 0.16);
+  border-radius: var(--radius);
+  background: rgba(255, 255, 255, 0.66);
+  box-shadow: var(--shadow-soft);
+}
+
+.agent-fleet-toolbar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 220px;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.agent-fleet-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 14px;
+}
+
+.agent-fleet-card {
+  min-height: 250px;
+  display: grid;
+  grid-template-rows: auto auto 1fr auto auto;
+  gap: 10px;
+  padding: 18px;
+  border: 1px solid rgba(104, 119, 160, 0.16);
+  border-radius: var(--radius);
+  background: rgba(255, 255, 255, 0.66);
+  box-shadow: var(--shadow-soft);
+  transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+}
+
+.agent-fleet-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(79, 108, 255, 0.30);
+  box-shadow: 0 24px 64px rgba(45, 60, 110, 0.12);
+}
+
+.agent-fleet-card-heading,
+.agent-fleet-card-stats {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  align-items: center;
+}
+
+.agent-fleet-card h4 {
+  margin: 0 !important;
+}
+
+.agent-fleet-card p {
+  margin: 0;
+  color: var(--text-soft);
+  line-height: 1.7;
+}
+
+.agent-fleet-card-stats {
+  justify-content: flex-start;
+  color: var(--text-soft);
+}
+
+.agent-fleet-card-stats span {
+  display: inline-flex;
+  gap: 4px;
+  align-items: center;
+}
+
 .resource-actions,
 .detail-actions {
   margin-top: auto;
@@ -1226,6 +1329,8 @@ pre {
   .content-grid,
   .settings-grid,
   .agent-control-panel,
+  .agent-fleet-header,
+  .agent-fleet-toolbar,
   .agent-health-grid,
   .agent-dashboard-grid,
   .developer-grid,
@@ -1240,6 +1345,7 @@ pre {
     padding: 24px;
   }
 
+  .agent-fleet-metrics,
   .console-kpi-strip {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }

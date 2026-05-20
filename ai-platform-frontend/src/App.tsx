@@ -461,7 +461,80 @@ function AccountProfilePage() {
 
 function AgentsPage() {
   const { data = [] } = useQuery({ queryKey: ['agents'], queryFn: () => getData<Agent[]>('/agents') });
-  return <ResourceList title="AI Agents" description="集中展示常用 AI Agent、IDE 和自动化助手，登录后可查看完整配置指南。" rows={data} detailBase="/agents" tagKey="category" metricKey="viewCount" />;
+  const [keyword, setKeyword] = useState('');
+  const [category, setCategory] = useState('all');
+  const categories = Array.from(new Set(data.map((agent) => agent.category))).sort();
+  const filteredAgents = data.filter((agent) => {
+    const matchesKeyword = `${agent.name} ${agent.category} ${agent.description}`.toLowerCase()
+      .includes(keyword.toLowerCase());
+    const matchesCategory = category === 'all' || agent.category === category;
+    return matchesKeyword && matchesCategory;
+  });
+  const totalViews = data.reduce((sum, agent) => sum + agent.viewCount, 0);
+  const totalLikes = data.reduce((sum, agent) => sum + agent.likeCount, 0);
+
+  return (
+    <div className="page">
+      <section className="agent-fleet-header">
+        <div>
+          <Tag color="processing" icon={<Bot size={14} />}>Agent Fleet</Tag>
+          <Title level={1}>Agent Fleet</Title>
+          <Paragraph>
+            统一管理团队正在评估和使用的 AI Agent、IDE Agent 与自动化助手，按类型、热度和接入说明快速定位。
+          </Paragraph>
+        </div>
+        <div className="agent-fleet-metrics">
+          <Statistic title="Agents" value={data.length} />
+          <Statistic title="分类" value={categories.length} />
+          <Statistic title="浏览" value={totalViews} />
+          <Statistic title="点赞" value={totalLikes} />
+        </div>
+      </section>
+
+      <div className="agent-fleet-toolbar">
+        <Input.Search
+          className="agent-fleet-search"
+          placeholder="搜索 Agent、分类或能力描述"
+          allowClear
+          onChange={(event) => setKeyword(event.target.value)}
+        />
+        <Select
+          className="agent-fleet-filter"
+          value={category}
+          onChange={setCategory}
+          options={[
+            { value: 'all', label: '全部分类' },
+            ...categories.map((item) => ({ value: item, label: item }))
+          ]}
+        />
+      </div>
+
+      <div className="agent-fleet-grid">
+        {filteredAgents.map((agent) => (
+          <section key={agent.id} className="agent-fleet-card">
+            <div className="agent-fleet-card-heading">
+              <Tag color="blue">{agent.category}</Tag>
+              <Tag>{agent.status}</Tag>
+            </div>
+            <Title level={4}>{agent.name}</Title>
+            <Paragraph>{agent.description}</Paragraph>
+            <div className="agent-fleet-card-stats">
+              <span><Activity size={14} /> {agent.viewCount}</span>
+              <span><CheckCircle2 size={14} /> {agent.likeCount}</span>
+            </div>
+            <Space wrap>
+              <Link to={`/agents/${agent.id}`}><Button size="small" type="primary">配置指南</Button></Link>
+              {agent.officialUrl && (
+                <Button size="small" icon={<ExternalLink size={14} />} href={agent.officialUrl} target="_blank">
+                  官方入口
+                </Button>
+              )}
+            </Space>
+          </section>
+        ))}
+      </div>
+    </div>
+  );
 }
 
 function AgentDetailPage() {
