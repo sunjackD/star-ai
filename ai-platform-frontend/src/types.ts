@@ -183,6 +183,15 @@ export type ApiKey = {
   lastUsedAt?: string;
 };
 
+export type DeveloperToolSpec = {
+  name: string;
+  method: string;
+  path: string;
+  scope: string;
+  risk: string;
+  description: string;
+};
+
 export type DeveloperSkillManifest = {
   name: string;
   description: string;
@@ -190,6 +199,7 @@ export type DeveloperSkillManifest = {
     headers: string[];
   };
   tools: string[];
+  toolSpecs?: DeveloperToolSpec[];
   examples: string[];
   installPrompt: string;
 };

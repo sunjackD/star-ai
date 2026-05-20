@@ -39,6 +39,7 @@ import type {
   AuthResponse,
   DeveloperDashboard,
   DeveloperSkillManifest,
+  DeveloperToolSpec,
   FinetuneJob,
   PlatformConfig,
   RedirectLink,
@@ -1227,6 +1228,16 @@ function DeveloperPage() {
     queryFn: () => getPublicData<DeveloperSkillManifest>('/developer/skill-manifest')
   });
   const tools = manifest?.tools ?? DEFAULT_DEVELOPER_TOOLS;
+  const toolSpecs = manifest?.toolSpecs?.length
+    ? manifest.toolSpecs
+    : tools.map((tool) => ({
+      name: tool,
+      method: '-',
+      path: '-',
+      scope: findDeveloperToolScope(tool),
+      risk: 'unknown',
+      description: formatToolName(tool)
+    }));
   const authHeaders = manifest?.auth?.headers ?? ['X-API-Key', 'Authorization: Bearer xma_xxx'];
   const manifestExamples = manifest?.examples ?? [];
   const toolGroups = DEVELOPER_TOOL_GROUPS.map((group) => ({
@@ -1266,7 +1277,7 @@ ${selfSkillUrl}
           </Space>
         </div>
         <div className="developer-manifest-meta">
-          <Statistic title="Tools" value={tools.length} />
+          <Statistic title="Tools" value={toolSpecs.length} />
           <Statistic title="Scopes" value={API_KEY_SCOPE_OPTIONS.filter((item) => item.value.startsWith('skills:')).length} />
           <Statistic title="Auth" value={authHeaders.length} />
         </div>
@@ -1318,6 +1329,52 @@ ${selfSkillUrl}
               </section>
             ))}
           </div>
+          <Table<DeveloperToolSpec>
+            className="developer-tool-spec-table"
+            rowKey="name"
+            dataSource={toolSpecs}
+            pagination={false}
+            size="small"
+            scroll={{ x: 720 }}
+            columns={[
+              {
+                title: 'Tool',
+                dataIndex: 'name',
+                render: (_, record) => (
+                  <Space direction="vertical" size={0}>
+                    <Text strong>{formatToolName(record.name)}</Text>
+                    <Text type="secondary">{record.description}</Text>
+                  </Space>
+                )
+              },
+              {
+                title: 'Method',
+                dataIndex: 'method',
+                width: 90,
+                render: (method: string) => <Tag color={methodTagColor(method)}>{method}</Tag>
+              },
+              {
+                title: 'Path',
+                dataIndex: 'path',
+                render: (path: string) => <Text code className="developer-tool-path">{path}</Text>
+              },
+              {
+                title: 'Scope',
+                dataIndex: 'scope',
+                render: (scope: string) => (
+                  <Space size={[4, 4]} wrap>
+                    {scope.split(',').map((item) => <Tag key={item}>{item.trim()}</Tag>)}
+                  </Space>
+                )
+              },
+              {
+                title: 'Risk',
+                dataIndex: 'risk',
+                width: 110,
+                render: (risk: string) => <Tag color={riskTagColor(risk)}>{risk}</Tag>
+              }
+            ]}
+          />
         </Card>
         <Card title="最小权限">
           <Table
@@ -1338,7 +1395,8 @@ ${selfSkillUrl}
           endpoint: '/api/v1/developer/skill-manifest',
           name: manifest?.name ?? 'ai-platform-manager',
           auth: authHeaders,
-          tools
+          tools,
+          toolSpecs
         }, null, 2)}</pre>
       </Card>
       <Card title="Developer API 示例" className="markdown-card">
@@ -1354,6 +1412,36 @@ ${selfSkillUrl}
 
 function formatToolName(tool: string): string {
   return tool.replace(/_/g, ' ');
+}
+
+function findDeveloperToolScope(tool: string): string {
+  return DEVELOPER_TOOL_GROUPS.find((group) => group.tools.includes(tool))?.scope ?? 'unknown';
+}
+
+function methodTagColor(method: string): string {
+  if (method === 'GET') {
+    return 'blue';
+  }
+  if (method === 'DELETE') {
+    return 'red';
+  }
+  if (method === 'POST' || method === 'PUT') {
+    return 'gold';
+  }
+  return 'default';
+}
+
+function riskTagColor(risk: string): string {
+  if (risk === 'destructive') {
+    return 'red';
+  }
+  if (risk === 'write') {
+    return 'gold';
+  }
+  if (risk === 'read') {
+    return 'blue';
+  }
+  return 'default';
 }
 
 function PlatformThemeBootstrap() {

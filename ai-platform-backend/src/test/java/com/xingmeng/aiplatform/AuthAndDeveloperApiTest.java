@@ -90,6 +90,25 @@ class AuthAndDeveloperApiTest {
     }
 
     @Test
+    void developerSkillManifestExposesStructuredToolSpecs() throws Exception {
+        mockMvc.perform(get("/api/v1/developer/skill-manifest"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath(
+                        "$.data.toolSpecs[?(@.name == 'list_skills' && @.scope == 'skills:read')]"
+                ).isNotEmpty())
+                .andExpect(jsonPath(
+                        "$.data.toolSpecs[?(@.name == 'import_skill' && @.method == 'POST')]"
+                ).isNotEmpty())
+                .andExpect(jsonPath(
+                        "$.data.toolSpecs[?(@.name == 'delete_skill' && @.risk == 'destructive')]"
+                ).isNotEmpty())
+                .andExpect(jsonPath(
+                        "$.data.toolSpecs[?(@.name == 'download_skill' "
+                                + "&& @.path == '/api/v1/developer/skills/{id}/download')]"
+                ).isNotEmpty());
+    }
+
+    @Test
     void apiKeyScopeIsRequiredForDeveloperOperations() throws Exception {
         String adminToken = createAdminAndLogin("admin_limited", "admin-limited@example.com");
         createUser(adminToken, "limited_user", "limited@example.com", "Limited", "DEVELOPER");

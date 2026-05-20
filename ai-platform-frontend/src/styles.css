@@ -685,6 +685,15 @@ pre {
   margin-bottom: 10px;
 }
 
+.developer-tool-spec-table {
+  margin-top: 16px;
+}
+
+.developer-tool-path {
+  white-space: normal;
+  word-break: break-all;
+}
+
 .prompt-copy {
   white-space: pre-wrap;
   margin-bottom: 0 !important;

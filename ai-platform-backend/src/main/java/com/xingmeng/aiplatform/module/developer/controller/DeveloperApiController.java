@@ -8,6 +8,7 @@ import com.xingmeng.aiplatform.module.audit.service.AuditService;
 import com.xingmeng.aiplatform.module.developer.dto.ApiKeyCreateRequest;
 import com.xingmeng.aiplatform.module.developer.dto.ApiKeyResponse;
 import com.xingmeng.aiplatform.module.developer.dto.DeveloperDashboardResponse;
+import com.xingmeng.aiplatform.module.developer.dto.DeveloperToolSpecResponse;
 import com.xingmeng.aiplatform.module.developer.dto.RemoteSkillImportRequest;
 import com.xingmeng.aiplatform.module.developer.dto.RemoteSkillRequest;
 import com.xingmeng.aiplatform.module.developer.service.ApiKeyService;
@@ -133,6 +134,7 @@ public class DeveloperApiController {
                         "delete_skill",
                         "download_skill"
                 ),
+                "toolSpecs", toolSpecs(),
                 "examples", List.of(
                         "list_skills: GET /api/v1/developer/skills",
                         "get_skill_categories: GET /api/v1/developer/skill-categories",
@@ -397,5 +399,57 @@ public class DeveloperApiController {
     private void requireImportAndWrite(Authentication authentication) {
         apiKeyService.requireScope(authentication, "skills:import");
         apiKeyService.requireScope(authentication, "skills:write");
+    }
+
+    private List<DeveloperToolSpecResponse> toolSpecs() {
+        return List.of(
+                new DeveloperToolSpecResponse(
+                        "list_skills", "GET", "/api/v1/developer/skills", "skills:read", "read", "查询平台 Skills"
+                ),
+                new DeveloperToolSpecResponse(
+                        "get_skill_categories", "GET", "/api/v1/developer/skill-categories",
+                        "skills:read", "read", "查询 Skill 分类"
+                ),
+                new DeveloperToolSpecResponse(
+                        "import_skill", "POST", "/api/v1/developer/skills/import",
+                        "skills:import", "write", "导入文本 Skill"
+                ),
+                new DeveloperToolSpecResponse(
+                        "upload_skill", "POST", "/api/v1/developer/skills/upload",
+                        "skills:import", "write", "上传 SKILL.md 或 zip 包"
+                ),
+                new DeveloperToolSpecResponse(
+                        "upload_skill_directory", "POST", "/api/v1/developer/skills/upload-directory",
+                        "skills:import", "write", "上传 Skill 文件夹"
+                ),
+                new DeveloperToolSpecResponse(
+                        "update_skill", "PUT", "/api/v1/developer/skills/{id}",
+                        "skills:write", "write", "更新 Skill 元数据和文本内容"
+                ),
+                new DeveloperToolSpecResponse(
+                        "replace_skill_artifact", "PUT", "/api/v1/developer/skills/{id}/artifact",
+                        "skills:import,skills:write", "write", "替换 Skill 文件包"
+                ),
+                new DeveloperToolSpecResponse(
+                        "replace_skill_directory", "PUT", "/api/v1/developer/skills/{id}/artifact-directory",
+                        "skills:import,skills:write", "write", "替换 Skill 文件夹"
+                ),
+                new DeveloperToolSpecResponse(
+                        "record_remote_skill", "POST", "/api/v1/developer/skills/remote",
+                        "skills:write", "write", "记录远程 HTTPS Skill 地址"
+                ),
+                new DeveloperToolSpecResponse(
+                        "import_remote_skill", "POST", "/api/v1/developer/skills/remote/import",
+                        "skills:import,skills:write", "write", "下载并导入远程 HTTPS Skill"
+                ),
+                new DeveloperToolSpecResponse(
+                        "delete_skill", "DELETE", "/api/v1/developer/skills/{id}",
+                        "skills:write", "destructive", "删除 Skill"
+                ),
+                new DeveloperToolSpecResponse(
+                        "download_skill", "GET", "/api/v1/developer/skills/{id}/download",
+                        "skills:download", "read", "下载 Skill 包"
+                )
+        );
     }
 }
