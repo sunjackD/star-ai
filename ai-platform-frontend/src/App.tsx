@@ -126,6 +126,7 @@ function Shell() {
     { key: '/models', icon: <BrainCircuit size={18} />, label: <Link to="/models">模型</Link> },
     { key: '/finetune', icon: <Database size={18} />, label: <Link to="/finetune">微调</Link> },
     { key: '/developer', icon: <Code2 size={18} />, label: <Link to="/developer">控制面</Link> },
+    { key: '/observability', icon: <Activity size={18} />, label: <Link to="/observability">观测</Link> },
     { key: '/account/api-keys', icon: <KeyRound size={18} />, label: <Link to="/account/api-keys">API Key</Link> },
     ...(isAdmin ? [{
       key: '/admin',
@@ -195,7 +196,7 @@ function selectedShellMenuKey(pathname: string): string {
   if (pathname.startsWith('/admin/')) {
     return pathname;
   }
-  const sections = ['/agents', '/skills', '/articles', '/models', '/finetune', '/developer', '/account/api-keys'];
+  const sections = ['/agents', '/skills', '/articles', '/models', '/finetune', '/developer', '/observability', '/account/api-keys'];
   return sections.find((section) => pathname.startsWith(section)) ?? pathname;
 }
 
@@ -276,6 +277,15 @@ function DashboardPage() {
       path: '/developer',
       icon: <Workflow size={20} />,
       status: '流程编排'
+    },
+    {
+      title: '观测中心',
+      description: '聚合 Agent 调用、权限覆盖、工作流阻塞和治理检查，形成运行态视图。',
+      metric: activeApiKeys,
+      unit: '个有效 Key',
+      path: '/observability',
+      icon: <Activity size={20} />,
+      status: '运行观测'
     },
     {
       title: '治理中心',
@@ -2087,6 +2097,175 @@ function statusLabel(status: string): string {
   return labels[status] ?? status;
 }
 
+function ObservabilityPage() {
+  const { data: dashboard } = useQuery({
+    queryKey: ['developer-dashboard'],
+    queryFn: () => getData<DeveloperDashboard>('/developer/dashboard')
+  });
+  const workflows = dashboard?.agentWorkflowReadiness ?? [];
+  const blockedWorkflows = workflows.filter((workflow) => !workflow.ready);
+  const governanceChecks = dashboard?.governanceChecks ?? [];
+  const attentionChecks = governanceChecks.filter((check) => check.status !== 'PASS');
+  const recentEvents = dashboard?.recentEvents ?? [];
+  const requiredScopes = dashboard?.requiredScopes ?? API_KEY_SCOPE_OPTIONS
+    .filter((item) => item.value.startsWith('skills:'))
+    .map((item) => item.value);
+  const missingScopes = dashboard?.missingRequiredScopes ?? requiredScopes;
+  const scopeCoverage = Math.round(
+    ((requiredScopes.length - missingScopes.length) / Math.max(requiredScopes.length, 1)) * 100
+  );
+  const readyWorkflowCount = workflows.filter((workflow) => workflow.ready).length;
+  const hasOperationRisk = missingScopes.length > 0 || attentionChecks.length > 0 || blockedWorkflows.length > 0;
+  const healthScore = Math.round((
+    scopeCoverage
+    + (workflows.length ? (readyWorkflowCount / workflows.length) * 100 : 0)
+    + (governanceChecks.length ? ((governanceChecks.length - attentionChecks.length) / governanceChecks.length) * 100 : 0)
+  ) / 3);
+
+  const operationSignals = [
+    {
+      title: '运行健康',
+      value: healthScore,
+      suffix: '%',
+      description: '综合权限覆盖、工作流准备度和治理检查',
+      icon: <Activity size={18} />
+    },
+    {
+      title: '可运行工作流',
+      value: `${readyWorkflowCount}/${workflows.length || 0}`,
+      description: blockedWorkflows.length > 0 ? `${blockedWorkflows.length} 条仍需处理` : '全部工作流已具备运行条件',
+      icon: <Workflow size={18} />
+    },
+    {
+      title: '权限覆盖',
+      value: scopeCoverage,
+      suffix: '%',
+      description: missingScopes.length > 0 ? `缺少 ${formatScopeList(missingScopes)}` : '最小权限已覆盖',
+      icon: <ShieldCheck size={18} />
+    },
+    {
+      title: '近期活动',
+      value: recentEvents.length,
+      description: `${dashboard?.recentlyUsedKeys ?? 0} 个 Key 最近 7 天有调用`,
+      icon: <Clock3 size={18} />
+    }
+  ];
+
+  return (
+    <div className="page">
+      <section className="observability-hero">
+        <div>
+          <Tag color="processing" icon={<Activity size={14} />}>Agent 观测中心</Tag>
+          <Title level={1}>运行观测与质量门禁</Title>
+          <Paragraph>
+            把 API Key 健康、Agent 工作流准备度、治理检查和审计事件集中到一个视图，
+            用于判断自动化能力是否可运行、可追踪、可回滚。
+          </Paragraph>
+          <Space wrap>
+            <Link to="/account/api-keys"><Button type="primary" icon={<KeyRound size={16} />}>管理 API Key</Button></Link>
+            <Link to="/developer"><Button icon={<Workflow size={16} />}>查看控制面</Button></Link>
+          </Space>
+        </div>
+        <div className="observability-health-panel">
+          <Progress type="circle" percent={healthScore} />
+          <div>
+            <Text strong>当前运行健康度</Text>
+            <Text type="secondary">
+              {hasOperationRisk
+                ? '存在待处理门禁，建议先补齐权限和审计信号。'
+                : '核心门禁已通过，可进入持续观测。'}
+            </Text>
+          </div>
+        </div>
+      </section>
+
+      <div className="observability-signal-grid">
+        {operationSignals.map((signal) => (
+          <Card key={signal.title} className="observability-signal-card">
+            <div className="observability-signal-heading">
+              <span>{signal.icon}</span>
+              <Text type="secondary">{signal.title}</Text>
+            </div>
+            <Statistic value={signal.value} suffix={signal.suffix} />
+            <Text type="secondary">{signal.description}</Text>
+          </Card>
+        ))}
+      </div>
+
+      <div className="observability-grid">
+        <Card title="工作流阻塞队列">
+          <div className="observability-workflow-list">
+            {(blockedWorkflows.length > 0 ? blockedWorkflows : workflows).map((workflow) => (
+              <section key={workflow.key} className={`observability-workflow-item ${workflow.ready ? 'is-ready' : 'is-blocked'}`}>
+                <div>
+                  <Text strong>{workflow.title}</Text>
+                  <Tag color={workflow.ready ? 'green' : 'orange'}>{workflow.ready ? '可运行' : '待处理'}</Tag>
+                </div>
+                <Text type="secondary">{workflow.ready ? '运行条件已覆盖' : `补齐 ${formatScopeList(workflow.missingScopes)} 后可执行`}</Text>
+                <div>{workflow.requiredScopes.map((scope) => renderScopeTag(scope, workflow.missingScopes.includes(scope)))}</div>
+              </section>
+            ))}
+          </div>
+        </Card>
+
+        <Card title="治理检查">
+          <div className="observability-check-list">
+            {governanceChecks.map((check) => (
+              <section
+                key={check.key}
+                className={`observability-check-item ${check.status === 'PASS' ? 'is-pass' : 'needs-attention'}`}
+              >
+                <div>
+                  {check.status === 'PASS' ? <CheckCircle2 size={18} /> : <AlertTriangle size={18} />}
+                  <Text strong>{check.title}</Text>
+                  <Tag color={statusTagColor(check.status)}>{statusLabel(check.status)}</Tag>
+                </div>
+                <Text>{check.description}</Text>
+                <Text type="secondary">{check.action}</Text>
+              </section>
+            ))}
+          </div>
+        </Card>
+      </div>
+
+      <div className="observability-grid">
+        <Card title="最近 Agent 活动">
+          <Table
+            rowKey="id"
+            size="small"
+            dataSource={recentEvents}
+            pagination={false}
+            columns={[
+              { title: '动作', dataIndex: 'action' },
+              { title: '资源', render: (_, row) => `${row.resourceType}#${row.resourceId}` },
+              { title: '调用方', dataIndex: 'actor' },
+              { title: '时间', dataIndex: 'createdAt', render: formatDateTime }
+            ]}
+          />
+        </Card>
+        <Card title="下一步建议">
+          <div className="observability-recommendations">
+            <section>
+              <Text strong>1. 补齐运行权限</Text>
+              <Text type="secondary">
+                {missingScopes.length > 0 ? `优先补齐 ${formatScopeList(missingScopes)}。` : '维持当前最小权限策略，避免授予无关权限。'}
+              </Text>
+            </section>
+            <section>
+              <Text strong>2. 固化质量门禁</Text>
+              <Text type="secondary">高风险写操作保留人工确认、执行后复核和审计记录。</Text>
+            </section>
+            <section>
+              <Text strong>3. 增强可观测性</Text>
+              <Text type="secondary">把最近活动和工作流阻塞作为 Agent 接入前的日常巡检项。</Text>
+            </section>
+          </div>
+        </Card>
+      </div>
+    </div>
+  );
+}
+
 function PlatformThemeBootstrap() {
   const setTheme = useThemeStore((state) => state.setTheme);
   const { data } = useQuery({ queryKey: ['platform-config'], queryFn: () => getData<PlatformConfig>('/platform/config') });
@@ -2129,6 +2308,7 @@ function App() {
               <Route path="/articles/:id" element={<ArticleDetailPage />} />
               <Route path="/finetune" element={<FinetunePage />} />
               <Route path="/developer" element={<DeveloperPage />} />
+              <Route path="/observability" element={<ObservabilityPage />} />
               <Route path="/account/profile" element={<AccountProfilePage />} />
               <Route path="/account/api-keys" element={<ApiKeysPage />} />
               <Route element={<RequireAdmin />}>
