@@ -431,11 +431,11 @@ class AuthAndDeveloperApiTest {
                         .header("Authorization", "Bearer " + jwt))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath(
-                        "$.data.controlPlaneModules[?(@.key == 'agent_fleet' && @.title == 'Agent Fleet' "
+                        "$.data.controlPlaneModules[?(@.key == 'agent_fleet' && @.title == 'Agent 资产库' "
                                 + "&& @.route == '/agents')]"
                 ).isNotEmpty())
                 .andExpect(jsonPath(
-                        "$.data.controlPlaneModules[?(@.key == 'skill_registry' && @.title == 'Skill Registry' "
+                        "$.data.controlPlaneModules[?(@.key == 'skill_registry' && @.title == 'Skill 资产库' "
                                 + "&& @.route == '/skills')]"
                 ).isNotEmpty())
                 .andExpect(jsonPath(

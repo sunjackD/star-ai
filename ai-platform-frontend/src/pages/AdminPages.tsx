@@ -74,8 +74,8 @@ export function AdminLandingPage() {
   const { data } = useQuery({ queryKey: ['admin-overview'], queryFn: () => getData<AdminOverview>('/admin/overview') });
   const cards = [
     ['用户', data?.users ?? 0, '/admin/users'],
-    ['Agents', data?.agents ?? 0, '/admin/agents'],
-    ['Skills', data?.skills ?? 0, '/admin/skills'],
+    ['Agent 资产', data?.agents ?? 0, '/admin/agents'],
+    ['Skill 资产', data?.skills ?? 0, '/admin/skills'],
     ['模型', data?.models ?? 0, '/admin/models'],
     ['数据集', data?.datasets ?? 0, '/admin/datasets'],
     ['微调任务', data?.finetuneJobs ?? 0, '/admin/finetune-jobs'],
@@ -87,7 +87,7 @@ export function AdminLandingPage() {
 
   return (
     <div className="page">
-      <PageHeader title="管理后台" description="统一管理用户、内容资源、Developer API 和平台审计。" />
+      <PageHeader title="管理后台" description="统一管理用户、内容资源、开放接口和平台审计。" />
       <div className="metric-grid">
         {cards.map(([label, value, href]) => (
           <Link to={href as string} key={label as string}>
@@ -136,7 +136,7 @@ export function SettingsAdminPage() {
               <Input placeholder="星梦 AI 聚合平台" />
             </Form.Item>
             <Form.Item name="siteSubtitle" label="站点副标题" rules={[{ required: true, whitespace: true }]}>
-              <Input.TextArea rows={3} placeholder="AI 工具、Skills 与模型的统一工作台" />
+              <Input.TextArea rows={3} placeholder="AI 工具、Skill 与模型的统一工作台" />
             </Form.Item>
             <Form.Item name="defaultTheme" label="全站默认主题" rules={[{ required: true }]}>
               <Select options={THEME_OPTIONS} />
@@ -310,7 +310,7 @@ export function UsersAdminPage() {
 
 export function AgentsAdminPage() {
   return <ResourceAdminPage<Agent> config={{
-    title: 'Agents 管理',
+    title: 'Agent 资产管理',
     description: '维护 AI 编辑器/Agent 的展示内容、指南和状态。',
     queryKey: 'admin-agents',
     endpoint: '/admin/agents',
@@ -326,7 +326,7 @@ export function AgentsAdminPage() {
 export function SkillCategoriesAdminPage() {
   return <ResourceAdminPage<SkillCategory> config={{
     title: 'Skill 分类管理',
-    description: '维护 Skills 市场的分类体系。',
+    description: '维护 Skill 市场的分类体系。',
     queryKey: 'admin-skill-categories',
     endpoint: '/admin/skill-categories',
     fields: [field('name', '名称'), field('description', '描述', 'textarea')],
@@ -337,7 +337,7 @@ export function SkillCategoriesAdminPage() {
 export function SkillsAdminPage() {
   const { data: categories = [] } = useQuery({ queryKey: ['admin-skill-categories'], queryFn: () => getData<SkillCategory[]>('/admin/skill-categories') });
   return <ResourceAdminPage<Skill> config={{
-    title: 'Skills 管理',
+    title: 'Skill 资产管理',
     description: '维护站内 Skill，支持文本创建、SKILL.md/zip 上传、下载和上下架。',
     queryKey: 'admin-skills',
     endpoint: '/admin/skills',
@@ -800,7 +800,7 @@ export function ApiKeysAdminPage() {
     <div className="page">
       <PageHeader title="API Key 审计" description="查看平台 API Key 状态、权限范围和最后使用时间。" />
       <Space className="admin-toolbar" wrap>
-        <Input.Search placeholder="搜索名称、前缀或 scope" onChange={(event) => setKeyword(event.target.value)} allowClear />
+        <Input.Search placeholder="搜索名称、前缀或权限" onChange={(event) => setKeyword(event.target.value)} allowClear />
         <Select
           allowClear
           placeholder="状态"
@@ -812,7 +812,7 @@ export function ApiKeysAdminPage() {
       <Table rowKey="id" dataSource={filteredData} pagination={{ pageSize: 8 }} columns={[
         { title: '名称', dataIndex: 'name' },
         { title: '前缀', dataIndex: 'keyPrefix' },
-        { title: 'Scopes', dataIndex: 'scopes', render: (scopes: string[]) => scopes.map((scope) => <Tag key={scope}>{scope}</Tag>) },
+        { title: '权限', dataIndex: 'scopes', render: (scopes: string[]) => scopes.map((scope) => <Tag key={scope}>{scope}</Tag>) },
         { title: '状态', dataIndex: 'status' },
         { title: '最后使用', dataIndex: 'lastUsedAt', render: (value) => value ?? '-' },
         { title: '操作', render: (_, row) => <Button danger size="small" onClick={() => mutation.mutate(row.id)}>禁用</Button> }
@@ -828,7 +828,7 @@ export function AuditLogsAdminPage() {
     .some((value) => String(value ?? '').toLowerCase().includes(keyword.toLowerCase())));
   return (
     <div className="page">
-      <PageHeader title="审计日志" description="追踪后台写操作和 Developer API 调用。" />
+      <PageHeader title="审计日志" description="追踪后台写操作和开放接口调用。" />
       <Space className="admin-toolbar" wrap>
         <Input.Search placeholder="搜索操作者、动作或资源" onChange={(event) => setKeyword(event.target.value)} allowClear />
       </Space>

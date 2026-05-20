@@ -178,17 +178,17 @@ public class ApiKeyService {
         long totalModels = aiModelRepository.count();
         long readyWorkflows = workflowReadiness.stream().filter(DeveloperAgentWorkflowReadinessResponse::ready).count();
         return List.of(
-                module("agent_fleet", "Agent Fleet", "Agent 运行入口与配置指南", agentRepository.count(),
-                        activeAgents, "/agents", activeAgents + " active agents"),
-                module("skill_registry", "Skill Registry", "可复用 Skill 资产与包分发", skillRepository.count(),
-                        activeSkills, "/skills", activeSkills + " active skills"),
-                module("model_layer", "Model Layer", "模型供应商、能力标签与服务入口", totalModels,
-                        totalModels, "/models", totalModels + " configured models"),
-                module("knowledge_base", "Knowledge Base", "教程、Prompt、脚本和执行前上下文", articleRepository.count(),
-                        activeArticles, "/articles", activeArticles + " published articles"),
-                module("agent_workflows", "Agent Workflows", "Agent 可执行流程、权限和风险门禁",
+                module("agent_fleet", "Agent 资产库", "Agent 运行入口与配置指南", agentRepository.count(),
+                        activeAgents, "/agents", activeAgents + " 个 Agent 可用"),
+                module("skill_registry", "Skill 资产库", "可复用 Skill 资产与包分发", skillRepository.count(),
+                        activeSkills, "/skills", activeSkills + " 个 Skill 可用"),
+                module("model_layer", "模型能力层", "模型供应商、能力标签与服务入口", totalModels,
+                        totalModels, "/models", totalModels + " 个模型已配置"),
+                module("knowledge_base", "知识库", "教程、Prompt、脚本和执行前上下文", articleRepository.count(),
+                        activeArticles, "/articles", activeArticles + " 篇内容已发布"),
+                module("agent_workflows", "Agent 工作流", "Agent 可执行流程、权限和风险门禁",
                         workflowReadiness.size(), readyWorkflows, "/developer",
-                        readyWorkflows + "/" + workflowReadiness.size() + " workflows ready")
+                        readyWorkflows + "/" + workflowReadiness.size() + " 个工作流可运行")
         );
     }
 
@@ -226,7 +226,7 @@ public class ApiKeyService {
         return List.of(
                 governanceCheck(
                         "scope_coverage",
-                        "Scope Coverage",
+                        "权限覆盖",
                         missingScopes.isEmpty(),
                         missingScopes.isEmpty() ? "所有 Agent 工作流的最小权限已覆盖" : "仍缺少 "
                                 + String.join(", ", missingScopes),
@@ -234,21 +234,21 @@ public class ApiKeyService {
                 ),
                 governanceCheck(
                         "destructive_gate",
-                        "Destructive Gate",
+                        "高风险门禁",
                         destructiveGateConfigured,
                         "删除类 Agent Workflow 必须带明确人工确认门禁",
                         "保留删除前的目标 ID 与名称确认"
                 ),
                 governanceCheck(
                         "remote_import_guard",
-                        "Remote Import Guard",
+                        "远程导入防护",
                         remoteImportGuarded,
                         "远程 Skill 导入路径要求 HTTPS 并依赖服务端安全校验",
                         "仅接收可信 HTTPS 来源"
                 ),
                 governanceCheck(
                         "audit_trail",
-                        "Audit Trail",
+                        "审计链路",
                         !recentEvents.isEmpty(),
                         recentEvents.isEmpty() ? "最近没有可展示的 Agent 调用事件" : "最近调用事件已进入审计链路",
                         "在后台审计日志复核高风险操作"
