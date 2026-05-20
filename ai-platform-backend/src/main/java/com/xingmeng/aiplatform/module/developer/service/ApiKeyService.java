@@ -34,6 +34,13 @@ public class ApiKeyService {
     private static final List<String> REQUIRED_AGENT_SCOPES = List.of(
             "skills:read", "skills:import", "skills:write", "skills:download"
     );
+    private static final Set<String> ALLOWED_API_KEY_SCOPES = Set.of(
+            "skills:read",
+            "skills:import",
+            "skills:write",
+            "skills:download",
+            "admin:manage"
+    );
 
     private final ApiKeyRepository apiKeyRepository;
     private final UserRepository userRepository;
@@ -60,13 +67,14 @@ public class ApiKeyService {
     @Transactional
     public ApiKeyResponse create(AuthenticatedUser principal, ApiKeyCreateRequest request) {
         User user = loadUser(principal);
+        List<String> normalizedScopes = normalizeScopes(request);
         String plainKey = "xma_" + randomToken();
         ApiKey apiKey = new ApiKey();
         apiKey.setUser(user);
         apiKey.setName(request.name());
         apiKey.setKeyPrefix(plainKey.substring(0, 12));
         apiKey.setKeyHash(HashUtils.sha256(plainKey));
-        apiKey.setScopes(String.join(",", request.scopes()));
+        apiKey.setScopes(String.join(",", normalizedScopes));
         apiKey.setStatus("ACTIVE");
         apiKey.setExpiresAt(request.expiresAt());
         return toResponse(apiKeyRepository.save(apiKey), plainKey);
@@ -137,6 +145,26 @@ public class ApiKeyService {
     private User loadUser(AuthenticatedUser principal) {
         return userRepository.findByUsername(principal.username())
                 .orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND, "用户不存在"));
+    }
+
+    private List<String> normalizeScopes(ApiKeyCreateRequest request) {
+        List<String> normalizedScopes = request.scopes().stream()
+                .map(scope -> scope == null ? "" : scope.trim())
+                .toList();
+        if (normalizedScopes.stream().anyMatch(String::isBlank)) {
+            throw new BusinessException(HttpStatus.BAD_REQUEST, "Scope不能为空");
+        }
+        List<String> unsupportedScopes = normalizedScopes.stream()
+                .filter(scope -> !ALLOWED_API_KEY_SCOPES.contains(scope))
+                .distinct()
+                .toList();
+        if (!unsupportedScopes.isEmpty()) {
+            throw new BusinessException(
+                    HttpStatus.BAD_REQUEST,
+                    "API Key包含不支持的Scope: " + String.join(",", unsupportedScopes)
+            );
+        }
+        return normalizedScopes.stream().distinct().toList();
     }
 
     private ApiKeyResponse toResponse(ApiKey key, String plainKey) {

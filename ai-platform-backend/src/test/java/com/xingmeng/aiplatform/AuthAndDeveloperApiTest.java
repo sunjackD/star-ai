@@ -150,6 +150,44 @@ class AuthAndDeveloperApiTest {
     }
 
     @Test
+    void apiKeyCreateRejectsUnknownScope() throws Exception {
+        String adminToken = createAdminAndLogin("admin_unknown_scope", "admin-unknown-scope@example.com");
+        createUser(adminToken, "unknown_scope_dev", "unknown-scope@example.com", "Unknown Scope", "DEVELOPER");
+        String jwt = login("unknown_scope_dev", "secret123");
+
+        mockMvc.perform(post("/api/v1/developer/api-keys")
+                        .header("Authorization", "Bearer " + jwt)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "name": "bad scope",
+                                  "scopes": ["skills:read", "root:all"]
+                                }
+                                """))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value(containsString("不支持的Scope")));
+    }
+
+    @Test
+    void apiKeyCreateRejectsBlankScopeItem() throws Exception {
+        String adminToken = createAdminAndLogin("admin_blank_scope", "admin-blank-scope@example.com");
+        createUser(adminToken, "blank_scope_dev", "blank-scope@example.com", "Blank Scope", "DEVELOPER");
+        String jwt = login("blank_scope_dev", "secret123");
+
+        mockMvc.perform(post("/api/v1/developer/api-keys")
+                        .header("Authorization", "Bearer " + jwt)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "name": "blank scope",
+                                  "scopes": ["skills:read", " "]
+                                }
+                                """))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value(containsString("Scope不能为空")));
+    }
+
+    @Test
     void apiKeyWithWriteScopeCanDeleteSkill() throws Exception {
         String adminToken = createAdminAndLogin("admin_delete_skill", "admin-delete-skill@example.com");
         createUser(adminToken, "delete_dev", "delete-dev@example.com", "Delete Dev", "DEVELOPER");
