@@ -1654,7 +1654,7 @@ function DeveloperPage() {
     apiBaseUrl,
     selfSkillUrl,
     manifestName: manifest?.name ?? 'ai-platform-manager',
-     manifestDescription: manifest?.description ?? '代管平台里的 Agent、Skill、模型、文章和工具导航。',
+    manifestDescription: manifest?.description ?? '代管平台里的 Agent、Skill 和文章。',
     authHeaders,
     requiredScopes,
     missingScopes,
@@ -1666,6 +1666,14 @@ function DeveloperPage() {
       message.success('已复制 Agent 接入配置');
     } catch {
       message.warning('请使用配置文本右侧复制按钮');
+    }
+  };
+  const copyTaskTemplate = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      message.success('已复制任务模板');
+    } catch {
+      message.warning('请使用模板文本右侧复制按钮');
     }
   };
 
@@ -1731,6 +1739,41 @@ function DeveloperPage() {
               一键配置平台 Skill
             </Button>
           </section>
+        </div>
+      </Card>
+
+      <Card title="代管任务模板" className="agent-api-card">
+        <div className="agent-api-task-grid">
+          {access.taskTemplates.map((template) => (
+            <section key={template.key} className={`agent-api-task-card is-${template.status}`}>
+              <div className="agent-api-task-heading">
+                <Space size={8} wrap>
+                  <Tag color={template.status === 'ready' ? 'green' : 'gold'}>{template.target}</Tag>
+                  <Text strong>{template.title}</Text>
+                </Space>
+                <Tag color={template.status === 'ready' ? 'green' : 'orange'}>
+                  {template.status === 'ready' ? '可执行' : `缺 ${template.missingScopes.length} 项权限`}
+                </Tag>
+              </div>
+              <Text type="secondary">{template.objective}</Text>
+              <div className="agent-api-task-meta">
+                <Text type="secondary">权限</Text>
+                <Space size={[4, 4]} wrap>
+                  {template.scopes.map((scope) => renderScopeTag(scope, template.missingScopes.includes(scope)))}
+                </Space>
+              </div>
+              <div className="agent-api-task-meta">
+                <Text type="secondary">工具</Text>
+                <Text>{template.tools.map((tool) => tool.name).join('、') || '读取 Manifest 后确认'}</Text>
+              </div>
+              <Paragraph copyable={{ text: template.copyText }} className="prompt-copy agent-api-task-copy">
+                {template.copyText}
+              </Paragraph>
+              <Button icon={<Copy size={16} />} onClick={() => copyTaskTemplate(template.copyText)}>
+                复制任务给 Agent
+              </Button>
+            </section>
+          ))}
         </div>
       </Card>
 

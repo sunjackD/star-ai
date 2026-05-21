@@ -30,7 +30,10 @@ describe('workspace style guard', () => {
 
   it('keeps the essential Agent API handoff actions visible', () => {
     expect(appSource).toContain('复制这段给 Agent');
+    expect(appSource).toContain('代管任务模板');
+    expect(appSource).toContain('复制任务给 Agent');
     expect(appSource).toContain('一键配置平台 Skill');
+    expect(appSource).not.toContain('Agent、Skill、模型、文章和工具导航');
   });
 
   it('removes the redundant observability/self-check surface from the workspace', () => {

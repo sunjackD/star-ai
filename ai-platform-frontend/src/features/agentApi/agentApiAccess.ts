@@ -31,8 +31,21 @@ export type AgentApiAccess = {
     downloadUrl: string;
   };
   featuredTools: AgentApiToolSpec[];
+  taskTemplates: AgentApiTaskTemplate[];
   copyToAgentText: string;
   installPrompt: string;
+};
+
+export type AgentApiTaskTemplate = {
+  key: 'agent' | 'skill' | 'article';
+  target: 'Agent' | 'Skill' | '文章';
+  title: string;
+  objective: string;
+  scopes: string[];
+  missingScopes: string[];
+  tools: AgentApiToolSpec[];
+  status: 'ready' | 'attention';
+  copyText: string;
 };
 
 const riskRank: Record<string, number> = {
@@ -50,17 +63,18 @@ export function buildAgentApiAccess(input: AgentApiAccessInput): AgentApiAccess 
     })
     .slice(0, 8);
   const manifestUrl = joinUrl(input.apiBaseUrl, '/developer/skill-manifest');
+  const taskTemplates = buildTaskTemplates(input, manifestUrl);
   const copyToAgentText = [
     '请把以下平台 Skill 接入当前 Agent:',
     `Skill: ${input.manifestName}`,
-    '用途: 代管平台里的 Agent、Skill、模型、文章和工具导航',
+    '用途: 代管平台里的 Agent、Skill 和文章',
     `平台说明: ${input.manifestDescription}`,
     `API Base: ${input.apiBaseUrl}`,
     `Manifest: ${manifestUrl}`,
     `Skill 包: ${input.selfSkillUrl}`,
     `认证头: ${input.authHeaders.join(' 或 ')}`,
     `最小权限: ${input.requiredScopes.join(', ')}`,
-    '约束: 只管理 Agent、Skill、模型、文章和工具导航；写入后重新读取目标记录确认结果。'
+    '约束: 只管理 Agent、Skill 和文章；写入后重新读取目标记录确认结果。'
   ].join('\n');
 
   return {
@@ -86,10 +100,11 @@ export function buildAgentApiAccess(input: AgentApiAccessInput): AgentApiAccess 
       downloadUrl: input.selfSkillUrl
     },
     featuredTools,
+    taskTemplates,
     copyToAgentText,
     installPrompt: [
       `接入 ${input.manifestName}`,
-      '用途: 只管理 Agent、Skill、模型、文章和工具导航',
+      '用途: 只管理 Agent、Skill 和文章',
       `平台说明: ${input.manifestDescription}`,
       `API Base: ${input.apiBaseUrl}`,
       `下载 Skill: ${input.selfSkillUrl}`,
@@ -98,6 +113,54 @@ export function buildAgentApiAccess(input: AgentApiAccessInput): AgentApiAccess 
       '执行前先读 Manifest，写入后重新读取目标记录确认结果。'
     ].join('\n')
   };
+}
+
+const taskDefinitions: Array<Pick<AgentApiTaskTemplate, 'key' | 'target' | 'title' | 'objective' | 'scopes'>> = [
+  {
+    key: 'agent',
+    target: 'Agent',
+    title: '维护 Agent',
+    objective: '创建或更新 Agent 的入口、说明、标签和使用场景。',
+    scopes: ['agents:read', 'agents:write']
+  },
+  {
+    key: 'skill',
+    target: 'Skill',
+    title: '维护 Skill',
+    objective: '导入、上传、替换或更新 Skill，并确认可下载。',
+    scopes: ['skills:read', 'skills:import', 'skills:write', 'skills:download']
+  },
+  {
+    key: 'article',
+    target: '文章',
+    title: '维护文章',
+    objective: '创建或更新文章正文、摘要、附件和参考链接。',
+    scopes: ['articles:read', 'articles:write']
+  }
+];
+
+function buildTaskTemplates(input: AgentApiAccessInput, manifestUrl: string): AgentApiTaskTemplate[] {
+  return taskDefinitions.map((definition) => {
+    const tools = input.toolSpecs.filter((tool) => definition.scopes.some((scope) => tool.scope.includes(scope)));
+    const missingScopes = definition.scopes.filter((scope) => input.missingScopes.includes(scope));
+    return {
+      ...definition,
+      missingScopes,
+      tools,
+      status: missingScopes.length > 0 ? 'attention' : 'ready',
+      copyText: [
+        `任务: ${definition.title}`,
+        `目标对象: ${definition.target}`,
+        `目标: ${definition.objective}`,
+        `API Base: ${input.apiBaseUrl}`,
+        `Manifest: ${manifestUrl}`,
+        `认证头: ${input.authHeaders.join(' 或 ')}`,
+        `所需权限: ${definition.scopes.join(', ')}`,
+        `可用工具: ${tools.map((tool) => tool.name).join(', ') || '读取 Manifest 后确认'}`,
+        '执行要求: 先读取目标记录，完成写入后重新读取并报告变化。'
+      ].join('\n')
+    };
+  });
 }
 
 function joinUrl(baseUrl: string, path: string): string {
