@@ -239,7 +239,7 @@ export type DeveloperAuditEvent = {
   createdAt?: string;
 };
 
-export type DeveloperGovernanceCheck = {
+export type DeveloperHandoffSignal = {
   key: string;
   title: string;
   status: string;
@@ -257,7 +257,7 @@ export type DeveloperDashboard = {
   requiredScopes: string[];
   missingRequiredScopes: string[];
   agentWorkflowReadiness: DeveloperAgentWorkflowReadiness[];
-  governanceChecks: DeveloperGovernanceCheck[];
+  handoffSignals: DeveloperHandoffSignal[];
   recentEvents: DeveloperAuditEvent[];
 };
 

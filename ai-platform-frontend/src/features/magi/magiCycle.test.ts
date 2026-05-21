@@ -16,7 +16,7 @@ describe('buildMagiCyclePlan', () => {
           ready: false
         }
       ],
-      governanceChecks: [
+      handoffSignals: [
         {
           key: 'task_boundary',
           title: '任务边界',
@@ -54,7 +54,7 @@ describe('buildMagiCyclePlan', () => {
           ready: true
         }
       ],
-      governanceChecks: [
+      handoffSignals: [
         {
           key: 'operation_activity',
           title: '操作记录',
@@ -84,7 +84,7 @@ describe('summarizeMagiCycle', () => {
       requiredScopes: ['skills:read'],
       missingScopes: ['skills:read'],
       workflows: [],
-      governanceChecks: [],
+      handoffSignals: [],
       recentEventCount: 0,
       recentlyUsedKeys: 0
     }));
@@ -112,7 +112,7 @@ describe('summarizeMagiCycle', () => {
           ready: true
         }
       ],
-      governanceChecks: [
+      handoffSignals: [
         {
           key: 'operation_activity',
           title: '操作记录',

@@ -11,7 +11,7 @@ import com.xingmeng.aiplatform.module.developer.dto.ApiKeyResponse;
 import com.xingmeng.aiplatform.module.developer.dto.DeveloperAgentWorkflowReadinessResponse;
 import com.xingmeng.aiplatform.module.developer.dto.DeveloperAuditEventResponse;
 import com.xingmeng.aiplatform.module.developer.dto.DeveloperDashboardResponse;
-import com.xingmeng.aiplatform.module.developer.dto.DeveloperGovernanceCheckResponse;
+import com.xingmeng.aiplatform.module.developer.dto.DeveloperHandoffSignalResponse;
 import com.xingmeng.aiplatform.module.developer.entity.ApiKey;
 import com.xingmeng.aiplatform.module.developer.repository.ApiKeyRepository;
 import com.xingmeng.aiplatform.module.user.entity.User;
@@ -157,12 +157,12 @@ public class ApiKeyService {
                 REQUIRED_AGENT_SCOPES,
                 missingScopes,
                 agentWorkflowReadiness,
-                governanceChecks(missingScopes, recentEvents),
+                handoffSignals(missingScopes, recentEvents),
                 recentEvents
         );
     }
 
-    private List<DeveloperGovernanceCheckResponse> governanceChecks(
+    private List<DeveloperHandoffSignalResponse> handoffSignals(
             List<String> missingScopes,
             List<DeveloperAuditEventResponse> recentEvents
     ) {
@@ -173,7 +173,7 @@ public class ApiKeyService {
                 .filter(workflow -> workflow.tools().contains("import_remote_skill"))
                 .allMatch(workflow -> workflow.riskGate().contains("HTTPS"));
         return List.of(
-                governanceCheck(
+                handoffSignal(
                         "scope_coverage",
                         "Scope 覆盖",
                         missingScopes.isEmpty(),
@@ -181,21 +181,21 @@ public class ApiKeyService {
                                 + String.join(", ", missingScopes),
                         "前往 API Key 页面补齐最小范围"
                 ),
-                governanceCheck(
+                handoffSignal(
                         "destructive_gate",
                         "高风险确认",
                         destructiveGateConfigured,
                         "删除类 Agent 代管任务必须带明确人工确认",
                         "保留删除前的目标 ID 与名称确认"
                 ),
-                governanceCheck(
+                handoffSignal(
                         "remote_import_guard",
                         "远程导入防护",
                         remoteImportGuarded,
                         "远程 Skill 导入路径要求 HTTPS 并依赖服务端安全校验",
                         "仅接收可信 HTTPS 来源"
                 ),
-                governanceCheck(
+                handoffSignal(
                         "audit_trail",
                         "代管记录",
                         !recentEvents.isEmpty(),
@@ -205,14 +205,14 @@ public class ApiKeyService {
         );
     }
 
-    private DeveloperGovernanceCheckResponse governanceCheck(
+    private DeveloperHandoffSignalResponse handoffSignal(
             String key,
             String title,
             boolean pass,
             String description,
             String action
     ) {
-        return new DeveloperGovernanceCheckResponse(key, title, pass ? "PASS" : "ATTENTION", description, action);
+        return new DeveloperHandoffSignalResponse(key, title, pass ? "PASS" : "ATTENTION", description, action);
     }
 
     private List<DeveloperAgentWorkflowReadinessResponse> agentWorkflowReadiness(Set<String> activeScopes) {

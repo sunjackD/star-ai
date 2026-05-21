@@ -12,7 +12,7 @@ public record DeveloperDashboardResponse(
         List<String> requiredScopes,
         List<String> missingRequiredScopes,
         List<DeveloperAgentWorkflowReadinessResponse> agentWorkflowReadiness,
-        List<DeveloperGovernanceCheckResponse> governanceChecks,
+        List<DeveloperHandoffSignalResponse> handoffSignals,
         List<DeveloperAuditEventResponse> recentEvents
 ) {
 }

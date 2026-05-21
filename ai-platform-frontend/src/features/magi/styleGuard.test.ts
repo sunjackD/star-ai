@@ -109,9 +109,11 @@ describe('workspace style guard', () => {
     expect(magiSource).not.toContain('内容分类');
     expect(magiSource).not.toContain('目标内容');
     expect(magiSource).not.toContain('governanceCoverage');
+    expect(magiSource).not.toContain('governanceChecks');
     expect(magiSource).not.toContain('knowledgeAssetScore');
     expect(magiSource).not.toContain('内容推进');
     expect(magiSource).toContain('handoffScore');
+    expect(magiSource).toContain('handoffSignals');
     expect(magiSource).toContain('代管进度');
   });
 });

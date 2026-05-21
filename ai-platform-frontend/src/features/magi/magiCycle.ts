@@ -22,7 +22,7 @@ export type MagiCycleInput = {
   requiredScopes: string[];
   missingScopes: string[];
   workflows: MagiWorkflow[];
-  governanceChecks: MagiHandoffSignal[];
+  handoffSignals: MagiHandoffSignal[];
   recentEventCount: number;
   recentlyUsedKeys: number;
 };
@@ -56,10 +56,10 @@ export type MagiCycleSummary = {
 export function buildMagiCyclePlan(input: MagiCycleInput): MagiCyclePlan {
   const blockedWorkflows = input.workflows.filter((workflow) => !workflow.ready);
   const readyWorkflows = input.workflows.filter((workflow) => workflow.ready);
-  const handoffSignals = input.governanceChecks.filter((check) => check.status !== 'PASS');
+  const handoffSignals = input.handoffSignals.filter((signal) => signal.status !== 'PASS');
   const scopeCoverage = scoreCoverage(input.requiredScopes.length, input.missingScopes.length);
   const workflowCoverage = scoreCoverage(input.workflows.length, blockedWorkflows.length);
-  const handoffSignalScore = scoreCoverage(input.governanceChecks.length, handoffSignals.length);
+  const handoffSignalScore = scoreCoverage(input.handoffSignals.length, handoffSignals.length);
   const handoffScore = Math.round((scopeCoverage + workflowCoverage + handoffSignalScore) / 3);
   const reviewMetric = input.missingScopes.length + blockedWorkflows.length + handoffSignals.length;
   const focusStage = reviewMetric > 0 ? 'review' : readyWorkflows.length > 0 ? 'execute' : 'elevate';

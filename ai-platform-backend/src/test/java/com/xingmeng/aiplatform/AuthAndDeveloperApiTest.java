@@ -621,7 +621,7 @@ class AuthAndDeveloperApiTest {
     }
 
     @Test
-    void developerDashboardReportsAgentApiReadinessWithoutControlPlaneModules() throws Exception {
+    void developerDashboardReportsAgentApiReadinessWithHandoffSignals() throws Exception {
         String adminToken = createAdminAndLogin("admin_agent_api_readiness", "admin-agent-api-readiness@example.com");
         createUser(adminToken, "agent_api_ready_dev", "agent-api-ready@example.com", "Agent API Ready Dev", "DEVELOPER");
         String jwt = login("agent_api_ready_dev", "secret123");
@@ -635,14 +635,15 @@ class AuthAndDeveloperApiTest {
                         .header("Authorization", "Bearer " + jwt))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.controlPlaneModules").doesNotExist())
+                .andExpect(jsonPath("$.data.governanceChecks").doesNotExist())
                 .andExpect(jsonPath(
                         "$.data.agentWorkflowReadiness[?(@.key == 'discover_skill_inventory' && @.ready == true)]"
                 ).isNotEmpty())
                 .andExpect(jsonPath(
-                        "$.data.governanceChecks[?(@.key == 'scope_coverage' && @.status == 'ATTENTION')]"
+                        "$.data.handoffSignals[?(@.key == 'scope_coverage' && @.status == 'ATTENTION')]"
                 ).isNotEmpty())
                 .andExpect(jsonPath(
-                        "$.data.governanceChecks[?(@.key == 'audit_trail' && @.status == 'PASS')]"
+                        "$.data.handoffSignals[?(@.key == 'audit_trail' && @.status == 'PASS')]"
                 ).isNotEmpty());
     }
 
