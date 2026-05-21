@@ -36,7 +36,7 @@ describe('buildMagiCyclePlan', () => {
       metric: 3,
       status: 'attention'
     });
-    expect(plan.stages[0].actions).toContain('补齐 1 项 Agent 授权，只开放当前任务需要的范围。');
+    expect(plan.stages[0].actions).toContain('补齐 1 项 API Key 权限，只开放当前任务需要的范围。');
     expect(plan.stages[0].actions).toContain('处理 1 项代管提示：任务边界。');
   });
 
@@ -93,7 +93,7 @@ describe('summarizeMagiCycle', () => {
       focusStage: 'review',
       focusLabel: '审视',
       progressLabel: '代管进度 0%',
-      primaryAction: '补齐 1 项 Agent 授权，只开放当前任务需要的范围。',
+      primaryAction: '补齐 1 项 API Key 权限，只开放当前任务需要的范围。',
       route: '/developer'
     });
   });

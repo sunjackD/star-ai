@@ -83,7 +83,7 @@ npm run build
 
 ## Agent API 接入
 
-登录后在右上角进入 API Key 管理，按本次 Agent、Skill 或文章任务创建包含 `skills:read`、`skills:import`、`skills:write`、`skills:download`、`agents:write` 或 `articles:write` 的 Agent 授权 Key。
+登录后在右上角进入 API Key 管理，按本次 Agent、Skill 或文章任务创建包含 `skills:read`、`skills:import`、`skills:write`、`skills:download`、`agents:write` 或 `articles:write` 的 API Key。
 
 下载平台自管理 Skill：
 

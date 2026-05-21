@@ -128,7 +128,7 @@ export function SettingsAdminPage() {
 
   return (
     <div className="page">
-      <PageHeader title="系统设置" description="维护站点文案、默认主题、注册策略和 Agent 授权默认有效期。" />
+      <PageHeader title="系统设置" description="维护站点文案、默认主题、注册策略和 API Key 默认有效期。" />
       <div className="settings-grid">
         <Card className="settings-form-card" loading={isLoading}>
           <Form form={form} layout="vertical" onFinish={(values) => mutation.mutate(values as AdminSettings)}>
@@ -146,7 +146,7 @@ export function SettingsAdminPage() {
             </Form.Item>
             <Form.Item
               name="apiKeyDefaultExpireDays"
-              label="Agent 授权默认有效期"
+              label="API Key 默认有效期"
               rules={[{ required: true, type: 'number', min: 1, max: 3650 }]}
             >
               <InputNumber min={1} max={3650} className="admin-number-input" />
@@ -798,7 +798,7 @@ export function ApiKeysAdminPage() {
   });
   return (
     <div className="page">
-      <PageHeader title="Agent 授权记录" description="查看 Agent 代管授权状态、范围和最后使用时间。" />
+      <PageHeader title="API Key 记录" description="查看 Agent 代管 API Key 状态、范围和最后使用时间。" />
       <Space className="admin-toolbar" wrap>
         <Input.Search placeholder="搜索名称、前缀或权限" onChange={(event) => setKeyword(event.target.value)} allowClear />
         <Select

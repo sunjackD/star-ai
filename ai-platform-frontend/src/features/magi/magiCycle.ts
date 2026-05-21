@@ -146,7 +146,7 @@ function buildReviewActions(
 ): string[] {
   const actions: string[] = [];
   if (missingScopeCount > 0) {
-    actions.push(`补齐 ${missingScopeCount} 项 Agent 授权，只开放当前任务需要的范围。`);
+    actions.push(`补齐 ${missingScopeCount} 项 API Key 权限，只开放当前任务需要的范围。`);
   }
   if (blockedWorkflows.length > 0) {
     actions.push(`拆解 ${blockedWorkflows.length} 条阻塞代管任务，优先处理 Skill 或文章写入。`);
@@ -174,7 +174,7 @@ function buildExecuteActions(readyWorkflows: MagiWorkflow[]): string[] {
 function buildElevateActions(recentEventCount: number, recentlyUsedKeys: number, handoffScore: number): string[] {
   const actions = [
     handoffScore >= 80 ? '将本轮可运行路径固化为 Agent 代管模板。' : '优先补齐代管进度低于 80% 的入口。',
-    recentlyUsedKeys > 0 ? `复盘 ${recentlyUsedKeys} 个近期活跃授权的范围。` : '创建一组短期 Agent 授权，用于下一轮代管验证。'
+    recentlyUsedKeys > 0 ? `复盘 ${recentlyUsedKeys} 个近期活跃 API Key 的范围。` : '创建一组短期 API Key，用于下一轮代管验证。'
   ];
   if (recentEventCount === 0) {
     actions.push('补充一次低风险读取调用，让页面有可回看的代管记录。');

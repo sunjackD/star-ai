@@ -175,11 +175,11 @@ public class ApiKeyService {
         return List.of(
                 governanceCheck(
                         "scope_coverage",
-                        "授权覆盖",
+                        "Scope 覆盖",
                         missingScopes.isEmpty(),
                         missingScopes.isEmpty() ? "所有 Agent 代管任务的最小授权已覆盖" : "仍缺少 "
                                 + String.join(", ", missingScopes),
-                        "前往 Agent 授权页面补齐最小范围"
+                        "前往 API Key 页面补齐最小范围"
                 ),
                 governanceCheck(
                         "destructive_gate",

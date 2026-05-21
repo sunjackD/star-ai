@@ -27,11 +27,6 @@ import {
 } from 'lucide-react';
 import { apiUrl, downloadFile, getData, getPublicData, postData, postPublicData, uploadData } from './api/client';
 import { buildAgentApiAccess } from './features/agentApi/agentApiAccess';
-import {
-  buildMagiCyclePlan,
-  summarizeMagiCycle,
-  type MagiCycleStageKey
-} from './features/magi/magiCycle';
 import { useAuthStore } from './store/authStore';
 import { useThemeStore } from './store/themeStore';
 import type {
@@ -53,7 +48,8 @@ import type {
   SetupAdminRequest,
   SetupStatus,
   Skill,
-  SkillCategory
+  SkillCategory,
+  UserProfile
 } from './types';
 import {
   AdminLandingPage,
@@ -97,9 +93,33 @@ function SetupGate() {
 
 function RequireAuth() {
   const token = useAuthStore((state) => state.token);
+  const setProfile = useAuthStore((state) => state.setProfile);
+  const logout = useAuthStore((state) => state.logout);
   const location = useLocation();
-  if (!token) {
+  const { data, isError, isLoading } = useQuery({
+    queryKey: ['auth-me'],
+    queryFn: () => getData<UserProfile>('/auth/me'),
+    enabled: Boolean(token),
+    retry: false
+  });
+
+  useEffect(() => {
+    if (data) {
+      setProfile(data);
+    }
+  }, [data, setProfile]);
+
+  useEffect(() => {
+    if (isError) {
+      logout();
+    }
+  }, [isError, logout]);
+
+  if (!token || isError) {
     return <Navigate to="/login" replace state={{ from: location.pathname }} />;
+  }
+  if (isLoading) {
+    return <div className="boot-screen"><Spin size="large" /></div>;
   }
   return <Outlet />;
 }
@@ -118,7 +138,7 @@ function Shell() {
   const token = useAuthStore((state) => state.token);
   const profile = useAuthStore((state) => state.profile);
   const logout = useAuthStore((state) => state.logout);
-  const { data: platform } = useQuery({ queryKey: ['platform-config'], queryFn: () => getData<PlatformConfig>('/platform/config') });
+  const { data: platform } = useQuery({ queryKey: ['platform-config'], queryFn: () => getPublicData<PlatformConfig>('/platform/config') });
   const isAdmin = profile?.roles.includes('ADMIN');
   const selectedMenuKey = selectedShellMenuKey(location.pathname);
 
@@ -130,7 +150,7 @@ function Shell() {
     { key: '/models', icon: <BrainCircuit size={18} />, label: <Link to="/models">模型</Link> },
     { key: '/finetune', icon: <Database size={18} />, label: <Link to="/finetune">微调</Link> },
     { key: '/developer', icon: <Code2 size={18} />, label: <Link to="/developer">Agent 代管</Link> },
-    { key: '/account/api-keys', icon: <KeyRound size={18} />, label: <Link to="/account/api-keys">Agent 授权</Link> },
+    { key: '/account/api-keys', icon: <KeyRound size={18} />, label: <Link to="/account/api-keys">API Key</Link> },
     ...(isAdmin ? [{
       key: '/admin',
       icon: <ShieldCheck size={18} />,
@@ -146,7 +166,7 @@ function Shell() {
         { key: '/admin/articles', label: <Link to="/admin/articles">文章</Link> },
         { key: '/admin/links', label: <Link to="/admin/links">跳转链接</Link> },
         { key: '/admin/settings', label: <Link to="/admin/settings">系统设置</Link> },
-        { key: '/admin/api-keys', label: <Link to="/admin/api-keys">Agent 授权记录</Link> },
+        { key: '/admin/api-keys', label: <Link to="/admin/api-keys">API Key 记录</Link> },
         { key: '/admin/audit-logs', label: <Link to="/admin/audit-logs">操作记录</Link> }
       ]
     }] : [])
@@ -204,35 +224,20 @@ function selectedShellMenuKey(pathname: string): string {
 }
 
 function DashboardPage() {
-  const { data: agents = [] } = useQuery({ queryKey: ['agents'], queryFn: () => getData<Agent[]>('/agents') });
-  const { data: skills = [] } = useQuery({ queryKey: ['skills'], queryFn: () => getData<Skill[]>('/skills') });
-  const { data: models = [] } = useQuery({ queryKey: ['models'], queryFn: () => getData<AiModel[]>('/models') });
-  const { data: articles = [] } = useQuery({ queryKey: ['articles'], queryFn: () => getData<ArticleSummary[]>('/articles') });
-  const { data: links = [] } = useQuery({ queryKey: ['links'], queryFn: () => getData<RedirectLink[]>('/links') });
-  const { data: platform } = useQuery({ queryKey: ['platform-config'], queryFn: () => getData<PlatformConfig>('/platform/config') });
-  const token = useAuthStore((state) => state.token);
-  const { data: finetuneJobs = [] } = useQuery({
-    queryKey: ['finetune-jobs'],
-    queryFn: () => getData<FinetuneJob[]>('/finetune/jobs'),
-    enabled: Boolean(token)
-  });
-  const { data: developerDashboard } = useQuery({
-    queryKey: ['developer-dashboard'],
-    queryFn: () => getData<DeveloperDashboard>('/developer/dashboard'),
-    enabled: Boolean(token)
+  const { data: agents = [] } = useQuery({ queryKey: ['agents'], queryFn: () => getPublicData<Agent[]>('/agents') });
+  const { data: skills = [] } = useQuery({ queryKey: ['skills'], queryFn: () => getPublicData<Skill[]>('/skills') });
+  const { data: models = [] } = useQuery({ queryKey: ['models'], queryFn: () => getPublicData<AiModel[]>('/models') });
+  const { data: articles = [] } = useQuery({ queryKey: ['articles'], queryFn: () => getPublicData<ArticleSummary[]>('/articles') });
+  const { data: links = [] } = useQuery({ queryKey: ['links'], queryFn: () => getPublicData<RedirectLink[]>('/links') });
+  const { data: platform } = useQuery({ queryKey: ['platform-config'], queryFn: () => getPublicData<PlatformConfig>('/platform/config') });
+  const { data: manifest } = useQuery({
+    queryKey: ['developer-skill-manifest'],
+    queryFn: () => getPublicData<DeveloperSkillManifest>('/developer/skill-manifest')
   });
   const groupedLinks = groupLinks(links);
   const activeSkills = skills.filter((skill) => skill.status === 'ACTIVE').length;
   const activeAgents = agents.filter((agent) => agent.status === 'ACTIVE').length;
-  const readyAgentWorkflows = developerDashboard?.agentWorkflowReadiness.filter((item) => item.ready).length ?? 0;
-  const magiSummary = developerDashboard ? summarizeMagiCycle(buildMagiCyclePlan({
-    requiredScopes: developerDashboard.requiredScopes,
-    missingScopes: developerDashboard.missingRequiredScopes,
-    workflows: developerDashboard.agentWorkflowReadiness,
-    governanceChecks: developerDashboard.governanceChecks,
-    recentEventCount: developerDashboard.recentEvents.length,
-    recentlyUsedKeys: developerDashboard.recentlyUsedKeys
-  })) : undefined;
+  const developerTools = manifest?.tools.length ?? 0;
   const consoleModules = [
     {
       title: 'Agent',
@@ -273,8 +278,8 @@ function DashboardPage() {
     {
       title: '数据集与微调',
       description: '记录数据集、训练任务和微调进度，保留模型迭代上下文。',
-      metric: finetuneJobs.length,
-      unit: '条记录',
+      metric: '登录后',
+      unit: '查看',
       path: '/finetune',
       icon: <Database size={20} />,
       status: '训练'
@@ -290,9 +295,9 @@ function DashboardPage() {
     },
     {
       title: 'Agent 代管入口',
-      description: '保留复制给 Agent 的配置文本、平台 Skill 和必要授权，让 Agent 代管 Agent、Skill 和文章。',
-      metric: readyAgentWorkflows,
-      unit: '项可代管',
+      description: '保留复制给 Agent 的配置文本、平台 Skill 和 API Key，让 Agent 代管 Agent、Skill 和文章。',
+      metric: developerTools,
+      unit: '个工具',
       path: '/developer',
       icon: <Code2 size={20} />,
       status: '代管接入'
@@ -306,7 +311,7 @@ function DashboardPage() {
           <Tag color="processing" icon={<Sparkles size={14} />}>AI 聚合平台</Tag>
           <Title level={1}>{platform?.siteName ?? '星梦 AI 聚合平台'}</Title>
           <Paragraph>
-            {platform?.siteSubtitle ?? '集中管理 Agent、Skill、模型、文章、数据集、微调和工具导航；外部 Agent 通过授权 Key 代管 Agent、Skill 和文章。'}
+            {platform?.siteSubtitle ?? '集中管理 Agent、Skill、模型、文章、数据集、微调和工具导航；外部 Agent 通过 API Key 代管 Agent、Skill 和文章。'}
           </Paragraph>
           <Space wrap className="console-hero-actions">
             <Link to="/agents"><Button type="primary" icon={<Bot size={16} />}>查看 Agent</Button></Link>
@@ -321,18 +326,6 @@ function DashboardPage() {
           <div><strong>{links.length}</strong><span>连接器</span></div>
         </div>
       </section>
-
-      {magiSummary && (
-        <Link to={magiSummary.route} className={`magi-action-strip is-${magiSummary.focusStage}`}>
-          <span className="magi-action-icon">{magiStageIcon(magiSummary.focusStage)}</span>
-          <span>
-            <Text type="secondary">MAGI 当前轮次</Text>
-             <strong>{magiSummary.focusLabel} · {magiSummary.progressLabel}</strong>
-            <small>{magiSummary.primaryAction}</small>
-          </span>
-          <span className="magi-action-link">进入{magiSummary.focusLabel}</span>
-        </Link>
-      )}
 
       <div className="console-module-grid">
         {consoleModules.map((module) => (
@@ -401,7 +394,7 @@ function LoginPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const setSession = useAuthStore((state) => state.setSession);
-  const { data: platform } = useQuery({ queryKey: ['platform-config'], queryFn: () => getData<PlatformConfig>('/platform/config') });
+  const { data: platform } = useQuery({ queryKey: ['platform-config'], queryFn: () => getPublicData<PlatformConfig>('/platform/config') });
   const from = (location.state as { from?: string } | null)?.from ?? '/';
   const mutation = useMutation({
     mutationFn: (values: { username: string; password: string }) => postData<AuthResponse>('/auth/login', values),
@@ -521,7 +514,7 @@ function AccountProfilePage() {
 }
 
 function AgentsPage() {
-  const { data = [] } = useQuery({ queryKey: ['agents'], queryFn: () => getData<Agent[]>('/agents') });
+  const { data = [] } = useQuery({ queryKey: ['agents'], queryFn: () => getPublicData<Agent[]>('/agents') });
   const [keyword, setKeyword] = useState('');
   const [category, setCategory] = useState('all');
   const categories = Array.from(new Set(data.map((agent) => agent.category))).sort();
@@ -609,8 +602,8 @@ function SkillsPage() {
   const token = useAuthStore((state) => state.token);
   const queryClient = useQueryClient();
   const navigate = useNavigate();
-  const { data = [] } = useQuery({ queryKey: ['skills'], queryFn: () => getData<Skill[]>('/skills') });
-  const { data: categories = [] } = useQuery({ queryKey: ['skill-categories'], queryFn: () => getData<SkillCategory[]>('/skills/categories') });
+  const { data = [] } = useQuery({ queryKey: ['skills'], queryFn: () => getPublicData<Skill[]>('/skills') });
+  const { data: categories = [] } = useQuery({ queryKey: ['skill-categories'], queryFn: () => getPublicData<SkillCategory[]>('/skills/categories') });
   const [keyword, setKeyword] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [artifactFilter, setArtifactFilter] = useState('all');
@@ -1247,7 +1240,7 @@ function DetailView(props: { title: string; label: string; description: string; 
 }
 
 function ModelsPage() {
-  const { data = [] } = useQuery({ queryKey: ['models'], queryFn: () => getData<AiModel[]>('/models') });
+  const { data = [] } = useQuery({ queryKey: ['models'], queryFn: () => getPublicData<AiModel[]>('/models') });
   const [providerFilter, setProviderFilter] = useState('all');
   const [typeFilter, setTypeFilter] = useState('all');
   const providers = Array.from(new Set(data.map((model) => model.provider))).sort();
@@ -1459,13 +1452,13 @@ function ApiKeysPage() {
 
   return (
     <div className="page">
-      <PageTitle title="Agent 授权" description="只为外部 Agent 管理 Agent、Skill 和文章签发 API Key，按任务选择最小范围。" />
+      <PageTitle title="API Key" description="只为外部 Agent 管理 Agent、Skill 和文章签发 API Key，按任务选择最小范围。" />
       <section className="agent-control-panel api-management-hero">
         <div>
-          <Tag color="processing" icon={<Activity size={14} />}>Agent 授权</Tag>
-          <Title level={2}>Agent 授权 Key</Title>
+          <Tag color="processing" icon={<Activity size={14} />}>API Key</Tag>
+          <Title level={2}>Agent API Key</Title>
           <Paragraph>
-            API Key 只是给 Agent 代管 Agent、Skill 和文章用的授权令牌，用完可撤销；平台主线仍是 Agent、Skill、模型和文章。
+            API Key 只给 Agent 代管 Agent、Skill 和文章使用，用完可撤销；平台主线仍是 Agent、Skill、模型和文章。
           </Paragraph>
         </div>
         <div className="api-management-quick-panel">
@@ -1684,7 +1677,7 @@ function DeveloperPage() {
           <Tag color="processing" icon={<Code2 size={14} />}>Agent 代管入口</Tag>
           <Title level={1}>Agent 代管入口</Title>
           <Paragraph>
-             外部 Agent 只用这里的 API Base、Manifest、授权 Key 和平台 Skill 管理 Agent、Skill 和文章。
+             外部 Agent 只用这里的 API Base、Manifest、API Key 和平台 Skill 管理 Agent、Skill 和文章。
           </Paragraph>
           <Space wrap>
             <Button type="primary" icon={<Download size={16} />} href={selfSkillUrl}>
@@ -1697,7 +1690,7 @@ function DeveloperPage() {
           <Statistic title="工具契约" value={toolSpecs.length} />
           <Statistic title="认证头" value={authHeaders.length} />
           <Statistic title="可代管任务" value={`${readyAgentWorkflows}/${agentWorkflowReadiness.length || 0}`} />
-          <Statistic title="授权覆盖" value={scopeCoverage} suffix="%" />
+          <Statistic title="Scope 覆盖" value={scopeCoverage} suffix="%" />
         </div>
       </section>
 
@@ -1804,7 +1797,7 @@ function DeveloperPage() {
             <section>
               <Tag>02</Tag>
               <div>
-                <Text strong>配置授权 Key</Text>
+                <Text strong>配置 API Key</Text>
                  <Text type="secondary">只开放本次 Agent、Skill 或文章任务需要的范围。</Text>
               </div>
             </section>
@@ -1988,19 +1981,9 @@ function statusLabel(status: string): string {
   return labels[status] ?? status;
 }
 
-function magiStageIcon(stage: MagiCycleStageKey): ReactNode {
-  if (stage === 'review') {
-    return <AlertTriangle size={18} />;
-  }
-  if (stage === 'execute') {
-    return <Workflow size={18} />;
-  }
-  return <Sparkles size={18} />;
-}
-
 function PlatformThemeBootstrap() {
   const setTheme = useThemeStore((state) => state.setTheme);
-  const { data } = useQuery({ queryKey: ['platform-config'], queryFn: () => getData<PlatformConfig>('/platform/config') });
+  const { data } = useQuery({ queryKey: ['platform-config'], queryFn: () => getPublicData<PlatformConfig>('/platform/config') });
 
   useEffect(() => {
     if (data?.defaultTheme) {

@@ -56,12 +56,13 @@ describe('workspace style guard', () => {
     expect(appSource).toContain('代管指南');
   });
 
-  it('names Agent authorization as the primary entry while preserving API Key management', () => {
-    expect(appSource).not.toContain('>API Key</Link>');
-    expect(appSource).not.toContain('>API Key</Button>');
+  it('keeps API Key as the primary label while framing it for Agent use', () => {
+    expect(appSource).not.toContain('Agent 授权');
+    expect(appSource).not.toContain('授权 Key');
+    expect(adminSource).not.toContain('Agent 授权');
     expect(appSource).not.toContain('凭据管理');
-    expect(appSource).toContain('Agent 授权');
     expect(appSource).toContain('API Key 管理');
+    expect(appSource).toContain('API Key 只给 Agent 代管 Agent、Skill 和文章使用');
   });
 
   it('keeps admin copy focused on concrete platform objects instead of governance surfaces', () => {
@@ -75,8 +76,18 @@ describe('workspace style guard', () => {
     expect(adminSource).not.toContain('内容后台');
     expect(adminSource).not.toContain('教程文章');
     expect(adminSource).toContain('平台后台');
-    expect(adminSource).toContain('Agent 授权记录');
+    expect(adminSource).toContain('API Key 记录');
     expect(adminSource).toContain('操作记录');
+  });
+
+  it('keeps public directory queries off protected API calls', () => {
+    expect(appSource).toContain("queryFn: () => getPublicData<Agent[]>('/agents')");
+    expect(appSource).toContain("queryFn: () => getPublicData<Skill[]>('/skills')");
+    expect(appSource).toContain("queryFn: () => getPublicData<AiModel[]>('/models')");
+    expect(appSource).toContain("queryFn: () => getPublicData<PlatformConfig>('/platform/config')");
+    expect(appSource).toContain("queryFn: () => getData<UserProfile>('/auth/me')");
+    expect(appSource).not.toContain("queryFn: () => getData<DeveloperDashboard>('/developer/dashboard'),\n    enabled: Boolean(token)");
+    expect(appSource).not.toContain("queryFn: () => getData<FinetuneJob[]>('/finetune/jobs'),");
   });
 
   it('frames MAGI as Agent handoff progress instead of content assets or self-check governance', () => {
