@@ -1,7 +1,7 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import { BrowserRouter, Link, Navigate, Outlet, Route, Routes, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Alert, Button, Card, Form, Input, Layout, Menu, Modal, Popconfirm, Progress, Segmented, Select, Space, Spin, Statistic, Steps, Switch, Table, Tag, Typography, Upload, message } from 'antd';
+import { Alert, Button, Card, Form, Input, Layout, Menu, Modal, Popconfirm, Progress, Segmented, Select, Space, Spin, Statistic, Switch, Table, Tag, Typography, Upload, message } from 'antd';
 import type { RcFile } from 'antd/es/upload';
 import {
   Activity,
@@ -27,6 +27,7 @@ import {
   Workflow
 } from 'lucide-react';
 import { apiUrl, downloadFile, getData, getPublicData, postData, postPublicData, uploadData } from './api/client';
+import { buildAgentApiAccess } from './features/agentApi/agentApiAccess';
 import {
   buildMagiCyclePlan,
   summarizeMagiCycle,
@@ -45,7 +46,6 @@ import type {
   ArticleLink,
   ArticleSummary,
   AuthResponse,
-  DeveloperAgentWorkflow,
   DeveloperDashboard,
   DeveloperSkillManifest,
   DeveloperToolSpec,
@@ -131,7 +131,7 @@ function Shell() {
     { key: '/articles', icon: <BookOpenCheck size={18} />, label: <Link to="/articles">知识库</Link> },
     { key: '/models', icon: <BrainCircuit size={18} />, label: <Link to="/models">模型</Link> },
     { key: '/finetune', icon: <Database size={18} />, label: <Link to="/finetune">微调</Link> },
-    { key: '/developer', icon: <Code2 size={18} />, label: <Link to="/developer">控制面</Link> },
+    { key: '/developer', icon: <Code2 size={18} />, label: <Link to="/developer">Agent API</Link> },
     { key: '/observability', icon: <Activity size={18} />, label: <Link to="/observability">观测</Link> },
     { key: '/account/api-keys', icon: <KeyRound size={18} />, label: <Link to="/account/api-keys">API Key</Link> },
     ...(isAdmin ? [{
@@ -272,13 +272,13 @@ function DashboardPage() {
       status: '知识资产'
     },
     {
-      title: '开发者中心',
-      description: '暴露 Manifest、工具契约和接入示例，让外部 Agent 稳定调用平台能力。',
+      title: 'Agent API 接入',
+      description: '提供 Manifest、API Base、认证头和工具契约，让外部 Agent 直接接入平台能力。',
       metric: 4,
-      unit: '项工具组',
+      unit: '项接入',
       path: '/developer',
       icon: <Code2 size={20} />,
-      status: '开放接口'
+      status: 'API 接入'
     },
     {
       title: 'API 管理',
@@ -330,7 +330,7 @@ function DashboardPage() {
           <Space wrap className="console-hero-actions">
             <Link to="/agents"><Button type="primary" icon={<Bot size={16} />}>查看 Agent 资产</Button></Link>
             <Link to="/skills"><Button icon={<Boxes size={16} />}>进入 Skill 资产</Button></Link>
-            <Link to="/developer"><Button icon={<Workflow size={16} />}>查看控制面</Button></Link>
+            <Link to="/developer"><Button icon={<Workflow size={16} />}>接入 Agent API</Button></Link>
           </Space>
         </div>
         <div className="console-kpi-strip">
@@ -1444,44 +1444,6 @@ const DEFAULT_DEVELOPER_TOOLS = [
   'update_user'
 ];
 
-const DEVELOPER_TOOL_GROUPS = [
-  {
-    title: '发现',
-    scope: 'skills:read',
-    tools: ['list_skills', 'get_skill_categories']
-  },
-  {
-    title: '导入',
-    scope: 'skills:import',
-    tools: ['import_skill', 'upload_skill', 'upload_skill_directory', 'import_remote_skill']
-  },
-  {
-    title: '治理',
-    scope: 'skills:write',
-    tools: ['update_skill', 'replace_skill_artifact', 'replace_skill_directory', 'record_remote_skill', 'delete_skill']
-  },
-  {
-    title: '分发',
-    scope: 'skills:download',
-    tools: ['download_skill']
-  },
-  {
-    title: 'Agent 资产',
-    scope: 'agents:write',
-    tools: ['list_agents', 'create_agent', 'update_agent']
-  },
-  {
-    title: '知识库',
-    scope: 'articles:write',
-    tools: ['list_articles', 'create_article', 'update_article']
-  },
-  {
-    title: '用户',
-    scope: 'users:write',
-    tools: ['list_users', 'create_user', 'update_user']
-  }
-];
-
 function ApiKeysPage() {
   const queryClient = useQueryClient();
   const [form] = Form.useForm<{ name: string; scopes: string[]; expireDays: number }>();
@@ -1829,10 +1791,6 @@ function DeveloperPage() {
     queryKey: ['developer-skill-manifest'],
     queryFn: () => getPublicData<DeveloperSkillManifest>('/developer/skill-manifest')
   });
-  const { data: agentWorkflows = [] } = useQuery({
-    queryKey: ['developer-agent-workflows'],
-    queryFn: () => getPublicData<DeveloperAgentWorkflow[]>('/developer/agent-workflows')
-  });
   const tools = manifest?.tools ?? DEFAULT_DEVELOPER_TOOLS;
   const manifestRequiredScopes = manifest?.requiredScopes ?? DEFAULT_PLATFORM_SCOPES;
   const toolSpecs = manifest?.toolSpecs?.length
@@ -1841,18 +1799,12 @@ function DeveloperPage() {
       name: tool,
       method: '-',
       path: '-',
-      scope: findDeveloperToolScope(tool),
+      scope: inferDeveloperToolScope(tool),
       risk: 'unknown',
       description: formatToolName(tool)
     }));
   const authHeaders = manifest?.auth?.headers ?? ['X-API-Key', 'Authorization: Bearer xma_xxx'];
-  const manifestExamples = manifest?.examples ?? [];
-  const toolGroups = DEVELOPER_TOOL_GROUPS.map((group) => ({
-    ...group,
-    tools: group.tools.filter((tool) => tools.includes(tool))
-  })).filter((group) => group.tools.length > 0);
   const agentWorkflowReadiness = dashboard?.agentWorkflowReadiness ?? [];
-  const controlPlaneModules = dashboard?.controlPlaneModules ?? [];
   const governanceChecks = dashboard?.governanceChecks ?? [];
   const readyAgentWorkflows = agentWorkflowReadiness.filter((item) => item.ready).length;
   const requiredScopes = dashboard?.requiredScopes ?? manifestRequiredScopes;
@@ -1860,250 +1812,160 @@ function DeveloperPage() {
   const scopeCoverage = Math.round(
     ((requiredScopes.length - missingScopes.length) / Math.max(requiredScopes.length, 1)) * 100
   );
-  const installPrompt = `请安装并使用 ${manifest?.name ?? 'ai-platform-manager'}：
-${selfSkillUrl}
-
-连接配置：
-- API Base: ${apiBaseUrl}
-- API Key: 使用平台 API Key 页面生成的 Key
-- 最小权限: ${manifestRequiredScopes.join(', ')}
-
-执行顺序：
-0. 先读取 skill-manifest 的工具清单，确认方法、路径、权限和风险
-1. 先用 list_* 工具读取目标模块现状
-2. 按任务调用 create_* 或 update_* 写入变更
-3. 用户相关工具属于敏感操作，执行前确认邮箱、角色和状态
-4. 写入后重新读取对应模块，确认结果可见且状态正确`;
+  const access = buildAgentApiAccess({
+    apiBaseUrl,
+    selfSkillUrl,
+    manifestName: manifest?.name ?? 'ai-platform-manager',
+    manifestDescription: manifest?.description ?? '平台自管理 Skill，供外部 Agent 调用站内 API。',
+    authHeaders,
+    requiredScopes,
+    missingScopes,
+    toolSpecs
+  });
 
   return (
     <div className="page">
-      <section className="developer-control-plane-hero">
+      <section className="agent-api-hero">
         <div>
-          <Tag color="processing" icon={<Workflow size={14} />}>Agent 控制面</Tag>
-          <Title level={1}>Agent 控制面</Title>
+          <Tag color="processing" icon={<Code2 size={14} />}>Agent API 接入</Tag>
+          <Title level={1}>Agent API 接入</Title>
           <Paragraph>
-            把 Agent 资产、Skill 资产、模型能力层、知识库、权限覆盖和审计信号组织成统一控制面，
-            让 Agent 在可授权、可审计、可回滚的边界内使用平台能力。
+            给外部 Agent 提供 API Base、Manifest、认证头、最小权限和工具契约。
           </Paragraph>
           <Space wrap>
             <Button type="primary" icon={<Download size={16} />} href={selfSkillUrl}>
-              下载自管理 Skill
+              下载 Skill
             </Button>
             <Link to="/account/api-keys"><Button icon={<KeyRound size={16} />}>创建 API Key</Button></Link>
           </Space>
         </div>
-        <div className="developer-control-plane-kpis">
-          <Statistic title="模块数" value={controlPlaneModules.length} />
-          <Statistic title="可用模块" value={controlPlaneModules.filter((item) => item.status === 'READY').length} />
-          <Statistic title="可运行工作流" value={`${readyAgentWorkflows}/${agentWorkflowReadiness.length || agentWorkflows.length}`} />
+        <div className="agent-api-status-panel">
+          <Statistic title="工具契约" value={toolSpecs.length} />
+          <Statistic title="认证头" value={authHeaders.length} />
+          <Statistic title="可运行工作流" value={`${readyAgentWorkflows}/${agentWorkflowReadiness.length || 0}`} />
           <Statistic title="权限覆盖" value={scopeCoverage} suffix="%" />
         </div>
       </section>
 
-      <section className="developer-module-grid">
-        {controlPlaneModules.map((module) => (
-          <div key={module.key} className="developer-module-card">
-            <div className="developer-module-heading">
-              <Tag color={statusTagColor(module.status)}>{statusLabel(module.status)}</Tag>
-              <Text type="secondary">{module.signal}</Text>
-            </div>
-            <Title level={4}>{module.title}</Title>
-            <Paragraph>{module.description}</Paragraph>
-            <div className="developer-module-metrics">
-              <Statistic title="总数" value={module.total} />
-              <Statistic title="可用" value={module.active} />
-            </div>
-            <Link to={module.route}>
-              <Button size="small" icon={<ExternalLink size={14} />}>打开模块</Button>
-            </Link>
+      <div className="agent-api-layout">
+        <Card title="连接参数">
+          <div className="agent-api-connection-list">
+            {access.connectionRows.map((row) => (
+              <div key={row.label}>
+                <Text type="secondary">{row.label}</Text>
+                <Text code copyable={{ text: row.value }}>{row.value}</Text>
+              </div>
+            ))}
           </div>
-        ))}
-      </section>
+          <Paragraph copyable={{ text: access.installPrompt }} className="prompt-copy agent-api-prompt">
+            {access.installPrompt}
+          </Paragraph>
+        </Card>
 
-      <section className="developer-governance-grid">
-        {governanceChecks.map((check) => (
-          <div key={check.key} className="developer-governance-card">
-            <div className="developer-governance-heading">
-              {check.status === 'PASS' ? <CheckCircle2 size={18} /> : <AlertTriangle size={18} />}
-              <Text strong>{check.title}</Text>
-              <Tag color={statusTagColor(check.status)}>{statusLabel(check.status)}</Tag>
-            </div>
-            <Text>{check.description}</Text>
-            <Text type="secondary">{check.action}</Text>
+        <Card title="接入步骤">
+          <div className="agent-api-step-list">
+            <section>
+              <Tag>01</Tag>
+              <div>
+                <Text strong>读取 Manifest</Text>
+                <Text type="secondary">确认工具路径、方法、scope 和风险级别。</Text>
+              </div>
+            </section>
+            <section>
+              <Tag>02</Tag>
+              <div>
+                <Text strong>签发 API Key</Text>
+                <Text type="secondary">只授予本次任务需要的最小权限。</Text>
+              </div>
+            </section>
+            <section>
+              <Tag>03</Tag>
+              <div>
+                <Text strong>调用并复核</Text>
+                <Text type="secondary">写入后重新读取资源，并在审计日志中确认调用。</Text>
+              </div>
+            </section>
           </div>
-        ))}
-      </section>
+        </Card>
+      </div>
 
-      <Card title="运行流程" className="developer-section-card">
-        <Steps
-          className="developer-steps"
-          responsive
-          items={[
-            { title: '接入', description: '下载自管理 Skill 并读取 Manifest 契约' },
-            { title: '授权', description: '创建最小权限 API Key 并检查权限覆盖' },
-            { title: '编排', description: '按 Agent Workflow 选择工具、门禁和验证方式' },
-            { title: '执行', description: '管理 Skill、Agent、文章和用户等平台模块' },
-            { title: '审计', description: '在治理检查和审计日志中追踪高风险动作' }
+      <Card
+        title="工具契约"
+        className="agent-api-card"
+        extra={(
+          <Tag color={statusTagColor(access.permissionStatus.status === 'ready' ? 'PASS' : 'ATTENTION')}>
+            {access.permissionStatus.label}
+          </Tag>
+        )}
+      >
+        <Table<DeveloperToolSpec>
+          rowKey="name"
+          dataSource={access.featuredTools}
+          pagination={false}
+          size="small"
+          scroll={{ x: 760 }}
+          columns={[
+            {
+              title: '工具',
+              dataIndex: 'name',
+              render: (_, record) => (
+                <Space direction="vertical" size={0}>
+                  <Text strong>{formatToolName(record.name)}</Text>
+                  <Text type="secondary">{record.description}</Text>
+                </Space>
+              )
+            },
+            {
+              title: '方法',
+              dataIndex: 'method',
+              width: 90,
+              render: (method: string) => <Tag color={methodTagColor(method)}>{method}</Tag>
+            },
+            {
+              title: '路径',
+              dataIndex: 'path',
+              render: (path: string) => <Text code className="developer-tool-path">{path}</Text>
+            },
+            {
+              title: '权限',
+              dataIndex: 'scope',
+              render: (scope: string) => (
+                <Space size={[4, 4]} wrap>
+                  {scope.split(',').map((item) => renderScopeTag(item.trim()))}
+                </Space>
+              )
+            },
+            {
+              title: '风险',
+              dataIndex: 'risk',
+              width: 110,
+              render: (risk: string) => <Tag color={riskTagColor(risk)}>{riskLabel(risk)}</Tag>
+            }
           ]}
         />
       </Card>
 
-      <Card title="Agent 工作流" className="developer-section-card">
-        <div className="developer-agent-workflow-grid">
-          {agentWorkflows.map((workflow) => (
-            <section key={workflow.key} className="developer-agent-workflow-card">
-              <div className="developer-agent-workflow-heading">
-                <Space direction="vertical" size={2}>
-                  <Text strong>{workflow.title}</Text>
-                  <Text type="secondary">{workflow.trigger}</Text>
-                </Space>
-                <Tag color={riskTagColor(workflow.risk)}>{riskLabel(workflow.risk)}</Tag>
+      <Card title="权限与门禁" className="agent-api-card">
+        <div className="agent-api-guard-grid">
+          <section className={`agent-api-guard-card is-${access.permissionStatus.status}`}>
+            <div>
+              {access.permissionStatus.status === 'ready' ? <CheckCircle2 size={18} /> : <AlertTriangle size={18} />}
+              <Text strong>{access.permissionStatus.label}</Text>
+            </div>
+            <Text type="secondary">{access.permissionStatus.detail}</Text>
+            <Link to="/account/api-keys"><Button size="small" icon={<KeyRound size={14} />}>管理 Key</Button></Link>
+          </section>
+          {governanceChecks.slice(0, 3).map((check) => (
+            <section key={check.key} className="agent-api-guard-card">
+              <div>
+                {check.status === 'PASS' ? <CheckCircle2 size={18} /> : <AlertTriangle size={18} />}
+                <Text strong>{check.title}</Text>
+                <Tag color={statusTagColor(check.status)}>{statusLabel(check.status)}</Tag>
               </div>
-              <div className="developer-agent-workflow-tools">
-                {workflow.tools.map((tool) => <Tag key={tool}>{formatToolName(tool)}</Tag>)}
-              </div>
-              <ol className="developer-agent-workflow-steps">
-                {workflow.steps.map((step) => <li key={step}>{step}</li>)}
-              </ol>
-              <div className="developer-agent-workflow-footer">
-                <div>
-                  <Text type="secondary">权限</Text>
-                  <div>
-                    {workflow.requiredScopes.map((scope) => renderScopeTag(scope))}
-                  </div>
-                </div>
-                <div>
-                  <Text type="secondary">门禁</Text>
-                  <Text>{workflow.riskGate}</Text>
-                </div>
-                <div>
-                  <Text type="secondary">验证</Text>
-                  <Text>{workflow.verification}</Text>
-                </div>
-              </div>
+              <Text type="secondary">{check.action}</Text>
             </section>
           ))}
         </div>
-      </Card>
-
-      <div className="developer-grid">
-        <Card title={manifest?.name ?? 'ai-platform-manager'}>
-          <Paragraph>
-            {manifest?.description ?? 'Skill 包内置工具契约，Agent 只需要 API Base、API Key 和明确任务目标即可管理平台资源。'}
-          </Paragraph>
-          <div className="developer-manifest-meta compact">
-            <Statistic title="版本" value={manifest?.schemaVersion ?? '1.0'} />
-            <Statistic title="工具数" value={toolSpecs.length} />
-            <Statistic title="权限数" value={manifestRequiredScopes.length} />
-            <Statistic title="认证头" value={authHeaders.length} />
-          </div>
-          <Space wrap>
-            <Button type="primary" icon={<Download size={16} />} href={selfSkillUrl}>下载 ai-platform-manager</Button>
-            <Link to="/account/api-keys"><Button icon={<KeyRound size={16} />}>创建 API Key</Button></Link>
-          </Space>
-        </Card>
-        <Card title="复制给 Agent 的提示词">
-          <Paragraph copyable={{ text: installPrompt }} className="prompt-copy">
-            {installPrompt}
-          </Paragraph>
-        </Card>
-      </div>
-
-      <div className="developer-two-column">
-        <Card title="能力矩阵">
-          <div className="developer-tool-groups">
-            {toolGroups.map((group) => (
-              <section key={group.title} className="developer-tool-group">
-                <div className="developer-tool-heading">
-                  <strong>{group.title}</strong>
-                  <Tag>{scopeLabel(group.scope)} · {group.scope}</Tag>
-                </div>
-                <div className="developer-tool-tags">
-                  {group.tools.map((tool) => <Tag key={tool}>{formatToolName(tool)}</Tag>)}
-                </div>
-              </section>
-            ))}
-          </div>
-          <Table<DeveloperToolSpec>
-            className="developer-tool-spec-table"
-            rowKey="name"
-            dataSource={toolSpecs}
-            pagination={false}
-            size="small"
-            scroll={{ x: 720 }}
-            columns={[
-              {
-                title: '工具',
-                dataIndex: 'name',
-                render: (_, record) => (
-                  <Space direction="vertical" size={0}>
-                    <Text strong>{formatToolName(record.name)}</Text>
-                    <Text type="secondary">{record.description}</Text>
-                  </Space>
-                )
-              },
-              {
-                title: '方法',
-                dataIndex: 'method',
-                width: 90,
-                render: (method: string) => <Tag color={methodTagColor(method)}>{method}</Tag>
-              },
-              {
-                title: '路径',
-                dataIndex: 'path',
-                render: (path: string) => <Text code className="developer-tool-path">{path}</Text>
-              },
-              {
-                title: '权限',
-                dataIndex: 'scope',
-                render: (scope: string) => (
-                  <Space size={[4, 4]} wrap>
-                    {scope.split(',').map((item) => renderScopeTag(item.trim()))}
-                  </Space>
-                )
-              },
-              {
-                title: '风险',
-                dataIndex: 'risk',
-                width: 110,
-                render: (risk: string) => <Tag color={riskTagColor(risk)}>{riskLabel(risk)}</Tag>
-              }
-            ]}
-          />
-        </Card>
-        <Card title="最小权限">
-          <Table
-            rowKey="value"
-            dataSource={API_KEY_SCOPE_OPTIONS.filter((item) => item.value !== 'admin:manage')}
-            pagination={false}
-            size="small"
-            columns={[
-              { title: '权限', dataIndex: 'value', render: (value) => renderScopeTag(value) },
-              { title: '用途', dataIndex: 'description' }
-            ]}
-          />
-        </Card>
-      </div>
-
-      <Card title="平台管理清单" className="markdown-card">
-        <pre>{JSON.stringify({
-          endpoint: '/api/v1/developer/skill-manifest',
-          schemaVersion: manifest?.schemaVersion ?? '1.0',
-          apiVersion: manifest?.apiVersion ?? 'v1',
-          apiBasePath: manifest?.apiBasePath ?? '/api/v1',
-          name: manifest?.name ?? 'ai-platform-manager',
-          auth: authHeaders,
-          requiredScopes: manifestRequiredScopes,
-          tools,
-          toolSpecs
-        }, null, 2)}</pre>
-      </Card>
-      <Card title="开放接口示例" className="markdown-card">
-        <pre>{manifestExamples.length > 0
-          ? manifestExamples.join('\n')
-          : `list_skills: GET ${apiBaseUrl}/developer/skills\n` +
-            `upload_skill: POST multipart ${apiBaseUrl}/developer/skills/upload\n` +
-            `download_skill: GET ${apiBaseUrl}/developer/skills/{id}/download`}</pre>
       </Card>
     </div>
   );
@@ -2113,8 +1975,29 @@ function formatToolName(tool: string): string {
   return tool.replace(/_/g, ' ');
 }
 
-function findDeveloperToolScope(tool: string): string {
-  return DEVELOPER_TOOL_GROUPS.find((group) => group.tools.includes(tool))?.scope ?? 'unknown';
+function inferDeveloperToolScope(tool: string): string {
+  if (tool.startsWith('list_') || tool === 'get_skill_categories') {
+    return tool.includes('agent') ? 'agents:read'
+      : tool.includes('article') ? 'articles:read'
+        : tool.includes('user') ? 'users:read'
+          : 'skills:read';
+  }
+  if (tool.includes('download')) {
+    return 'skills:download';
+  }
+  if (tool.includes('import') || tool.includes('upload')) {
+    return 'skills:import';
+  }
+  if (tool.includes('agent')) {
+    return 'agents:write';
+  }
+  if (tool.includes('article')) {
+    return 'articles:write';
+  }
+  if (tool.includes('user')) {
+    return 'users:write';
+  }
+  return 'skills:write';
 }
 
 function methodTagColor(method: string): string {
@@ -2255,7 +2138,7 @@ function ObservabilityPage() {
           </Paragraph>
           <Space wrap>
             <Link to="/account/api-keys"><Button type="primary" icon={<KeyRound size={16} />}>管理 API Key</Button></Link>
-            <Link to="/developer"><Button icon={<Workflow size={16} />}>查看控制面</Button></Link>
+            <Link to="/developer"><Button icon={<Workflow size={16} />}>Agent API</Button></Link>
           </Space>
         </div>
         <div className="observability-health-panel">
