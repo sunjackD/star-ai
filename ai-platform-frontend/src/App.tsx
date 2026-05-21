@@ -131,8 +131,7 @@ function Shell() {
     { key: '/articles', icon: <BookOpenCheck size={18} />, label: <Link to="/articles">知识库</Link> },
     { key: '/models', icon: <BrainCircuit size={18} />, label: <Link to="/models">模型</Link> },
     { key: '/finetune', icon: <Database size={18} />, label: <Link to="/finetune">微调</Link> },
-    { key: '/developer', icon: <Code2 size={18} />, label: <Link to="/developer">Agent API</Link> },
-    { key: '/observability', icon: <Activity size={18} />, label: <Link to="/observability">观测</Link> },
+    { key: '/developer', icon: <Code2 size={18} />, label: <Link to="/developer">Agent 代管</Link> },
     { key: '/account/api-keys', icon: <KeyRound size={18} />, label: <Link to="/account/api-keys">API Key</Link> },
     ...(isAdmin ? [{
       key: '/admin',
@@ -202,7 +201,7 @@ function selectedShellMenuKey(pathname: string): string {
   if (pathname.startsWith('/admin/')) {
     return pathname;
   }
-  const sections = ['/agents', '/skills', '/articles', '/models', '/finetune', '/developer', '/observability', '/account/api-keys'];
+  const sections = ['/agents', '/skills', '/articles', '/models', '/finetune', '/developer', '/account/api-keys'];
   return sections.find((section) => pathname.startsWith(section)) ?? pathname;
 }
 
@@ -212,20 +211,22 @@ function DashboardPage() {
   const { data: models = [] } = useQuery({ queryKey: ['models'], queryFn: () => getData<AiModel[]>('/models') });
   const { data: articles = [] } = useQuery({ queryKey: ['articles'], queryFn: () => getData<ArticleSummary[]>('/articles') });
   const { data: links = [] } = useQuery({ queryKey: ['links'], queryFn: () => getData<RedirectLink[]>('/links') });
-  const { data: apiKeys = [] } = useQuery({ queryKey: ['account-api-keys'], queryFn: () => getData<ApiKey[]>('/account/api-keys') });
   const { data: platform } = useQuery({ queryKey: ['platform-config'], queryFn: () => getData<PlatformConfig>('/platform/config') });
   const token = useAuthStore((state) => state.token);
-  const profile = useAuthStore((state) => state.profile);
+  const { data: finetuneJobs = [] } = useQuery({
+    queryKey: ['finetune-jobs'],
+    queryFn: () => getData<FinetuneJob[]>('/finetune/jobs'),
+    enabled: Boolean(token)
+  });
   const { data: developerDashboard } = useQuery({
     queryKey: ['developer-dashboard'],
     queryFn: () => getData<DeveloperDashboard>('/developer/dashboard'),
     enabled: Boolean(token)
   });
-  const isAdmin = profile?.roles.includes('ADMIN');
   const groupedLinks = groupLinks(links);
   const activeSkills = skills.filter((skill) => skill.status === 'ACTIVE').length;
   const activeAgents = agents.filter((agent) => agent.status === 'ACTIVE').length;
-  const activeApiKeys = apiKeys.filter((key) => key.status === 'ACTIVE').length;
+  const readyAgentWorkflows = developerDashboard?.agentWorkflowReadiness.filter((item) => item.ready).length ?? 0;
   const magiSummary = developerDashboard ? summarizeMagiCycle(buildMagiCyclePlan({
     requiredScopes: developerDashboard.requiredScopes,
     missingScopes: developerDashboard.missingRequiredScopes,
@@ -235,102 +236,84 @@ function DashboardPage() {
     recentlyUsedKeys: developerDashboard.recentlyUsedKeys
   })) : undefined;
   const consoleModules = [
-    {
-      title: 'Agent 资产库',
-      description: '统一维护团队正在使用的 IDE Agent、CLI Agent 与自动化助手。',
-      metric: activeAgents,
-      unit: '可用',
-      path: '/agents',
-      icon: <Bot size={20} />,
-      status: '运行目录'
-    },
-    {
-      title: 'Skill 资产库',
-      description: '沉淀可复用能力包，支持发现、下载、上传、替换和远程导入。',
-      metric: activeSkills,
-      unit: '个 Skill',
-      path: '/skills',
-      icon: <Boxes size={20} />,
-      status: '资产仓库'
-    },
-    {
-      title: '模型能力层',
-      description: '跟踪模型供应商、能力标签和调用入口，为 Agent 选择合适底座。',
-      metric: models.length,
-      unit: '个模型',
-      path: '/models',
-      icon: <BrainCircuit size={20} />,
-      status: '能力底座'
-    },
-    {
-      title: '知识库',
-      description: '把教程、最佳实践和操作资产结构化，作为 Agent 执行前上下文。',
-      metric: articles.length,
-      unit: '篇内容',
-      path: '/articles',
-      icon: <BookOpenCheck size={20} />,
-      status: '知识资产'
-    },
-    {
-      title: 'Agent API 接入',
-      description: '提供 Manifest、API Base、认证头和工具契约，让外部 Agent 直接接入平台能力。',
-      metric: 4,
-      unit: '项接入',
-      path: '/developer',
-      icon: <Code2 size={20} />,
-      status: 'API 接入'
-    },
-    {
-      title: 'API 管理',
-      description: '管理 API Key 生命周期、最小权限覆盖和近期调用痕迹。',
-      metric: activeApiKeys,
-      unit: '个有效 Key',
-      path: '/account/api-keys',
-      icon: <KeyRound size={20} />,
-      status: '凭据治理'
-    },
-    {
-      title: 'AI 工作流',
-      description: '把 Skill 导入、资产维护和删除门禁编排成可审计的 Agent 流程。',
-      metric: 4,
-      unit: '条流程',
-      path: '/developer',
-      icon: <Workflow size={20} />,
-      status: '流程编排'
-    },
-    {
-      title: '观测中心',
-      description: '聚合 Agent 调用、权限覆盖、工作流阻塞和治理检查，形成运行态视图。',
-      metric: activeApiKeys,
-      unit: '个有效 Key',
-      path: '/observability',
-      icon: <Activity size={20} />,
-      status: '运行观测'
-    },
-    {
-      title: '治理中心',
-      description: '管理用户、角色、系统设置、API Key 审计和操作日志。',
-      metric: isAdmin ? 1 : 0,
-      unit: isAdmin ? '管理员' : '受限',
-      path: isAdmin ? '/admin' : '/account/api-keys',
-      icon: <ShieldCheck size={20} />,
-      status: isAdmin ? '治理入口' : '权限受限'
-    }
+      {
+        title: 'Agent 资料库',
+        description: '维护 IDE Agent、CLI Agent 与自动化助手的入口、说明和使用场景。',
+        metric: activeAgents,
+        unit: '可用',
+        path: '/agents',
+        icon: <Bot size={20} />,
+        status: 'Agent 资料'
+      },
+      {
+        title: 'Skill 能力包',
+        description: '沉淀可复用能力包，支持发现、下载、上传、替换和远程导入。',
+        metric: activeSkills,
+        unit: '个 Skill',
+        path: '/skills',
+        icon: <Boxes size={20} />,
+        status: '能力资产'
+      },
+      {
+        title: '模型资料',
+        description: '整理模型供应商、能力标签和调用入口，为 Agent 选择合适底座。',
+        metric: models.length,
+        unit: '个模型',
+        path: '/models',
+        icon: <BrainCircuit size={20} />,
+        status: '模型目录'
+      },
+      {
+        title: 'AI 文章库',
+        description: '把教程、最佳实践、Prompt 和操作资产结构化，作为 Agent 执行前上下文。',
+        metric: articles.length,
+        unit: '篇内容',
+        path: '/articles',
+        icon: <BookOpenCheck size={20} />,
+        status: '内容资产'
+      },
+      {
+        title: '数据与微调记录',
+        description: '记录数据集、训练任务和微调进度，保留模型迭代上下文。',
+        metric: finetuneJobs.length,
+        unit: '条记录',
+        path: '/finetune',
+        icon: <Database size={20} />,
+        status: '训练资料'
+      },
+      {
+        title: '工具导航',
+        description: '维护常用 AI 工具、模型服务和外部资源入口。',
+        metric: links.length,
+        unit: '个入口',
+        path: '/#navigation',
+        icon: <ExternalLink size={20} />,
+        status: '外部工具'
+      },
+      {
+        title: 'Agent 代管入口',
+        description: '保留复制给 Agent 的配置文本、平台 Skill 和必要授权，让 Agent 只代管这些知识产物。',
+        metric: readyAgentWorkflows,
+        unit: '项可代管',
+        path: '/developer',
+        icon: <Code2 size={20} />,
+        status: '代管接入'
+      }
   ];
 
   return (
     <div className="page">
       <section className="workspace-hero">
         <div>
-          <Tag color="processing" icon={<Sparkles size={14} />}>Agent API 工作台</Tag>
-          <Title level={1}>{platform?.siteName ?? '星梦 AI Agent API 工作台'}</Title>
+          <Tag color="processing" icon={<Sparkles size={14} />}>AI 知识产物工作台</Tag>
+          <Title level={1}>{platform?.siteName ?? '星梦 AI 知识产物工作台'}</Title>
           <Paragraph>
-            {platform?.siteSubtitle ?? '围绕 Agent API 接入、Skill 资产、模型层、知识库和治理链路组织工作，让团队快速完成发现、授权、调用和审计。'}
+            {platform?.siteSubtitle ?? '集中管理 Agent 资料、Skill 能力包、模型资料、AI 文章和工具导航；Agent 只作为代管助手维护这些内容。'}
           </Paragraph>
           <Space wrap className="console-hero-actions">
             <Link to="/agents"><Button type="primary" icon={<Bot size={16} />}>查看 Agent 资产</Button></Link>
             <Link to="/skills"><Button icon={<Boxes size={16} />}>进入 Skill 资产</Button></Link>
-            <Link to="/developer"><Button icon={<Workflow size={16} />}>接入 Agent API</Button></Link>
+            <Link to="/developer"><Button icon={<Workflow size={16} />}>打开 Agent 代管</Button></Link>
           </Space>
         </div>
         <div className="console-kpi-strip">
@@ -370,7 +353,7 @@ function DashboardPage() {
         ))}
       </div>
 
-      <Card title="外部系统连接器" className="navigation-card">
+      <Card id="navigation" title="外部工具导航" className="navigation-card">
         <div className="navigation-groups">
           {Object.keys(groupedLinks).length === 0 && <Text type="secondary">暂无导航入口，请在后台跳转链接中维护。</Text>}
           {Object.entries(groupedLinks).map(([category, items]) => (
@@ -1365,8 +1348,6 @@ const API_KEY_SCOPE_OPTIONS = [
   { value: 'agents:write', label: '维护 Agent', description: '创建和更新 Agent 资产' },
   { value: 'articles:read', label: '读取文章', description: '查询知识库文章和内容元数据' },
   { value: 'articles:write', label: '维护文章', description: '创建和更新知识库文章' },
-  { value: 'users:read', label: '读取用户', description: '查询用户、角色和账号状态' },
-  { value: 'users:write', label: '维护用户', description: '创建用户并更新资料、状态和角色' },
   { value: 'admin:manage', label: '平台管理', description: '预留给管理类自动化能力' }
 ];
 
@@ -1384,14 +1365,14 @@ const API_KEY_EXPIRE_OPTIONS = [
 const API_KEY_PERMISSION_PRESETS = [
   {
     key: 'platform',
-    label: '平台模块管理',
-    description: '覆盖 Skill、Agent、文章和用户模块，适合受信任的后台 Agent。',
+    label: 'AI 知识产物代管',
+    description: '覆盖 Skill、Agent 和文章，适合让外部 Agent 维护核心 AI 知识产物。',
     scopes: DEFAULT_PLATFORM_SCOPES
   },
   {
     key: 'content',
     label: '内容与 Agent',
-    description: '允许维护 Agent 资产和知识库文章，不触碰用户账号。',
+    description: '允许维护 Agent 资料和知识库文章，适合日常内容更新。',
     scopes: ['agents:read', 'agents:write', 'articles:read', 'articles:write']
   },
   {
@@ -1401,16 +1382,10 @@ const API_KEY_PERMISSION_PRESETS = [
     scopes: ['skills:read', 'skills:import', 'skills:write', 'skills:download']
   },
   {
-    key: 'users',
-    label: '用户管理',
-    description: '仅开放用户查询、创建和更新，适合账号维护任务。',
-    scopes: ['users:read', 'users:write']
-  },
-  {
     key: 'read',
     label: '只读发现',
-    description: '仅允许查询平台模块，适合检索、推荐和审计场景。',
-    scopes: ['skills:read', 'agents:read', 'articles:read', 'users:read']
+    description: '仅允许查询知识产物，适合检索、推荐和整理场景。',
+    scopes: ['skills:read', 'agents:read', 'articles:read']
   },
   {
     key: 'custom',
@@ -1438,10 +1413,7 @@ const DEFAULT_DEVELOPER_TOOLS = [
   'update_agent',
   'list_articles',
   'create_article',
-  'update_article',
-  'list_users',
-  'create_user',
-  'update_user'
+  'update_article'
 ];
 
 function ApiKeysPage() {
@@ -1501,13 +1473,13 @@ function ApiKeysPage() {
 
   return (
     <div className="page">
-      <PageTitle title="API 管理" description="管理 Agent 调用凭据、权限策略、过期风险和审计信号，让自动化接入保持最小权限和可追踪。" />
+      <PageTitle title="Agent 授权" description="只为外部 Agent 管理 AI 知识产物签发 API Key，按任务选择最小范围。" />
       <section className="agent-control-panel api-management-hero">
         <div>
           <Tag color="processing" icon={<Activity size={14} />}>凭据管理</Tag>
-          <Title level={2}>API Key 生命周期与 Agent 调用治理</Title>
+          <Title level={2}>Agent 代管授权 Key</Title>
           <Paragraph>
-            这里聚合 API Key 生命周期、权限覆盖、工作流准备度和最近调用痕迹，用于判断 Agent 是否具备稳定、安全的平台模块管理能力。
+            API Key 只是给 Agent 代管内容用的授权令牌，用完可撤销；平台主线仍是 Agent、Skill、模型和文章等知识产物。
           </Paragraph>
         </div>
         <div className="api-management-quick-panel">
@@ -1520,7 +1492,7 @@ function ApiKeysPage() {
             <Text code>/developer/skill-manifest</Text>
           </div>
           <Space wrap>
-            <Link to="/developer"><Button icon={<Workflow size={16} />}>接入指南</Button></Link>
+            <Link to="/developer"><Button icon={<Workflow size={16} />}>代管指南</Button></Link>
             <Button type="primary" icon={<KeyRound size={16} />} onClick={() => setModalOpen(true)}>创建 API Key</Button>
           </Space>
         </div>
@@ -1532,16 +1504,16 @@ function ApiKeysPage() {
           <Text type="secondary">总数 {dashboard?.totalKeys ?? data.length}</Text>
         </Card>
         <Card className="agent-health-card">
-          <Statistic title="近期调用" value={dashboard?.recentlyUsedKeys ?? 0} prefix={<Clock3 size={18} />} />
-          <Text type="secondary">最近 7 天有使用记录</Text>
+          <Statistic title="近期代管" value={dashboard?.recentlyUsedKeys ?? 0} prefix={<Clock3 size={18} />} />
+          <Text type="secondary">最近 7 天有 Agent 使用</Text>
         </Card>
         <Card className="agent-health-card">
           <Statistic title="即将过期" value={dashboard?.expiringSoonKeys ?? 0} prefix={<AlertTriangle size={18} />} />
           <Text type="secondary">未来 14 天内到期</Text>
         </Card>
         <Card className="agent-health-card">
-          <Statistic title="权限覆盖" value={scopeCoverage} suffix="%" prefix={<ShieldCheck size={18} />} />
-          <Text type="secondary">工作流可运行 {readyAgentWorkflows}/{agentWorkflowReadiness.length || '-'}</Text>
+          <Statistic title="代管范围" value={scopeCoverage} suffix="%" prefix={<ShieldCheck size={18} />} />
+          <Text type="secondary">可代管任务 {readyAgentWorkflows}/{agentWorkflowReadiness.length || '-'}</Text>
         </Card>
       </div>
 
@@ -1550,7 +1522,7 @@ function ApiKeysPage() {
           type="warning"
           showIcon
           className="agent-dashboard-alert"
-          message="Agent 自管理权限未完整覆盖"
+          message="Agent 代管授权未完整覆盖"
           description={`缺少 ${formatScopeList(missingScopes)}。创建或更新 Key 时只授予当前任务所需权限。`}
         />
       ) : (
@@ -1558,12 +1530,12 @@ function ApiKeysPage() {
           type="success"
           showIcon
           className="agent-dashboard-alert"
-          message="Agent 自管理权限已覆盖"
-          description="当前至少有一个有效 Key 覆盖平台自管理所需权限。"
+          message="Agent 代管授权已覆盖"
+          description="当前至少有一个有效 Key 覆盖知识产物代管所需范围。"
         />
       )}
 
-      <Card title="权限策略模板" className="api-key-policy-card">
+      <Card title="代管范围模板" className="api-key-policy-card">
         <div className="api-key-policy-grid">
           {API_KEY_PERMISSION_PRESETS.map((preset) => (
             <section key={preset.key} className="api-key-policy-item">
@@ -1579,7 +1551,7 @@ function ApiKeysPage() {
       </Card>
 
       <div className="agent-dashboard-grid">
-        <Card title="权限覆盖">
+        <Card title="授权覆盖">
           <Progress percent={scopeCoverage} />
           <div className="permission-coverage-list">
             {requiredScopes.map((scope) => {
@@ -1597,7 +1569,7 @@ function ApiKeysPage() {
             })}
           </div>
         </Card>
-        <Card title="近期 Agent 活动">
+        <Card title="近期 Agent 代管记录">
           <Table
             rowKey="id"
             size="small"
@@ -1614,7 +1586,7 @@ function ApiKeysPage() {
       </div>
 
       {agentWorkflowReadiness.length > 0 && (
-        <Card title="Agent 工作流准备度" className="agent-workflow-readiness-card">
+        <Card title="Agent 代管任务准备度" className="agent-workflow-readiness-card">
           <div className="agent-workflow-readiness-grid">
             {agentWorkflowReadiness.map((workflow) => (
               <section
@@ -1630,7 +1602,7 @@ function ApiKeysPage() {
                     <Tag color={workflow.ready ? 'green' : 'orange'} icon={
                       workflow.ready ? <CheckCircle2 size={12} /> : <AlertTriangle size={12} />
                     }>
-                      {workflow.ready ? '可运行' : '缺权限'}
+                      {workflow.ready ? '可代管' : '缺授权'}
                     </Tag>
                     <Tag color={riskTagColor(workflow.risk)}>{riskLabel(workflow.risk)}</Tag>
                   </Space>
@@ -1639,9 +1611,9 @@ function ApiKeysPage() {
                   {workflow.requiredScopes.map((scope) => renderScopeTag(scope, workflow.missingScopes.includes(scope)))}
                 </div>
                 {workflow.missingScopes.length > 0 ? (
-                  <Text type="secondary">补齐 {formatScopeList(workflow.missingScopes)} 后可执行</Text>
+                  <Text type="secondary">补齐 {formatScopeList(workflow.missingScopes)} 后可代管</Text>
                 ) : (
-                  <Text type="secondary">当前有效 Key 已覆盖运行所需权限</Text>
+                  <Text type="secondary">当前有效 Key 已覆盖代管所需范围</Text>
                 )}
               </section>
             ))}
@@ -1696,7 +1668,7 @@ function ApiKeysPage() {
           onFinish={(values) => mutation.mutate(values)}
         >
           <Form.Item name="name" label="名称" rules={[{ required: true }]}>
-            <Input placeholder="Agent 后台管理" />
+            <Input placeholder="知识产物代管" />
           </Form.Item>
           <Form.Item label="权限预设">
             <div className="api-key-preset-panel">
@@ -1805,7 +1777,6 @@ function DeveloperPage() {
     }));
   const authHeaders = manifest?.auth?.headers ?? ['X-API-Key', 'Authorization: Bearer xma_xxx'];
   const agentWorkflowReadiness = dashboard?.agentWorkflowReadiness ?? [];
-  const governanceChecks = dashboard?.governanceChecks ?? [];
   const readyAgentWorkflows = agentWorkflowReadiness.filter((item) => item.ready).length;
   const requiredScopes = dashboard?.requiredScopes ?? manifestRequiredScopes;
   const missingScopes = dashboard?.missingRequiredScopes ?? manifestRequiredScopes;
@@ -1816,7 +1787,7 @@ function DeveloperPage() {
     apiBaseUrl,
     selfSkillUrl,
     manifestName: manifest?.name ?? 'ai-platform-manager',
-    manifestDescription: manifest?.description ?? '平台自管理 Skill，供外部 Agent 调用站内 API。',
+    manifestDescription: manifest?.description ?? '代管平台里的 AI 知识产物。',
     authHeaders,
     requiredScopes,
     missingScopes,
@@ -1835,10 +1806,10 @@ function DeveloperPage() {
     <div className="page">
       <section className="agent-api-hero">
         <div>
-          <Tag color="processing" icon={<Code2 size={14} />}>Agent API 接入</Tag>
-          <Title level={1}>Agent API 接入</Title>
+          <Tag color="processing" icon={<Code2 size={14} />}>Agent 代管入口</Tag>
+          <Title level={1}>Agent 代管入口</Title>
           <Paragraph>
-            给外部 Agent 提供 API Base、Manifest、认证头、最小权限和工具契约。
+            外部 Agent 只用这里的 API Base、Manifest、授权 Key 和平台 Skill 管理 Agent 资料、Skill 与文章等 AI 知识产物。
           </Paragraph>
           <Space wrap>
             <Button type="primary" icon={<Download size={16} />} href={selfSkillUrl}>
@@ -1850,8 +1821,8 @@ function DeveloperPage() {
         <div className="agent-api-status-panel">
           <Statistic title="工具契约" value={toolSpecs.length} />
           <Statistic title="认证头" value={authHeaders.length} />
-          <Statistic title="可运行工作流" value={`${readyAgentWorkflows}/${agentWorkflowReadiness.length || 0}`} />
-          <Statistic title="权限覆盖" value={scopeCoverage} suffix="%" />
+          <Statistic title="可代管任务" value={`${readyAgentWorkflows}/${agentWorkflowReadiness.length || 0}`} />
+          <Statistic title="授权覆盖" value={scopeCoverage} suffix="%" />
         </div>
       </section>
 
@@ -1917,21 +1888,21 @@ function DeveloperPage() {
               <Tag>01</Tag>
               <div>
                 <Text strong>读取 Manifest</Text>
-                <Text type="secondary">确认工具路径、方法、scope 和风险级别。</Text>
+                <Text type="secondary">确认可代管的知识产物工具、方法和 scope。</Text>
               </div>
             </section>
             <section>
               <Tag>02</Tag>
               <div>
-                <Text strong>签发 API Key</Text>
-                <Text type="secondary">只授予本次任务需要的最小权限。</Text>
+                <Text strong>配置授权 Key</Text>
+                <Text type="secondary">只开放本次知识产物任务需要的范围。</Text>
               </div>
             </section>
             <section>
               <Tag>03</Tag>
               <div>
-                <Text strong>调用并复核</Text>
-                <Text type="secondary">写入后重新读取资源，并在审计日志中确认调用。</Text>
+                <Text strong>代管并回读</Text>
+                <Text type="secondary">创建或更新后重新读取目标知识产物确认结果。</Text>
               </div>
             </section>
           </div>
@@ -1994,7 +1965,7 @@ function DeveloperPage() {
         />
       </Card>
 
-      <Card title="权限与门禁" className="agent-api-card">
+      <Card title="授权范围" className="agent-api-card">
         <div className="agent-api-guard-grid">
           <section className={`agent-api-guard-card is-${access.permissionStatus.status}`}>
             <div>
@@ -2004,16 +1975,13 @@ function DeveloperPage() {
             <Text type="secondary">{access.permissionStatus.detail}</Text>
             <Link to="/account/api-keys"><Button size="small" icon={<KeyRound size={14} />}>管理 Key</Button></Link>
           </section>
-          {governanceChecks.slice(0, 3).map((check) => (
-            <section key={check.key} className="agent-api-guard-card">
-              <div>
-                {check.status === 'PASS' ? <CheckCircle2 size={18} /> : <AlertTriangle size={18} />}
-                <Text strong>{check.title}</Text>
-                <Tag color={statusTagColor(check.status)}>{statusLabel(check.status)}</Tag>
-              </div>
-              <Text type="secondary">{check.action}</Text>
-            </section>
-          ))}
+          <section className="agent-api-guard-card">
+            <div>
+              <Boxes size={18} />
+              <Text strong>代管对象</Text>
+            </div>
+            <Text type="secondary">Agent 资料、Skill 能力包和 AI 文章；用户账号仍由后台管理。</Text>
+          </section>
         </div>
       </Card>
     </div>
@@ -2026,9 +1994,8 @@ function formatToolName(tool: string): string {
 
 function inferDeveloperToolScope(tool: string): string {
   if (tool.startsWith('list_') || tool === 'get_skill_categories') {
-    return tool.includes('agent') ? 'agents:read'
-      : tool.includes('article') ? 'articles:read'
-        : tool.includes('user') ? 'users:read'
+      return tool.includes('agent') ? 'agents:read'
+        : tool.includes('article') ? 'articles:read'
           : 'skills:read';
   }
   if (tool.includes('download')) {
@@ -2042,9 +2009,6 @@ function inferDeveloperToolScope(tool: string): string {
   }
   if (tool.includes('article')) {
     return 'articles:write';
-  }
-  if (tool.includes('user')) {
-    return 'users:write';
   }
   return 'skills:write';
 }
@@ -2139,27 +2103,27 @@ function ObservabilityPage() {
 
   const operationSignals = [
     {
-      title: '运行健康',
+      title: '代管完善度',
       value: healthScore,
       suffix: '%',
-      description: '综合权限覆盖、工作流准备度和治理检查',
+      description: '综合授权覆盖、任务准备度和最近记录',
       icon: <Activity size={18} />
     },
     {
-      title: '可运行工作流',
+      title: '可代管任务',
       value: `${readyWorkflowCount}/${workflows.length || 0}`,
-      description: blockedWorkflows.length > 0 ? `${blockedWorkflows.length} 条仍需处理` : '全部工作流已具备运行条件',
+      description: blockedWorkflows.length > 0 ? `${blockedWorkflows.length} 条仍需处理` : '全部任务已具备代管条件',
       icon: <Workflow size={18} />
     },
     {
-      title: '权限覆盖',
+      title: '授权覆盖',
       value: scopeCoverage,
       suffix: '%',
-      description: missingScopes.length > 0 ? `缺少 ${formatScopeList(missingScopes)}` : '最小权限已覆盖',
+      description: missingScopes.length > 0 ? `缺少 ${formatScopeList(missingScopes)}` : '代管授权已覆盖',
       icon: <ShieldCheck size={18} />
     },
     {
-      title: '近期活动',
+      title: '代管记录',
       value: recentEvents.length,
       description: `${dashboard?.recentlyUsedKeys ?? 0} 个 Key 最近 7 天有调用`,
       icon: <Clock3 size={18} />
@@ -2179,25 +2143,24 @@ function ObservabilityPage() {
     <div className="page">
       <section className="observability-hero">
         <div>
-          <Tag color="processing" icon={<Activity size={14} />}>Agent 观测中心</Tag>
-          <Title level={1}>运行观测与质量门禁</Title>
+          <Tag color="processing" icon={<Activity size={14} />}>Agent 代管记录</Tag>
+          <Title level={1}>代管进展</Title>
           <Paragraph>
-            把 API Key 健康、Agent 工作流准备度、治理检查和审计事件集中到一个视图，
-            用于判断自动化能力是否可运行、可追踪、可回滚。
+            把授权覆盖、可代管任务和最近 Agent 操作放在一个辅助视图，方便回看哪些知识产物已经被维护。
           </Paragraph>
           <Space wrap>
             <Link to="/account/api-keys"><Button type="primary" icon={<KeyRound size={16} />}>管理 API Key</Button></Link>
-            <Link to="/developer"><Button icon={<Workflow size={16} />}>Agent API</Button></Link>
+            <Link to="/developer"><Button icon={<Workflow size={16} />}>Agent 代管</Button></Link>
           </Space>
         </div>
         <div className="observability-health-panel">
           <Progress type="circle" percent={healthScore} />
           <div>
-            <Text strong>当前运行健康度</Text>
+            <Text strong>当前代管完善度</Text>
             <Text type="secondary">
               {hasOperationRisk
-                ? '存在待处理门禁，建议先补齐权限和审计信号。'
-                : '核心门禁已通过，可进入持续观测。'}
+                ? '存在待处理任务，建议先补齐授权范围。'
+                : '核心代管任务已具备条件。'}
             </Text>
           </div>
         </div>
@@ -2221,7 +2184,7 @@ function ObservabilityPage() {
         title={<Space><BrainCircuit size={18} />MAGI 三脑轮次</Space>}
         extra={(
           <Tag color={magiStageColor(magiFocusStatus)}>
-            当前焦点：{magiStageLabel(magiPlan.focusStage)} · 健康 {magiPlan.healthScore}%
+            当前焦点：{magiStageLabel(magiPlan.focusStage)} · 完善 {magiPlan.healthScore}%
           </Tag>
         )}
       >
@@ -2250,7 +2213,7 @@ function ObservabilityPage() {
       </Card>
 
       <div className="observability-grid">
-        <Card title="工作流阻塞队列">
+        <Card title="代管任务队列">
           <div className="observability-workflow-list">
             {(blockedWorkflows.length > 0 ? blockedWorkflows : workflows).map((workflow) => (
               <section key={workflow.key} className={`observability-workflow-item ${workflow.ready ? 'is-ready' : 'is-blocked'}`}>
@@ -2258,14 +2221,14 @@ function ObservabilityPage() {
                   <Text strong>{workflow.title}</Text>
                   <Tag color={workflow.ready ? 'green' : 'orange'}>{workflow.ready ? '可运行' : '待处理'}</Tag>
                 </div>
-                <Text type="secondary">{workflow.ready ? '运行条件已覆盖' : `补齐 ${formatScopeList(workflow.missingScopes)} 后可执行`}</Text>
+                 <Text type="secondary">{workflow.ready ? '代管条件已覆盖' : `补齐 ${formatScopeList(workflow.missingScopes)} 后可代管`}</Text>
                 <div>{workflow.requiredScopes.map((scope) => renderScopeTag(scope, workflow.missingScopes.includes(scope)))}</div>
               </section>
             ))}
           </div>
         </Card>
 
-        <Card title="治理检查">
+        <Card title="代管提示">
           <div className="observability-check-list">
             {governanceChecks.map((check) => (
               <section
@@ -2303,19 +2266,19 @@ function ObservabilityPage() {
         <Card title="下一步建议">
           <div className="observability-recommendations">
             <section>
-              <Text strong>1. 补齐运行权限</Text>
-              <Text type="secondary">
-                {missingScopes.length > 0 ? `优先补齐 ${formatScopeList(missingScopes)}。` : '维持当前最小权限策略，避免授予无关权限。'}
-              </Text>
-            </section>
-            <section>
-              <Text strong>2. 固化质量门禁</Text>
-              <Text type="secondary">高风险写操作保留人工确认、执行后复核和审计记录。</Text>
-            </section>
-            <section>
-              <Text strong>3. 增强可观测性</Text>
-              <Text type="secondary">把最近活动和工作流阻塞作为 Agent 接入前的日常巡检项。</Text>
-            </section>
+               <Text strong>1. 补齐代管授权</Text>
+               <Text type="secondary">
+                 {missingScopes.length > 0 ? `优先补齐 ${formatScopeList(missingScopes)}。` : '维持当前最小授权，避免开放无关范围。'}
+               </Text>
+             </section>
+             <section>
+               <Text strong>2. 沉淀代管模板</Text>
+               <Text type="secondary">把稳定的 Skill、Agent 和文章维护路径固化为可复用模板。</Text>
+             </section>
+             <section>
+               <Text strong>3. 补充知识产物</Text>
+               <Text type="secondary">优先补充缺口最大的 Agent 资料、Skill 能力包和 AI 文章。</Text>
+             </section>
           </div>
         </Card>
       </div>

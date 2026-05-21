@@ -57,8 +57,10 @@ describe('buildAgentApiAccess', () => {
       'list_skills'
     ]);
     expect(access.copyToAgentText).toContain('请把以下平台 Skill 接入当前 Agent');
+    expect(access.copyToAgentText).toContain('用途: 代管平台里的 AI 知识产物');
     expect(access.copyToAgentText).toContain('Skill: ai-platform-manager');
     expect(access.copyToAgentText).toContain('Manifest: http://localhost:8081/api/v1/developer/skill-manifest');
+    expect(access.copyToAgentText).not.toContain('核对审计日志');
     expect(access.builtinSkill).toEqual({
       name: 'ai-platform-manager',
       manifestUrl: 'http://localhost:8081/api/v1/developer/skill-manifest',
@@ -85,5 +87,6 @@ describe('buildAgentApiAccess', () => {
     });
     expect(access.installPrompt).toContain('API Base: https://api.example.com/api/v1');
     expect(access.installPrompt).toContain('下载 Skill: https://api.example.com/api/v1/developer/self-skill/download');
+    expect(access.installPrompt).toContain('只管理 Agent、Skill、模型资料、文章和工具导航等 AI 知识产物');
   });
 });

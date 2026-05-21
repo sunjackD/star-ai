@@ -188,17 +188,17 @@ public class SkillArtifactService {
         return """
                 ---
                 name: ai-platform-manager
-                description: 通过 AI 聚合平台 API Key 管理 Skill、Agent、文章和用户等平台模块
+                description: 通过 AI 聚合平台 API Key 代管 Skill、Agent、文章等 AI 知识产物
                 ---
                 # AI Platform Manager
 
-                该 Skill 让 AI Agent 通过 AI 聚合平台 Developer API 管理站内模块。
+                该 Skill 让 AI Agent 通过 AI 聚合平台 Developer API 代管站内 AI 知识产物。
                 它适合在 Codex、Claude Code、Roo Code 等 Agent 中安装后使用。
 
                 ## 初始化
 
                 1. 在平台右上角进入 API Key 页面。
-                2. 按任务选择最小 scopes，例如 `skills:read`、`agents:write`、`articles:write`、`users:write`。
+                2. 按任务选择最小 scopes，例如 `skills:read`、`skills:import`、`agents:write`、`articles:write`。
                 3. 在 Agent 中保存平台地址和 API Key。
 
                 API Base: http://localhost:8081/api/v1（按实际部署地址替换）
@@ -210,7 +210,7 @@ public class SkillArtifactService {
                 2. 从 `toolSpecs` 中匹配工具的 `method`、`path`、`scope`、`risk` 和 `description`，不要只凭示例字符串猜测接口。
                 3. 调用前确认 API Key 覆盖对应 `scope`；`skills:import,skills:write` 表示两个 scope 都必须具备。
                 4. `risk` 为 `sensitive` 或 `destructive` 的工具必须先确认目标、影响范围和回滚方式。
-                5. 写操作完成后重新读取列表或详情做校验，遇到 401/403 时先提示用户更新 API Key scopes。
+                5. 写操作完成后重新读取列表或详情做校验，遇到 401/403 时先提示用户更新授权范围。
 
                 ## Tools
 
@@ -242,12 +242,6 @@ public class SkillArtifactService {
                 - `list_articles`: 查询文章。需要 `articles:read`。
                 - `create_article`: 创建文章。需要 `articles:write`。
                 - `update_article`: 更新文章。需要 `articles:write`。
-
-                ### 用户管理
-
-                - `list_users`: 查询用户。需要 `users:read`，风险为 `sensitive`。
-                - `create_user`: 创建用户并分配角色。需要 `users:write`，风险为 `sensitive`。
-                - `update_user`: 更新用户资料、状态和角色。需要 `users:write`，风险为 `sensitive`。
 
                 ## Agent 调用示例
 

@@ -91,13 +91,13 @@ class AuthAndDeveloperApiTest {
     }
 
     @Test
-    void developerManifestExposesPlatformModuleManagementTools() throws Exception {
+    void developerManifestFocusesAgentKnowledgeAssetTools() throws Exception {
         mockMvc.perform(get("/api/v1/developer/skill-manifest"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.description").value(containsString("平台模块")))
+                .andExpect(jsonPath("$.data.description").value(containsString("AI 知识产物")))
                 .andExpect(jsonPath("$.data.requiredScopes[?(@ == 'agents:write')]").isNotEmpty())
                 .andExpect(jsonPath("$.data.requiredScopes[?(@ == 'articles:write')]").isNotEmpty())
-                .andExpect(jsonPath("$.data.requiredScopes[?(@ == 'users:write')]").isNotEmpty())
+                .andExpect(jsonPath("$.data.requiredScopes[?(@ == 'users:write')]").isEmpty())
                 .andExpect(jsonPath(
                         "$.data.toolSpecs[?(@.name == 'create_agent' && @.scope == 'agents:write')]"
                 ).isNotEmpty())
@@ -105,9 +105,8 @@ class AuthAndDeveloperApiTest {
                         "$.data.toolSpecs[?(@.name == 'update_article' && @.scope == 'articles:write')]"
                 ).isNotEmpty())
                 .andExpect(jsonPath(
-                        "$.data.toolSpecs[?(@.name == 'create_user' && @.scope == 'users:write' "
-                                + "&& @.risk == 'sensitive')]"
-                ).isNotEmpty());
+                        "$.data.toolSpecs[?(@.name == 'create_user')]"
+                ).isEmpty());
     }
 
     @Test
@@ -162,7 +161,8 @@ class AuthAndDeveloperApiTest {
                 .andExpect(jsonPath(
                         "$.data[?(@.key == 'download_and_reuse_skill' "
                                 + "&& @.verification == '校验下载文件名和大小')]"
-                ).isNotEmpty());
+                ).isNotEmpty())
+                .andExpect(jsonPath("$.data[?(@.key == 'maintain_user_accounts')]").isEmpty());
     }
 
     @Test
@@ -211,7 +211,7 @@ class AuthAndDeveloperApiTest {
     }
 
     @Test
-    void apiKeyCanManageAgentArticleAndUserModules() throws Exception {
+    void apiKeyCanManageAgentAndArticleKnowledgeAssets() throws Exception {
         String adminToken = createAdminAndLogin("admin_platform_modules", "admin-platform-modules@example.com");
         createUser(adminToken, "platform_module_dev", "platform-module@example.com", "Platform Module Dev", "DEVELOPER");
         String jwt = login("platform_module_dev", "secret123");
@@ -220,9 +220,7 @@ class AuthAndDeveloperApiTest {
                 "agents:read",
                 "agents:write",
                 "articles:read",
-                "articles:write",
-                "users:read",
-                "users:write"
+                "articles:write"
         );
 
         String agentJson = mockMvc.perform(post("/api/v1/developer/agents")
@@ -313,39 +311,6 @@ class AuthAndDeveloperApiTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.slug").value("agent-runtime-policy-updated"));
 
-        String userJson = mockMvc.perform(post("/api/v1/developer/users")
-                        .header("X-API-Key", apiKey)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
-                                {
-                                  "username": "agent_created_user",
-                                  "email": "agent-created-user@example.com",
-                                  "displayName": "Agent Created User",
-                                  "password": "secret123",
-                                  "status": "ACTIVE",
-                                  "roles": ["DEVELOPER"]
-                                }
-                                """))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.username").value("agent_created_user"))
-                .andReturn()
-                .getResponse()
-                .getContentAsString();
-        long userId = objectMapper.readTree(userJson).path("data").path("id").asLong();
-
-        mockMvc.perform(put("/api/v1/developer/users/" + userId)
-                        .header("X-API-Key", apiKey)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
-                                {
-                                  "email": "agent-created-user-updated@example.com",
-                                  "displayName": "Agent Created User Updated",
-                                  "status": "ACTIVE",
-                                  "roles": ["DEVELOPER"]
-                                }
-                                """))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.email").value("agent-created-user-updated@example.com"));
     }
 
     @Test
@@ -353,7 +318,7 @@ class AuthAndDeveloperApiTest {
         String adminToken = createAdminAndLogin("admin_module_scope", "admin-module-scope@example.com");
         createUser(adminToken, "module_scope_dev", "module-scope@example.com", "Module Scope Dev", "DEVELOPER");
         String jwt = login("module_scope_dev", "secret123");
-        String apiKey = createApiKey(jwt, "agents:read", "articles:read", "users:read");
+        String apiKey = createApiKey(jwt, "agents:read", "articles:read");
 
         mockMvc.perform(post("/api/v1/developer/agents")
                         .header("X-API-Key", apiKey)

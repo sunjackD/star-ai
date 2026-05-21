@@ -41,9 +41,7 @@ public class ApiKeyService {
             "agents:read",
             "agents:write",
             "articles:read",
-            "articles:write",
-            "users:read",
-            "users:write"
+            "articles:write"
     );
     private static final Set<String> ALLOWED_API_KEY_SCOPES = Set.of(
             "skills:read",
@@ -54,8 +52,6 @@ public class ApiKeyService {
             "agents:write",
             "articles:read",
             "articles:write",
-            "users:read",
-            "users:write",
             "admin:manage"
     );
 
@@ -179,17 +175,17 @@ public class ApiKeyService {
         return List.of(
                 governanceCheck(
                         "scope_coverage",
-                        "权限覆盖",
+                        "授权覆盖",
                         missingScopes.isEmpty(),
-                        missingScopes.isEmpty() ? "所有 Agent 工作流的最小权限已覆盖" : "仍缺少 "
+                        missingScopes.isEmpty() ? "所有 Agent 代管任务的最小授权已覆盖" : "仍缺少 "
                                 + String.join(", ", missingScopes),
-                        "前往 API Key 页面补齐最小权限"
+                        "前往 Agent 授权页面补齐最小范围"
                 ),
                 governanceCheck(
                         "destructive_gate",
-                        "高风险门禁",
+                        "高风险确认",
                         destructiveGateConfigured,
-                        "删除类 Agent Workflow 必须带明确人工确认门禁",
+                        "删除类 Agent 代管任务必须带明确人工确认",
                         "保留删除前的目标 ID 与名称确认"
                 ),
                 governanceCheck(
@@ -201,10 +197,10 @@ public class ApiKeyService {
                 ),
                 governanceCheck(
                         "audit_trail",
-                        "审计链路",
+                        "代管记录",
                         !recentEvents.isEmpty(),
-                        recentEvents.isEmpty() ? "最近没有可展示的 Agent 调用事件" : "最近调用事件已进入审计链路",
-                        "在后台审计日志复核高风险操作"
+                        recentEvents.isEmpty() ? "最近没有可展示的 Agent 代管记录" : "最近调用已形成代管记录",
+                        "完成一次低风险读取后回看记录"
                 )
         );
     }

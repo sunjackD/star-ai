@@ -85,17 +85,6 @@ public class DeveloperAgentWorkflowCatalog {
                         "write",
                         "发布前确认标题、slug、状态和正文摘要",
                         "确认文章标题、slug 和状态已更新"
-                ),
-                new DeveloperAgentWorkflowResponse(
-                        "maintain_user_accounts",
-                        "维护用户账号",
-                        "用户明确要求创建或更新平台账号、角色和状态",
-                        List.of("list_users", "create_user", "update_user"),
-                        List.of("users:read", "users:write"),
-                        List.of("读取用户列表", "确认用户名、邮箱和角色", "创建或更新用户", "复核用户状态"),
-                        "sensitive",
-                        "执行前必须确认目标用户、邮箱、角色和状态",
-                        "确认用户信息、角色和状态已更新"
                 )
         );
     }

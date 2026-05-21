@@ -9,11 +9,13 @@ describe('workspace style guard', () => {
     expect(styles).not.toMatch(/\.console-module-card::before\s*\{/);
   });
 
-  it('keeps the dashboard framed as Agent API work instead of a control console', () => {
+  it('keeps the dashboard framed as AI knowledge asset management', () => {
     expect(appSource).not.toContain('Agent 控制台');
     expect(appSource).not.toContain('凭据控制台');
     expect(appSource).not.toContain('同一控制台');
-    expect(appSource).toContain('Agent API 工作台');
+    expect(appSource).not.toContain('Agent API 工作台');
+    expect(appSource).toContain('AI 知识产物工作台');
+    expect(appSource).toContain('Agent 代管入口');
   });
 
   it('keeps the essential Agent API handoff actions visible', () => {

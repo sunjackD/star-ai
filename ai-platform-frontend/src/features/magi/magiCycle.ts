@@ -72,12 +72,12 @@ export function buildMagiCyclePlan(input: MagiCycleInput): MagiCyclePlan {
         key: 'review',
         label: '01 审视',
         title: '提出问题',
-        question: '哪些权限、门禁或审计信号会阻塞 Agent 自动化？',
+        question: '哪些授权范围或代管任务会阻塞 Agent 维护知识产物？',
         metric: reviewMetric,
         metricLabel: '待审视项',
         description: reviewMetric > 0
-          ? '先收敛风险，再允许执行型 Agent 进入写操作。'
-          : '当前没有明显阻塞，进入执行队列前保持一次快速复核。',
+          ? '先收敛代管边界，再让 Agent 进入写操作。'
+          : '当前没有明显阻塞，可以进入知识产物维护队列。',
         status: reviewMetric > 0 ? 'attention' : 'ready',
         actions: buildReviewActions(input.missingScopes.length, blockedWorkflows, attentionChecks)
       },
@@ -85,12 +85,12 @@ export function buildMagiCyclePlan(input: MagiCycleInput): MagiCyclePlan {
         key: 'execute',
         label: '02 执行',
         title: '解决问题',
-        question: '哪个工作流已经具备最小权限、可被安全执行并复核？',
+        question: '哪个知识产物维护任务已经具备授权，可以交给 Agent 执行？',
         metric: readyWorkflows.length,
-        metricLabel: '可执行工作流',
+        metricLabel: '可代管任务',
         description: readyWorkflows.length > 0
-          ? '从已就绪工作流中选择一条执行，并用读取接口复核结果。'
-          : '没有完全就绪的工作流，先返回审视阶段补齐前置条件。',
+          ? '从已就绪任务中选择一条执行，并用读取接口复核结果。'
+          : '没有完全就绪的任务，先返回审视阶段补齐前置条件。',
         status: readyWorkflows.length > 0 ? 'ready' : 'attention',
         actions: buildExecuteActions(readyWorkflows)
       },
@@ -98,10 +98,10 @@ export function buildMagiCyclePlan(input: MagiCycleInput): MagiCyclePlan {
         key: 'elevate',
         label: '03 提升',
         title: '指引方向',
-        question: '下一轮要沉淀哪类策略，让平台更适合持续自治？',
+        question: '下一轮要沉淀哪类知识产物，让平台更适合持续维护？',
         metric: input.recentEventCount,
-        metricLabel: '近期审计事件',
-        description: '把执行结果沉淀成权限预设、工作流门禁和页面可见的运行信号。',
+        metricLabel: '近期代管记录',
+        description: '把执行结果沉淀成更清晰的内容分类、Skill 包和 Agent 代管模板。',
         status: healthScore >= 80 ? 'steady' : 'attention',
         actions: buildElevateActions(input.recentEventCount, input.recentlyUsedKeys, healthScore)
       }
@@ -114,7 +114,7 @@ export function summarizeMagiCycle(plan: MagiCyclePlan): MagiCycleSummary {
   return {
     focusStage: plan.focusStage,
     focusLabel: stageLabels[plan.focusStage],
-    healthLabel: `健康度 ${plan.healthScore}%`,
+    healthLabel: `完善度 ${plan.healthScore}%`,
     primaryAction: focusStage.actions[0] ?? focusStage.description,
     route: stageRoutes[plan.focusStage]
   };
@@ -127,9 +127,9 @@ const stageLabels: Record<MagiCycleStageKey, string> = {
 };
 
 const stageRoutes: Record<MagiCycleStageKey, string> = {
-  review: '/observability',
+  review: '/developer',
   execute: '/developer',
-  elevate: '/observability'
+  elevate: '/developer'
 };
 
 function scoreCoverage(total: number, missing: number): number {
@@ -146,38 +146,38 @@ function buildReviewActions(
 ): string[] {
   const actions: string[] = [];
   if (missingScopeCount > 0) {
-    actions.push(`补齐 ${missingScopeCount} 项缺失权限，并复核 API Key 是否遵循最小权限。`);
+    actions.push(`补齐 ${missingScopeCount} 项 Agent 代管授权，只开放当前知识产物任务需要的范围。`);
   }
   if (blockedWorkflows.length > 0) {
-    actions.push(`拆解 ${blockedWorkflows.length} 条阻塞工作流，优先处理高风险或写入型任务。`);
+    actions.push(`拆解 ${blockedWorkflows.length} 条阻塞代管任务，优先处理 Skill 或文章写入。`);
   }
   if (attentionChecks.length > 0) {
-    actions.push(`复核 ${attentionChecks.length} 项治理检查：${attentionChecks.map((check) => check.title).join('、')}。`);
+    actions.push(`复核 ${attentionChecks.length} 项代管提示：${attentionChecks.map((check) => check.title).join('、')}。`);
   }
   if (actions.length === 0) {
-    actions.push('快速复核权限覆盖、审计链路和高风险门禁，无异常后进入执行。');
+    actions.push('快速确认代管范围和目标内容，无异常后进入执行。');
   }
   return actions;
 }
 
 function buildExecuteActions(readyWorkflows: MagiWorkflow[]): string[] {
   if (readyWorkflows.length === 0) {
-    return ['先回到审视阶段，补齐权限和门禁后再执行。'];
+    return ['先回到审视阶段，补齐代管范围后再执行。'];
   }
   const [firstWorkflow] = readyWorkflows;
   return [
     `优先执行“${firstWorkflow.title}”，并在完成后读取结果复核。`,
-    '保留操作前后状态、调用方和资源 ID，方便在审计日志中追踪。'
+    '保留操作前后状态、调用方和资源 ID，方便回看代管结果。'
   ];
 }
 
 function buildElevateActions(recentEventCount: number, recentlyUsedKeys: number, healthScore: number): string[] {
   const actions = [
-    healthScore >= 80 ? '将本轮可运行路径固化为权限预设或 Agent Workflow。' : '优先提升健康度低于 80% 的门禁项。',
-    recentlyUsedKeys > 0 ? `复盘 ${recentlyUsedKeys} 个近期活跃 Key 的权限范围。` : '创建一组短期 API Key，用于下一轮受控验证。'
+    healthScore >= 80 ? '将本轮可运行路径固化为 Agent 代管模板。' : '优先补齐完善度低于 80% 的代管入口。',
+    recentlyUsedKeys > 0 ? `复盘 ${recentlyUsedKeys} 个近期活跃授权的范围。` : '创建一组短期 Agent 授权，用于下一轮代管验证。'
   ];
   if (recentEventCount === 0) {
-    actions.push('补充一次低风险读取调用，让观测中心产生可验证审计事件。');
+    actions.push('补充一次低风险读取调用，让页面有可回看的代管记录。');
   }
   return actions;
 }

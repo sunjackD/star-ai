@@ -36,7 +36,7 @@ describe('buildMagiCyclePlan', () => {
       metric: 3,
       status: 'attention'
     });
-    expect(plan.stages[0].actions).toContain('补齐 1 项缺失权限，并复核 API Key 是否遵循最小权限。');
+    expect(plan.stages[0].actions).toContain('补齐 1 项 Agent 代管授权，只开放当前知识产物任务需要的范围。');
   });
 
   it('moves focus to execution when all gates are clear and runnable workflows exist', () => {
@@ -78,7 +78,7 @@ describe('buildMagiCyclePlan', () => {
 });
 
 describe('summarizeMagiCycle', () => {
-  it('points review-focused users to observability with the first review action', () => {
+  it('points review-focused users to the Agent handoff entry with the first review action', () => {
     const summary = summarizeMagiCycle(buildMagiCyclePlan({
       requiredScopes: ['skills:read'],
       missingScopes: ['skills:read'],
@@ -91,9 +91,9 @@ describe('summarizeMagiCycle', () => {
     expect(summary).toEqual({
       focusStage: 'review',
       focusLabel: '审视',
-      healthLabel: '健康度 0%',
-      primaryAction: '补齐 1 项缺失权限，并复核 API Key 是否遵循最小权限。',
-      route: '/observability'
+      healthLabel: '完善度 0%',
+      primaryAction: '补齐 1 项 Agent 代管授权，只开放当前知识产物任务需要的范围。',
+      route: '/developer'
     });
   });
 
