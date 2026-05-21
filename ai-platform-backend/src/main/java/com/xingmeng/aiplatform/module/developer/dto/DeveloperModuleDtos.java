@@ -1,16 +1,13 @@
 package com.xingmeng.aiplatform.module.developer.dto;
 
-import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 public final class DeveloperModuleDtos {
     private DeveloperModuleDtos() {
@@ -41,35 +38,6 @@ public final class DeveloperModuleDtos {
             @NotNull Integer sortOrder,
             @NotBlank String safetyMarkdown,
             @NotBlank String bodyMarkdown
-    ) {
-    }
-
-    public record UserCreateRequest(
-            @NotBlank @Size(max = 64) String username,
-            @NotBlank @Email @Size(max = 160) String email,
-            @NotBlank @Size(max = 120) String displayName,
-            @NotBlank @Size(min = 6, max = 64) String password,
-            @NotBlank String status,
-            @NotEmpty List<@NotBlank String> roles
-    ) {
-    }
-
-    public record UserUpdateRequest(
-            @NotBlank @Email @Size(max = 160) String email,
-            @NotBlank @Size(max = 120) String displayName,
-            @NotBlank String status,
-            @NotEmpty List<@NotBlank String> roles
-    ) {
-    }
-
-    public record UserResponse(
-            Long id,
-            String username,
-            String email,
-            String displayName,
-            String status,
-            String themePreference,
-            List<String> roles
     ) {
     }
 

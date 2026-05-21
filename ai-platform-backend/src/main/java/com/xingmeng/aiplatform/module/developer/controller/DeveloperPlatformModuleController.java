@@ -96,34 +96,4 @@ public class DeveloperPlatformModuleController {
         auditService.log(authentication, "DEVELOPER_ARTICLE_UPDATED", "ARTICLE", id, saved.title());
         return ApiResponse.success(saved);
     }
-
-    @GetMapping("/users")
-    public ApiResponse<List<DeveloperModuleDtos.UserResponse>> users(Authentication authentication) {
-        apiKeyService.requireScope(authentication, "users:read");
-        auditService.log(authentication, "DEVELOPER_USERS_LISTED", "USER", "-", "list users");
-        return ApiResponse.success(moduleService.users());
-    }
-
-    @PostMapping("/users")
-    public ApiResponse<DeveloperModuleDtos.UserResponse> createUser(
-            Authentication authentication,
-            @Valid @RequestBody DeveloperModuleDtos.UserCreateRequest request
-    ) {
-        apiKeyService.requireScope(authentication, "users:write");
-        DeveloperModuleDtos.UserResponse saved = moduleService.createUser(request);
-        auditService.log(authentication, "DEVELOPER_USER_CREATED", "USER", saved.id(), saved.username());
-        return ApiResponse.success(saved);
-    }
-
-    @PutMapping("/users/{id}")
-    public ApiResponse<DeveloperModuleDtos.UserResponse> updateUser(
-            Authentication authentication,
-            @PathVariable Long id,
-            @Valid @RequestBody DeveloperModuleDtos.UserUpdateRequest request
-    ) {
-        apiKeyService.requireScope(authentication, "users:write");
-        DeveloperModuleDtos.UserResponse saved = moduleService.updateUser(id, request);
-        auditService.log(authentication, "DEVELOPER_USER_UPDATED", "USER", id, saved.username());
-        return ApiResponse.success(saved);
-    }
 }

@@ -8,17 +8,11 @@ import com.xingmeng.aiplatform.module.article.entity.Article;
 import com.xingmeng.aiplatform.module.article.repository.ArticleRepository;
 import com.xingmeng.aiplatform.module.article.service.ArticleService;
 import com.xingmeng.aiplatform.module.developer.dto.DeveloperModuleDtos;
-import com.xingmeng.aiplatform.module.user.entity.Role;
-import com.xingmeng.aiplatform.module.user.entity.User;
-import com.xingmeng.aiplatform.module.user.repository.RoleRepository;
-import com.xingmeng.aiplatform.module.user.repository.UserRepository;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.List;
 
 @Service
@@ -26,24 +20,15 @@ public class DeveloperPlatformModuleService {
     private final AgentRepository agentRepository;
     private final ArticleRepository articleRepository;
     private final ArticleService articleService;
-    private final UserRepository userRepository;
-    private final RoleRepository roleRepository;
-    private final PasswordEncoder passwordEncoder;
 
     public DeveloperPlatformModuleService(
             AgentRepository agentRepository,
             ArticleRepository articleRepository,
-            ArticleService articleService,
-            UserRepository userRepository,
-            RoleRepository roleRepository,
-            PasswordEncoder passwordEncoder
+            ArticleService articleService
     ) {
         this.agentRepository = agentRepository;
         this.articleRepository = articleRepository;
         this.articleService = articleService;
-        this.userRepository = userRepository;
-        this.roleRepository = roleRepository;
-        this.passwordEncoder = passwordEncoder;
     }
 
     public List<Agent> agents() {
@@ -81,44 +66,6 @@ public class DeveloperPlatformModuleService {
     @Transactional
     public DeveloperModuleDtos.ArticleResponse updateArticle(Long id, DeveloperModuleDtos.ArticleRequest request) {
         return toArticleResponse(articleService.update(id, toArticleSaveRequest(request)));
-    }
-
-    public List<DeveloperModuleDtos.UserResponse> users() {
-        return userRepository.findAll().stream()
-                .sorted(Comparator.comparing(User::getId).reversed())
-                .map(this::toUserResponse)
-                .toList();
-    }
-
-    @Transactional
-    public DeveloperModuleDtos.UserResponse createUser(DeveloperModuleDtos.UserCreateRequest request) {
-        if (userRepository.existsByUsernameOrEmail(request.username(), request.email())) {
-            throw new BusinessException(HttpStatus.CONFLICT, "用户名或邮箱已存在");
-        }
-        User user = new User();
-        user.setUsername(request.username());
-        user.setEmail(request.email());
-        user.setDisplayName(request.displayName());
-        user.setPasswordHash(passwordEncoder.encode(request.password()));
-        user.setStatus(request.status());
-        user.setThemePreference("minimal-reference");
-        user.setRoles(new HashSet<>(request.roles().stream().map(this::role).toList()));
-        return toUserResponse(userRepository.save(user));
-    }
-
-    @Transactional
-    public DeveloperModuleDtos.UserResponse updateUser(Long id, DeveloperModuleDtos.UserUpdateRequest request) {
-        User user = user(id);
-        userRepository.findByEmail(request.email())
-                .filter(existing -> !existing.getId().equals(id))
-                .ifPresent(existing -> {
-                    throw new BusinessException(HttpStatus.CONFLICT, "邮箱已存在");
-                });
-        user.setEmail(request.email());
-        user.setDisplayName(request.displayName());
-        user.setStatus(request.status());
-        user.setRoles(new HashSet<>(request.roles().stream().map(this::role).toList()));
-        return toUserResponse(user);
     }
 
     private Agent applyAgent(Agent agent, DeveloperModuleDtos.AgentRequest request) {
@@ -192,30 +139,8 @@ public class DeveloperPlatformModuleService {
         );
     }
 
-    private DeveloperModuleDtos.UserResponse toUserResponse(User user) {
-        return new DeveloperModuleDtos.UserResponse(
-                user.getId(),
-                user.getUsername(),
-                user.getEmail(),
-                user.getDisplayName(),
-                user.getStatus(),
-                user.getThemePreference(),
-                user.getRoles().stream().map(Role::getName).toList()
-        );
-    }
-
     private Agent agent(Long id) {
         return agentRepository.findById(id)
                 .orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND, "Agent不存在"));
-    }
-
-    private User user(Long id) {
-        return userRepository.findById(id)
-                .orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND, "用户不存在"));
-    }
-
-    private Role role(String name) {
-        return roleRepository.findByName(name)
-                .orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND, "角色不存在"));
     }
 }

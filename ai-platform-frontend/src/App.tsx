@@ -31,8 +31,7 @@ import { buildAgentApiAccess } from './features/agentApi/agentApiAccess';
 import {
   buildMagiCyclePlan,
   summarizeMagiCycle,
-  type MagiCycleStageKey,
-  type MagiCycleStageStatus
+  type MagiCycleStageKey
 } from './features/magi/magiCycle';
 import { useAuthStore } from './store/authStore';
 import { useThemeStore } from './store/themeStore';
@@ -2078,214 +2077,6 @@ function statusLabel(status: string): string {
   return labels[status] ?? status;
 }
 
-function ObservabilityPage() {
-  const { data: dashboard } = useQuery({
-    queryKey: ['developer-dashboard'],
-    queryFn: () => getData<DeveloperDashboard>('/developer/dashboard')
-  });
-  const workflows = dashboard?.agentWorkflowReadiness ?? [];
-  const blockedWorkflows = workflows.filter((workflow) => !workflow.ready);
-  const governanceChecks = dashboard?.governanceChecks ?? [];
-  const attentionChecks = governanceChecks.filter((check) => check.status !== 'PASS');
-  const recentEvents = dashboard?.recentEvents ?? [];
-  const requiredScopes = dashboard?.requiredScopes ?? DEFAULT_PLATFORM_SCOPES;
-  const missingScopes = dashboard?.missingRequiredScopes ?? requiredScopes;
-  const scopeCoverage = Math.round(
-    ((requiredScopes.length - missingScopes.length) / Math.max(requiredScopes.length, 1)) * 100
-  );
-  const readyWorkflowCount = workflows.filter((workflow) => workflow.ready).length;
-  const hasOperationRisk = missingScopes.length > 0 || attentionChecks.length > 0 || blockedWorkflows.length > 0;
-  const healthScore = Math.round((
-    scopeCoverage
-    + (workflows.length ? (readyWorkflowCount / workflows.length) * 100 : 0)
-    + (governanceChecks.length ? ((governanceChecks.length - attentionChecks.length) / governanceChecks.length) * 100 : 0)
-  ) / 3);
-
-  const operationSignals = [
-    {
-      title: '代管完善度',
-      value: healthScore,
-      suffix: '%',
-      description: '综合授权覆盖、任务准备度和最近记录',
-      icon: <Activity size={18} />
-    },
-    {
-      title: '可代管任务',
-      value: `${readyWorkflowCount}/${workflows.length || 0}`,
-      description: blockedWorkflows.length > 0 ? `${blockedWorkflows.length} 条仍需处理` : '全部任务已具备代管条件',
-      icon: <Workflow size={18} />
-    },
-    {
-      title: '授权覆盖',
-      value: scopeCoverage,
-      suffix: '%',
-      description: missingScopes.length > 0 ? `缺少 ${formatScopeList(missingScopes)}` : '代管授权已覆盖',
-      icon: <ShieldCheck size={18} />
-    },
-    {
-      title: '代管记录',
-      value: recentEvents.length,
-      description: `${dashboard?.recentlyUsedKeys ?? 0} 个 Key 最近 7 天有调用`,
-      icon: <Clock3 size={18} />
-    }
-  ];
-  const magiPlan = buildMagiCyclePlan({
-    requiredScopes,
-    missingScopes,
-    workflows,
-    governanceChecks,
-    recentEventCount: recentEvents.length,
-    recentlyUsedKeys: dashboard?.recentlyUsedKeys ?? 0
-  });
-  const magiFocusStatus = magiPlan.stages.find((stage) => stage.key === magiPlan.focusStage)?.status ?? 'steady';
-
-  return (
-    <div className="page">
-      <section className="observability-hero">
-        <div>
-          <Tag color="processing" icon={<Activity size={14} />}>Agent 代管记录</Tag>
-          <Title level={1}>代管进展</Title>
-          <Paragraph>
-            把授权覆盖、可代管任务和最近 Agent 操作放在一个辅助视图，方便回看哪些知识产物已经被维护。
-          </Paragraph>
-          <Space wrap>
-            <Link to="/account/api-keys"><Button type="primary" icon={<KeyRound size={16} />}>管理 API Key</Button></Link>
-            <Link to="/developer"><Button icon={<Workflow size={16} />}>Agent 代管</Button></Link>
-          </Space>
-        </div>
-        <div className="observability-health-panel">
-          <Progress type="circle" percent={healthScore} />
-          <div>
-            <Text strong>当前代管完善度</Text>
-            <Text type="secondary">
-              {hasOperationRisk
-                ? '存在待处理任务，建议先补齐授权范围。'
-                : '核心代管任务已具备条件。'}
-            </Text>
-          </div>
-        </div>
-      </section>
-
-      <div className="observability-signal-grid">
-        {operationSignals.map((signal) => (
-          <Card key={signal.title} className="observability-signal-card">
-            <div className="observability-signal-heading">
-              <span>{signal.icon}</span>
-              <Text type="secondary">{signal.title}</Text>
-            </div>
-            <Statistic value={signal.value} suffix={signal.suffix} />
-            <Text type="secondary">{signal.description}</Text>
-          </Card>
-        ))}
-      </div>
-
-      <Card
-        className="magi-cycle-card"
-        title={<Space><BrainCircuit size={18} />MAGI 三脑轮次</Space>}
-        extra={(
-          <Tag color={magiStageColor(magiFocusStatus)}>
-            当前焦点：{magiStageLabel(magiPlan.focusStage)} · 完善 {magiPlan.healthScore}%
-          </Tag>
-        )}
-      >
-        <div className="magi-stage-grid">
-          {magiPlan.stages.map((stage) => (
-            <section
-              key={stage.key}
-              className={`magi-stage-card ${stage.key === magiPlan.focusStage ? 'is-focus' : ''} is-${stage.status}`}
-            >
-              <div className="magi-stage-heading">
-                <span>{magiStageIcon(stage.key)}</span>
-                <div>
-                  <Text type="secondary">{stage.label}</Text>
-                  <Title level={4}>{stage.title}</Title>
-                </div>
-                <Tag color={magiStageColor(stage.status)}>{stage.metric} {stage.metricLabel}</Tag>
-              </div>
-              <Text className="magi-stage-question">{stage.question}</Text>
-              <Text type="secondary">{stage.description}</Text>
-              <ol className="magi-stage-actions">
-                {stage.actions.map((action) => <li key={action}>{action}</li>)}
-              </ol>
-            </section>
-          ))}
-        </div>
-      </Card>
-
-      <div className="observability-grid">
-        <Card title="代管任务队列">
-          <div className="observability-workflow-list">
-            {(blockedWorkflows.length > 0 ? blockedWorkflows : workflows).map((workflow) => (
-              <section key={workflow.key} className={`observability-workflow-item ${workflow.ready ? 'is-ready' : 'is-blocked'}`}>
-                <div>
-                  <Text strong>{workflow.title}</Text>
-                  <Tag color={workflow.ready ? 'green' : 'orange'}>{workflow.ready ? '可运行' : '待处理'}</Tag>
-                </div>
-                 <Text type="secondary">{workflow.ready ? '代管条件已覆盖' : `补齐 ${formatScopeList(workflow.missingScopes)} 后可代管`}</Text>
-                <div>{workflow.requiredScopes.map((scope) => renderScopeTag(scope, workflow.missingScopes.includes(scope)))}</div>
-              </section>
-            ))}
-          </div>
-        </Card>
-
-        <Card title="代管提示">
-          <div className="observability-check-list">
-            {governanceChecks.map((check) => (
-              <section
-                key={check.key}
-                className={`observability-check-item ${check.status === 'PASS' ? 'is-pass' : 'needs-attention'}`}
-              >
-                <div>
-                  {check.status === 'PASS' ? <CheckCircle2 size={18} /> : <AlertTriangle size={18} />}
-                  <Text strong>{check.title}</Text>
-                  <Tag color={statusTagColor(check.status)}>{statusLabel(check.status)}</Tag>
-                </div>
-                <Text>{check.description}</Text>
-                <Text type="secondary">{check.action}</Text>
-              </section>
-            ))}
-          </div>
-        </Card>
-      </div>
-
-      <div className="observability-grid">
-        <Card title="最近 Agent 活动">
-          <Table
-            rowKey="id"
-            size="small"
-            dataSource={recentEvents}
-            pagination={false}
-            columns={[
-              { title: '动作', dataIndex: 'action' },
-              { title: '资源', render: (_, row) => `${row.resourceType}#${row.resourceId}` },
-              { title: '调用方', dataIndex: 'actor' },
-              { title: '时间', dataIndex: 'createdAt', render: formatDateTime }
-            ]}
-          />
-        </Card>
-        <Card title="下一步建议">
-          <div className="observability-recommendations">
-            <section>
-               <Text strong>1. 补齐代管授权</Text>
-               <Text type="secondary">
-                 {missingScopes.length > 0 ? `优先补齐 ${formatScopeList(missingScopes)}。` : '维持当前最小授权，避免开放无关范围。'}
-               </Text>
-             </section>
-             <section>
-               <Text strong>2. 沉淀代管模板</Text>
-               <Text type="secondary">把稳定的 Skill、Agent 和文章维护路径固化为可复用模板。</Text>
-             </section>
-             <section>
-               <Text strong>3. 补充知识产物</Text>
-               <Text type="secondary">优先补充缺口最大的 Agent 资料、Skill 能力包和 AI 文章。</Text>
-             </section>
-          </div>
-        </Card>
-      </div>
-    </div>
-  );
-}
-
 function magiStageIcon(stage: MagiCycleStageKey): ReactNode {
   if (stage === 'review') {
     return <AlertTriangle size={18} />;
@@ -2294,25 +2085,6 @@ function magiStageIcon(stage: MagiCycleStageKey): ReactNode {
     return <Workflow size={18} />;
   }
   return <Sparkles size={18} />;
-}
-
-function magiStageLabel(stage: MagiCycleStageKey): string {
-  const labels: Record<MagiCycleStageKey, string> = {
-    review: '审视',
-    execute: '执行',
-    elevate: '提升'
-  };
-  return labels[stage];
-}
-
-function magiStageColor(status: MagiCycleStageStatus): string {
-  if (status === 'attention') {
-    return 'gold';
-  }
-  if (status === 'ready') {
-    return 'green';
-  }
-  return 'blue';
 }
 
 function PlatformThemeBootstrap() {
@@ -2357,7 +2129,6 @@ function App() {
               <Route path="/articles/:id" element={<ArticleDetailPage />} />
               <Route path="/finetune" element={<FinetunePage />} />
               <Route path="/developer" element={<DeveloperPage />} />
-              <Route path="/observability" element={<ObservabilityPage />} />
               <Route path="/account/profile" element={<AccountProfilePage />} />
               <Route path="/account/api-keys" element={<ApiKeysPage />} />
               <Route element={<RequireAdmin />}>

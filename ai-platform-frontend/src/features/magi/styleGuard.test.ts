@@ -22,4 +22,10 @@ describe('workspace style guard', () => {
     expect(appSource).toContain('复制这段给 Agent');
     expect(appSource).toContain('一键配置平台 Skill');
   });
+
+  it('removes the redundant observability/self-check surface from the workspace', () => {
+    expect(appSource).not.toContain('ObservabilityPage');
+    expect(appSource).not.toContain('/observability');
+    expect(styles).not.toContain('observability-');
+  });
 });

@@ -166,6 +166,33 @@ class AuthAndDeveloperApiTest {
     }
 
     @Test
+    void developerApiDoesNotExposeUserManagementTools() throws Exception {
+        String adminToken = createAdminAndLogin("admin_no_user_tools", "admin-no-user-tools@example.com");
+        createUser(adminToken, "no_user_tools_dev", "no-user-tools@example.com", "No User Tools", "DEVELOPER");
+        String jwt = login("no_user_tools_dev", "secret123");
+        String apiKey = createApiKey(jwt, "skills:read");
+
+        mockMvc.perform(get("/api/v1/developer/users")
+                        .header("X-API-Key", apiKey))
+                .andExpect(status().isNotFound());
+
+        mockMvc.perform(post("/api/v1/developer/users")
+                        .header("X-API-Key", apiKey)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "username": "agent_created_user",
+                                  "email": "agent-created-user@example.com",
+                                  "displayName": "Agent Created User",
+                                  "password": "secret123",
+                                  "status": "ACTIVE",
+                                  "roles": ["DEVELOPER"]
+                                }
+                                """))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
     void apiKeyScopeIsRequiredForDeveloperOperations() throws Exception {
         String adminToken = createAdminAndLogin("admin_limited", "admin-limited@example.com");
         createUser(adminToken, "limited_user", "limited@example.com", "Limited", "DEVELOPER");
@@ -350,21 +377,6 @@ class AuthAndDeveloperApiTest {
                                   "sortOrder": 99,
                                   "safetyMarkdown": "# Safety",
                                   "bodyMarkdown": "# Body"
-                                }
-                                """))
-                .andExpect(status().isForbidden());
-
-        mockMvc.perform(post("/api/v1/developer/users")
-                        .header("X-API-Key", apiKey)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
-                                {
-                                  "username": "blocked_user",
-                                  "email": "blocked-user@example.com",
-                                  "displayName": "Blocked User",
-                                  "password": "secret123",
-                                  "status": "ACTIVE",
-                                  "roles": ["DEVELOPER"]
                                 }
                                 """))
                 .andExpect(status().isForbidden());
