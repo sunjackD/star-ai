@@ -58,8 +58,7 @@ body {
   background: rgba(91, 140, 255, 0.20);
 }
 
-body::before,
-body::after {
+body::before {
   content: "";
   position: fixed;
   inset: 0;
@@ -74,22 +73,6 @@ body::before {
     radial-gradient(circle at 1px 1px, rgba(91, 111, 160, 0.13) 1px, transparent 1.8px);
   background-size: auto, auto, 28px 28px;
   mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.92), rgba(0, 0, 0, 0.48) 62%, transparent);
-}
-
-body::after {
-  inset: 8vh 4vw auto auto;
-  width: min(42vw, 620px);
-  height: min(38vw, 520px);
-  z-index: -1;
-  border: 1px solid rgba(255, 255, 255, 0.64);
-  border-radius: 48px 18px 48px 18px;
-  background:
-    linear-gradient(135deg, rgba(255, 255, 255, 0.84), rgba(255, 255, 255, 0.08)),
-    conic-gradient(from 210deg, rgba(91, 140, 255, 0.18), rgba(159, 211, 255, 0.13), rgba(124, 108, 255, 0.16), rgba(91, 140, 255, 0.18));
-  box-shadow: 0 52px 140px rgba(91, 140, 255, 0.14);
-  filter: blur(0.1px);
-  opacity: 0.70;
-  transform: perspective(980px) rotateX(60deg) rotateZ(-18deg);
 }
 
 html[data-theme='minimal-reference'] body,
@@ -450,8 +433,7 @@ html[data-theme='minimal-modern'] .app-sider .ant-menu-submenu-title {
   white-space: nowrap;
 }
 
-.workspace-hero::before,
-.workspace-hero::after {
+.workspace-hero::before {
   content: "";
   position: absolute;
   pointer-events: none;
@@ -469,19 +451,6 @@ html[data-theme='minimal-modern'] .app-sider .ant-menu-submenu-title {
     linear-gradient(45deg, rgba(91, 140, 255, 0.18), rgba(159, 211, 255, 0.12), rgba(124, 108, 255, 0.18));
   box-shadow: 0 32px 90px rgba(91, 140, 255, 0.16);
   transform: perspective(780px) rotateX(60deg) rotateZ(-19deg);
-}
-
-.workspace-hero::after {
-  right: 6%;
-  bottom: 34px;
-  width: 42%;
-  height: 68px;
-  border-radius: 999px;
-  background:
-    linear-gradient(90deg, rgba(91, 140, 255, 0.20), rgba(159, 211, 255, 0.18), rgba(124, 108, 255, 0.16));
-  filter: blur(16px);
-  opacity: 0.72;
-  transform: rotate(-7deg);
 }
 
 .metric-grid {
@@ -517,20 +486,6 @@ html[data-theme='minimal-modern'] .app-sider .ant-menu-submenu-title {
   box-shadow: var(--shadow-soft), inset 0 1px 0 rgba(255, 255, 255, 0.78);
   backdrop-filter: blur(24px) saturate(165%);
   transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease, background 180ms ease;
-}
-
-.console-module-card::before {
-  content: "";
-  position: absolute;
-  inset: -40% -12% auto auto;
-  width: 72%;
-  height: 70%;
-  z-index: -1;
-  border-radius: 999px;
-  background: linear-gradient(135deg, rgba(91, 140, 255, 0.18), rgba(124, 108, 255, 0.08));
-  filter: blur(24px);
-  opacity: 0.72;
-  transform: rotate(-16deg);
 }
 
 .console-module-card > * {
@@ -2173,10 +2128,6 @@ pre {
 }
 
 @media (max-width: 900px) {
-  body::after {
-    display: none;
-  }
-
   .app-header {
     min-height: 78px;
     height: auto;
@@ -2246,8 +2197,7 @@ pre {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .workspace-hero::before,
-  .workspace-hero::after {
+  .workspace-hero::before {
     opacity: 0.28;
   }
 
