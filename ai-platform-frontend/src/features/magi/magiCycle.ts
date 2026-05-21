@@ -87,7 +87,7 @@ export function buildMagiCyclePlan(input: MagiCycleInput): MagiCyclePlan {
         title: '解决问题',
         question: '哪个 Agent、Skill 或文章任务已经具备授权，可以交给 Agent 执行？',
         metric: readyWorkflows.length,
-        metricLabel: '可代管任务',
+        metricLabel: '可管理对象',
         description: readyWorkflows.length > 0
           ? '从已就绪任务中选择一条执行，并更新对应 Agent、Skill 或文章。'
           : '没有完全就绪的任务，先返回审视阶段补齐前置条件。',
@@ -101,7 +101,7 @@ export function buildMagiCyclePlan(input: MagiCycleInput): MagiCyclePlan {
         question: '下一轮要整理 Agent、Skill、模型还是文章？',
         metric: input.recentEventCount,
         metricLabel: '近期代管记录',
-        description: '把执行结果沉淀成更清晰的分类、Skill 包和 Agent 代管模板。',
+        description: '把执行结果沉淀成更清晰的分类、Skill 包和 Agent API 接入说明。',
         status: handoffScore >= 80 ? 'steady' : 'attention',
         actions: buildElevateActions(input.recentEventCount, input.recentlyUsedKeys, handoffScore)
       }
@@ -149,7 +149,7 @@ function buildReviewActions(
     actions.push(`补齐 ${missingScopeCount} 项 API Key 权限，只开放当前任务需要的范围。`);
   }
   if (blockedWorkflows.length > 0) {
-    actions.push(`拆解 ${blockedWorkflows.length} 条阻塞代管任务，优先处理 Skill 或文章写入。`);
+    actions.push(`处理 ${blockedWorkflows.length} 项阻塞条件，优先补齐 Skill 或文章写入。`);
   }
   if (handoffSignals.length > 0) {
     actions.push(`处理 ${handoffSignals.length} 项代管提示：${handoffSignals.map((check) => check.title).join('、')}。`);
@@ -173,7 +173,7 @@ function buildExecuteActions(readyWorkflows: MagiWorkflow[]): string[] {
 
 function buildElevateActions(recentEventCount: number, recentlyUsedKeys: number, handoffScore: number): string[] {
   const actions = [
-    handoffScore >= 80 ? '将本轮可运行路径固化为 Agent 代管模板。' : '优先补齐代管进度低于 80% 的入口。',
+    handoffScore >= 80 ? '将本轮可运行路径固化为 Agent API 接入说明。' : '优先补齐代管进度低于 80% 的入口。',
     recentlyUsedKeys > 0 ? `复盘 ${recentlyUsedKeys} 个近期活跃 API Key 的范围。` : '创建一组短期 API Key，用于下一轮代管验证。'
   ];
   if (recentEventCount === 0) {

@@ -177,7 +177,7 @@ public class ApiKeyService {
                         "scope_coverage",
                         "Scope 覆盖",
                         missingScopes.isEmpty(),
-                        missingScopes.isEmpty() ? "所有 Agent 代管任务的最小授权已覆盖" : "仍缺少 "
+                        missingScopes.isEmpty() ? "Agent、Skill 和文章的最小授权已覆盖" : "仍缺少 "
                                 + String.join(", ", missingScopes),
                         "前往 API Key 页面补齐最小范围"
                 ),
@@ -185,7 +185,7 @@ public class ApiKeyService {
                         "destructive_gate",
                         "高风险确认",
                         destructiveGateConfigured,
-                        "删除类 Agent 代管任务必须带明确人工确认",
+                        "删除类 Agent API 操作必须带明确人工确认",
                         "保留删除前的目标 ID 与名称确认"
                 ),
                 handoffSignal(

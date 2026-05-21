@@ -120,7 +120,7 @@ describe('buildAgentApiAccess', () => {
     });
   });
 
-  it('builds concrete task templates for Agent Skill and article handoff', () => {
+  it('builds concrete managed objects for Agent Skill and article handoff', () => {
     const access = buildAgentApiAccess({
       apiBaseUrl: 'http://localhost:8081/api/v1',
       selfSkillUrl: 'http://localhost:8081/api/v1/developer/self-skill/download',
@@ -132,18 +132,18 @@ describe('buildAgentApiAccess', () => {
       toolSpecs
     });
 
-    expect(access.taskTemplates.map((template) => template.target)).toEqual(['Agent', 'Skill', '文章']);
-    expect(access.taskTemplates[0]).toMatchObject({
-      title: '维护 Agent',
+    expect(access.managedObjects.map((object) => object.target)).toEqual(['Agent', 'Skill', '文章']);
+    expect(access.managedObjects[0]).toMatchObject({
+      title: 'Agent',
       status: 'attention',
       missingScopes: ['agents:write']
     });
-    expect(access.taskTemplates[0].copyText).toContain('任务: 维护 Agent');
-    expect(access.taskTemplates[0].copyText).toContain('目标对象: Agent');
-    expect(access.taskTemplates[0].copyText).toContain('可用工具: list_agents, update_agent');
-    expect(access.taskTemplates[0].copyText).toContain('所需权限: agents:read, agents:write');
-    expect(access.taskTemplates[1].copyText).toContain('目标对象: Skill');
-    expect(access.taskTemplates[2].copyText).toContain('目标对象: 文章');
+    expect(access.managedObjects[0].copyText).toContain('对象: Agent');
+    expect(access.managedObjects[0].copyText).toContain('可用工具: list_agents, update_agent');
+    expect(access.managedObjects[0].copyText).toContain('所需权限: agents:read, agents:write');
+    expect(access.managedObjects[0].copyText).not.toContain('任务');
+    expect(access.managedObjects[1].copyText).toContain('对象: Skill');
+    expect(access.managedObjects[2].copyText).toContain('对象: 文章');
   });
 
   it('uses a ready permission status when all required scopes are covered', () => {

@@ -39,6 +39,15 @@ class AuthAndDeveloperApiTest {
     }
 
     @Test
+    void publicDirectoryPreflightAllowsFrontendSkipAuthMarker() throws Exception {
+        mockMvc.perform(options("/api/v1/agents")
+                        .header("Origin", "http://localhost:5173")
+                        .header("Access-Control-Request-Method", "GET")
+                        .header("Access-Control-Request-Headers", "x-skip-auth"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
     void seededDefaultAdminCannotLogin() throws Exception {
         mockMvc.perform(post("/api/v1/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)

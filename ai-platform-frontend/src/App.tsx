@@ -1710,12 +1710,12 @@ function DeveloperPage() {
       message.warning('请使用配置文本右侧复制按钮');
     }
   };
-  const copyTaskTemplate = async (text: string) => {
+  const copyManagedObject = async (text: string) => {
     try {
       await navigator.clipboard.writeText(text);
-      message.success('已复制任务模板');
+      message.success('已复制对象上下文');
     } catch {
-      message.warning('请使用模板文本右侧复制按钮');
+      message.warning('请使用对象文本右侧复制按钮');
     }
   };
   const copyExecutionPackage = async () => {
@@ -1746,7 +1746,7 @@ function DeveloperPage() {
         <div className="agent-api-status-panel">
           <Statistic title="工具契约" value={toolSpecs.length} />
           <Statistic title="认证头" value={authHeaders.length} />
-          <Statistic title="可代管任务" value={`${readyAgentWorkflows}/${agentWorkflowReadiness.length || 0}`} />
+          <Statistic title="对象覆盖" value={`${readyAgentWorkflows}/${agentWorkflowReadiness.length || 0}`} />
           <Statistic title="Scope 覆盖" value={scopeCoverage} suffix="%" />
         </div>
       </section>
@@ -1819,35 +1819,35 @@ function DeveloperPage() {
         </div>
       </Card>
 
-      <Card title="代管任务模板" className="agent-api-card">
-        <div className="agent-api-task-grid">
-          {access.taskTemplates.map((template) => (
-            <section key={template.key} className={`agent-api-task-card is-${template.status}`}>
-              <div className="agent-api-task-heading">
+      <Card title="Agent API 可管理对象" className="agent-api-card">
+        <div className="agent-api-object-grid">
+          {access.managedObjects.map((object) => (
+            <section key={object.key} className={`agent-api-object-card is-${object.status}`}>
+              <div className="agent-api-object-heading">
                 <Space size={8} wrap>
-                  <Tag color={template.status === 'ready' ? 'green' : 'gold'}>{template.target}</Tag>
-                  <Text strong>{template.title}</Text>
+                  <Tag color={object.status === 'ready' ? 'green' : 'gold'}>{object.target}</Tag>
+                  <Text strong>{object.title}</Text>
                 </Space>
-                <Tag color={template.status === 'ready' ? 'green' : 'orange'}>
-                  {template.status === 'ready' ? '可执行' : `缺 ${template.missingScopes.length} 项权限`}
+                <Tag color={object.status === 'ready' ? 'green' : 'orange'}>
+                  {object.status === 'ready' ? '可管理' : `缺 ${object.missingScopes.length} 项权限`}
                 </Tag>
               </div>
-              <Text type="secondary">{template.objective}</Text>
-              <div className="agent-api-task-meta">
+              <Text type="secondary">{object.objective}</Text>
+              <div className="agent-api-object-meta">
                 <Text type="secondary">权限</Text>
                 <Space size={[4, 4]} wrap>
-                  {template.scopes.map((scope) => renderScopeTag(scope, template.missingScopes.includes(scope)))}
+                  {object.scopes.map((scope) => renderScopeTag(scope, object.missingScopes.includes(scope)))}
                 </Space>
               </div>
-              <div className="agent-api-task-meta">
+              <div className="agent-api-object-meta">
                 <Text type="secondary">工具</Text>
-                <Text>{template.tools.map((tool) => tool.name).join('、') || '读取 Manifest 后确认'}</Text>
+                <Text>{object.tools.map((tool) => tool.name).join('、') || '读取 Manifest 后确认'}</Text>
               </div>
-              <Paragraph copyable={{ text: template.copyText }} className="prompt-copy agent-api-task-copy">
-                {template.copyText}
+              <Paragraph copyable={{ text: object.copyText }} className="prompt-copy agent-api-object-copy">
+                {object.copyText}
               </Paragraph>
-              <Button icon={<Copy size={16} />} onClick={() => copyTaskTemplate(template.copyText)}>
-                复制任务给 Agent
+              <Button icon={<Copy size={16} />} onClick={() => copyManagedObject(object.copyText)}>
+                复制给 Agent
               </Button>
             </section>
           ))}

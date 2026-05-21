@@ -1280,13 +1280,13 @@ pre {
   align-items: center;
 }
 
-.agent-api-task-grid {
+.agent-api-object-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 14px;
 }
 
-.agent-api-task-card {
+.agent-api-object-card {
   display: grid;
   align-content: start;
   gap: 12px;
@@ -1298,27 +1298,27 @@ pre {
   box-shadow: var(--shadow-soft);
 }
 
-.agent-api-task-card.is-ready {
+.agent-api-object-card.is-ready {
   border-left: 3px solid rgba(34, 197, 94, 0.76);
 }
 
-.agent-api-task-card.is-attention {
+.agent-api-object-card.is-attention {
   border-left: 3px solid rgba(245, 158, 11, 0.78);
 }
 
-.agent-api-task-heading {
+.agent-api-object-heading {
   display: flex;
   gap: 10px;
   align-items: center;
   justify-content: space-between;
 }
 
-.agent-api-task-meta {
+.agent-api-object-meta {
   display: grid;
   gap: 6px;
 }
 
-.agent-api-task-copy {
+.agent-api-object-copy {
   max-height: 180px;
   overflow: auto;
   padding: 12px;
