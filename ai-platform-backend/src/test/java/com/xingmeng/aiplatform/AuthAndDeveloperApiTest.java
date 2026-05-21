@@ -632,10 +632,10 @@ class AuthAndDeveloperApiTest {
     }
 
     @Test
-    void developerDashboardReportsCrossModuleControlPlaneReadiness() throws Exception {
-        String adminToken = createAdminAndLogin("admin_control_plane", "admin-control-plane@example.com");
-        createUser(adminToken, "control_plane_dev", "control-plane@example.com", "Control Plane Dev", "DEVELOPER");
-        String jwt = login("control_plane_dev", "secret123");
+    void developerDashboardReportsAgentApiReadinessWithoutControlPlaneModules() throws Exception {
+        String adminToken = createAdminAndLogin("admin_agent_api_readiness", "admin-agent-api-readiness@example.com");
+        createUser(adminToken, "agent_api_ready_dev", "agent-api-ready@example.com", "Agent API Ready Dev", "DEVELOPER");
+        String jwt = login("agent_api_ready_dev", "secret123");
         String apiKey = createApiKey(jwt, "skills:read");
 
         mockMvc.perform(get("/api/v1/developer/skills")
@@ -645,16 +645,9 @@ class AuthAndDeveloperApiTest {
         mockMvc.perform(get("/api/v1/developer/dashboard")
                         .header("Authorization", "Bearer " + jwt))
                 .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.controlPlaneModules").doesNotExist())
                 .andExpect(jsonPath(
-                        "$.data.controlPlaneModules[?(@.key == 'agent_fleet' && @.title == 'Agent 资产库' "
-                                + "&& @.route == '/agents')]"
-                ).isNotEmpty())
-                .andExpect(jsonPath(
-                        "$.data.controlPlaneModules[?(@.key == 'skill_registry' && @.title == 'Skill 资产库' "
-                                + "&& @.route == '/skills')]"
-                ).isNotEmpty())
-                .andExpect(jsonPath(
-                        "$.data.controlPlaneModules[?(@.key == 'agent_workflows' && @.total == 8 && @.active == 1)]"
+                        "$.data.agentWorkflowReadiness[?(@.key == 'discover_skill_inventory' && @.ready == true)]"
                 ).isNotEmpty())
                 .andExpect(jsonPath(
                         "$.data.governanceChecks[?(@.key == 'scope_coverage' && @.status == 'ATTENTION')]"

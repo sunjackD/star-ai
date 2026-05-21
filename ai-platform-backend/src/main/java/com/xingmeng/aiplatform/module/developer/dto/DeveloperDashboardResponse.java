@@ -12,7 +12,6 @@ public record DeveloperDashboardResponse(
         List<String> requiredScopes,
         List<String> missingRequiredScopes,
         List<DeveloperAgentWorkflowReadinessResponse> agentWorkflowReadiness,
-        List<DeveloperControlPlaneModuleResponse> controlPlaneModules,
         List<DeveloperGovernanceCheckResponse> governanceChecks,
         List<DeveloperAuditEventResponse> recentEvents
 ) {

@@ -6,19 +6,14 @@ import com.xingmeng.aiplatform.module.audit.entity.AuditLog;
 import com.xingmeng.aiplatform.module.audit.repository.AuditLogRepository;
 import com.xingmeng.aiplatform.module.auth.security.ApiKeyAuthenticationDetails;
 import com.xingmeng.aiplatform.module.auth.security.AuthenticatedUser;
-import com.xingmeng.aiplatform.module.agent.repository.AgentRepository;
-import com.xingmeng.aiplatform.module.article.repository.ArticleRepository;
-import com.xingmeng.aiplatform.module.model.repository.AiModelRepository;
 import com.xingmeng.aiplatform.module.developer.dto.ApiKeyCreateRequest;
 import com.xingmeng.aiplatform.module.developer.dto.ApiKeyResponse;
 import com.xingmeng.aiplatform.module.developer.dto.DeveloperAgentWorkflowReadinessResponse;
 import com.xingmeng.aiplatform.module.developer.dto.DeveloperAuditEventResponse;
-import com.xingmeng.aiplatform.module.developer.dto.DeveloperControlPlaneModuleResponse;
 import com.xingmeng.aiplatform.module.developer.dto.DeveloperDashboardResponse;
 import com.xingmeng.aiplatform.module.developer.dto.DeveloperGovernanceCheckResponse;
 import com.xingmeng.aiplatform.module.developer.entity.ApiKey;
 import com.xingmeng.aiplatform.module.developer.repository.ApiKeyRepository;
-import com.xingmeng.aiplatform.module.skill.repository.SkillRepository;
 import com.xingmeng.aiplatform.module.user.entity.User;
 import com.xingmeng.aiplatform.module.user.repository.UserRepository;
 import org.springframework.http.HttpStatus;
@@ -68,30 +63,18 @@ public class ApiKeyService {
     private final UserRepository userRepository;
     private final AuditLogRepository auditLogRepository;
     private final DeveloperAgentWorkflowCatalog agentWorkflowCatalog;
-    private final AgentRepository agentRepository;
-    private final SkillRepository skillRepository;
-    private final AiModelRepository aiModelRepository;
-    private final ArticleRepository articleRepository;
     private final SecureRandom secureRandom = new SecureRandom();
 
     public ApiKeyService(
             ApiKeyRepository apiKeyRepository,
             UserRepository userRepository,
             AuditLogRepository auditLogRepository,
-            DeveloperAgentWorkflowCatalog agentWorkflowCatalog,
-            AgentRepository agentRepository,
-            SkillRepository skillRepository,
-            AiModelRepository aiModelRepository,
-            ArticleRepository articleRepository
+            DeveloperAgentWorkflowCatalog agentWorkflowCatalog
     ) {
         this.apiKeyRepository = apiKeyRepository;
         this.userRepository = userRepository;
         this.auditLogRepository = auditLogRepository;
         this.agentWorkflowCatalog = agentWorkflowCatalog;
-        this.agentRepository = agentRepository;
-        this.skillRepository = skillRepository;
-        this.aiModelRepository = aiModelRepository;
-        this.articleRepository = articleRepository;
     }
 
     public List<ApiKeyResponse> list(AuthenticatedUser principal) {
@@ -178,56 +161,8 @@ public class ApiKeyService {
                 REQUIRED_AGENT_SCOPES,
                 missingScopes,
                 agentWorkflowReadiness,
-                controlPlaneModules(agentWorkflowReadiness),
                 governanceChecks(missingScopes, recentEvents),
                 recentEvents
-        );
-    }
-
-    private List<DeveloperControlPlaneModuleResponse> controlPlaneModules(
-            List<DeveloperAgentWorkflowReadinessResponse> workflowReadiness
-    ) {
-        long activeAgents = agentRepository.findByStatusOrderByViewCountDesc("ACTIVE").size();
-        long activeSkills = skillRepository.findByStatusOrderByDownloadCountDesc("ACTIVE").size();
-        long activeArticles = articleRepository.findByStatusOrderBySortOrderAscCreatedAtDesc("PUBLISHED").size();
-        long totalModels = aiModelRepository.count();
-        long readyWorkflows = workflowReadiness.stream().filter(DeveloperAgentWorkflowReadinessResponse::ready).count();
-        return List.of(
-                module("agent_fleet", "Agent 资产库", "Agent 运行入口与配置指南", agentRepository.count(),
-                        activeAgents, "/agents", activeAgents + " 个 Agent 可用"),
-                module("skill_registry", "Skill 资产库", "可复用 Skill 资产与包分发", skillRepository.count(),
-                        activeSkills, "/skills", activeSkills + " 个 Skill 可用"),
-                module("model_layer", "模型能力层", "模型供应商、能力标签与服务入口", totalModels,
-                        totalModels, "/models", totalModels + " 个模型已配置"),
-                module("knowledge_base", "知识库", "教程、Prompt、脚本和执行前上下文", articleRepository.count(),
-                        activeArticles, "/articles", activeArticles + " 篇内容已发布"),
-                module("user_control", "用户管理", "用户、角色和登录状态的自动化维护", userRepository.count(),
-                        userRepository.findAll().stream().filter(user -> "ACTIVE".equals(user.getStatus())).count(),
-                        "/admin/users", "用户与角色可由授权 Agent 维护"),
-                module("agent_workflows", "Agent 工作流", "Agent 可执行流程、权限和风险门禁",
-                        workflowReadiness.size(), readyWorkflows, "/developer",
-                        readyWorkflows + "/" + workflowReadiness.size() + " 个工作流可运行")
-        );
-    }
-
-    private DeveloperControlPlaneModuleResponse module(
-            String key,
-            String title,
-            String description,
-            long total,
-            long active,
-            String route,
-            String signal
-    ) {
-        return new DeveloperControlPlaneModuleResponse(
-                key,
-                title,
-                description,
-                total,
-                active,
-                active > 0 ? "READY" : "ATTENTION",
-                route,
-                signal
         );
     }
 
