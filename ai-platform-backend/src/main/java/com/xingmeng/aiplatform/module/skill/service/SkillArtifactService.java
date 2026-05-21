@@ -188,11 +188,11 @@ public class SkillArtifactService {
         return """
                 ---
                 name: ai-platform-manager
-                description: 通过 AI 聚合平台 API Key 代管 Skill、Agent、文章
+                description: 通过 AI 聚合平台 API Key 代管 Agent、Skill、文章
                 ---
                 # AI Platform Manager
 
-                该 Skill 让 AI Agent 通过 AI 聚合平台 Developer API 代管站内 Skill、Agent、文章。
+                该 Skill 让 AI Agent 通过 AI 聚合平台 Developer API 代管站内 Agent、Skill、文章。
                 它适合在 Codex、Claude Code、Roo Code 等 Agent 中安装后使用。
 
                 ## 初始化
@@ -210,7 +210,7 @@ public class SkillArtifactService {
                 2. 从 `toolSpecs` 中匹配工具的 `method`、`path`、`scope`、`risk` 和 `description`，不要只凭示例字符串猜测接口。
                 3. 调用前确认 API Key 覆盖对应 `scope`；`skills:import,skills:write` 表示两个 scope 都必须具备。
                 4. `risk` 为 `sensitive` 或 `destructive` 的工具必须先确认目标、影响范围和回滚方式。
-                5. 写操作完成后重新读取列表或详情做校验，遇到 401/403 时先提示用户更新授权范围。
+                5. 写操作完成后重新读取列表或详情做校验，遇到 401/403 时先提示更新 API Key scope。
 
                 ## Tools
 
@@ -229,7 +229,7 @@ public class SkillArtifactService {
                 - `delete_skill`: 删除站内 Skill。需要 `skills:write`。
                 - `download_skill`: 下载某个 Skill 的源码文件或上传包。需要 `skills:download`。
 
-                执行 `delete_skill` 前必须确认目标 Skill ID、名称和用户意图。
+                执行 `delete_skill` 前必须确认目标 Skill ID、名称和任务意图。
 
                 ### Agent
 
@@ -261,13 +261,13 @@ public class SkillArtifactService {
                 curl -X POST "http://localhost:8081/api/v1/developer/articles" \\
                   -H "X-API-Key: xma_xxx" \\
                   -H "Content-Type: application/json" \\
-                  -d '{"title":"Agent 规范","slug":"agent-policy","summary":"运行规范","category":"治理","tags":"agent","difficulty":"BEGINNER","estimatedMinutes":8,"status":"ACTIVE","sortOrder":10,"safetyMarkdown":"# Safety","bodyMarkdown":"# Body"}'
+                  -d '{"title":"Agent 接入流程","slug":"agent-api-workflow","summary":"Agent 调用平台 API 的步骤","category":"Agent","tags":"agent,api","difficulty":"BEGINNER","estimatedMinutes":8,"status":"ACTIVE","sortOrder":10,"safetyMarkdown":"# Safety","bodyMarkdown":"# Body"}'
                 ```
 
                 ## 可直接给 Agent 的任务提示
 
                 “使用 ai-platform-manager，先读取 Manifest 和 toolSpecs；按我的任务选择最小 scope；
-                创建或更新 Skill、Agent、文章、用户后重新读取对应列表并汇报校验结果。”
+                创建或更新 Agent、Skill、文章后重新读取对应列表并汇报校验结果。”
                 """;
     }
 

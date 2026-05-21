@@ -22,6 +22,7 @@ import java.util.List;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.startsWith;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
@@ -474,6 +475,18 @@ class SetupAndUploadApiTest {
                 .andExpect(content().string(containsString("risk")))
                 .andExpect(content().string(containsString("destructive")))
                 .andExpect(content().string(containsString("执行 `delete_skill` 前必须确认")));
+    }
+
+    @Test
+    void selfSkillKeepsApiKeyPurposeLimitedToAgentSkillAndArticleManagement() throws Exception {
+        mockMvc.perform(get("/api/v1/developer/self-skill/download"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("API Key")))
+                .andExpect(content().string(containsString("Agent、Skill、文章")))
+                .andExpect(content().string(not(containsString("用户"))))
+                .andExpect(content().string(not(containsString("治理"))))
+                .andExpect(content().string(not(containsString("知识产物"))))
+                .andExpect(content().string(not(containsString("内容资产"))));
     }
 
     private String createAdminAndLogin(String username, String email) throws Exception {

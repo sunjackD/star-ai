@@ -94,7 +94,7 @@ class AuthAndDeveloperApiTest {
     void developerManifestFocusesAgentSkillAndArticleTools() throws Exception {
         mockMvc.perform(get("/api/v1/developer/skill-manifest"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.description").value(containsString("Skill、Agent、文章")))
+                .andExpect(jsonPath("$.data.description").value(containsString("Agent、Skill、文章")))
                 .andExpect(jsonPath("$.data.requiredScopes[?(@ == 'agents:write')]").isNotEmpty())
                 .andExpect(jsonPath("$.data.requiredScopes[?(@ == 'articles:write')]").isNotEmpty())
                 .andExpect(jsonPath("$.data.requiredScopes[?(@ == 'users:write')]").isEmpty())
@@ -238,7 +238,7 @@ class AuthAndDeveloperApiTest {
     }
 
     @Test
-    void apiKeyCanManageAgentAndArticleKnowledgeAssets() throws Exception {
+    void apiKeyCanManageAgentAndArticleModules() throws Exception {
         String adminToken = createAdminAndLogin("admin_platform_modules", "admin-platform-modules@example.com");
         createUser(adminToken, "platform_module_dev", "platform-module@example.com", "Platform Module Dev", "DEVELOPER");
         String jwt = login("platform_module_dev", "secret123");
@@ -296,8 +296,8 @@ class AuthAndDeveloperApiTest {
                                   "title": "Agent 运行规范",
                                   "slug": "agent-runtime-policy",
                                   "summary": "面向 Agent 接入的运行规范",
-                                  "category": "治理",
-                                  "tags": "agent,governance",
+                                  "category": "Agent",
+                                  "tags": "agent,api",
                                   "difficulty": "BEGINNER",
                                   "estimatedMinutes": 8,
                                   "sourceUrl": "https://example.com/policy",
@@ -323,8 +323,8 @@ class AuthAndDeveloperApiTest {
                                   "title": "Agent 运行规范更新",
                                   "slug": "agent-runtime-policy-updated",
                                   "summary": "面向 Agent 接入的运行规范更新",
-                                  "category": "治理",
-                                  "tags": "agent,governance",
+                                  "category": "Agent",
+                                  "tags": "agent,api",
                                   "difficulty": "INTERMEDIATE",
                                   "estimatedMinutes": 12,
                                   "sourceUrl": "https://example.com/policy",

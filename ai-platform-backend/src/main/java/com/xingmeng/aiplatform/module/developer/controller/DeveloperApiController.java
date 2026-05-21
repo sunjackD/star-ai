@@ -137,7 +137,7 @@ public class DeveloperApiController {
                 Map.entry("apiVersion", "v1"),
                 Map.entry("apiBasePath", "/api/v1"),
                 Map.entry("name", "ai-platform-manager"),
-                Map.entry("description", "通过 API Key 让 AI Agent 代管 Skill、Agent、文章"),
+                Map.entry("description", "通过 API Key 让 AI Agent 代管 Agent、Skill、文章"),
                 Map.entry("auth", Map.of("headers", List.of("X-API-Key", "Authorization: Bearer xma_xxx"))),
                 Map.entry("requiredScopes", REQUIRED_PLATFORM_SCOPES),
                 Map.entry("tools", List.of(
@@ -182,7 +182,7 @@ public class DeveloperApiController {
                 Map.entry(
                         "installPrompt",
                         "请下载并安装 ai-platform-manager Skill，配置 API Base 和覆盖目标 scopes 的 API Key，"
-                                + "然后让 Agent 只按 toolSpecs 代管 Skill、Agent、文章。"
+                                + "然后让 Agent 只按 toolSpecs 代管 Agent、Skill、文章。"
                 )
         ));
     }
