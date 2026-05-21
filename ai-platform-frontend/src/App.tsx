@@ -1685,8 +1685,6 @@ function DeveloperPage() {
       description: formatToolName(tool)
     }));
   const authHeaders = manifest?.auth?.headers ?? ['X-API-Key', 'Authorization: Bearer xma_xxx'];
-  const agentWorkflowReadiness = dashboard?.agentWorkflowReadiness ?? [];
-  const readyAgentWorkflows = agentWorkflowReadiness.filter((item) => item.ready).length;
   const requiredScopes = dashboard?.requiredScopes ?? manifestRequiredScopes;
   const missingScopes = dashboard?.missingRequiredScopes ?? manifestRequiredScopes;
   const scopeCoverage = Math.round(
@@ -1738,7 +1736,7 @@ function DeveloperPage() {
         <div className="agent-api-status-panel">
           <Statistic title="工具契约" value={toolSpecs.length} />
           <Statistic title="认证头" value={authHeaders.length} />
-          <Statistic title="对象覆盖" value={`${readyAgentWorkflows}/${agentWorkflowReadiness.length || 0}`} />
+          <Statistic title="对象覆盖" value={access.managedObjectCoverage.label} />
           <Statistic title="Scope 覆盖" value={scopeCoverage} suffix="%" />
         </div>
       </section>

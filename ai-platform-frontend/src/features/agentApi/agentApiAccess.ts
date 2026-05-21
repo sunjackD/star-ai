@@ -35,6 +35,11 @@ export type AgentApiAccess = {
   };
   featuredTools: AgentApiToolSpec[];
   managedObjects: AgentApiManagedObject[];
+  managedObjectCoverage: {
+    ready: number;
+    total: number;
+    label: string;
+  };
   copyToAgentText: string;
   installPrompt: string;
 };
@@ -67,6 +72,7 @@ export function buildAgentApiAccess(input: AgentApiAccessInput): AgentApiAccess 
     .slice(0, 8);
   const manifestUrl = joinUrl(input.apiBaseUrl, '/developer/skill-manifest');
   const managedObjects = buildManagedObjects(input, manifestUrl);
+  const readyManagedObjects = managedObjects.filter((object) => object.status === 'ready').length;
   const copyToAgentText = [
     '请把以下平台 Skill 接入当前 Agent:',
     `Skill: ${input.manifestName}`,
@@ -103,6 +109,11 @@ export function buildAgentApiAccess(input: AgentApiAccessInput): AgentApiAccess 
     },
     featuredTools,
     managedObjects,
+    managedObjectCoverage: {
+      ready: readyManagedObjects,
+      total: managedObjects.length,
+      label: `${readyManagedObjects}/${managedObjects.length}`
+    },
     copyToAgentText,
     installPrompt: [
       `接入 ${input.manifestName}`,

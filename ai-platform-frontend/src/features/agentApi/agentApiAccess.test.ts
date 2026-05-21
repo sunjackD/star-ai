@@ -132,6 +132,11 @@ describe('buildAgentApiAccess', () => {
     expect(access.managedObjects[0].copyText).not.toContain('任务');
     expect(access.managedObjects[1].copyText).toContain('对象: Skill');
     expect(access.managedObjects[2].copyText).toContain('对象: 文章');
+    expect(access.managedObjectCoverage).toEqual({
+      ready: 2,
+      total: 3,
+      label: '2/3'
+    });
   });
 
   it('uses manifest managed objects as the Agent API object contract', () => {
