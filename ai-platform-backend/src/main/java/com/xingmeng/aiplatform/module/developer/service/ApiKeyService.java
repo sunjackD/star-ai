@@ -110,14 +110,14 @@ public class ApiKeyService {
                 .map(GrantedAuthority::getAuthority)
                 .anyMatch(authority -> authority.equals("SCOPE_" + scope) || authority.equals("ROLE_ADMIN"));
         if (!allowed) {
-            throw new BusinessException(HttpStatus.FORBIDDEN, "API Key缺少权限: " + scope);
+            throw new BusinessException(HttpStatus.FORBIDDEN, "API Key 缺少权限: " + scope);
         }
     }
 
     public void requireUserSession(Authentication authentication) {
         Object details = authentication == null ? null : authentication.getDetails();
         if (details instanceof ApiKeyAuthenticationDetails) {
-            throw new BusinessException(HttpStatus.FORBIDDEN, "API Key凭据不能管理API Key");
+            throw new BusinessException(HttpStatus.FORBIDDEN, "API Key 不能管理 API Key");
         }
     }
 

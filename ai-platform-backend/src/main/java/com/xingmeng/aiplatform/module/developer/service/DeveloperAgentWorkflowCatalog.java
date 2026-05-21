@@ -65,7 +65,7 @@ public class DeveloperAgentWorkflowCatalog {
                         "校验下载文件名和大小"
                 ),
                 new DeveloperAgentWorkflowResponse(
-                        "maintain_agent_assets",
+                        "maintain_agents",
                         "维护 Agent",
                         "用户要求新增或更新 Agent 入口、说明和状态",
                         List.of("list_agents", "create_agent", "update_agent"),
@@ -76,9 +76,9 @@ public class DeveloperAgentWorkflowCatalog {
                         "确认 Agent 名称、分类和状态已更新"
                 ),
                 new DeveloperAgentWorkflowResponse(
-                        "maintain_knowledge_articles",
+                        "maintain_articles",
                         "维护文章",
-                        "用户要求新增教程、规范、Prompt 或最佳实践内容",
+                        "用户要求新增或更新文章",
                         List.of("list_articles", "create_article", "update_article"),
                         List.of("articles:read", "articles:write"),
                         List.of("读取文章清单", "检查 slug 唯一性", "创建或更新文章", "重新读取列表确认"),

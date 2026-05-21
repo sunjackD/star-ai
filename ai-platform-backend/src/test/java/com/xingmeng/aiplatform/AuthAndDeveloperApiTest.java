@@ -166,6 +166,16 @@ class AuthAndDeveloperApiTest {
     }
 
     @Test
+    void developerAgentWorkflowsUseDirectAgentSkillAndArticleNames() throws Exception {
+        mockMvc.perform(get("/api/v1/developer/agent-workflows"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data[?(@.key == 'maintain_agents')]").isNotEmpty())
+                .andExpect(jsonPath("$.data[?(@.key == 'maintain_articles')]").isNotEmpty())
+                .andExpect(jsonPath("$.data[?(@.key == 'maintain_agent_assets')]").isEmpty())
+                .andExpect(jsonPath("$.data[?(@.key == 'maintain_knowledge_articles')]").isEmpty());
+    }
+
+    @Test
     void developerApiDoesNotExposeUserManagementTools() throws Exception {
         String adminToken = createAdminAndLogin("admin_no_user_tools", "admin-no-user-tools@example.com");
         createUser(adminToken, "no_user_tools_dev", "no-user-tools@example.com", "No User Tools", "DEVELOPER");
@@ -215,7 +225,8 @@ class AuthAndDeveloperApiTest {
 
         mockMvc.perform(get("/api/v1/developer/skills/1/download")
                         .header("X-API-Key", plainKey))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.message").value("API Key 缺少权限: skills:download"));
     }
 
     @Test
@@ -463,7 +474,8 @@ class AuthAndDeveloperApiTest {
 
         mockMvc.perform(get("/api/v1/developer/api-keys")
                         .header("X-API-Key", apiKey))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.message").value("API Key 不能管理 API Key"));
     }
 
     @Test
