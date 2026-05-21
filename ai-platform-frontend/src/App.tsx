@@ -27,7 +27,12 @@ import {
   Workflow
 } from 'lucide-react';
 import { apiUrl, downloadFile, getData, getPublicData, postData, postPublicData, uploadData } from './api/client';
-import { buildMagiCyclePlan, type MagiCycleStageKey, type MagiCycleStageStatus } from './features/magi/magiCycle';
+import {
+  buildMagiCyclePlan,
+  summarizeMagiCycle,
+  type MagiCycleStageKey,
+  type MagiCycleStageStatus
+} from './features/magi/magiCycle';
 import { useAuthStore } from './store/authStore';
 import { useThemeStore } from './store/themeStore';
 import type {
@@ -209,12 +214,26 @@ function DashboardPage() {
   const { data: links = [] } = useQuery({ queryKey: ['links'], queryFn: () => getData<RedirectLink[]>('/links') });
   const { data: apiKeys = [] } = useQuery({ queryKey: ['account-api-keys'], queryFn: () => getData<ApiKey[]>('/account/api-keys') });
   const { data: platform } = useQuery({ queryKey: ['platform-config'], queryFn: () => getData<PlatformConfig>('/platform/config') });
+  const token = useAuthStore((state) => state.token);
   const profile = useAuthStore((state) => state.profile);
+  const { data: developerDashboard } = useQuery({
+    queryKey: ['developer-dashboard'],
+    queryFn: () => getData<DeveloperDashboard>('/developer/dashboard'),
+    enabled: Boolean(token)
+  });
   const isAdmin = profile?.roles.includes('ADMIN');
   const groupedLinks = groupLinks(links);
   const activeSkills = skills.filter((skill) => skill.status === 'ACTIVE').length;
   const activeAgents = agents.filter((agent) => agent.status === 'ACTIVE').length;
   const activeApiKeys = apiKeys.filter((key) => key.status === 'ACTIVE').length;
+  const magiSummary = developerDashboard ? summarizeMagiCycle(buildMagiCyclePlan({
+    requiredScopes: developerDashboard.requiredScopes,
+    missingScopes: developerDashboard.missingRequiredScopes,
+    workflows: developerDashboard.agentWorkflowReadiness,
+    governanceChecks: developerDashboard.governanceChecks,
+    recentEventCount: developerDashboard.recentEvents.length,
+    recentlyUsedKeys: developerDashboard.recentlyUsedKeys
+  })) : undefined;
   const consoleModules = [
     {
       title: 'Agent 资产库',
@@ -321,6 +340,18 @@ function DashboardPage() {
           <div><strong>{links.length}</strong><span>连接器</span></div>
         </div>
       </section>
+
+      {magiSummary && (
+        <Link to={magiSummary.route} className={`magi-action-strip is-${magiSummary.focusStage}`}>
+          <span className="magi-action-icon">{magiStageIcon(magiSummary.focusStage)}</span>
+          <span>
+            <Text type="secondary">MAGI 当前轮次</Text>
+            <strong>{magiSummary.focusLabel} · {magiSummary.healthLabel}</strong>
+            <small>{magiSummary.primaryAction}</small>
+          </span>
+          <span className="magi-action-link">进入{magiSummary.focusLabel}</span>
+        </Link>
+      )}
 
       <div className="console-module-grid">
         {consoleModules.map((module) => (

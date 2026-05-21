@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { buildMagiCyclePlan } from './magiCycle';
+import { buildMagiCyclePlan, summarizeMagiCycle } from './magiCycle';
 
 describe('buildMagiCyclePlan', () => {
   it('prioritizes review when governance or permission gates are blocking execution', () => {
@@ -74,5 +74,58 @@ describe('buildMagiCyclePlan', () => {
       status: 'ready'
     });
     expect(plan.stages[1].actions[0]).toBe('优先执行“发现 Skill 库存”，并在完成后读取结果复核。');
+  });
+});
+
+describe('summarizeMagiCycle', () => {
+  it('points review-focused users to observability with the first review action', () => {
+    const summary = summarizeMagiCycle(buildMagiCyclePlan({
+      requiredScopes: ['skills:read'],
+      missingScopes: ['skills:read'],
+      workflows: [],
+      governanceChecks: [],
+      recentEventCount: 0,
+      recentlyUsedKeys: 0
+    }));
+
+    expect(summary).toEqual({
+      focusStage: 'review',
+      focusLabel: '审视',
+      healthLabel: '健康度 0%',
+      primaryAction: '补齐 1 项缺失权限，并复核 API Key 是否遵循最小权限。',
+      route: '/observability'
+    });
+  });
+
+  it('points execution-focused users to the developer control plane', () => {
+    const summary = summarizeMagiCycle(buildMagiCyclePlan({
+      requiredScopes: ['skills:read'],
+      missingScopes: [],
+      workflows: [
+        {
+          key: 'discover_skill_inventory',
+          title: '发现 Skill 库存',
+          risk: 'read',
+          requiredScopes: ['skills:read'],
+          missingScopes: [],
+          ready: true
+        }
+      ],
+      governanceChecks: [
+        {
+          key: 'audit_trail',
+          title: '审计链路',
+          status: 'PASS',
+          description: '调用已进入审计',
+          action: '继续复核'
+        }
+      ],
+      recentEventCount: 1,
+      recentlyUsedKeys: 1
+    }));
+
+    expect(summary.route).toBe('/developer');
+    expect(summary.focusLabel).toBe('执行');
+    expect(summary.primaryAction).toBe('优先执行“发现 Skill 库存”，并在完成后读取结果复核。');
   });
 });

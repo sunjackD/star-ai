@@ -375,6 +375,81 @@ html[data-theme='minimal-modern'] .app-sider .ant-menu-submenu-title {
   letter-spacing: 0;
 }
 
+.magi-action-strip {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr) auto;
+  gap: 14px;
+  align-items: center;
+  padding: 16px 18px;
+  margin-bottom: 22px;
+  border: 1px solid rgba(255, 255, 255, 0.76);
+  border-left: 4px solid rgba(91, 140, 255, 0.72);
+  border-radius: var(--radius);
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.90), rgba(248, 251, 255, 0.66)),
+    linear-gradient(112deg, rgba(91, 140, 255, 0.12), transparent 42%, rgba(34, 197, 94, 0.10));
+  color: var(--text);
+  text-decoration: none;
+  box-shadow: var(--shadow-soft), inset 0 1px 0 rgba(255, 255, 255, 0.72);
+  transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+}
+
+.magi-action-strip:hover {
+  color: var(--text);
+  transform: translateY(-3px);
+  border-color: rgba(91, 140, 255, 0.32);
+  box-shadow: var(--shadow-hover);
+}
+
+.magi-action-strip.is-review {
+  border-left-color: rgba(245, 158, 11, 0.78);
+}
+
+.magi-action-strip.is-execute {
+  border-left-color: rgba(34, 197, 94, 0.76);
+}
+
+.magi-action-strip.is-elevate {
+  border-left-color: rgba(14, 165, 233, 0.74);
+}
+
+.magi-action-icon {
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  border-radius: 16px;
+  background: rgba(91, 140, 255, 0.10);
+  color: var(--accent);
+}
+
+.magi-action-strip strong,
+.magi-action-strip small {
+  display: block;
+}
+
+.magi-action-strip strong {
+  margin-top: 2px;
+  font-size: 18px;
+}
+
+.magi-action-strip small {
+  margin-top: 4px;
+  color: var(--text-soft);
+  line-height: 1.6;
+}
+
+.magi-action-link {
+  padding: 8px 12px;
+  border: 1px solid rgba(91, 140, 255, 0.20);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.66);
+  color: var(--accent);
+  font-size: 13px;
+  font-weight: 750;
+  white-space: nowrap;
+}
+
 .workspace-hero::before,
 .workspace-hero::after {
   content: "";
@@ -2147,6 +2222,15 @@ pre {
     grid-template-columns: 1fr;
     min-height: auto;
     padding: 24px;
+  }
+
+  .magi-action-strip {
+    grid-template-columns: 44px minmax(0, 1fr);
+  }
+
+  .magi-action-link {
+    grid-column: 2;
+    justify-self: start;
   }
 
   .workspace-hero h1 {

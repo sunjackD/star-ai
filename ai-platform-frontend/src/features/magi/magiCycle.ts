@@ -45,6 +45,14 @@ export type MagiCyclePlan = {
   stages: MagiCycleStage[];
 };
 
+export type MagiCycleSummary = {
+  focusStage: MagiCycleStageKey;
+  focusLabel: string;
+  healthLabel: string;
+  primaryAction: string;
+  route: string;
+};
+
 export function buildMagiCyclePlan(input: MagiCycleInput): MagiCyclePlan {
   const blockedWorkflows = input.workflows.filter((workflow) => !workflow.ready);
   const readyWorkflows = input.workflows.filter((workflow) => workflow.ready);
@@ -100,6 +108,29 @@ export function buildMagiCyclePlan(input: MagiCycleInput): MagiCyclePlan {
     ]
   };
 }
+
+export function summarizeMagiCycle(plan: MagiCyclePlan): MagiCycleSummary {
+  const focusStage = plan.stages.find((stage) => stage.key === plan.focusStage) ?? plan.stages[0];
+  return {
+    focusStage: plan.focusStage,
+    focusLabel: stageLabels[plan.focusStage],
+    healthLabel: `健康度 ${plan.healthScore}%`,
+    primaryAction: focusStage.actions[0] ?? focusStage.description,
+    route: stageRoutes[plan.focusStage]
+  };
+}
+
+const stageLabels: Record<MagiCycleStageKey, string> = {
+  review: '审视',
+  execute: '执行',
+  elevate: '提升'
+};
+
+const stageRoutes: Record<MagiCycleStageKey, string> = {
+  review: '/observability',
+  execute: '/developer',
+  elevate: '/observability'
+};
 
 function scoreCoverage(total: number, missing: number): number {
   if (total === 0) {
