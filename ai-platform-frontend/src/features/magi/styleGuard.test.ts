@@ -42,4 +42,12 @@ describe('workspace style guard', () => {
     expect(appSource).toContain('创建 API Key');
     expect(appSource).toContain('代管指南');
   });
+
+  it('names Agent authorization as the primary entry while preserving API Key management', () => {
+    expect(appSource).not.toContain('>API Key</Link>');
+    expect(appSource).not.toContain('>API Key</Button>');
+    expect(appSource).not.toContain('凭据管理');
+    expect(appSource).toContain('Agent 授权');
+    expect(appSource).toContain('API Key 管理');
+  });
 });

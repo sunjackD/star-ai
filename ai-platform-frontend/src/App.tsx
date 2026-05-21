@@ -130,7 +130,7 @@ function Shell() {
     { key: '/models', icon: <BrainCircuit size={18} />, label: <Link to="/models">模型</Link> },
     { key: '/finetune', icon: <Database size={18} />, label: <Link to="/finetune">微调</Link> },
     { key: '/developer', icon: <Code2 size={18} />, label: <Link to="/developer">Agent 代管</Link> },
-    { key: '/account/api-keys', icon: <KeyRound size={18} />, label: <Link to="/account/api-keys">API Key</Link> },
+    { key: '/account/api-keys', icon: <KeyRound size={18} />, label: <Link to="/account/api-keys">Agent 授权</Link> },
     ...(isAdmin ? [{
       key: '/admin',
       icon: <ShieldCheck size={18} />,
@@ -171,7 +171,7 @@ function Shell() {
               <>
                 <Text>{profile?.displayName ?? profile?.username}</Text>
                 <Link to="/account/profile"><Button icon={<CircleUserRound size={16} />}>用户中心</Button></Link>
-                <Link to="/account/api-keys"><Button icon={<KeyRound size={16} />}>API Key</Button></Link>
+                <Link to="/account/api-keys"><Button icon={<KeyRound size={16} />}>API Key 管理</Button></Link>
                 <Link to={isAdmin ? '/admin/settings' : '/account/profile'}>
                   <Button icon={<Settings size={16} />}>设置</Button>
                 </Link>
@@ -1462,8 +1462,8 @@ function ApiKeysPage() {
       <PageTitle title="Agent 授权" description="只为外部 Agent 管理 AI 知识产物签发 API Key，按任务选择最小范围。" />
       <section className="agent-control-panel api-management-hero">
         <div>
-          <Tag color="processing" icon={<Activity size={14} />}>凭据管理</Tag>
-          <Title level={2}>Agent 代管授权 Key</Title>
+          <Tag color="processing" icon={<Activity size={14} />}>Agent 授权</Tag>
+          <Title level={2}>Agent 授权 Key</Title>
           <Paragraph>
             API Key 只是给 Agent 代管内容用的授权令牌，用完可撤销；平台主线仍是 Agent、Skill、模型和文章等知识产物。
           </Paragraph>
