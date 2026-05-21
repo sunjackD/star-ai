@@ -1276,6 +1276,55 @@ pre {
   margin-bottom: 18px;
 }
 
+.agent-api-handoff-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.12fr) minmax(280px, 0.88fr);
+  gap: 16px;
+}
+
+.agent-api-handoff-grid > section {
+  display: grid;
+  align-content: start;
+  gap: 14px;
+  padding: 16px;
+  border: 1px solid rgba(104, 119, 160, 0.14);
+  border-radius: var(--radius);
+  background: rgba(255, 255, 255, 0.68);
+}
+
+.agent-api-section-heading {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.agent-api-copy-block {
+  padding: 14px;
+  border: 1px solid rgba(104, 119, 160, 0.14);
+  border-radius: var(--radius);
+  background: rgba(248, 251, 255, 0.78);
+}
+
+.agent-api-skill-meta {
+  display: grid;
+  gap: 10px;
+}
+
+.agent-api-skill-meta > div {
+  display: grid;
+  gap: 6px;
+  padding: 12px;
+  border: 1px solid rgba(104, 119, 160, 0.14);
+  border-radius: var(--radius-sm);
+  background: rgba(248, 251, 255, 0.78);
+}
+
+.agent-api-skill-meta code {
+  white-space: normal;
+  word-break: break-all;
+}
+
 .agent-api-connection-list,
 .agent-api-step-list,
 .agent-api-guard-grid {
@@ -2013,6 +2062,7 @@ pre {
   .agent-dashboard-grid,
   .api-key-policy-grid,
   .agent-api-hero,
+  .agent-api-handoff-grid,
   .agent-api-layout,
   .observability-hero,
   .observability-signal-grid,

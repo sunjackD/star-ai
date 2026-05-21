@@ -322,10 +322,10 @@ function DashboardPage() {
     <div className="page">
       <section className="workspace-hero">
         <div>
-          <Tag color="processing" icon={<Sparkles size={14} />}>Agent 控制台</Tag>
-          <Title level={1}>{platform?.siteName ?? '星梦 AI Agent 控制台'}</Title>
+          <Tag color="processing" icon={<Sparkles size={14} />}>Agent API 工作台</Tag>
+          <Title level={1}>{platform?.siteName ?? '星梦 AI Agent API 工作台'}</Title>
           <Paragraph>
-            {platform?.siteSubtitle ?? '围绕 Agent、Skill 资产、模型层、知识库和治理链路组织工作，让团队在同一控制台完成发现、接入、授权和审计。'}
+            {platform?.siteSubtitle ?? '围绕 Agent API 接入、Skill 资产、模型层、知识库和治理链路组织工作，让团队快速完成发现、授权、调用和审计。'}
           </Paragraph>
           <Space wrap className="console-hero-actions">
             <Link to="/agents"><Button type="primary" icon={<Bot size={16} />}>查看 Agent 资产</Button></Link>
@@ -1822,6 +1822,14 @@ function DeveloperPage() {
     missingScopes,
     toolSpecs
   });
+  const copyAgentConfig = async () => {
+    try {
+      await navigator.clipboard.writeText(access.copyToAgentText);
+      message.success('已复制 Agent 接入配置');
+    } catch {
+      message.warning('请使用配置文本右侧复制按钮');
+    }
+  };
 
   return (
     <div className="page">
@@ -1846,6 +1854,47 @@ function DeveloperPage() {
           <Statistic title="权限覆盖" value={scopeCoverage} suffix="%" />
         </div>
       </section>
+
+      <Card title="Agent 快速接入" className="agent-api-card agent-api-handoff-card">
+        <div className="agent-api-handoff-grid">
+          <section>
+            <div className="agent-api-section-heading">
+              <Text strong>复制这段给 Agent</Text>
+              <Tag color={access.permissionStatus.status === 'ready' ? 'green' : 'gold'}>
+                {access.permissionStatus.label}
+              </Tag>
+            </div>
+            <Paragraph copyable={{ text: access.copyToAgentText }} className="prompt-copy agent-api-copy-block">
+              {access.copyToAgentText}
+            </Paragraph>
+            <Space wrap>
+              <Button type="primary" icon={<Copy size={16} />} onClick={copyAgentConfig}>
+                复制配置文本
+              </Button>
+              <Link to="/account/api-keys"><Button icon={<KeyRound size={16} />}>创建 API Key</Button></Link>
+            </Space>
+          </section>
+          <section>
+            <div className="agent-api-section-heading">
+              <Text strong>平台自带 Skill</Text>
+              <Tag>{access.builtinSkill.name}</Tag>
+            </div>
+            <div className="agent-api-skill-meta">
+              <div>
+                <Text type="secondary">Manifest</Text>
+                <Text code copyable={{ text: access.builtinSkill.manifestUrl }}>{access.builtinSkill.manifestUrl}</Text>
+              </div>
+              <div>
+                <Text type="secondary">Skill 包</Text>
+                <Text code copyable={{ text: access.builtinSkill.downloadUrl }}>{access.builtinSkill.downloadUrl}</Text>
+              </div>
+            </div>
+            <Button type="primary" icon={<Download size={16} />} href={access.builtinSkill.downloadUrl}>
+              一键配置平台 Skill
+            </Button>
+          </section>
+        </div>
+      </Card>
 
       <div className="agent-api-layout">
         <Card title="连接参数">

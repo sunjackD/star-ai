@@ -35,7 +35,7 @@ class PlatformSettingsApiTest {
         mockMvc.perform(get("/api/v1/platform/config"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.siteName").value("星梦 AI 聚合平台"))
-                .andExpect(jsonPath("$.data.siteSubtitle").value("AI 工具、Skill 与模型的统一控制台"))
+                .andExpect(jsonPath("$.data.siteSubtitle").value("Agent API、Skill 与模型资产的统一工作台"))
                 .andExpect(jsonPath("$.data.defaultTheme").value("minimal-reference"))
                 .andExpect(jsonPath("$.data.allowPublicRegistration").value(false))
                 .andExpect(jsonPath("$.data.themeOptions[0].label").value("极简风"))

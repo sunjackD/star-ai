@@ -56,6 +56,14 @@ describe('buildAgentApiAccess', () => {
       'import_remote_skill',
       'list_skills'
     ]);
+    expect(access.copyToAgentText).toContain('请把以下平台 Skill 接入当前 Agent');
+    expect(access.copyToAgentText).toContain('Skill: ai-platform-manager');
+    expect(access.copyToAgentText).toContain('Manifest: http://localhost:8081/api/v1/developer/skill-manifest');
+    expect(access.builtinSkill).toEqual({
+      name: 'ai-platform-manager',
+      manifestUrl: 'http://localhost:8081/api/v1/developer/skill-manifest',
+      downloadUrl: 'http://localhost:8081/api/v1/developer/self-skill/download'
+    });
   });
 
   it('uses a ready permission status when all required scopes are covered', () => {

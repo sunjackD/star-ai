@@ -25,7 +25,13 @@ export type AgentApiAccess = {
     status: 'ready' | 'attention';
     detail: string;
   };
+  builtinSkill: {
+    name: string;
+    manifestUrl: string;
+    downloadUrl: string;
+  };
   featuredTools: AgentApiToolSpec[];
+  copyToAgentText: string;
   installPrompt: string;
 };
 
@@ -43,6 +49,18 @@ export function buildAgentApiAccess(input: AgentApiAccessInput): AgentApiAccess 
       return riskDiff === 0 ? left.name.localeCompare(right.name) : riskDiff;
     })
     .slice(0, 8);
+  const manifestUrl = joinUrl(input.apiBaseUrl, '/developer/skill-manifest');
+  const copyToAgentText = [
+    '请把以下平台 Skill 接入当前 Agent:',
+    `Skill: ${input.manifestName}`,
+    `用途: ${input.manifestDescription}`,
+    `API Base: ${input.apiBaseUrl}`,
+    `Manifest: ${manifestUrl}`,
+    `Skill 包: ${input.selfSkillUrl}`,
+    `认证头: ${input.authHeaders.join(' 或 ')}`,
+    `最小权限: ${input.requiredScopes.join(', ')}`,
+    '约束: 执行前先读取 Manifest；写操作只使用任务所需 scope；执行后重新读取资源并核对审计日志。'
+  ].join('\n');
 
   return {
     connectionRows: [
@@ -61,7 +79,13 @@ export function buildAgentApiAccess(input: AgentApiAccessInput): AgentApiAccess 
         status: 'ready',
         detail: `${input.requiredScopes.length} 项最小权限可用`
       },
+    builtinSkill: {
+      name: input.manifestName,
+      manifestUrl,
+      downloadUrl: input.selfSkillUrl
+    },
     featuredTools,
+    copyToAgentText,
     installPrompt: [
       `接入 ${input.manifestName}`,
       `用途: ${input.manifestDescription}`,
@@ -72,4 +96,8 @@ export function buildAgentApiAccess(input: AgentApiAccessInput): AgentApiAccess 
       '执行前先读 Manifest，写入后重新读取目标资源并核对审计日志。'
     ].join('\n')
   };
+}
+
+function joinUrl(baseUrl: string, path: string): string {
+  return `${baseUrl.replace(/\/$/, '')}/${path.replace(/^\//, '')}`;
 }
