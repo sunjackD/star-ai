@@ -1003,14 +1003,8 @@ pre {
   word-break: break-all;
 }
 
-.account-key-toolbar,
 .api-key-policy-card {
   margin-bottom: 18px;
-}
-
-.account-key-toolbar {
-  display: flex;
-  justify-content: flex-end;
 }
 
 .api-key-scope-tags {

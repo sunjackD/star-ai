@@ -1497,7 +1497,7 @@ function ApiKeysPage() {
           <Tag color="processing" icon={<Activity size={14} />}>API Key</Tag>
           <Title level={2}>Agent API Key</Title>
           <Paragraph>
-            API Key 只给 Agent 代管 Agent、Skill 和文章使用，用完可撤销；平台主线仍是 Agent、Skill、模型和文章。
+            API Key 只给 Agent 代管 Agent、Skill 和文章使用，用完可撤销。
           </Paragraph>
         </div>
         <div className="api-management-quick-panel">
@@ -1540,9 +1540,6 @@ function ApiKeysPage() {
           className="one-time-key"
         />
       )}
-      <div className="account-key-toolbar">
-        <Button type="primary" icon={<KeyRound size={16} />} onClick={() => setModalOpen(true)}>创建 API Key</Button>
-      </div>
       <Table rowKey="id" dataSource={data} columns={[
         { title: '名称', dataIndex: 'name' },
         { title: '前缀', dataIndex: 'keyPrefix' },

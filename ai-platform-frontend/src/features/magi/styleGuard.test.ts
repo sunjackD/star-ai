@@ -56,6 +56,8 @@ describe('workspace style guard', () => {
     expect(styles).not.toContain('agent-dashboard-grid');
     expect(styles).not.toContain('permission-coverage-list');
     expect(styles).not.toContain('agent-workflow-readiness');
+    expect(appSource).not.toContain('account-key-toolbar');
+    expect(appSource).not.toContain('平台主线仍是 Agent、Skill、模型和文章');
     expect(appSource).toContain('权限预设');
     expect(appSource).toContain('创建 API Key');
     expect(appSource).toContain('代管指南');
