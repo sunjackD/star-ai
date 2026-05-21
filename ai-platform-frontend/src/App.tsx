@@ -27,7 +27,11 @@ import {
 } from 'lucide-react';
 import { apiUrl, downloadFile, getData, getPublicData, postData, postPublicData, uploadData } from './api/client';
 import { buildAgentApiAccess } from './features/agentApi/agentApiAccess';
-import { buildAgentCatalogHandoff, buildSkillCatalogHandoff } from './features/agentApi/catalogHandoff';
+import {
+  buildAgentCatalogHandoff,
+  buildArticleCatalogHandoff,
+  buildSkillCatalogHandoff
+} from './features/agentApi/catalogHandoff';
 import { useAuthStore } from './store/authStore';
 import { useThemeStore } from './store/themeStore';
 import type {
@@ -806,6 +810,15 @@ function ArticlesPage() {
     return matchesCategory && matchesDifficulty;
   });
   const estimatedMinutes = data.reduce((sum, article) => sum + article.estimatedMinutes, 0);
+  const copyArticleHandoff = (article: ArticleSummary) => copyToClipboard(buildArticleCatalogHandoff({
+    title: article.title,
+    category: article.category,
+    difficulty: article.difficulty,
+    estimatedMinutes: article.estimatedMinutes,
+    tags: article.tags,
+    summary: article.summary,
+    detailUrl: pageUrl(`/articles/${article.id}`)
+  }), '已复制文章上下文');
 
   function openDetail(id: number) {
     if (!token) {
@@ -856,11 +869,7 @@ function ArticlesPage() {
 
       <div className="article-grid">
         {filteredArticles.map((article) => (
-          <section
-            key={article.id}
-            className="article-card"
-            onClick={() => openDetail(article.id)}
-          >
+          <section key={article.id} className="article-card">
             <div className="article-meta">
               <Tag color="blue">{article.category}</Tag>
               <Tag color={difficultyColor(article.difficulty)}>{difficultyLabel(article.difficulty)}</Tag>
@@ -870,6 +879,12 @@ function ArticlesPage() {
             <Paragraph>{article.summary}</Paragraph>
             <Space wrap>
               {article.tags.split(',').map((tag) => <Tag key={tag}>{tag}</Tag>)}
+            </Space>
+            <Space wrap className="article-actions">
+              <Button size="small" type="primary" onClick={() => openDetail(article.id)}>阅读全文</Button>
+              <Button size="small" icon={<Copy size={14} />} onClick={() => copyArticleHandoff(article)}>
+                复制给 Agent
+              </Button>
             </Space>
           </section>
         ))}

@@ -17,6 +17,16 @@ export type SkillCatalogHandoffInput = {
   detailUrl: string;
 };
 
+export type ArticleCatalogHandoffInput = {
+  title: string;
+  category: string;
+  difficulty: string;
+  estimatedMinutes: number;
+  tags: string;
+  summary: string;
+  detailUrl: string;
+};
+
 export function buildAgentCatalogHandoff(input: AgentCatalogHandoffInput): string {
   return [
     '任务: 评估或维护 Agent',
@@ -41,6 +51,20 @@ export function buildSkillCatalogHandoff(input: SkillCatalogHandoffInput): strin
     `说明: ${input.description}`,
     `详情: ${input.detailUrl}`,
     '执行要求: 如需写入，先读取原 Skill，再执行最小变更并回读确认。'
+  ].join('\n');
+}
+
+export function buildArticleCatalogHandoff(input: ArticleCatalogHandoffInput): string {
+  return [
+    '任务: 阅读或维护文章',
+    `目标文章: ${input.title}`,
+    `分类: ${input.category}`,
+    `难度: ${input.difficulty}`,
+    `阅读时间: ${input.estimatedMinutes} 分钟`,
+    `标签: ${formatTags(input.tags)}`,
+    `摘要: ${input.summary}`,
+    `详情: ${input.detailUrl}`,
+    '执行要求: 先读取文章详情，再提炼可复用步骤；如需更新文章，执行最小变更并回读确认。'
   ].join('\n');
 }
 

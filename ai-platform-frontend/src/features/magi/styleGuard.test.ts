@@ -35,6 +35,7 @@ describe('workspace style guard', () => {
     expect(appSource).toContain('复制给 Agent');
     expect(appSource).toContain('一键配置平台 Skill');
     expect(appSource).not.toContain('Agent、Skill、模型、文章和工具导航');
+    expect(appSource).toContain('buildArticleCatalogHandoff');
   });
 
   it('removes the redundant observability/self-check surface from the workspace', () => {
