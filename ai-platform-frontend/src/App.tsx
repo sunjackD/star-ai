@@ -27,6 +27,7 @@ import {
   Workflow
 } from 'lucide-react';
 import { apiUrl, downloadFile, getData, getPublicData, postData, postPublicData, uploadData } from './api/client';
+import { buildMagiCyclePlan, type MagiCycleStageKey, type MagiCycleStageStatus } from './features/magi/magiCycle';
 import { useAuthStore } from './store/authStore';
 import { useThemeStore } from './store/themeStore';
 import type {
@@ -2201,6 +2202,15 @@ function ObservabilityPage() {
       icon: <Clock3 size={18} />
     }
   ];
+  const magiPlan = buildMagiCyclePlan({
+    requiredScopes,
+    missingScopes,
+    workflows,
+    governanceChecks,
+    recentEventCount: recentEvents.length,
+    recentlyUsedKeys: dashboard?.recentlyUsedKeys ?? 0
+  });
+  const magiFocusStatus = magiPlan.stages.find((stage) => stage.key === magiPlan.focusStage)?.status ?? 'steady';
 
   return (
     <div className="page">
@@ -2242,6 +2252,39 @@ function ObservabilityPage() {
           </Card>
         ))}
       </div>
+
+      <Card
+        className="magi-cycle-card"
+        title={<Space><BrainCircuit size={18} />MAGI 三脑轮次</Space>}
+        extra={(
+          <Tag color={magiStageColor(magiFocusStatus)}>
+            当前焦点：{magiStageLabel(magiPlan.focusStage)} · 健康 {magiPlan.healthScore}%
+          </Tag>
+        )}
+      >
+        <div className="magi-stage-grid">
+          {magiPlan.stages.map((stage) => (
+            <section
+              key={stage.key}
+              className={`magi-stage-card ${stage.key === magiPlan.focusStage ? 'is-focus' : ''} is-${stage.status}`}
+            >
+              <div className="magi-stage-heading">
+                <span>{magiStageIcon(stage.key)}</span>
+                <div>
+                  <Text type="secondary">{stage.label}</Text>
+                  <Title level={4}>{stage.title}</Title>
+                </div>
+                <Tag color={magiStageColor(stage.status)}>{stage.metric} {stage.metricLabel}</Tag>
+              </div>
+              <Text className="magi-stage-question">{stage.question}</Text>
+              <Text type="secondary">{stage.description}</Text>
+              <ol className="magi-stage-actions">
+                {stage.actions.map((action) => <li key={action}>{action}</li>)}
+              </ol>
+            </section>
+          ))}
+        </div>
+      </Card>
 
       <div className="observability-grid">
         <Card title="工作流阻塞队列">
@@ -2315,6 +2358,35 @@ function ObservabilityPage() {
       </div>
     </div>
   );
+}
+
+function magiStageIcon(stage: MagiCycleStageKey): ReactNode {
+  if (stage === 'review') {
+    return <AlertTriangle size={18} />;
+  }
+  if (stage === 'execute') {
+    return <Workflow size={18} />;
+  }
+  return <Sparkles size={18} />;
+}
+
+function magiStageLabel(stage: MagiCycleStageKey): string {
+  const labels: Record<MagiCycleStageKey, string> = {
+    review: '审视',
+    execute: '执行',
+    elevate: '提升'
+  };
+  return labels[stage];
+}
+
+function magiStageColor(status: MagiCycleStageStatus): string {
+  if (status === 'attention') {
+    return 'gold';
+  }
+  if (status === 'ready') {
+    return 'green';
+  }
+  return 'blue';
 }
 
 function PlatformThemeBootstrap() {
