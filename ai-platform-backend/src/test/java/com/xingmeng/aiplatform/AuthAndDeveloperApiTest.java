@@ -119,6 +119,25 @@ class AuthAndDeveloperApiTest {
     }
 
     @Test
+    void developerSkillManifestExposesManagedObjectsWithoutTaskTemplates() throws Exception {
+        mockMvc.perform(get("/api/v1/developer/skill-manifest"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.taskTemplates").doesNotExist())
+                .andExpect(jsonPath("$.data.managedObjects[?(@.key == 'agent' && @.name == 'Agent')]").isNotEmpty())
+                .andExpect(jsonPath("$.data.managedObjects[?(@.key == 'skill' && @.name == 'Skill')]").isNotEmpty())
+                .andExpect(jsonPath("$.data.managedObjects[?(@.key == 'article' && @.name == '文章')]").isNotEmpty())
+                .andExpect(jsonPath(
+                        "$.data.managedObjects[?(@.key == 'agent' && @.scopes[?(@ == 'agents:write')])]"
+                ).isNotEmpty())
+                .andExpect(jsonPath(
+                        "$.data.managedObjects[?(@.key == 'skill' && @.tools[?(@ == 'download_skill')])]"
+                ).isNotEmpty())
+                .andExpect(jsonPath(
+                        "$.data.managedObjects[?(@.key == 'article' && @.tools[?(@ == 'update_article')])]"
+                ).isNotEmpty());
+    }
+
+    @Test
     void developerSkillManifestExposesStructuredToolSpecs() throws Exception {
         mockMvc.perform(get("/api/v1/developer/skill-manifest"))
                 .andExpect(status().isOk())

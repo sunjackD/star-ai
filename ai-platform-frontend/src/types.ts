@@ -192,6 +192,14 @@ export type DeveloperToolSpec = {
   description: string;
 };
 
+export type DeveloperManagedObject = {
+  key: 'agent' | 'skill' | 'article';
+  name: 'Agent' | 'Skill' | '文章';
+  description: string;
+  scopes: string[];
+  tools: string[];
+};
+
 export type DeveloperAgentWorkflow = {
   key: string;
   title: string;
@@ -223,6 +231,7 @@ export type DeveloperSkillManifest = {
     headers: string[];
   };
   requiredScopes?: string[];
+  managedObjects?: DeveloperManagedObject[];
   tools: string[];
   toolSpecs?: DeveloperToolSpec[];
   examples: string[];

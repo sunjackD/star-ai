@@ -1,3 +1,5 @@
+import type { DeveloperManagedObject } from '../../types';
+
 export type AgentApiToolSpec = {
   name: string;
   method: string;
@@ -16,6 +18,7 @@ export type AgentApiAccessInput = {
   requiredScopes: string[];
   missingScopes: string[];
   toolSpecs: AgentApiToolSpec[];
+  managedObjects?: DeveloperManagedObject[];
 };
 
 export type AgentApiAccess = {
@@ -139,8 +142,12 @@ const managedObjectDefinitions: Array<Pick<AgentApiManagedObject, 'key' | 'targe
 ];
 
 function buildManagedObjects(input: AgentApiAccessInput, manifestUrl: string): AgentApiManagedObject[] {
-  return managedObjectDefinitions.map((definition) => {
-    const tools = input.toolSpecs.filter((tool) => definition.scopes.some((scope) => tool.scope.includes(scope)));
+  return normalizeManagedObjectDefinitions(input.managedObjects).map((definition) => {
+    const tools = input.toolSpecs.filter((tool) => {
+      const matchesName = definition.toolNames?.includes(tool.name);
+      const matchesScope = definition.scopes.some((scope) => tool.scope.includes(scope));
+      return matchesName || (!definition.toolNames?.length && matchesScope);
+    });
     const missingScopes = definition.scopes.filter((scope) => input.missingScopes.includes(scope));
     return {
       ...definition,
@@ -159,6 +166,24 @@ function buildManagedObjects(input: AgentApiAccessInput, manifestUrl: string): A
       ].join('\n')
     };
   });
+}
+
+function normalizeManagedObjectDefinitions(
+  managedObjects?: DeveloperManagedObject[]
+): Array<
+  Pick<AgentApiManagedObject, 'key' | 'target' | 'title' | 'objective' | 'scopes'> & { toolNames?: string[] }
+> {
+  if (!managedObjects?.length) {
+    return managedObjectDefinitions;
+  }
+  return managedObjects.map((object) => ({
+    key: object.key,
+    target: object.name,
+    title: object.name,
+    objective: object.description,
+    scopes: object.scopes,
+    toolNames: object.tools
+  }));
 }
 
 function joinUrl(baseUrl: string, path: string): string {

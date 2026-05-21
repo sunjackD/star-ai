@@ -134,6 +134,40 @@ describe('buildAgentApiAccess', () => {
     expect(access.managedObjects[2].copyText).toContain('对象: 文章');
   });
 
+  it('uses manifest managed objects as the Agent API object contract', () => {
+    const access = buildAgentApiAccess({
+      apiBaseUrl: 'http://localhost:8081/api/v1',
+      selfSkillUrl: 'http://localhost:8081/api/v1/developer/self-skill/download',
+      manifestName: 'ai-platform-manager',
+      manifestDescription: '平台管理 Skill',
+      authHeaders: ['X-API-Key'],
+      requiredScopes: ['agents:read', 'agents:write', 'skills:read'],
+      missingScopes: [],
+      toolSpecs,
+      managedObjects: [
+        {
+          key: 'agent',
+          name: 'Agent',
+          description: '管理 Agent 的名称、入口和说明。',
+          scopes: ['agents:read', 'agents:write'],
+          tools: ['list_agents', 'update_agent']
+        },
+        {
+          key: 'skill',
+          name: 'Skill',
+          description: '管理 Skill 的导入、更新和下载。',
+          scopes: ['skills:read'],
+          tools: ['list_skills']
+        }
+      ]
+    });
+
+    expect(access.managedObjects.map((object) => object.target)).toEqual(['Agent', 'Skill']);
+    expect(access.managedObjects[0].objective).toBe('管理 Agent 的名称、入口和说明。');
+    expect(access.managedObjects[0].tools.map((tool) => tool.name)).toEqual(['list_agents', 'update_agent']);
+    expect(access.managedObjects[0].copyText).not.toContain('任务');
+  });
+
   it('uses a ready permission status when all required scopes are covered', () => {
     const access = buildAgentApiAccess({
       apiBaseUrl: 'https://api.example.com/api/v1',

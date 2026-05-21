@@ -1700,7 +1700,8 @@ function DeveloperPage() {
     authHeaders,
     requiredScopes,
     missingScopes,
-    toolSpecs
+    toolSpecs,
+    managedObjects: manifest?.managedObjects
   });
   const copyAgentConfig = async () => {
     try {

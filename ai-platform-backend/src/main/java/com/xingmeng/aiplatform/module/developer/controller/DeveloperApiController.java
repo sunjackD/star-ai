@@ -9,6 +9,7 @@ import com.xingmeng.aiplatform.module.developer.dto.ApiKeyCreateRequest;
 import com.xingmeng.aiplatform.module.developer.dto.ApiKeyResponse;
 import com.xingmeng.aiplatform.module.developer.dto.DeveloperAgentWorkflowResponse;
 import com.xingmeng.aiplatform.module.developer.dto.DeveloperDashboardResponse;
+import com.xingmeng.aiplatform.module.developer.dto.DeveloperManagedObjectResponse;
 import com.xingmeng.aiplatform.module.developer.dto.DeveloperToolSpecResponse;
 import com.xingmeng.aiplatform.module.developer.dto.RemoteSkillImportRequest;
 import com.xingmeng.aiplatform.module.developer.dto.RemoteSkillRequest;
@@ -57,6 +58,42 @@ public class DeveloperApiController {
             "agents:write",
             "articles:read",
             "articles:write"
+    );
+    private static final List<DeveloperManagedObjectResponse> MANAGED_OBJECTS = List.of(
+            new DeveloperManagedObjectResponse(
+                    "agent",
+                    "Agent",
+                    "创建或更新 Agent 的入口、说明、标签和使用场景。",
+                    List.of("agents:read", "agents:write"),
+                    List.of("list_agents", "create_agent", "update_agent")
+            ),
+            new DeveloperManagedObjectResponse(
+                    "skill",
+                    "Skill",
+                    "导入、上传、替换或更新 Skill，并确认可下载。",
+                    List.of("skills:read", "skills:import", "skills:write", "skills:download"),
+                    List.of(
+                            "list_skills",
+                            "get_skill_categories",
+                            "import_skill",
+                            "upload_skill",
+                            "upload_skill_directory",
+                            "update_skill",
+                            "replace_skill_artifact",
+                            "replace_skill_directory",
+                            "record_remote_skill",
+                            "import_remote_skill",
+                            "delete_skill",
+                            "download_skill"
+                    )
+            ),
+            new DeveloperManagedObjectResponse(
+                    "article",
+                    "文章",
+                    "创建或更新文章正文、摘要、附件和参考链接。",
+                    List.of("articles:read", "articles:write"),
+                    List.of("list_articles", "create_article", "update_article")
+            )
     );
 
     private final ApiKeyService apiKeyService;
@@ -140,6 +177,7 @@ public class DeveloperApiController {
                 Map.entry("description", "通过 API Key 让 AI Agent 代管 Agent、Skill、文章"),
                 Map.entry("auth", Map.of("headers", List.of("X-API-Key", "Authorization: Bearer xma_xxx"))),
                 Map.entry("requiredScopes", REQUIRED_PLATFORM_SCOPES),
+                Map.entry("managedObjects", MANAGED_OBJECTS),
                 Map.entry("tools", List.of(
                         "list_skills",
                         "get_skill_categories",
