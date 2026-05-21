@@ -53,14 +53,14 @@ export function buildAgentApiAccess(input: AgentApiAccessInput): AgentApiAccess 
   const copyToAgentText = [
     '请把以下平台 Skill 接入当前 Agent:',
     `Skill: ${input.manifestName}`,
-    '用途: 代管平台里的 AI 知识产物',
+    '用途: 代管平台里的 Agent、Skill、模型、文章和工具导航',
     `平台说明: ${input.manifestDescription}`,
     `API Base: ${input.apiBaseUrl}`,
     `Manifest: ${manifestUrl}`,
     `Skill 包: ${input.selfSkillUrl}`,
     `认证头: ${input.authHeaders.join(' 或 ')}`,
     `最小权限: ${input.requiredScopes.join(', ')}`,
-    '约束: 只管理 Agent、Skill、模型资料、文章和工具导航等 AI 知识产物；写入后重新读取目标资源确认结果。'
+    '约束: 只管理 Agent、Skill、模型、文章和工具导航；写入后重新读取目标记录确认结果。'
   ].join('\n');
 
   return {
@@ -89,13 +89,13 @@ export function buildAgentApiAccess(input: AgentApiAccessInput): AgentApiAccess 
     copyToAgentText,
     installPrompt: [
       `接入 ${input.manifestName}`,
-      '用途: 只管理 Agent、Skill、模型资料、文章和工具导航等 AI 知识产物',
+      '用途: 只管理 Agent、Skill、模型、文章和工具导航',
       `平台说明: ${input.manifestDescription}`,
       `API Base: ${input.apiBaseUrl}`,
       `下载 Skill: ${input.selfSkillUrl}`,
       `认证: ${input.authHeaders.join(' 或 ')}`,
       `最小权限: ${input.requiredScopes.join(', ')}`,
-      '执行前先读 Manifest，写入后重新读取目标资源确认结果。'
+      '执行前先读 Manifest，写入后重新读取目标记录确认结果。'
     ].join('\n')
   };
 }

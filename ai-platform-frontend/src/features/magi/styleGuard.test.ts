@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import appSource from '../../App.tsx?raw';
+import adminSource from '../../pages/AdminPages.tsx?raw';
+import magiSource from './magiCycle.ts?raw';
 import styles from '../../styles.css?raw';
 
 describe('workspace style guard', () => {
@@ -9,12 +11,20 @@ describe('workspace style guard', () => {
     expect(styles).not.toMatch(/\.console-module-card::before\s*\{/);
   });
 
-  it('keeps the dashboard framed as AI knowledge asset management', () => {
+  it('keeps the dashboard framed as concrete Agent and Skill management', () => {
     expect(appSource).not.toContain('Agent 控制台');
     expect(appSource).not.toContain('凭据控制台');
     expect(appSource).not.toContain('同一控制台');
     expect(appSource).not.toContain('Agent API 工作台');
-    expect(appSource).toContain('AI 知识产物工作台');
+    expect(appSource).not.toContain('AI 知识产物工作台');
+    expect(appSource).not.toContain('Agent 资产');
+    expect(appSource).not.toContain('Skill 资产');
+    expect(appSource).not.toContain('知识库');
+    expect(appSource).not.toContain('教程文章');
+    expect(appSource).toContain('AI 聚合平台');
+    expect(appSource).toContain('Agent');
+    expect(appSource).toContain('Skill');
+    expect(appSource).toContain('文章');
     expect(appSource).toContain('Agent 代管入口');
   });
 
@@ -49,5 +59,38 @@ describe('workspace style guard', () => {
     expect(appSource).not.toContain('凭据管理');
     expect(appSource).toContain('Agent 授权');
     expect(appSource).toContain('API Key 管理');
+  });
+
+  it('keeps admin copy focused on concrete platform objects instead of governance surfaces', () => {
+    expect(appSource).not.toContain('Key 审计');
+    expect(appSource).not.toContain('审计日志</Link>');
+    expect(adminSource).not.toContain('管理后台');
+    expect(adminSource).not.toContain('开放接口');
+    expect(adminSource).not.toContain('平台审计');
+    expect(adminSource).not.toContain('API Key 审计');
+    expect(adminSource).not.toContain('审计日志');
+    expect(adminSource).not.toContain('内容后台');
+    expect(adminSource).not.toContain('教程文章');
+    expect(adminSource).toContain('平台后台');
+    expect(adminSource).toContain('Agent 授权记录');
+    expect(adminSource).toContain('操作记录');
+  });
+
+  it('frames MAGI as Agent handoff progress instead of content assets or self-check governance', () => {
+    expect(appSource).not.toContain('healthLabel');
+    expect(appSource).not.toContain('知识产物');
+    expect(appSource).not.toContain('内容资产');
+    expect(appSource).not.toContain('上下文资产');
+    expect(appSource).not.toContain('内容与 Agent');
+    expect(appSource).not.toContain('资产详情');
+    expect(magiSource).not.toContain('完善度');
+    expect(magiSource).not.toContain('复核');
+    expect(magiSource).not.toContain('内容分类');
+    expect(magiSource).not.toContain('目标内容');
+    expect(magiSource).not.toContain('governanceCoverage');
+    expect(magiSource).not.toContain('knowledgeAssetScore');
+    expect(magiSource).not.toContain('内容推进');
+    expect(magiSource).toContain('handoffScore');
+    expect(magiSource).toContain('代管进度');
   });
 });

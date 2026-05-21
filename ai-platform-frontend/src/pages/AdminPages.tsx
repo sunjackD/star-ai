@@ -74,20 +74,20 @@ export function AdminLandingPage() {
   const { data } = useQuery({ queryKey: ['admin-overview'], queryFn: () => getData<AdminOverview>('/admin/overview') });
   const cards = [
     ['用户', data?.users ?? 0, '/admin/users'],
-    ['Agent 资产', data?.agents ?? 0, '/admin/agents'],
-    ['Skill 资产', data?.skills ?? 0, '/admin/skills'],
+    ['Agent', data?.agents ?? 0, '/admin/agents'],
+    ['Skill', data?.skills ?? 0, '/admin/skills'],
     ['模型', data?.models ?? 0, '/admin/models'],
     ['数据集', data?.datasets ?? 0, '/admin/datasets'],
     ['微调任务', data?.finetuneJobs ?? 0, '/admin/finetune-jobs'],
-    ['教程文章', data?.articles ?? 0, '/admin/articles'],
+    ['文章', data?.articles ?? 0, '/admin/articles'],
     ['链接', data?.links ?? 0, '/admin/links'],
     ['系统设置', '配置', '/admin/settings'],
-    ['审计日志', data?.auditLogs ?? 0, '/admin/audit-logs']
+    ['操作记录', data?.auditLogs ?? 0, '/admin/audit-logs']
   ];
 
   return (
     <div className="page">
-      <PageHeader title="管理后台" description="统一管理用户、内容资源、开放接口和平台审计。" />
+      <PageHeader title="平台后台" description="维护用户、Agent、Skill、模型、文章、数据集、微调任务和工具导航。" />
       <div className="metric-grid">
         {cards.map(([label, value, href]) => (
           <Link to={href as string} key={label as string}>
@@ -128,7 +128,7 @@ export function SettingsAdminPage() {
 
   return (
     <div className="page">
-      <PageHeader title="系统设置" description="统一控制站点文案、全站默认主题、注册策略和 API Key 默认策略。" />
+      <PageHeader title="系统设置" description="维护站点文案、默认主题、注册策略和 Agent 授权默认有效期。" />
       <div className="settings-grid">
         <Card className="settings-form-card" loading={isLoading}>
           <Form form={form} layout="vertical" onFinish={(values) => mutation.mutate(values as AdminSettings)}>
@@ -146,7 +146,7 @@ export function SettingsAdminPage() {
             </Form.Item>
             <Form.Item
               name="apiKeyDefaultExpireDays"
-              label="API Key 默认过期天数"
+              label="Agent 授权默认有效期"
               rules={[{ required: true, type: 'number', min: 1, max: 3650 }]}
             >
               <InputNumber min={1} max={3650} className="admin-number-input" />
@@ -310,7 +310,7 @@ export function UsersAdminPage() {
 
 export function AgentsAdminPage() {
   return <ResourceAdminPage<Agent> config={{
-    title: 'Agent 资产管理',
+    title: 'Agent 管理',
     description: '维护 AI 编辑器/Agent 的展示内容、指南和状态。',
     queryKey: 'admin-agents',
     endpoint: '/admin/agents',
@@ -337,7 +337,7 @@ export function SkillCategoriesAdminPage() {
 export function SkillsAdminPage() {
   const { data: categories = [] } = useQuery({ queryKey: ['admin-skill-categories'], queryFn: () => getData<SkillCategory[]>('/admin/skill-categories') });
   return <ResourceAdminPage<Skill> config={{
-    title: 'Skill 资产管理',
+    title: 'Skill 管理',
     description: '维护站内 Skill，支持文本创建、SKILL.md/zip 上传、下载和上下架。',
     queryKey: 'admin-skills',
     endpoint: '/admin/skills',
@@ -582,7 +582,7 @@ export function ArticlesAdminPage() {
 
   return (
     <div className="page">
-      <PageHeader title="文章管理" description="维护教程文章、Markdown 正文、安全提示、附件和参考链接。" />
+      <PageHeader title="文章管理" description="维护文章、Markdown 正文、安全提示、附件和参考链接。" />
       <Space className="admin-toolbar" wrap>
         <Input.Search placeholder="搜索标题、摘要、分类或标签" onChange={(event) => setKeyword(event.target.value)} allowClear />
         <Select
@@ -798,7 +798,7 @@ export function ApiKeysAdminPage() {
   });
   return (
     <div className="page">
-      <PageHeader title="API Key 审计" description="查看平台 API Key 状态、权限范围和最后使用时间。" />
+      <PageHeader title="Agent 授权记录" description="查看 Agent 代管授权状态、范围和最后使用时间。" />
       <Space className="admin-toolbar" wrap>
         <Input.Search placeholder="搜索名称、前缀或权限" onChange={(event) => setKeyword(event.target.value)} allowClear />
         <Select
@@ -828,7 +828,7 @@ export function AuditLogsAdminPage() {
     .some((value) => String(value ?? '').toLowerCase().includes(keyword.toLowerCase())));
   return (
     <div className="page">
-      <PageHeader title="审计日志" description="追踪后台写操作和开放接口调用。" />
+      <PageHeader title="操作记录" description="查看后台编辑和 Agent 代管调用记录。" />
       <Space className="admin-toolbar" wrap>
         <Input.Search placeholder="搜索操作者、动作或资源" onChange={(event) => setKeyword(event.target.value)} allowClear />
       </Space>

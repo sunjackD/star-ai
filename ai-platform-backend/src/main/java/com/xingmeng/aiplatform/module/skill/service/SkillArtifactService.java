@@ -188,11 +188,11 @@ public class SkillArtifactService {
         return """
                 ---
                 name: ai-platform-manager
-                description: 通过 AI 聚合平台 API Key 代管 Skill、Agent、文章等 AI 知识产物
+                description: 通过 AI 聚合平台 API Key 代管 Skill、Agent、文章
                 ---
                 # AI Platform Manager
 
-                该 Skill 让 AI Agent 通过 AI 聚合平台 Developer API 代管站内 AI 知识产物。
+                该 Skill 让 AI Agent 通过 AI 聚合平台 Developer API 代管站内 Skill、Agent、文章。
                 它适合在 Codex、Claude Code、Roo Code 等 Agent 中安装后使用。
 
                 ## 初始化
@@ -214,7 +214,7 @@ public class SkillArtifactService {
 
                 ## Tools
 
-                ### Skill 资产
+                ### Skill
 
                 - `list_skills`: 查询平台中已发布的 Skills。需要 `skills:read`。
                 - `get_skill_categories`: 查询 Skill 分类。需要 `skills:read`。
@@ -231,13 +231,13 @@ public class SkillArtifactService {
 
                 执行 `delete_skill` 前必须确认目标 Skill ID、名称和用户意图。
 
-                ### Agent 资产
+                ### Agent
 
-                - `list_agents`: 查询 Agent 资产。需要 `agents:read`。
-                - `create_agent`: 创建 Agent 资产。需要 `agents:write`。
-                - `update_agent`: 更新 Agent 资产。需要 `agents:write`。
+                - `list_agents`: 查询 Agent。需要 `agents:read`。
+                - `create_agent`: 创建 Agent。需要 `agents:write`。
+                - `update_agent`: 更新 Agent。需要 `agents:write`。
 
-                ### 知识库文章
+                ### 文章
 
                 - `list_articles`: 查询文章。需要 `articles:read`。
                 - `create_article`: 创建文章。需要 `articles:write`。

@@ -124,9 +124,9 @@ function Shell() {
 
   const menuItems = [
     { key: '/', icon: <LayoutDashboard size={18} />, label: <Link to="/">总览</Link> },
-    { key: '/agents', icon: <Bot size={18} />, label: <Link to="/agents">Agent 资产</Link> },
-    { key: '/skills', icon: <Boxes size={18} />, label: <Link to="/skills">Skill 资产</Link> },
-    { key: '/articles', icon: <BookOpenCheck size={18} />, label: <Link to="/articles">知识库</Link> },
+    { key: '/agents', icon: <Bot size={18} />, label: <Link to="/agents">Agent</Link> },
+    { key: '/skills', icon: <Boxes size={18} />, label: <Link to="/skills">Skill</Link> },
+    { key: '/articles', icon: <BookOpenCheck size={18} />, label: <Link to="/articles">文章</Link> },
     { key: '/models', icon: <BrainCircuit size={18} />, label: <Link to="/models">模型</Link> },
     { key: '/finetune', icon: <Database size={18} />, label: <Link to="/finetune">微调</Link> },
     { key: '/developer', icon: <Code2 size={18} />, label: <Link to="/developer">Agent 代管</Link> },
@@ -134,20 +134,20 @@ function Shell() {
     ...(isAdmin ? [{
       key: '/admin',
       icon: <ShieldCheck size={18} />,
-      label: <Link to="/admin">后台</Link>,
+      label: <Link to="/admin">平台后台</Link>,
       children: [
         { key: '/admin/users', label: <Link to="/admin/users">用户管理</Link> },
-        { key: '/admin/agents', label: <Link to="/admin/agents">Agent 资产</Link> },
-        { key: '/admin/skills', label: <Link to="/admin/skills">Skill 资产</Link> },
+        { key: '/admin/agents', label: <Link to="/admin/agents">Agent</Link> },
+        { key: '/admin/skills', label: <Link to="/admin/skills">Skill</Link> },
         { key: '/admin/skill-categories', label: <Link to="/admin/skill-categories">分类</Link> },
         { key: '/admin/models', label: <Link to="/admin/models">模型</Link> },
         { key: '/admin/datasets', label: <Link to="/admin/datasets">数据集</Link> },
         { key: '/admin/finetune-jobs', label: <Link to="/admin/finetune-jobs">微调任务</Link> },
-        { key: '/admin/articles', label: <Link to="/admin/articles">教程文章</Link> },
+        { key: '/admin/articles', label: <Link to="/admin/articles">文章</Link> },
         { key: '/admin/links', label: <Link to="/admin/links">跳转链接</Link> },
         { key: '/admin/settings', label: <Link to="/admin/settings">系统设置</Link> },
-        { key: '/admin/api-keys', label: <Link to="/admin/api-keys">Key 审计</Link> },
-        { key: '/admin/audit-logs', label: <Link to="/admin/audit-logs">审计日志</Link> }
+        { key: '/admin/api-keys', label: <Link to="/admin/api-keys">Agent 授权记录</Link> },
+        { key: '/admin/audit-logs', label: <Link to="/admin/audit-logs">操作记录</Link> }
       ]
     }] : [])
   ];
@@ -234,83 +234,83 @@ function DashboardPage() {
     recentlyUsedKeys: developerDashboard.recentlyUsedKeys
   })) : undefined;
   const consoleModules = [
-      {
-        title: 'Agent 资料库',
-        description: '维护 IDE Agent、CLI Agent 与自动化助手的入口、说明和使用场景。',
-        metric: activeAgents,
-        unit: '可用',
-        path: '/agents',
-        icon: <Bot size={20} />,
-        status: 'Agent 资料'
-      },
-      {
-        title: 'Skill 能力包',
-        description: '沉淀可复用能力包，支持发现、下载、上传、替换和远程导入。',
-        metric: activeSkills,
-        unit: '个 Skill',
-        path: '/skills',
-        icon: <Boxes size={20} />,
-        status: '能力资产'
-      },
-      {
-        title: '模型资料',
-        description: '整理模型供应商、能力标签和调用入口，为 Agent 选择合适底座。',
-        metric: models.length,
-        unit: '个模型',
-        path: '/models',
-        icon: <BrainCircuit size={20} />,
-        status: '模型目录'
-      },
-      {
-        title: 'AI 文章库',
-        description: '把教程、最佳实践、Prompt 和操作资产结构化，作为 Agent 执行前上下文。',
-        metric: articles.length,
-        unit: '篇内容',
-        path: '/articles',
-        icon: <BookOpenCheck size={20} />,
-        status: '内容资产'
-      },
-      {
-        title: '数据与微调记录',
-        description: '记录数据集、训练任务和微调进度，保留模型迭代上下文。',
-        metric: finetuneJobs.length,
-        unit: '条记录',
-        path: '/finetune',
-        icon: <Database size={20} />,
-        status: '训练资料'
-      },
-      {
-        title: '工具导航',
-        description: '维护常用 AI 工具、模型服务和外部资源入口。',
-        metric: links.length,
-        unit: '个入口',
-        path: '/#navigation',
-        icon: <ExternalLink size={20} />,
-        status: '外部工具'
-      },
-      {
-        title: 'Agent 代管入口',
-        description: '保留复制给 Agent 的配置文本、平台 Skill 和必要授权，让 Agent 只代管这些知识产物。',
-        metric: readyAgentWorkflows,
-        unit: '项可代管',
-        path: '/developer',
-        icon: <Code2 size={20} />,
-        status: '代管接入'
-      }
+    {
+      title: 'Agent',
+      description: '维护 IDE Agent、CLI Agent 与自动化助手的入口、说明和使用场景。',
+      metric: activeAgents,
+      unit: '可用',
+      path: '/agents',
+      icon: <Bot size={20} />,
+      status: 'Agent'
+    },
+    {
+      title: 'Skill',
+      description: '维护 Skill 分类、说明、源码或文件包，支持上传、远程导入和下载。',
+      metric: activeSkills,
+      unit: '个 Skill',
+      path: '/skills',
+      icon: <Boxes size={20} />,
+      status: 'Skill'
+    },
+    {
+      title: '模型',
+      description: '维护模型供应商、能力标签、价格和调用入口。',
+      metric: models.length,
+      unit: '个模型',
+      path: '/models',
+      icon: <BrainCircuit size={20} />,
+      status: '模型目录'
+    },
+    {
+      title: '文章',
+      description: '维护教程、最佳实践、Prompt、附件和参考链接。',
+      metric: articles.length,
+      unit: '篇',
+      path: '/articles',
+      icon: <BookOpenCheck size={20} />,
+      status: '文章'
+    },
+    {
+      title: '数据集与微调',
+      description: '记录数据集、训练任务和微调进度，保留模型迭代上下文。',
+      metric: finetuneJobs.length,
+      unit: '条记录',
+      path: '/finetune',
+      icon: <Database size={20} />,
+      status: '训练'
+    },
+    {
+      title: '工具导航',
+      description: '维护常用 AI 工具、模型服务和外部资源入口。',
+      metric: links.length,
+      unit: '个入口',
+      path: '/#navigation',
+      icon: <ExternalLink size={20} />,
+      status: '外部工具'
+    },
+    {
+      title: 'Agent 代管入口',
+      description: '保留复制给 Agent 的配置文本、平台 Skill 和必要授权，让 Agent 代管 Agent、Skill 和文章。',
+      metric: readyAgentWorkflows,
+      unit: '项可代管',
+      path: '/developer',
+      icon: <Code2 size={20} />,
+      status: '代管接入'
+    }
   ];
 
   return (
     <div className="page">
       <section className="workspace-hero">
         <div>
-          <Tag color="processing" icon={<Sparkles size={14} />}>AI 知识产物工作台</Tag>
-          <Title level={1}>{platform?.siteName ?? '星梦 AI 知识产物工作台'}</Title>
+          <Tag color="processing" icon={<Sparkles size={14} />}>AI 聚合平台</Tag>
+          <Title level={1}>{platform?.siteName ?? '星梦 AI 聚合平台'}</Title>
           <Paragraph>
-            {platform?.siteSubtitle ?? '集中管理 Agent 资料、Skill 能力包、模型资料、AI 文章和工具导航；Agent 只作为代管助手维护这些内容。'}
+            {platform?.siteSubtitle ?? '集中管理 Agent、Skill、模型、文章、数据集、微调和工具导航；外部 Agent 通过授权 Key 代管 Agent、Skill 和文章。'}
           </Paragraph>
           <Space wrap className="console-hero-actions">
-            <Link to="/agents"><Button type="primary" icon={<Bot size={16} />}>查看 Agent 资产</Button></Link>
-            <Link to="/skills"><Button icon={<Boxes size={16} />}>进入 Skill 资产</Button></Link>
+            <Link to="/agents"><Button type="primary" icon={<Bot size={16} />}>查看 Agent</Button></Link>
+            <Link to="/skills"><Button icon={<Boxes size={16} />}>进入 Skill</Button></Link>
             <Link to="/developer"><Button icon={<Workflow size={16} />}>打开 Agent 代管</Button></Link>
           </Space>
         </div>
@@ -327,7 +327,7 @@ function DashboardPage() {
           <span className="magi-action-icon">{magiStageIcon(magiSummary.focusStage)}</span>
           <span>
             <Text type="secondary">MAGI 当前轮次</Text>
-            <strong>{magiSummary.focusLabel} · {magiSummary.healthLabel}</strong>
+             <strong>{magiSummary.focusLabel} · {magiSummary.progressLabel}</strong>
             <small>{magiSummary.primaryAction}</small>
           </span>
           <span className="magi-action-link">进入{magiSummary.focusLabel}</span>
@@ -371,14 +371,14 @@ function DashboardPage() {
       </Card>
 
       <div className="content-grid">
-        <Card title="Agent 资产热度">
+        <Card title="Agent 热度">
           <Table rowKey="id" dataSource={agents.slice(0, 5)} pagination={false} columns={[
             { title: '名称', dataIndex: 'name', render: (name, row) => <Link to={`/agents/${row.id}`}>{name}</Link> },
             { title: '分类', dataIndex: 'category' },
             { title: '浏览', dataIndex: 'viewCount' }
           ]} />
         </Card>
-        <Card title="Skill 资产下载">
+        <Card title="Skill 下载">
           <Table rowKey="id" dataSource={skills.slice(0, 5)} pagination={false} columns={[
             { title: '名称', dataIndex: 'name', render: (name, row) => <Link to={`/skills/${row.id}`}>{name}</Link> },
             { title: '分类', render: (_, row) => row.category.name },
@@ -538,8 +538,8 @@ function AgentsPage() {
     <div className="page">
       <section className="agent-fleet-header">
         <div>
-          <Tag color="processing" icon={<Bot size={14} />}>Agent 资产</Tag>
-          <Title level={1}>Agent 资产库</Title>
+          <Tag color="processing" icon={<Bot size={14} />}>Agent</Tag>
+          <Title level={1}>Agent</Title>
           <Paragraph>
             统一管理团队正在评估和使用的 AI Agent、IDE Agent 与自动化助手，按类型、热度和接入说明快速定位。
           </Paragraph>
@@ -637,10 +637,10 @@ function SkillsPage() {
     <div className="page">
       <section className="skill-registry-header">
         <div>
-          <Tag color="processing" icon={<Boxes size={14} />}>Skill 资产</Tag>
-          <Title level={1}>Skill 资产库</Title>
+          <Tag color="processing" icon={<Boxes size={14} />}>Skill</Tag>
+          <Title level={1}>Skill</Title>
           <Paragraph>
-            管理团队可复用 Skill 资产，按分类、包类型、下载热度和标签定位可直接交给 Agent 使用的能力包。
+            管理团队可复用 Skill，按分类、包类型、下载热度和标签定位可直接交给 Agent 使用的能力包。
           </Paragraph>
           <MarketSkillUploadButton
             categories={categories}
@@ -700,7 +700,7 @@ function SkillsPage() {
               <span>{formatFileSize(row.artifactSize)}</span>
             </div>
             <Space wrap className="skill-registry-actions">
-              <Link to={`/skills/${row.id}`}><Button size="small" type="primary">资产详情</Button></Link>
+              <Link to={`/skills/${row.id}`}><Button size="small" type="primary">Skill 详情</Button></Link>
               <Button
                 size="small"
                 icon={<Download size={14} />}
@@ -802,17 +802,17 @@ function ArticlesPage() {
     <div className="page">
       <section className="knowledge-base-header">
         <div>
-          <Tag color="processing" icon={<BookOpenCheck size={14} />}>知识库</Tag>
-          <Title level={1}>知识库</Title>
+          <Tag color="processing" icon={<BookOpenCheck size={14} />}>文章</Tag>
+          <Title level={1}>文章</Title>
           <Paragraph>
-            沉淀可阅读、可下载、可复用的 AI 教程、脚本、Prompt 和参考资料，作为 Agent 执行复杂任务前的上下文资产。
+            沉淀可阅读、可下载、可复用的 AI 教程、脚本、Prompt 和参考材料，作为 Agent 执行复杂任务前的上下文。
           </Paragraph>
         </div>
         <div className="knowledge-base-metrics">
           <Statistic title="文章数" value={data.length} />
           <Statistic title="分类" value={categories.length} />
           <Statistic title="阅读分钟" value={estimatedMinutes} />
-          <Statistic title="高级内容" value={data.filter((article) => article.difficulty === 'ADVANCED').length} />
+          <Statistic title="高级文章" value={data.filter((article) => article.difficulty === 'ADVANCED').length} />
         </div>
       </section>
 
@@ -1342,10 +1342,10 @@ const API_KEY_SCOPE_OPTIONS = [
   { value: 'skills:import', label: '导入 Skill', description: '创建文本 Skill、上传文件包和远程导入' },
   { value: 'skills:write', label: '维护 Skill', description: '更新、替换、删除和记录远程地址' },
   { value: 'skills:download', label: '下载 Skill', description: '下载 Skill 源码文件或 zip 包' },
-  { value: 'agents:read', label: '读取 Agent', description: '查询 Agent 资产、运行入口和状态' },
-  { value: 'agents:write', label: '维护 Agent', description: '创建和更新 Agent 资产' },
-  { value: 'articles:read', label: '读取文章', description: '查询知识库文章和内容元数据' },
-  { value: 'articles:write', label: '维护文章', description: '创建和更新知识库文章' },
+  { value: 'agents:read', label: '读取 Agent', description: '查询 Agent 入口、说明和状态' },
+  { value: 'agents:write', label: '维护 Agent', description: '创建和更新 Agent' },
+  { value: 'articles:read', label: '读取文章', description: '查询文章正文和元数据' },
+  { value: 'articles:write', label: '维护文章', description: '创建和更新文章' },
   { value: 'admin:manage', label: '平台管理', description: '预留给管理类自动化能力' }
 ];
 
@@ -1363,26 +1363,26 @@ const API_KEY_EXPIRE_OPTIONS = [
 const API_KEY_PERMISSION_PRESETS = [
   {
     key: 'platform',
-    label: 'AI 知识产物代管',
-    description: '覆盖 Skill、Agent 和文章，适合让外部 Agent 维护核心 AI 知识产物。',
+    label: 'Agent/Skill/文章代管',
+    description: '覆盖 Skill、Agent 和文章，适合让外部 Agent 维护核心记录。',
     scopes: DEFAULT_PLATFORM_SCOPES
   },
   {
     key: 'content',
-    label: '内容与 Agent',
-    description: '允许维护 Agent 资料和知识库文章，适合日常内容更新。',
+    label: 'Agent/文章',
+    description: '允许维护 Agent 和文章，适合日常更新。',
     scopes: ['agents:read', 'agents:write', 'articles:read', 'articles:write']
   },
   {
     key: 'skill',
     label: 'Skill 管理',
-    description: '覆盖发现、导入、维护和下载，适合 Skill 资产维护任务。',
+    description: '覆盖发现、导入、维护和下载，适合 Skill 维护任务。',
     scopes: ['skills:read', 'skills:import', 'skills:write', 'skills:download']
   },
   {
     key: 'read',
     label: '只读发现',
-    description: '仅允许查询知识产物，适合检索、推荐和整理场景。',
+    description: '仅允许查询 Agent、Skill 和文章，适合检索、推荐和整理场景。',
     scopes: ['skills:read', 'agents:read', 'articles:read']
   },
   {
@@ -1459,13 +1459,13 @@ function ApiKeysPage() {
 
   return (
     <div className="page">
-      <PageTitle title="Agent 授权" description="只为外部 Agent 管理 AI 知识产物签发 API Key，按任务选择最小范围。" />
+      <PageTitle title="Agent 授权" description="只为外部 Agent 管理 Agent、Skill 和文章签发 API Key，按任务选择最小范围。" />
       <section className="agent-control-panel api-management-hero">
         <div>
           <Tag color="processing" icon={<Activity size={14} />}>Agent 授权</Tag>
           <Title level={2}>Agent 授权 Key</Title>
           <Paragraph>
-            API Key 只是给 Agent 代管内容用的授权令牌，用完可撤销；平台主线仍是 Agent、Skill、模型和文章等知识产物。
+            API Key 只是给 Agent 代管 Agent、Skill 和文章用的授权令牌，用完可撤销；平台主线仍是 Agent、Skill、模型和文章。
           </Paragraph>
         </div>
         <div className="api-management-quick-panel">
@@ -1546,7 +1546,7 @@ function ApiKeysPage() {
           onFinish={(values) => mutation.mutate(values)}
         >
           <Form.Item name="name" label="名称" rules={[{ required: true }]}>
-            <Input placeholder="知识产物代管" />
+             <Input placeholder="Agent/Skill 代管" />
           </Form.Item>
           <Form.Item label="权限预设">
             <div className="api-key-preset-panel">
@@ -1654,7 +1654,7 @@ function DeveloperPage() {
     apiBaseUrl,
     selfSkillUrl,
     manifestName: manifest?.name ?? 'ai-platform-manager',
-    manifestDescription: manifest?.description ?? '代管平台里的 AI 知识产物。',
+     manifestDescription: manifest?.description ?? '代管平台里的 Agent、Skill、模型、文章和工具导航。',
     authHeaders,
     requiredScopes,
     missingScopes,
@@ -1676,7 +1676,7 @@ function DeveloperPage() {
           <Tag color="processing" icon={<Code2 size={14} />}>Agent 代管入口</Tag>
           <Title level={1}>Agent 代管入口</Title>
           <Paragraph>
-            外部 Agent 只用这里的 API Base、Manifest、授权 Key 和平台 Skill 管理 Agent 资料、Skill 与文章等 AI 知识产物。
+             外部 Agent 只用这里的 API Base、Manifest、授权 Key 和平台 Skill 管理 Agent、Skill 和文章。
           </Paragraph>
           <Space wrap>
             <Button type="primary" icon={<Download size={16} />} href={selfSkillUrl}>
@@ -1755,21 +1755,21 @@ function DeveloperPage() {
               <Tag>01</Tag>
               <div>
                 <Text strong>读取 Manifest</Text>
-                <Text type="secondary">确认可代管的知识产物工具、方法和 scope。</Text>
+                 <Text type="secondary">确认可代管的 Agent、Skill 和文章工具、方法和 scope。</Text>
               </div>
             </section>
             <section>
               <Tag>02</Tag>
               <div>
                 <Text strong>配置授权 Key</Text>
-                <Text type="secondary">只开放本次知识产物任务需要的范围。</Text>
+                 <Text type="secondary">只开放本次 Agent、Skill 或文章任务需要的范围。</Text>
               </div>
             </section>
             <section>
               <Tag>03</Tag>
               <div>
                 <Text strong>代管并回读</Text>
-                <Text type="secondary">创建或更新后重新读取目标知识产物确认结果。</Text>
+                 <Text type="secondary">创建或更新后重新读取目标 Agent、Skill 或文章确认结果。</Text>
               </div>
             </section>
           </div>
@@ -1847,7 +1847,7 @@ function DeveloperPage() {
               <Boxes size={18} />
               <Text strong>代管对象</Text>
             </div>
-            <Text type="secondary">Agent 资料、Skill 能力包和 AI 文章；用户账号仍由后台管理。</Text>
+            <Text type="secondary">Agent、Skill 和文章；用户账号仍由后台管理。</Text>
           </section>
         </div>
       </Card>

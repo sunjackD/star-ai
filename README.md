@@ -1,7 +1,7 @@
 # 星梦 AI 聚合平台
 
-AI 聚合平台用于集中管理 Agent 资料、Skill 能力包、模型资料、AI 文章、工具导航、数据集和微调记录等 AI 知识产物。
-API Key 只承担一个角色：把平台自带 Skill 授权给外部 Agent，让 Agent 代用户维护这些 AI 知识产物。
+AI 聚合平台用于集中管理 Agent、Skill、模型、文章、工具导航、数据集和微调记录。
+API Key 只承担一个角色：把平台自带 Skill 授权给外部 Agent，让 Agent 代用户维护 Agent、Skill 和文章。
 
 ## 快速启动
 
@@ -81,9 +81,9 @@ npm install
 npm run build
 ```
 
-## Developer API
+## Agent API 接入
 
-登录后在右上角进入 API Key 页面，按本次代管任务创建包含 `skills:read`、`skills:import`、`skills:write`、`skills:download`、`agents:write` 或 `articles:write` 的 Key。
+登录后在右上角进入 API Key 管理，按本次 Agent、Skill 或文章任务创建包含 `skills:read`、`skills:import`、`skills:write`、`skills:download`、`agents:write` 或 `articles:write` 的 Agent 授权 Key。
 
 下载平台自管理 Skill：
 

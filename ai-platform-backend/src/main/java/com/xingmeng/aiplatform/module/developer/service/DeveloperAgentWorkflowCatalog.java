@@ -11,7 +11,7 @@ public class DeveloperAgentWorkflowCatalog {
         return List.of(
                 new DeveloperAgentWorkflowResponse(
                         "discover_skill_inventory",
-                        "发现现有 Skill 资产",
+                        "发现现有 Skill",
                         "Agent 接到新增、替换或复用任务前",
                         List.of("list_skills", "get_skill_categories"),
                         List.of("skills:read"),
@@ -66,7 +66,7 @@ public class DeveloperAgentWorkflowCatalog {
                 ),
                 new DeveloperAgentWorkflowResponse(
                         "maintain_agent_assets",
-                        "维护 Agent 资产",
+                        "维护 Agent",
                         "用户要求新增或更新 Agent 入口、说明和状态",
                         List.of("list_agents", "create_agent", "update_agent"),
                         List.of("agents:read", "agents:write"),
@@ -77,7 +77,7 @@ public class DeveloperAgentWorkflowCatalog {
                 ),
                 new DeveloperAgentWorkflowResponse(
                         "maintain_knowledge_articles",
-                        "维护知识库文章",
+                        "维护文章",
                         "用户要求新增教程、规范、Prompt 或最佳实践内容",
                         List.of("list_articles", "create_article", "update_article"),
                         List.of("articles:read", "articles:write"),

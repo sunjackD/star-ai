@@ -91,10 +91,10 @@ class AuthAndDeveloperApiTest {
     }
 
     @Test
-    void developerManifestFocusesAgentKnowledgeAssetTools() throws Exception {
+    void developerManifestFocusesAgentSkillAndArticleTools() throws Exception {
         mockMvc.perform(get("/api/v1/developer/skill-manifest"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.description").value(containsString("AI 知识产物")))
+                .andExpect(jsonPath("$.data.description").value(containsString("Skill、Agent、文章")))
                 .andExpect(jsonPath("$.data.requiredScopes[?(@ == 'agents:write')]").isNotEmpty())
                 .andExpect(jsonPath("$.data.requiredScopes[?(@ == 'articles:write')]").isNotEmpty())
                 .andExpect(jsonPath("$.data.requiredScopes[?(@ == 'users:write')]").isEmpty())

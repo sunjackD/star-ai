@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { buildMagiCyclePlan, summarizeMagiCycle } from './magiCycle';
 
 describe('buildMagiCyclePlan', () => {
-  it('prioritizes review when governance or permission gates are blocking execution', () => {
+  it('prioritizes review when Agent handoff is not ready', () => {
     const plan = buildMagiCyclePlan({
       requiredScopes: ['skills:read', 'skills:write'],
       missingScopes: ['skills:write'],
@@ -18,11 +18,11 @@ describe('buildMagiCyclePlan', () => {
       ],
       governanceChecks: [
         {
-          key: 'scope_coverage',
-          title: '权限覆盖',
+          key: 'task_boundary',
+          title: '任务边界',
           status: 'ATTENTION',
-          description: '缺少写入权限',
-          action: '补齐最小权限'
+          description: '缺少写入范围',
+          action: '补齐本轮 Agent 代管边界'
         }
       ],
       recentEventCount: 0,
@@ -30,13 +30,14 @@ describe('buildMagiCyclePlan', () => {
     });
 
     expect(plan.focusStage).toBe('review');
-    expect(plan.healthScore).toBe(17);
+    expect(plan.handoffScore).toBe(17);
     expect(plan.stages[0]).toMatchObject({
       key: 'review',
       metric: 3,
       status: 'attention'
     });
-    expect(plan.stages[0].actions).toContain('补齐 1 项 Agent 代管授权，只开放当前知识产物任务需要的范围。');
+    expect(plan.stages[0].actions).toContain('补齐 1 项 Agent 授权，只开放当前任务需要的范围。');
+    expect(plan.stages[0].actions).toContain('处理 1 项代管提示：任务边界。');
   });
 
   it('moves focus to execution when all gates are clear and runnable workflows exist', () => {
@@ -55,11 +56,11 @@ describe('buildMagiCyclePlan', () => {
       ],
       governanceChecks: [
         {
-          key: 'audit_trail',
-          title: '审计链路',
+          key: 'operation_activity',
+          title: '操作记录',
           status: 'PASS',
-          description: '调用已进入审计',
-          action: '继续复核'
+          description: '代管记录可回看',
+          action: '继续沉淀'
         }
       ],
       recentEventCount: 2,
@@ -67,13 +68,13 @@ describe('buildMagiCyclePlan', () => {
     });
 
     expect(plan.focusStage).toBe('execute');
-    expect(plan.healthScore).toBe(100);
+    expect(plan.handoffScore).toBe(100);
     expect(plan.stages[1]).toMatchObject({
       key: 'execute',
       metric: 1,
       status: 'ready'
     });
-    expect(plan.stages[1].actions[0]).toBe('优先执行“发现 Skill 库存”，并在完成后读取结果复核。');
+    expect(plan.stages[1].actions[0]).toBe('优先执行“发现 Skill 库存”，完成后更新对应 Skill 说明或标签。');
   });
 });
 
@@ -91,8 +92,8 @@ describe('summarizeMagiCycle', () => {
     expect(summary).toEqual({
       focusStage: 'review',
       focusLabel: '审视',
-      healthLabel: '完善度 0%',
-      primaryAction: '补齐 1 项 Agent 代管授权，只开放当前知识产物任务需要的范围。',
+      progressLabel: '代管进度 0%',
+      primaryAction: '补齐 1 项 Agent 授权，只开放当前任务需要的范围。',
       route: '/developer'
     });
   });
@@ -113,11 +114,11 @@ describe('summarizeMagiCycle', () => {
       ],
       governanceChecks: [
         {
-          key: 'audit_trail',
-          title: '审计链路',
+          key: 'operation_activity',
+          title: '操作记录',
           status: 'PASS',
-          description: '调用已进入审计',
-          action: '继续复核'
+          description: '代管记录可回看',
+          action: '继续沉淀'
         }
       ],
       recentEventCount: 1,
@@ -126,6 +127,6 @@ describe('summarizeMagiCycle', () => {
 
     expect(summary.route).toBe('/developer');
     expect(summary.focusLabel).toBe('执行');
-    expect(summary.primaryAction).toBe('优先执行“发现 Skill 库存”，并在完成后读取结果复核。');
+    expect(summary.primaryAction).toBe('优先执行“发现 Skill 库存”，完成后更新对应 Skill 说明或标签。');
   });
 });

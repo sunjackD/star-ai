@@ -137,7 +137,7 @@ public class DeveloperApiController {
                 Map.entry("apiVersion", "v1"),
                 Map.entry("apiBasePath", "/api/v1"),
                 Map.entry("name", "ai-platform-manager"),
-                Map.entry("description", "通过 API Key 让 AI Agent 代管 Skill、Agent、文章等 AI 知识产物"),
+                Map.entry("description", "通过 API Key 让 AI Agent 代管 Skill、Agent、文章"),
                 Map.entry("auth", Map.of("headers", List.of("X-API-Key", "Authorization: Bearer xma_xxx"))),
                 Map.entry("requiredScopes", REQUIRED_PLATFORM_SCOPES),
                 Map.entry("tools", List.of(
@@ -181,8 +181,8 @@ public class DeveloperApiController {
                 )),
                 Map.entry(
                         "installPrompt",
-                        "请下载并安装 ai-platform-manager Skill，配置 API Base 和覆盖目标知识产物 scopes 的 API Key，"
-                                + "然后让 Agent 只按 toolSpecs 代管 Skill、Agent、文章等 AI 知识产物。"
+                        "请下载并安装 ai-platform-manager Skill，配置 API Base 和覆盖目标 scopes 的 API Key，"
+                                + "然后让 Agent 只按 toolSpecs 代管 Skill、Agent、文章。"
                 )
         ));
     }
@@ -491,27 +491,27 @@ public class DeveloperApiController {
                 ),
                 new DeveloperToolSpecResponse(
                         "list_agents", "GET", "/api/v1/developer/agents",
-                        "agents:read", "read", "查询 Agent 资产"
+                        "agents:read", "read", "查询 Agent"
                 ),
                 new DeveloperToolSpecResponse(
                         "create_agent", "POST", "/api/v1/developer/agents",
-                        "agents:write", "write", "创建 Agent 资产"
+                        "agents:write", "write", "创建 Agent"
                 ),
                 new DeveloperToolSpecResponse(
                         "update_agent", "PUT", "/api/v1/developer/agents/{id}",
-                        "agents:write", "write", "更新 Agent 资产"
+                        "agents:write", "write", "更新 Agent"
                 ),
                 new DeveloperToolSpecResponse(
                         "list_articles", "GET", "/api/v1/developer/articles",
-                        "articles:read", "read", "查询知识库文章"
+                        "articles:read", "read", "查询文章"
                 ),
                 new DeveloperToolSpecResponse(
                         "create_article", "POST", "/api/v1/developer/articles",
-                        "articles:write", "write", "创建知识库文章"
+                        "articles:write", "write", "创建文章"
                 ),
                 new DeveloperToolSpecResponse(
                         "update_article", "PUT", "/api/v1/developer/articles/{id}",
-                        "articles:write", "write", "更新知识库文章"
+                        "articles:write", "write", "更新文章"
                 )
         );
     }
