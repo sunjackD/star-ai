@@ -1504,7 +1504,7 @@ function ApiKeysPage() {
       <PageTitle title="API 管理" description="管理 Agent 调用凭据、权限策略、过期风险和审计信号，让自动化接入保持最小权限和可追踪。" />
       <section className="agent-control-panel api-management-hero">
         <div>
-          <Tag color="processing" icon={<Activity size={14} />}>凭据控制台</Tag>
+          <Tag color="processing" icon={<Activity size={14} />}>凭据管理</Tag>
           <Title level={2}>API Key 生命周期与 Agent 调用治理</Title>
           <Paragraph>
             这里聚合 API Key 生命周期、权限覆盖、工作流准备度和最近调用痕迹，用于判断 Agent 是否具备稳定、安全的平台模块管理能力。

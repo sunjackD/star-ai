@@ -97,7 +97,7 @@ describe('summarizeMagiCycle', () => {
     });
   });
 
-  it('points execution-focused users to the developer control plane', () => {
+  it('points execution-focused users to Agent API access', () => {
     const summary = summarizeMagiCycle(buildMagiCyclePlan({
       requiredScopes: ['skills:read'],
       missingScopes: [],

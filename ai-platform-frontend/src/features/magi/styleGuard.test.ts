@@ -11,6 +11,7 @@ describe('workspace style guard', () => {
 
   it('keeps the dashboard framed as Agent API work instead of a control console', () => {
     expect(appSource).not.toContain('Agent 控制台');
+    expect(appSource).not.toContain('凭据控制台');
     expect(appSource).not.toContain('同一控制台');
     expect(appSource).toContain('Agent API 工作台');
   });
