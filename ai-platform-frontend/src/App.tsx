@@ -1721,6 +1721,14 @@ function DeveloperPage() {
       message.warning('请使用模板文本右侧复制按钮');
     }
   };
+  const copyExecutionPackage = async () => {
+    try {
+      await navigator.clipboard.writeText(access.executionPackageText);
+      message.success('已复制 Agent 执行包');
+    } catch {
+      message.warning('请使用执行包文本右侧复制按钮');
+    }
+  };
 
   return (
     <div className="page">
@@ -1787,6 +1795,33 @@ function DeveloperPage() {
         </div>
       </Card>
 
+      <Card title="Agent 执行包" className="agent-api-card">
+        <div className="agent-api-package-grid">
+          <section>
+            <div className="agent-api-section-heading">
+              <Text strong>给 Agent 的完整上下文</Text>
+              <Tag color={access.permissionStatus.status === 'ready' ? 'green' : 'gold'}>
+                {access.permissionStatus.label}
+              </Tag>
+            </div>
+            <Paragraph copyable={{ text: access.executionPackageText }} className="prompt-copy agent-api-package-copy">
+              {access.executionPackageText}
+            </Paragraph>
+            <Button type="primary" icon={<Copy size={16} />} onClick={copyExecutionPackage}>
+              复制执行包
+            </Button>
+          </section>
+          <section className="agent-api-package-steps">
+            {access.executionSteps.map((step, index) => (
+              <div key={step}>
+                <Tag>{String(index + 1).padStart(2, '0')}</Tag>
+                <Text strong>{step}</Text>
+              </div>
+            ))}
+          </section>
+        </div>
+      </Card>
+
       <Card title="代管任务模板" className="agent-api-card">
         <div className="agent-api-task-grid">
           {access.taskTemplates.map((template) => (
@@ -1821,48 +1856,6 @@ function DeveloperPage() {
           ))}
         </div>
       </Card>
-
-      <div className="agent-api-layout">
-        <Card title="连接参数">
-          <div className="agent-api-connection-list">
-            {access.connectionRows.map((row) => (
-              <div key={row.label}>
-                <Text type="secondary">{row.label}</Text>
-                <Text code copyable={{ text: row.value }}>{row.value}</Text>
-              </div>
-            ))}
-          </div>
-          <Paragraph copyable={{ text: access.installPrompt }} className="prompt-copy agent-api-prompt">
-            {access.installPrompt}
-          </Paragraph>
-        </Card>
-
-        <Card title="接入步骤">
-          <div className="agent-api-step-list">
-            <section>
-              <Tag>01</Tag>
-              <div>
-                <Text strong>读取 Manifest</Text>
-                 <Text type="secondary">确认可代管的 Agent、Skill 和文章工具、方法和 scope。</Text>
-              </div>
-            </section>
-            <section>
-              <Tag>02</Tag>
-              <div>
-                <Text strong>配置 API Key</Text>
-                 <Text type="secondary">只开放本次 Agent、Skill 或文章任务需要的范围。</Text>
-              </div>
-            </section>
-            <section>
-              <Tag>03</Tag>
-              <div>
-                <Text strong>代管并回读</Text>
-                 <Text type="secondary">创建或更新后重新读取目标 Agent、Skill 或文章确认结果。</Text>
-              </div>
-            </section>
-          </div>
-        </Card>
-      </div>
 
       <Card
         title="工具契约"

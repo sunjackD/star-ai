@@ -30,10 +30,13 @@ describe('workspace style guard', () => {
 
   it('keeps the essential Agent API handoff actions visible', () => {
     expect(appSource).toContain('复制这段给 Agent');
+    expect(appSource).toContain('Agent 执行包');
     expect(appSource).toContain('代管任务模板');
     expect(appSource).toContain('复制任务给 Agent');
     expect(appSource).toContain('复制给 Agent');
     expect(appSource).toContain('一键配置平台 Skill');
+    expect(appSource).not.toContain('连接参数');
+    expect(appSource).not.toContain('接入步骤');
     expect(appSource).not.toContain('Agent、Skill、模型、文章和工具导航');
     expect(appSource).toContain('buildArticleCatalogHandoff');
   });
