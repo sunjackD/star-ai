@@ -185,6 +185,14 @@ class AuthAndDeveloperApiTest {
     }
 
     @Test
+    void developerAgentWorkflowsUseObjectOperationLanguage() throws Exception {
+        mockMvc.perform(get("/api/v1/developer/agent-workflows"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data[?(@.trigger =~ /.*任务.*/)]").isEmpty())
+                .andExpect(jsonPath("$.data[?(@.riskGate =~ /.*任务.*/)]").isEmpty());
+    }
+
+    @Test
     void developerApiDoesNotExposeUserManagementTools() throws Exception {
         String adminToken = createAdminAndLogin("admin_no_user_tools", "admin-no-user-tools@example.com");
         createUser(adminToken, "no_user_tools_dev", "no-user-tools@example.com", "No User Tools", "DEVELOPER");

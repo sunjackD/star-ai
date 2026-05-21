@@ -198,7 +198,7 @@ public class SkillArtifactService {
                 ## 初始化
 
                 1. 在平台右上角进入 API Key 页面。
-                2. 按任务选择最小 scopes，例如 `skills:read`、`skills:import`、`agents:write`、`articles:write`。
+                2. 按对象选择最小 scopes，例如 `skills:read`、`skills:import`、`agents:write`、`articles:write`。
                 3. 在 Agent 中保存平台地址和 API Key。
 
                 API Base: http://localhost:8081/api/v1（按实际部署地址替换）
@@ -229,7 +229,7 @@ public class SkillArtifactService {
                 - `delete_skill`: 删除站内 Skill。需要 `skills:write`。
                 - `download_skill`: 下载某个 Skill 的源码文件或上传包。需要 `skills:download`。
 
-                执行 `delete_skill` 前必须确认目标 Skill ID、名称和任务意图。
+                执行 `delete_skill` 前必须确认目标 Skill ID、名称和操作意图。
 
                 ### Agent
 
@@ -264,9 +264,9 @@ public class SkillArtifactService {
                   -d '{"title":"Agent 接入流程","slug":"agent-api-workflow","summary":"Agent 调用平台 API 的步骤","category":"Agent","tags":"agent,api","difficulty":"BEGINNER","estimatedMinutes":8,"status":"ACTIVE","sortOrder":10,"safetyMarkdown":"# Safety","bodyMarkdown":"# Body"}'
                 ```
 
-                ## 可直接给 Agent 的任务提示
+                ## 可直接给 Agent 的对象提示
 
-                “使用 ai-platform-manager，先读取 Manifest 和 toolSpecs；按我的任务选择最小 scope；
+                “使用 ai-platform-manager，先读取 Manifest 和 toolSpecs；按我的对象和操作选择最小 scope；
                 创建或更新 Agent、Skill、文章后重新读取对应列表并汇报校验结果。”
                 """;
     }

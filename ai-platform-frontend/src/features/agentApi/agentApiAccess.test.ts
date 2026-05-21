@@ -99,20 +99,8 @@ describe('buildAgentApiAccess', () => {
     expect(access.copyToAgentText).toContain('Skill: ai-platform-manager');
     expect(access.copyToAgentText).toContain('Manifest: http://localhost:8081/api/v1/developer/skill-manifest');
     expect(access.copyToAgentText).not.toContain('核对审计日志');
-    expect(access.executionPackageText).toContain('Agent 执行包');
-    expect(access.executionPackageText).toContain('对象: Agent、Skill、文章');
-    expect(access.executionPackageText).toContain('API Base: http://localhost:8081/api/v1');
-    expect(access.executionPackageText).toContain('Manifest: http://localhost:8081/api/v1/developer/skill-manifest');
-    expect(access.executionPackageText).toContain('Skill 包: http://localhost:8081/api/v1/developer/self-skill/download');
-    expect(access.executionPackageText).toContain('执行顺序: 读取 Manifest -> 选择最小 scope -> 调用 toolSpecs -> 回读目标记录');
-    expect(access.executionPackageText).not.toContain('模型');
-    expect(access.executionPackageText).not.toContain('工具导航');
-    expect(access.executionSteps).toEqual([
-      '读取 Manifest',
-      '选择最小 scope',
-      '调用 toolSpecs',
-      '回读目标记录'
-    ]);
+    expect('executionPackageText' in access).toBe(false);
+    expect('executionSteps' in access).toBe(false);
     expect(access.builtinSkill).toEqual({
       name: 'ai-platform-manager',
       manifestUrl: 'http://localhost:8081/api/v1/developer/skill-manifest',
@@ -166,6 +154,7 @@ describe('buildAgentApiAccess', () => {
     expect(access.installPrompt).toContain('API Base: https://api.example.com/api/v1');
     expect(access.installPrompt).toContain('下载 Skill: https://api.example.com/api/v1/developer/self-skill/download');
     expect(access.installPrompt).toContain('只管理 Agent、Skill 和文章');
+    expect(access.installPrompt).not.toContain('任务');
     expect(access.installPrompt).not.toContain('工具导航');
   });
 });

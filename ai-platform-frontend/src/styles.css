@@ -1243,43 +1243,6 @@ pre {
   word-break: break-all;
 }
 
-.agent-api-package-grid {
-  display: grid;
-  grid-template-columns: minmax(0, 1.12fr) minmax(260px, 0.58fr);
-  gap: 16px;
-}
-
-.agent-api-package-grid > section {
-  display: grid;
-  align-content: start;
-  gap: 14px;
-  padding: 16px;
-  border: 1px solid rgba(104, 119, 160, 0.14);
-  border-radius: var(--radius);
-  background: rgba(255, 255, 255, 0.68);
-}
-
-.agent-api-package-copy {
-  max-height: 220px;
-  overflow: auto;
-  padding: 14px;
-  border: 1px solid rgba(104, 119, 160, 0.14);
-  border-radius: var(--radius);
-  background: rgba(248, 251, 255, 0.78);
-}
-
-.agent-api-package-steps {
-  display: grid;
-  align-content: start;
-  gap: 12px;
-}
-
-.agent-api-package-steps > div {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-}
-
 .agent-api-object-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -1332,8 +1295,6 @@ pre {
   gap: 12px;
 }
 
-.agent-api-package-grid > section,
-.agent-api-package-steps > div,
 .agent-api-guard-card {
   display: grid;
   gap: 6px;
@@ -1621,8 +1582,6 @@ pre {
 .model-layer-metrics .ant-statistic,
 .knowledge-base-metrics .ant-statistic,
 .agent-api-status-panel .ant-statistic,
-.agent-api-package-grid > section,
-.agent-api-package-steps > div,
 .agent-api-guard-card,
 .settings-theme-card,
 .navigation-link,
@@ -1851,8 +1810,7 @@ pre {
   .knowledge-base-toolbar,
   .api-key-policy-grid,
   .agent-api-hero,
-  .agent-api-handoff-grid,
-  .agent-api-package-grid {
+  .agent-api-handoff-grid {
     grid-template-columns: 1fr;
   }
 

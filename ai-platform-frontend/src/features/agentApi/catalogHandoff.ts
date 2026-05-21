@@ -29,7 +29,7 @@ export type ArticleCatalogHandoffInput = {
 
 export function buildAgentCatalogHandoff(input: AgentCatalogHandoffInput): string {
   return [
-    '任务: 评估或维护 Agent',
+    '对象: Agent',
     `目标 Agent: ${input.name}`,
     `分类: ${input.category}`,
     `状态: ${input.status}`,
@@ -42,7 +42,7 @@ export function buildAgentCatalogHandoff(input: AgentCatalogHandoffInput): strin
 
 export function buildSkillCatalogHandoff(input: SkillCatalogHandoffInput): string {
   return [
-    '任务: 评估或维护 Skill',
+    '对象: Skill',
     `目标 Skill: ${input.name}`,
     `分类: ${input.category}`,
     `状态: ${input.status}`,
@@ -56,7 +56,7 @@ export function buildSkillCatalogHandoff(input: SkillCatalogHandoffInput): strin
 
 export function buildArticleCatalogHandoff(input: ArticleCatalogHandoffInput): string {
   return [
-    '任务: 阅读或维护文章',
+    '对象: 文章',
     `目标文章: ${input.title}`,
     `分类: ${input.category}`,
     `难度: ${input.difficulty}`,

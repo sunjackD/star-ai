@@ -12,7 +12,7 @@ public class DeveloperAgentWorkflowCatalog {
                 new DeveloperAgentWorkflowResponse(
                         "discover_skill_inventory",
                         "发现现有 Skill",
-                        "Agent 接到新增、替换或复用任务前",
+                        "Agent 接到新增、替换或复用请求前",
                         List.of("list_skills", "get_skill_categories"),
                         List.of("skills:read"),
                         List.of("读取分类", "读取 ACTIVE Skills", "按名称、标签、下载量识别可复用项"),

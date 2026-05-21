@@ -72,7 +72,7 @@ export function buildMagiCyclePlan(input: MagiCycleInput): MagiCyclePlan {
         key: 'review',
         label: '01 审视',
         title: '提出问题',
-        question: '哪些授权范围或任务会阻塞 Agent 维护 Agent、Skill 或文章？',
+        question: '哪些授权范围或对象会阻塞 Agent 维护 Agent、Skill 或文章？',
         metric: reviewMetric,
         metricLabel: '待审视项',
         description: reviewMetric > 0
@@ -85,12 +85,12 @@ export function buildMagiCyclePlan(input: MagiCycleInput): MagiCyclePlan {
         key: 'execute',
         label: '02 执行',
         title: '解决问题',
-        question: '哪个 Agent、Skill 或文章任务已经具备授权，可以交给 Agent 执行？',
+        question: '哪个 Agent、Skill 或文章对象已经具备授权，可以交给 Agent 处理？',
         metric: readyWorkflows.length,
         metricLabel: '可管理对象',
         description: readyWorkflows.length > 0
-          ? '从已就绪任务中选择一条执行，并更新对应 Agent、Skill 或文章。'
-          : '没有完全就绪的任务，先返回审视阶段补齐前置条件。',
+          ? '从已就绪对象中选择一项处理，并更新对应 Agent、Skill 或文章。'
+          : '没有完全就绪的对象，先返回审视阶段补齐前置条件。',
         status: readyWorkflows.length > 0 ? 'ready' : 'attention',
         actions: buildExecuteActions(readyWorkflows)
       },
@@ -146,7 +146,7 @@ function buildReviewActions(
 ): string[] {
   const actions: string[] = [];
   if (missingScopeCount > 0) {
-    actions.push(`补齐 ${missingScopeCount} 项 API Key 权限，只开放当前任务需要的范围。`);
+    actions.push(`补齐 ${missingScopeCount} 项 API Key 权限，只开放当前对象需要的范围。`);
   }
   if (blockedWorkflows.length > 0) {
     actions.push(`处理 ${blockedWorkflows.length} 项阻塞条件，优先补齐 Skill 或文章写入。`);

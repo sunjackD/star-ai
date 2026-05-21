@@ -34,8 +34,6 @@ export type AgentApiAccess = {
   managedObjects: AgentApiManagedObject[];
   copyToAgentText: string;
   installPrompt: string;
-  executionPackageText: string;
-  executionSteps: string[];
 };
 
 export type AgentApiManagedObject = {
@@ -56,13 +54,6 @@ const riskRank: Record<string, number> = {
   write: 2,
   read: 3
 };
-
-const executionSteps = [
-  '读取 Manifest',
-  '选择最小 scope',
-  '调用 toolSpecs',
-  '回读目标记录'
-];
 
 export function buildAgentApiAccess(input: AgentApiAccessInput): AgentApiAccess {
   const featuredTools = [...input.toolSpecs]
@@ -85,19 +76,6 @@ export function buildAgentApiAccess(input: AgentApiAccessInput): AgentApiAccess 
     `最小权限: ${input.requiredScopes.join(', ')}`,
     '约束: 只管理 Agent、Skill 和文章；写入后重新读取目标记录确认结果。'
   ].join('\n');
-  const executionPackageText = [
-    'Agent 执行包',
-    '对象: Agent、Skill、文章',
-    `Skill: ${input.manifestName}`,
-    `API Base: ${input.apiBaseUrl}`,
-    `Manifest: ${manifestUrl}`,
-    `Skill 包: ${input.selfSkillUrl}`,
-    `认证头: ${input.authHeaders.join(' 或 ')}`,
-    `最小权限: ${input.requiredScopes.join(', ')}`,
-    `可用工具数: ${input.toolSpecs.length}`,
-    `执行顺序: ${executionSteps.join(' -> ')}`
-  ].join('\n');
-
   return {
     connectionRows: [
       { label: 'API Base', value: input.apiBaseUrl },
@@ -132,9 +110,7 @@ export function buildAgentApiAccess(input: AgentApiAccessInput): AgentApiAccess 
       `认证: ${input.authHeaders.join(' 或 ')}`,
       `最小权限: ${input.requiredScopes.join(', ')}`,
       '执行前先读 Manifest，写入后重新读取目标记录确认结果。'
-    ].join('\n'),
-    executionPackageText,
-    executionSteps
+    ].join('\n')
   };
 }
 

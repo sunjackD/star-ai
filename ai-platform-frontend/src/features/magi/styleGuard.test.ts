@@ -30,7 +30,8 @@ describe('workspace style guard', () => {
 
   it('keeps the essential Agent API handoff actions visible', () => {
     expect(appSource).toContain('复制这段给 Agent');
-    expect(appSource).toContain('Agent 执行包');
+    expect(appSource).not.toContain('Agent 执行包');
+    expect(appSource).not.toContain('复制执行包');
     expect(appSource).toContain('Agent API 可管理对象');
     expect(appSource).not.toContain('代管任务模板');
     expect(appSource).not.toContain('复制任务给 Agent');
@@ -60,8 +61,11 @@ describe('workspace style guard', () => {
     expect(appSource).not.toContain('account-key-toolbar');
     expect(appSource).not.toContain('平台主线仍是 Agent、Skill、模型和文章');
     expect(appSource).toContain('权限预设');
+    expect(appSource).toContain('范围预设');
     expect(appSource).toContain('创建 API Key');
     expect(appSource).toContain('代管指南');
+    expect(appSource).not.toContain('代管范围模板');
+    expect(appSource).not.toContain('按任务选择');
   });
 
   it('keeps API Key as the primary label while framing it for Agent use', () => {
@@ -113,6 +117,7 @@ describe('workspace style guard', () => {
     expect(magiSource).not.toContain('governanceChecks');
     expect(magiSource).not.toContain('knowledgeAssetScore');
     expect(magiSource).not.toContain('内容推进');
+    expect(magiSource).not.toContain('任务');
     expect(magiSource).toContain('handoffScore');
     expect(magiSource).toContain('handoffSignals');
     expect(magiSource).toContain('代管进度');

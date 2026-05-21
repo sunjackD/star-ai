@@ -1408,7 +1408,7 @@ const API_KEY_PERMISSION_PRESETS = [
   {
     key: 'skill',
     label: 'Skill 管理',
-    description: '覆盖发现、导入、维护和下载，适合 Skill 维护任务。',
+    description: '覆盖发现、导入、维护和下载，适合 Skill 操作。',
     scopes: ['skills:read', 'skills:import', 'skills:write', 'skills:download']
   },
   {
@@ -1420,7 +1420,7 @@ const API_KEY_PERMISSION_PRESETS = [
   {
     key: 'custom',
     label: '自定义',
-    description: '按单次任务选择最小权限，适合临时接入或高风险动作拆分。',
+    description: '按单次操作选择最小权限，适合临时接入或高风险动作拆分。',
     scopes: []
   }
 ];
@@ -1491,7 +1491,7 @@ function ApiKeysPage() {
 
   return (
     <div className="page">
-      <PageTitle title="API Key" description="只为外部 Agent 管理 Agent、Skill 和文章签发 API Key，按任务选择最小范围。" />
+      <PageTitle title="API Key" description="只为外部 Agent 管理 Agent、Skill 和文章签发 API Key，按对象选择最小范围。" />
       <section className="agent-control-panel api-management-hero">
         <div>
           <Tag color="processing" icon={<Activity size={14} />}>API Key</Tag>
@@ -1516,7 +1516,7 @@ function ApiKeysPage() {
         </div>
       </section>
 
-      <Card title="代管范围模板" className="api-key-policy-card">
+      <Card title="范围预设" className="api-key-policy-card">
         <div className="api-key-policy-grid">
           {API_KEY_PERMISSION_PRESETS.map((preset) => (
             <section key={preset.key} className="api-key-policy-item">
@@ -1718,15 +1718,6 @@ function DeveloperPage() {
       message.warning('请使用对象文本右侧复制按钮');
     }
   };
-  const copyExecutionPackage = async () => {
-    try {
-      await navigator.clipboard.writeText(access.executionPackageText);
-      message.success('已复制 Agent 执行包');
-    } catch {
-      message.warning('请使用执行包文本右侧复制按钮');
-    }
-  };
-
   return (
     <div className="page">
       <section className="agent-api-hero">
@@ -1788,33 +1779,6 @@ function DeveloperPage() {
             <Button type="primary" icon={<Download size={16} />} href={access.builtinSkill.downloadUrl}>
               一键配置平台 Skill
             </Button>
-          </section>
-        </div>
-      </Card>
-
-      <Card title="Agent 执行包" className="agent-api-card">
-        <div className="agent-api-package-grid">
-          <section>
-            <div className="agent-api-section-heading">
-              <Text strong>给 Agent 的完整上下文</Text>
-              <Tag color={access.permissionStatus.status === 'ready' ? 'green' : 'gold'}>
-                {access.permissionStatus.label}
-              </Tag>
-            </div>
-            <Paragraph copyable={{ text: access.executionPackageText }} className="prompt-copy agent-api-package-copy">
-              {access.executionPackageText}
-            </Paragraph>
-            <Button type="primary" icon={<Copy size={16} />} onClick={copyExecutionPackage}>
-              复制执行包
-            </Button>
-          </section>
-          <section className="agent-api-package-steps">
-            {access.executionSteps.map((step, index) => (
-              <div key={step}>
-                <Tag>{String(index + 1).padStart(2, '0')}</Tag>
-                <Text strong>{step}</Text>
-              </div>
-            ))}
           </section>
         </div>
       </Card>
