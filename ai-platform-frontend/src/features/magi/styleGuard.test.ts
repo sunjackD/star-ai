@@ -32,6 +32,7 @@ describe('workspace style guard', () => {
     expect(appSource).toContain('复制这段给 Agent');
     expect(appSource).toContain('代管任务模板');
     expect(appSource).toContain('复制任务给 Agent');
+    expect(appSource).toContain('复制给 Agent');
     expect(appSource).toContain('一键配置平台 Skill');
     expect(appSource).not.toContain('Agent、Skill、模型、文章和工具导航');
   });
