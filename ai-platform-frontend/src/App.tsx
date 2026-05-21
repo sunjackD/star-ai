@@ -12,7 +12,6 @@ import {
   BookOpenCheck,
   CheckCircle2,
   CircleUserRound,
-  Clock3,
   Code2,
   Copy,
   Database,
@@ -1422,10 +1421,6 @@ function ApiKeysPage() {
   const [createdKey, setCreatedKey] = useState<string>();
   const [selectedPreset, setSelectedPreset] = useState('platform');
   const { data = [] } = useQuery({ queryKey: ['api-keys'], queryFn: () => getData<ApiKey[]>('/developer/api-keys') });
-  const { data: dashboard } = useQuery({
-    queryKey: ['developer-dashboard'],
-    queryFn: () => getData<DeveloperDashboard>('/developer/dashboard')
-  });
   const mutation = useMutation({
     mutationFn: (values: { name: string; scopes: string[]; expireDays: number }) => {
       return postData<ApiKey>('/developer/api-keys', {
@@ -1449,14 +1444,6 @@ function ApiKeysPage() {
       queryClient.invalidateQueries({ queryKey: ['developer-dashboard'] });
     }
   });
-  const defaultRequiredScopes = DEFAULT_PLATFORM_SCOPES;
-  const requiredScopes = dashboard?.requiredScopes ?? defaultRequiredScopes;
-  const missingScopes = dashboard?.missingRequiredScopes ?? requiredScopes;
-  const agentWorkflowReadiness = dashboard?.agentWorkflowReadiness ?? [];
-  const readyAgentWorkflows = agentWorkflowReadiness.filter((item) => item.ready).length;
-  const scopeCoverage = Math.round(
-    ((requiredScopes.length - missingScopes.length) / Math.max(requiredScopes.length, 1)) * 100
-  );
   const apiBaseUrl = apiUrl('').replace(/\/$/, '');
   const selectedPresetOption = API_KEY_PERMISSION_PRESETS.find((item) => item.key === selectedPreset)
     ?? API_KEY_PERMISSION_PRESETS[0];
@@ -1497,43 +1484,6 @@ function ApiKeysPage() {
         </div>
       </section>
 
-      <div className="agent-health-grid">
-        <Card className="agent-health-card">
-          <Statistic title="有效 Key" value={dashboard?.activeKeys ?? 0} prefix={<CheckCircle2 size={18} />} />
-          <Text type="secondary">总数 {dashboard?.totalKeys ?? data.length}</Text>
-        </Card>
-        <Card className="agent-health-card">
-          <Statistic title="近期代管" value={dashboard?.recentlyUsedKeys ?? 0} prefix={<Clock3 size={18} />} />
-          <Text type="secondary">最近 7 天有 Agent 使用</Text>
-        </Card>
-        <Card className="agent-health-card">
-          <Statistic title="即将过期" value={dashboard?.expiringSoonKeys ?? 0} prefix={<AlertTriangle size={18} />} />
-          <Text type="secondary">未来 14 天内到期</Text>
-        </Card>
-        <Card className="agent-health-card">
-          <Statistic title="代管范围" value={scopeCoverage} suffix="%" prefix={<ShieldCheck size={18} />} />
-          <Text type="secondary">可代管任务 {readyAgentWorkflows}/{agentWorkflowReadiness.length || '-'}</Text>
-        </Card>
-      </div>
-
-      {missingScopes.length > 0 ? (
-        <Alert
-          type="warning"
-          showIcon
-          className="agent-dashboard-alert"
-          message="Agent 代管授权未完整覆盖"
-          description={`缺少 ${formatScopeList(missingScopes)}。创建或更新 Key 时只授予当前任务所需权限。`}
-        />
-      ) : (
-        <Alert
-          type="success"
-          showIcon
-          className="agent-dashboard-alert"
-          message="Agent 代管授权已覆盖"
-          description="当前至少有一个有效 Key 覆盖知识产物代管所需范围。"
-        />
-      )}
-
       <Card title="代管范围模板" className="api-key-policy-card">
         <div className="api-key-policy-grid">
           {API_KEY_PERMISSION_PRESETS.map((preset) => (
@@ -1543,82 +1493,11 @@ function ApiKeysPage() {
                 {preset.key === 'platform' && <Tag color="blue">推荐</Tag>}
               </div>
               <Text type="secondary">{preset.description}</Text>
-              <div className="scope-coverage-tags">{renderScopeTags(preset.scopes)}</div>
+              <div className="api-key-scope-tags">{renderScopeTags(preset.scopes)}</div>
             </section>
           ))}
         </div>
       </Card>
-
-      <div className="agent-dashboard-grid">
-        <Card title="授权覆盖">
-          <Progress percent={scopeCoverage} />
-          <div className="permission-coverage-list">
-            {requiredScopes.map((scope) => {
-              const missing = missingScopes.includes(scope);
-              return (
-                <section key={scope} className={`permission-coverage-item ${missing ? 'is-missing' : 'is-ready'}`}>
-                  <div>
-                    <Text strong>{scopeLabel(scope)}</Text>
-                    <Tag color={missing ? 'orange' : 'green'}>{missing ? '待补齐' : '已覆盖'}</Tag>
-                  </div>
-                  <Text type="secondary">{scopeDescription(scope)}</Text>
-                  <Text code>{scope}</Text>
-                </section>
-              );
-            })}
-          </div>
-        </Card>
-        <Card title="近期 Agent 代管记录">
-          <Table
-            rowKey="id"
-            size="small"
-            dataSource={dashboard?.recentEvents ?? []}
-            pagination={false}
-            columns={[
-              { title: '动作', dataIndex: 'action' },
-              { title: '资源', render: (_, row) => `${row.resourceType}#${row.resourceId}` },
-              { title: '调用方', dataIndex: 'actor' },
-              { title: '时间', dataIndex: 'createdAt', render: formatDateTime }
-            ]}
-          />
-        </Card>
-      </div>
-
-      {agentWorkflowReadiness.length > 0 && (
-        <Card title="Agent 代管任务准备度" className="agent-workflow-readiness-card">
-          <div className="agent-workflow-readiness-grid">
-            {agentWorkflowReadiness.map((workflow) => (
-              <section
-                key={workflow.key}
-                className={`agent-workflow-readiness-item ${workflow.ready ? 'is-ready' : 'is-blocked'}`}
-              >
-                <div className="agent-workflow-readiness-heading">
-                  <Space direction="vertical" size={2}>
-                    <Text strong>{workflow.title}</Text>
-                    <Text type="secondary">{workflow.key}</Text>
-                  </Space>
-                  <Space size={4} wrap>
-                    <Tag color={workflow.ready ? 'green' : 'orange'} icon={
-                      workflow.ready ? <CheckCircle2 size={12} /> : <AlertTriangle size={12} />
-                    }>
-                      {workflow.ready ? '可代管' : '缺授权'}
-                    </Tag>
-                    <Tag color={riskTagColor(workflow.risk)}>{riskLabel(workflow.risk)}</Tag>
-                  </Space>
-                </div>
-                <div className="agent-workflow-readiness-scopes">
-                  {workflow.requiredScopes.map((scope) => renderScopeTag(scope, workflow.missingScopes.includes(scope)))}
-                </div>
-                {workflow.missingScopes.length > 0 ? (
-                  <Text type="secondary">补齐 {formatScopeList(workflow.missingScopes)} 后可代管</Text>
-                ) : (
-                  <Text type="secondary">当前有效 Key 已覆盖代管所需范围</Text>
-                )}
-              </section>
-            ))}
-          </div>
-        </Card>
-      )}
 
       {createdKey && (
         <Alert
@@ -1716,17 +1595,6 @@ function scopeOption(scope: string) {
 
 function scopeLabel(scope: string): string {
   return scopeOption(scope)?.label ?? scope;
-}
-
-function scopeDescription(scope: string): string {
-  return scopeOption(scope)?.description ?? '自定义权限';
-}
-
-function formatScopeList(scopes: string[]): string {
-  if (scopes.length === 0) {
-    return '无';
-  }
-  return scopes.map((scope) => `${scopeLabel(scope)}（${scope}）`).join('、');
 }
 
 function renderScopeTag(scope: string, missing = false): ReactNode {

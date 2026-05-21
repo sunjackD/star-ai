@@ -28,4 +28,18 @@ describe('workspace style guard', () => {
     expect(appSource).not.toContain('/observability');
     expect(styles).not.toContain('observability-');
   });
+
+  it('keeps the API Key page as a compact Agent authorization utility', () => {
+    expect(appSource).not.toContain('agent-health-grid');
+    expect(appSource).not.toContain('agent-dashboard-grid');
+    expect(appSource).not.toContain('permission-coverage-list');
+    expect(appSource).not.toContain('agent-workflow-readiness-card');
+    expect(styles).not.toContain('agent-health-grid');
+    expect(styles).not.toContain('agent-dashboard-grid');
+    expect(styles).not.toContain('permission-coverage-list');
+    expect(styles).not.toContain('agent-workflow-readiness');
+    expect(appSource).toContain('权限预设');
+    expect(appSource).toContain('创建 API Key');
+    expect(appSource).toContain('代管指南');
+  });
 });

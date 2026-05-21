@@ -1003,22 +1003,8 @@ pre {
   word-break: break-all;
 }
 
-.agent-health-grid {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 18px;
-  margin-bottom: 18px;
-}
-
-.agent-health-card .ant-card-body {
-  min-height: 132px;
-}
-
-.agent-dashboard-alert,
 .account-key-toolbar,
-.agent-dashboard-grid,
-.api-key-policy-card,
-.agent-workflow-readiness-card {
+.api-key-policy-card {
   margin-bottom: 18px;
 }
 
@@ -1027,13 +1013,7 @@ pre {
   justify-content: flex-end;
 }
 
-.agent-dashboard-grid {
-  display: grid;
-  grid-template-columns: minmax(300px, 0.8fr) minmax(0, 1.2fr);
-  gap: 18px;
-}
-
-.scope-coverage-tags {
+.api-key-scope-tags {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
@@ -1046,8 +1026,7 @@ pre {
   gap: 14px;
 }
 
-.api-key-policy-item,
-.permission-coverage-item {
+.api-key-policy-item {
   display: grid;
   gap: 10px;
   padding: 16px;
@@ -1059,64 +1038,16 @@ pre {
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.72);
 }
 
-.api-key-policy-item > div:first-child,
-.permission-coverage-item > div:first-child {
+.api-key-policy-item > div:first-child {
   display: flex;
   justify-content: space-between;
   gap: 10px;
   align-items: center;
 }
 
-.permission-coverage-list {
-  display: grid;
-  gap: 10px;
-  margin-top: 16px;
-}
-
-.permission-coverage-item {
-  border-left: 3px solid rgba(34, 197, 94, 0.76);
-}
-
-.permission-coverage-item.is-missing {
-  border-left-color: rgba(245, 158, 11, 0.78);
-}
-
 .api-key-preset-panel {
   display: grid;
   gap: 10px;
-}
-
-.agent-workflow-readiness-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 12px;
-}
-
-.agent-workflow-readiness-item {
-  display: grid;
-  gap: 10px;
-  padding: 14px;
-  border: 1px solid rgba(104, 119, 160, 0.16);
-  border-left: 3px solid rgba(245, 158, 11, 0.72);
-  border-radius: var(--radius);
-  background: rgba(255, 255, 255, 0.58);
-}
-
-.agent-workflow-readiness-item.is-ready {
-  border-left-color: rgba(34, 197, 94, 0.76);
-}
-
-.agent-workflow-readiness-heading {
-  display: flex;
-  justify-content: space-between;
-  gap: 10px;
-  align-items: flex-start;
-}
-
-.agent-workflow-readiness-scopes {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
 }
 
 .admin-toolbar {
@@ -1632,7 +1563,6 @@ pre {
 .model-layer-metrics .ant-statistic,
 .knowledge-base-metrics .ant-statistic,
 .agent-api-status-panel .ant-statistic,
-.agent-workflow-readiness-item,
 .agent-api-connection-list > div,
 .agent-api-step-list section,
 .agent-api-guard-card,
@@ -1861,8 +1791,6 @@ pre {
   .model-layer-toolbar,
   .knowledge-base-header,
   .knowledge-base-toolbar,
-  .agent-health-grid,
-  .agent-dashboard-grid,
   .api-key-policy-grid,
   .agent-api-hero,
   .agent-api-handoff-grid,
