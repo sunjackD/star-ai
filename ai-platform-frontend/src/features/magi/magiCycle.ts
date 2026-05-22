@@ -1,4 +1,4 @@
-export type MagiWorkflow = {
+export type MagiManagedObject = {
   key: string;
   title: string;
   risk: string;
@@ -21,7 +21,7 @@ export type MagiCycleStageStatus = 'attention' | 'ready' | 'steady';
 export type MagiCycleInput = {
   requiredScopes: string[];
   missingScopes: string[];
-  workflows: MagiWorkflow[];
+  objects: MagiManagedObject[];
   handoffSignals: MagiHandoffSignal[];
   recentEventCount: number;
   recentlyUsedKeys: number;
@@ -54,15 +54,15 @@ export type MagiCycleSummary = {
 };
 
 export function buildMagiCyclePlan(input: MagiCycleInput): MagiCyclePlan {
-  const blockedWorkflows = input.workflows.filter((workflow) => !workflow.ready);
-  const readyWorkflows = input.workflows.filter((workflow) => workflow.ready);
+  const blockedObjects = input.objects.filter((object) => !object.ready);
+  const readyObjects = input.objects.filter((object) => object.ready);
   const handoffSignals = input.handoffSignals.filter((signal) => signal.status !== 'PASS');
   const scopeCoverage = scoreCoverage(input.requiredScopes.length, input.missingScopes.length);
-  const workflowCoverage = scoreCoverage(input.workflows.length, blockedWorkflows.length);
+  const objectCoverage = scoreCoverage(input.objects.length, blockedObjects.length);
   const handoffSignalScore = scoreCoverage(input.handoffSignals.length, handoffSignals.length);
-  const handoffScore = Math.round((scopeCoverage + workflowCoverage + handoffSignalScore) / 3);
-  const reviewMetric = input.missingScopes.length + blockedWorkflows.length + handoffSignals.length;
-  const focusStage = reviewMetric > 0 ? 'review' : readyWorkflows.length > 0 ? 'execute' : 'elevate';
+  const handoffScore = Math.round((scopeCoverage + objectCoverage + handoffSignalScore) / 3);
+  const reviewMetric = input.missingScopes.length + blockedObjects.length + handoffSignals.length;
+  const focusStage = reviewMetric > 0 ? 'review' : readyObjects.length > 0 ? 'execute' : 'elevate';
 
   return {
     focusStage,
@@ -79,20 +79,20 @@ export function buildMagiCyclePlan(input: MagiCycleInput): MagiCyclePlan {
           ? '先收敛代管边界，再让 Agent 进入写操作。'
           : '当前没有明显阻塞，可以进入 Agent、Skill 或文章维护队列。',
         status: reviewMetric > 0 ? 'attention' : 'ready',
-        actions: buildReviewActions(input.missingScopes.length, blockedWorkflows, handoffSignals)
+        actions: buildReviewActions(input.missingScopes.length, blockedObjects, handoffSignals)
       },
       {
         key: 'execute',
         label: '02 执行',
         title: '解决问题',
         question: '哪个 Agent、Skill 或文章对象已经具备授权，可以交给 Agent 处理？',
-        metric: readyWorkflows.length,
+        metric: readyObjects.length,
         metricLabel: '可管理对象',
-        description: readyWorkflows.length > 0
+        description: readyObjects.length > 0
           ? '从已就绪对象中选择一项处理，并更新对应 Agent、Skill 或文章。'
           : '没有完全就绪的对象，先返回审视阶段补齐前置条件。',
-        status: readyWorkflows.length > 0 ? 'ready' : 'attention',
-        actions: buildExecuteActions(readyWorkflows)
+        status: readyObjects.length > 0 ? 'ready' : 'attention',
+        actions: buildExecuteActions(readyObjects)
       },
       {
         key: 'elevate',
@@ -141,15 +141,15 @@ function scoreCoverage(total: number, missing: number): number {
 
 function buildReviewActions(
   missingScopeCount: number,
-  blockedWorkflows: MagiWorkflow[],
+  blockedObjects: MagiManagedObject[],
   handoffSignals: MagiHandoffSignal[]
 ): string[] {
   const actions: string[] = [];
   if (missingScopeCount > 0) {
     actions.push(`补齐 ${missingScopeCount} 项 API Key 权限，只开放当前对象需要的范围。`);
   }
-  if (blockedWorkflows.length > 0) {
-    actions.push(`处理 ${blockedWorkflows.length} 项阻塞条件，优先补齐 Skill 或文章写入。`);
+  if (blockedObjects.length > 0) {
+    actions.push(`处理 ${blockedObjects.length} 项阻塞对象，优先补齐 Skill 或文章写入。`);
   }
   if (handoffSignals.length > 0) {
     actions.push(`处理 ${handoffSignals.length} 项代管提示：${handoffSignals.map((check) => check.title).join('、')}。`);
@@ -160,13 +160,13 @@ function buildReviewActions(
   return actions;
 }
 
-function buildExecuteActions(readyWorkflows: MagiWorkflow[]): string[] {
-  if (readyWorkflows.length === 0) {
+function buildExecuteActions(readyObjects: MagiManagedObject[]): string[] {
+  if (readyObjects.length === 0) {
     return ['先回到审视阶段，补齐代管范围后再执行。'];
   }
-  const [firstWorkflow] = readyWorkflows;
+  const [firstObject] = readyObjects;
   return [
-    `优先执行“${firstWorkflow.title}”，完成后更新对应 Skill 说明或标签。`,
+    `优先处理“${firstObject.title}”，完成后回读对应记录。`,
     '保留操作前后状态、调用方和资源 ID，方便回看代管结果。'
   ];
 }

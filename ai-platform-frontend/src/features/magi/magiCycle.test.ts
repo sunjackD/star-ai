@@ -6,10 +6,10 @@ describe('buildMagiCyclePlan', () => {
     const plan = buildMagiCyclePlan({
       requiredScopes: ['skills:read', 'skills:write'],
       missingScopes: ['skills:write'],
-      workflows: [
+      objects: [
         {
-          key: 'import_skill',
-          title: '导入 Skill',
+          key: 'skill',
+          title: 'Skill',
           risk: 'write',
           requiredScopes: ['skills:read', 'skills:write'],
           missingScopes: ['skills:write'],
@@ -42,14 +42,14 @@ describe('buildMagiCyclePlan', () => {
     expect(plan.stages[0].actions).toContain('处理 1 项代管提示：对象边界。');
   });
 
-  it('moves focus to execution when all gates are clear and runnable workflows exist', () => {
+  it('moves focus to execution when all gates are clear and manageable objects exist', () => {
     const plan = buildMagiCyclePlan({
       requiredScopes: ['skills:read'],
       missingScopes: [],
-      workflows: [
+      objects: [
         {
-          key: 'discover_skill_inventory',
-          title: '发现 Skill 库存',
+          key: 'skill',
+          title: 'Skill',
           risk: 'read',
           requiredScopes: ['skills:read'],
           missingScopes: [],
@@ -76,7 +76,7 @@ describe('buildMagiCyclePlan', () => {
       metric: 1,
       status: 'ready'
     });
-    expect(plan.stages[1].actions[0]).toBe('优先执行“发现 Skill 库存”，完成后更新对应 Skill 说明或标签。');
+    expect(plan.stages[1].actions[0]).toBe('优先处理“Skill”，完成后回读对应记录。');
   });
 });
 
@@ -85,7 +85,7 @@ describe('summarizeMagiCycle', () => {
     const summary = summarizeMagiCycle(buildMagiCyclePlan({
       requiredScopes: ['skills:read'],
       missingScopes: ['skills:read'],
-      workflows: [],
+      objects: [],
       handoffSignals: [],
       recentEventCount: 0,
       recentlyUsedKeys: 0
@@ -104,10 +104,10 @@ describe('summarizeMagiCycle', () => {
     const summary = summarizeMagiCycle(buildMagiCyclePlan({
       requiredScopes: ['skills:read'],
       missingScopes: [],
-      workflows: [
+      objects: [
         {
-          key: 'discover_skill_inventory',
-          title: '发现 Skill 库存',
+          key: 'skill',
+          title: 'Skill',
           risk: 'read',
           requiredScopes: ['skills:read'],
           missingScopes: [],
@@ -129,6 +129,6 @@ describe('summarizeMagiCycle', () => {
 
     expect(summary.route).toBe('/developer');
     expect(summary.focusLabel).toBe('执行');
-    expect(summary.primaryAction).toBe('优先执行“发现 Skill 库存”，完成后更新对应 Skill 说明或标签。');
+    expect(summary.primaryAction).toBe('优先处理“Skill”，完成后回读对应记录。');
   });
 });

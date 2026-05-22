@@ -27,11 +27,6 @@ import {
 } from 'lucide-react';
 import { apiUrl, downloadFile, getData, getPublicData, postData, postPublicData, uploadData } from './api/client';
 import { buildAgentApiAccess } from './features/agentApi/agentApiAccess';
-import {
-  buildAgentCatalogHandoff,
-  buildArticleCatalogHandoff,
-  buildSkillCatalogHandoff
-} from './features/agentApi/catalogHandoff';
 import { useAuthStore } from './store/authStore';
 import { useThemeStore } from './store/themeStore';
 import type {
@@ -300,7 +295,7 @@ function DashboardPage() {
     },
     {
       title: 'Agent 代管入口',
-      description: '保留复制给 Agent 的配置文本、平台 Skill 和 API Key，让 Agent 代管 Agent、Skill 和文章。',
+      description: '保留 Agent 接入配置文本、平台 Skill 和 API Key，让 Agent 代管 Agent、Skill 和文章。',
       metric: developerTools,
       unit: '个工具',
       path: '/developer',
@@ -531,14 +526,6 @@ function AgentsPage() {
   });
   const totalViews = data.reduce((sum, agent) => sum + agent.viewCount, 0);
   const totalLikes = data.reduce((sum, agent) => sum + agent.likeCount, 0);
-  const copyAgentHandoff = (agent: Agent) => copyToClipboard(buildAgentCatalogHandoff({
-    name: agent.name,
-    category: agent.category,
-    status: agent.status,
-    description: agent.description,
-    guideUrl: pageUrl(`/agents/${agent.id}`),
-    officialUrl: agent.officialUrl
-  }), '已复制 Agent 上下文');
 
   return (
     <div className="page">
@@ -596,9 +583,6 @@ function AgentsPage() {
                   官方入口
                 </Button>
               )}
-              <Button size="small" icon={<Copy size={14} />} onClick={() => copyAgentHandoff(agent)}>
-                复制给 Agent
-              </Button>
             </Space>
           </section>
         ))}
@@ -633,15 +617,6 @@ function SkillsPage() {
   const totalDownloads = data.reduce((sum, skill) => sum + skill.downloadCount, 0);
   const totalStars = data.reduce((sum, skill) => sum + skill.starCount, 0);
   const fileSkills = data.filter((skill) => skill.artifactType === 'FILE').length;
-  const copySkillHandoff = (skill: Skill) => copyToClipboard(buildSkillCatalogHandoff({
-    name: skill.name,
-    category: skill.category.name,
-    status: skill.status,
-    artifactLabel: skillArtifactLabel(skill),
-    tags: skill.tags,
-    description: skill.description,
-    detailUrl: pageUrl(`/skills/${skill.id}`)
-  }), '已复制 Skill 上下文');
 
   function requireLogin(action: () => void) {
     if (!token) {
@@ -726,9 +701,6 @@ function SkillsPage() {
               >
                 下载
               </Button>
-              <Button size="small" icon={<Copy size={14} />} onClick={() => copySkillHandoff(row)}>
-                复制给 Agent
-              </Button>
             </Space>
           </section>
         ))}
@@ -810,15 +782,6 @@ function ArticlesPage() {
     return matchesCategory && matchesDifficulty;
   });
   const estimatedMinutes = data.reduce((sum, article) => sum + article.estimatedMinutes, 0);
-  const copyArticleHandoff = (article: ArticleSummary) => copyToClipboard(buildArticleCatalogHandoff({
-    title: article.title,
-    category: article.category,
-    difficulty: article.difficulty,
-    estimatedMinutes: article.estimatedMinutes,
-    tags: article.tags,
-    summary: article.summary,
-    detailUrl: pageUrl(`/articles/${article.id}`)
-  }), '已复制文章上下文');
 
   function openDetail(id: number) {
     if (!token) {
@@ -882,9 +845,6 @@ function ArticlesPage() {
             </Space>
             <Space wrap className="article-actions">
               <Button size="small" type="primary" onClick={() => openDetail(article.id)}>阅读全文</Button>
-              <Button size="small" icon={<Copy size={14} />} onClick={() => copyArticleHandoff(article)}>
-                复制给 Agent
-              </Button>
             </Space>
           </section>
         ))}
@@ -1646,19 +1606,6 @@ function formatDateTime(value?: string): string {
     return '-';
   }
   return value.replace('T', ' ').slice(0, 19);
-}
-
-function pageUrl(path: string): string {
-  return `${window.location.origin}${path}`;
-}
-
-async function copyToClipboard(text: string, successMessage: string): Promise<void> {
-  try {
-    await navigator.clipboard.writeText(text);
-    message.success(successMessage);
-  } catch {
-    message.warning('请使用系统复制功能');
-  }
 }
 
 function DeveloperPage() {

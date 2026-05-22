@@ -35,12 +35,14 @@ describe('workspace style guard', () => {
     expect(appSource).toContain('Agent API 可管理对象');
     expect(appSource).not.toContain('代管任务模板');
     expect(appSource).not.toContain('复制任务给 Agent');
-    expect(appSource).toContain('复制给 Agent');
+    expect(appSource.match(/复制给 Agent/g) ?? []).toHaveLength(1);
     expect(appSource).toContain('一键配置平台 Skill');
     expect(appSource).not.toContain('连接参数');
     expect(appSource).not.toContain('接入步骤');
     expect(appSource).not.toContain('Agent、Skill、模型、文章和工具导航');
-    expect(appSource).toContain('buildArticleCatalogHandoff');
+    expect(appSource).not.toContain('buildAgentCatalogHandoff');
+    expect(appSource).not.toContain('buildSkillCatalogHandoff');
+    expect(appSource).not.toContain('buildArticleCatalogHandoff');
   });
 
   it('removes the redundant observability/self-check surface from the workspace', () => {
