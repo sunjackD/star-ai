@@ -1281,15 +1281,6 @@ pre {
   gap: 6px;
 }
 
-.agent-api-object-copy {
-  max-height: 180px;
-  overflow: auto;
-  padding: 12px;
-  border: 1px solid rgba(104, 119, 160, 0.14);
-  border-radius: var(--radius-sm);
-  background: rgba(248, 251, 255, 0.78);
-}
-
 .agent-api-guard-grid {
   display: grid;
   gap: 12px;

@@ -1653,14 +1653,6 @@ function DeveloperPage() {
       message.warning('请使用配置文本右侧复制按钮');
     }
   };
-  const copyManagedObject = async (text: string) => {
-    try {
-      await navigator.clipboard.writeText(text);
-      message.success('已复制对象上下文');
-    } catch {
-      message.warning('请使用对象文本右侧复制按钮');
-    }
-  };
   return (
     <div className="page">
       <section className="agent-api-hero">
@@ -1750,12 +1742,6 @@ function DeveloperPage() {
                 <Text type="secondary">工具</Text>
                 <Text>{object.tools.map((tool) => tool.name).join('、') || '读取 Manifest 后确认'}</Text>
               </div>
-              <Paragraph copyable={{ text: object.copyText }} className="prompt-copy agent-api-object-copy">
-                {object.copyText}
-              </Paragraph>
-              <Button icon={<Copy size={16} />} onClick={() => copyManagedObject(object.copyText)}>
-                复制给 Agent
-              </Button>
             </section>
           ))}
         </div>
