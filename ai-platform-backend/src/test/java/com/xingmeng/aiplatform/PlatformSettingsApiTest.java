@@ -11,8 +11,10 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.everyItem;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -87,6 +89,18 @@ class PlatformSettingsApiTest {
     }
 
     @Test
+    void launchSeedsDoNotExposePlaceholderDomains() throws Exception {
+        mockMvc.perform(get("/api/v1/models"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data[*].endpoint", everyItem(not(containsString("example.com")))));
+
+        mockMvc.perform(get("/api/v1/links"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data[*].url", everyItem(not(containsString("example.com")))))
+                .andExpect(jsonPath("$.data[*].name", everyItem(not(containsString("New API 平台")))));
+    }
+
+    @Test
     void publicLinksOnlyReturnActiveLinksOrderedByCategoryAndSortOrder() throws Exception {
         String adminToken = createAdminAndLogin("links_admin", "links-admin@example.com");
 
@@ -98,7 +112,7 @@ class PlatformSettingsApiTest {
         mockMvc.perform(get("/api/v1/links"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data[*].status", everyItem(is("ACTIVE"))))
-                .andExpect(jsonPath("$.data[*].name", contains("Tool A", "Docs A", "Docs B", "New API 平台")));
+                .andExpect(jsonPath("$.data[*].name", contains("Tool A", "Docs A", "Docs B", "OpenAI 文档")));
     }
 
     private void createLink(
