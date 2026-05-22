@@ -1,10 +1,17 @@
 import { describe, expect, it } from 'vitest';
+// @ts-expect-error Vitest runs this guard in Node; the app build intentionally omits Node ambient types.
+import { readFileSync } from 'node:fs';
 import appSource from '../../App.tsx?raw';
 import adminSource from '../../pages/AdminPages.tsx?raw';
 import magiSource from './magiCycle.ts?raw';
-import styles from '../../styles.css?raw';
+
+const styles = readFileSync(new URL('../../styles.css', import.meta.url), 'utf8');
 
 describe('workspace style guard', () => {
+  it('loads the stylesheet before checking visual guardrails', () => {
+    expect(styles.length).toBeGreaterThan(1000);
+  });
+
   it('keeps the operations console free of decorative pseudo-element blobs', () => {
     expect(styles).not.toMatch(/body::after\s*\{/);
     expect(styles).not.toMatch(/\.workspace-hero::after\s*\{/);
