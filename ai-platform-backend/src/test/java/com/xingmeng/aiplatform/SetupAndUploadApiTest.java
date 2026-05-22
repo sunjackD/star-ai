@@ -21,7 +21,9 @@ import java.util.HashSet;
 import java.util.List;
 
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.everyItem;
 import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.startsWith;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -184,6 +186,20 @@ class SetupAndUploadApiTest {
                                 }
                                 """))
                 .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void publicLaunchSeedCountersStartAtZero() throws Exception {
+        mockMvc.perform(get("/api/v1/agents"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data[*].viewCount", everyItem(is(0))))
+                .andExpect(jsonPath("$.data[*].likeCount", everyItem(is(0))));
+
+        mockMvc.perform(get("/api/v1/skills"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data[*].viewCount", everyItem(is(0))))
+                .andExpect(jsonPath("$.data[*].downloadCount", everyItem(is(0))))
+                .andExpect(jsonPath("$.data[*].starCount", everyItem(is(0))));
     }
 
     @Test

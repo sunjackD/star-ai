@@ -1337,13 +1337,10 @@ const API_KEY_SCOPE_OPTIONS = [
   { value: 'agents:read', label: '读取 Agent', description: '查询 Agent 入口、说明和状态' },
   { value: 'agents:write', label: '维护 Agent', description: '创建和更新 Agent' },
   { value: 'articles:read', label: '读取文章', description: '查询文章正文和元数据' },
-  { value: 'articles:write', label: '维护文章', description: '创建和更新文章' },
-  { value: 'admin:manage', label: '平台管理', description: '预留给管理类自动化能力' }
+  { value: 'articles:write', label: '维护文章', description: '创建和更新文章' }
 ];
 
-const DEFAULT_PLATFORM_SCOPES = API_KEY_SCOPE_OPTIONS
-  .filter((item) => item.value !== 'admin:manage')
-  .map((item) => item.value);
+const DEFAULT_PLATFORM_SCOPES = API_KEY_SCOPE_OPTIONS.map((item) => item.value);
 
 const API_KEY_EXPIRE_OPTIONS = [
   { value: 30, label: '30 天' },

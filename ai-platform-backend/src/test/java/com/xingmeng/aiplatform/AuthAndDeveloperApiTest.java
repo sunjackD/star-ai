@@ -285,6 +285,25 @@ class AuthAndDeveloperApiTest {
     }
 
     @Test
+    void apiKeyCreateRejectsAdminManageScope() throws Exception {
+        String adminToken = createAdminAndLogin("admin_reserved_scope", "admin-reserved-scope@example.com");
+        createUser(adminToken, "reserved_scope_dev", "reserved-scope@example.com", "Reserved Scope", "DEVELOPER");
+        String jwt = login("reserved_scope_dev", "secret123");
+
+        mockMvc.perform(post("/api/v1/developer/api-keys")
+                        .header("Authorization", "Bearer " + jwt)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "name": "reserved scope",
+                                  "scopes": ["admin:manage"]
+                                }
+                                """))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value(containsString("不支持的Scope")));
+    }
+
+    @Test
     void apiKeyCanManageAgentAndArticleModules() throws Exception {
         String adminToken = createAdminAndLogin("admin_platform_modules", "admin-platform-modules@example.com");
         createUser(adminToken, "platform_module_dev", "platform-module@example.com", "Platform Module Dev", "DEVELOPER");

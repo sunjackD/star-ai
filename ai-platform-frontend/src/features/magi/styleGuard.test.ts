@@ -75,6 +75,8 @@ describe('workspace style guard', () => {
     expect(appSource).not.toContain('授权 Key');
     expect(adminSource).not.toContain('Agent 授权');
     expect(appSource).not.toContain('凭据管理');
+    expect(appSource).not.toContain("value: 'admin:manage'");
+    expect(appSource).not.toContain('预留给管理类自动化能力');
     expect(appSource).toContain('API Key 管理');
     expect(appSource).toContain('API Key 只给 Agent 代管 Agent、Skill 和文章使用');
   });

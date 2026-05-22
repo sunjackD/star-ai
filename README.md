@@ -1,7 +1,7 @@
 # 星梦 AI 聚合平台
 
 AI 聚合平台用于集中管理 Agent、Skill、模型、文章、工具导航、数据集和微调记录。
-API Key 只承担一个角色：把平台自带 Skill 授权给外部 Agent，让 Agent 代用户维护 Agent、Skill 和文章。
+API Key 只承担一个角色：给外部 Agent 调用平台 API，让 Agent 代用户维护 Agent、Skill 和文章。
 
 ## 快速启动
 
@@ -40,6 +40,8 @@ SPRING_DATASOURCE_PASSWORD=your_password
 
 4. 一键构建并启动：
 
+Windows PowerShell：
+
 ```powershell
 .\scripts\start.ps1
 ```
@@ -49,6 +51,12 @@ Linux / macOS：
 ```bash
 sh scripts/start.sh
 ```
+
+Linux 不能直接执行 PowerShell 脚本。除非服务器已安装 PowerShell，否则不要用
+`scripts/start.ps1`；常规 Linux 部署直接使用 `scripts/start.sh`。
+
+根目录的 `docker-compose.yml` 已包含应用和 MySQL 编排。数据库名、账号、密码、
+映射端口、应用端口、JWT Secret 和 CORS 来源都通过 `.env` 配置，不需要改镜像。
 
 5. 打开系统：
 
@@ -83,7 +91,7 @@ npm run build
 
 ## Agent API 接入
 
-登录后在右上角进入 API Key 管理，按本次 Agent、Skill 或文章任务创建包含 `skills:read`、`skills:import`、`skills:write`、`skills:download`、`agents:write` 或 `articles:write` 的 API Key。
+登录后在右上角进入 API Key 管理，按 Agent、Skill 或文章的管理需要创建包含 `skills:read`、`skills:import`、`skills:write`、`skills:download`、`agents:write` 或 `articles:write` 的 API Key。
 
 下载平台自管理 Skill：
 

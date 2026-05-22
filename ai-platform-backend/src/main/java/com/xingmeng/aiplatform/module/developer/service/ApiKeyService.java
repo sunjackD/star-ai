@@ -51,8 +51,7 @@ public class ApiKeyService {
             "agents:read",
             "agents:write",
             "articles:read",
-            "articles:write",
-            "admin:manage"
+            "articles:write"
     );
 
     private final ApiKeyRepository apiKeyRepository;
