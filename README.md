@@ -21,13 +21,17 @@ MYSQL_USER=ai_platform
 MYSQL_PASSWORD=ai_platform
 MYSQL_ROOT_PASSWORD=root_password
 MYSQL_PORT=3307
+MYSQL_CHARSET=utf8mb4
+MYSQL_COLLATION=utf8mb4_unicode_ci
 
 SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/ai_platform?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true
 SPRING_DATASOURCE_USERNAME=ai_platform
 SPRING_DATASOURCE_PASSWORD=ai_platform
 
 APP_PORT=8081
+APP_STORAGE_ROOT=/app/uploads
 JWT_SECRET=please-change-this-secret-to-a-long-random-value-at-least-32-chars
+JWT_EXPIRATION_MINUTES=1440
 ```
 
 如果使用外部 MySQL，把 `SPRING_DATASOURCE_URL` 改成实际地址，例如：
@@ -56,7 +60,8 @@ Linux 不能直接执行 PowerShell 脚本。除非服务器已安装 PowerShell
 `scripts/start.ps1`；常规 Linux 部署直接使用 `scripts/start.sh`。
 
 根目录的 `docker-compose.yml` 已包含应用和 MySQL 编排。数据库名、账号、密码、
-映射端口、应用端口、JWT Secret 和 CORS 来源都通过 `.env` 配置，不需要改镜像。
+字符集、映射端口、应用端口、上传存储路径、JWT Secret、JWT 过期时间和 CORS
+来源都通过 `.env` 配置，不需要改镜像。
 
 5. 打开系统：
 
