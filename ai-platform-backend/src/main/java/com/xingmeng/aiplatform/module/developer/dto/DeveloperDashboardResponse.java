@@ -11,7 +11,6 @@ public record DeveloperDashboardResponse(
         long recentlyUsedKeys,
         List<String> requiredScopes,
         List<String> missingRequiredScopes,
-        List<DeveloperAgentWorkflowReadinessResponse> agentWorkflowReadiness,
         List<DeveloperHandoffSignalResponse> handoffSignals,
         List<DeveloperAuditEventResponse> recentEvents
 ) {

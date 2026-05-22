@@ -200,27 +200,6 @@ export type DeveloperManagedObject = {
   tools: string[];
 };
 
-export type DeveloperAgentWorkflow = {
-  key: string;
-  title: string;
-  trigger: string;
-  tools: string[];
-  requiredScopes: string[];
-  steps: string[];
-  risk: string;
-  riskGate: string;
-  verification: string;
-};
-
-export type DeveloperAgentWorkflowReadiness = {
-  key: string;
-  title: string;
-  risk: string;
-  requiredScopes: string[];
-  missingScopes: string[];
-  ready: boolean;
-};
-
 export type DeveloperSkillManifest = {
   schemaVersion?: string;
   apiVersion?: string;
@@ -265,7 +244,6 @@ export type DeveloperDashboard = {
   recentlyUsedKeys: number;
   requiredScopes: string[];
   missingRequiredScopes: string[];
-  agentWorkflowReadiness: DeveloperAgentWorkflowReadiness[];
   handoffSignals: DeveloperHandoffSignal[];
   recentEvents: DeveloperAuditEvent[];
 };

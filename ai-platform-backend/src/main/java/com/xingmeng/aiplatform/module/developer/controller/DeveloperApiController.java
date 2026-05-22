@@ -7,14 +7,12 @@ import com.xingmeng.aiplatform.module.auth.security.AuthenticatedUser;
 import com.xingmeng.aiplatform.module.audit.service.AuditService;
 import com.xingmeng.aiplatform.module.developer.dto.ApiKeyCreateRequest;
 import com.xingmeng.aiplatform.module.developer.dto.ApiKeyResponse;
-import com.xingmeng.aiplatform.module.developer.dto.DeveloperAgentWorkflowResponse;
 import com.xingmeng.aiplatform.module.developer.dto.DeveloperDashboardResponse;
 import com.xingmeng.aiplatform.module.developer.dto.DeveloperManagedObjectResponse;
 import com.xingmeng.aiplatform.module.developer.dto.DeveloperToolSpecResponse;
 import com.xingmeng.aiplatform.module.developer.dto.RemoteSkillImportRequest;
 import com.xingmeng.aiplatform.module.developer.dto.RemoteSkillRequest;
 import com.xingmeng.aiplatform.module.developer.service.ApiKeyService;
-import com.xingmeng.aiplatform.module.developer.service.DeveloperAgentWorkflowCatalog;
 import com.xingmeng.aiplatform.module.skill.dto.SkillCreateRequest;
 import com.xingmeng.aiplatform.module.skill.entity.Skill;
 import com.xingmeng.aiplatform.module.skill.entity.SkillSource;
@@ -103,7 +101,6 @@ public class DeveloperApiController {
     private final SkillArtifactService skillArtifactService;
     private final AuditService auditService;
     private final RemoteUrlGuard remoteUrlGuard;
-    private final DeveloperAgentWorkflowCatalog agentWorkflowCatalog;
 
     public DeveloperApiController(
             ApiKeyService apiKeyService,
@@ -112,8 +109,7 @@ public class DeveloperApiController {
             SkillSourceRepository skillSourceRepository,
             SkillArtifactService skillArtifactService,
             AuditService auditService,
-            RemoteUrlGuard remoteUrlGuard,
-            DeveloperAgentWorkflowCatalog agentWorkflowCatalog
+            RemoteUrlGuard remoteUrlGuard
     ) {
         this.apiKeyService = apiKeyService;
         this.skillRepository = skillRepository;
@@ -122,7 +118,6 @@ public class DeveloperApiController {
         this.skillArtifactService = skillArtifactService;
         this.auditService = auditService;
         this.remoteUrlGuard = remoteUrlGuard;
-        this.agentWorkflowCatalog = agentWorkflowCatalog;
     }
 
     @GetMapping("/api-keys")
@@ -223,11 +218,6 @@ public class DeveloperApiController {
                                 + "然后让 Agent 只按 toolSpecs 代管 Agent、Skill、文章。"
                 )
         ));
-    }
-
-    @GetMapping("/agent-workflows")
-    public ApiResponse<List<DeveloperAgentWorkflowResponse>> agentWorkflows() {
-        return ApiResponse.success(agentWorkflowCatalog.list());
     }
 
     @GetMapping("/skill-categories")

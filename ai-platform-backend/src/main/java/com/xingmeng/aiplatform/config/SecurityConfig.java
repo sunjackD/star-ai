@@ -57,7 +57,6 @@ public class SecurityConfig {
                                 "/api/v1/platform/config",
                                 "/api/v1/assets/icons/*",
                                 "/api/v1/developer/skill-manifest",
-                                "/api/v1/developer/agent-workflows",
                                 "/api/v1/developer/self-skill/download",
                                 "/api/v1/articles",
                                 "/api/v1/agents",

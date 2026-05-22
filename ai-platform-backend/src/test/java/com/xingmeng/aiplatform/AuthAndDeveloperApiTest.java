@@ -171,44 +171,14 @@ class AuthAndDeveloperApiTest {
     }
 
     @Test
-    void developerAgentWorkflowsExposeStructuredContractsWithoutAuthentication() throws Exception {
-        mockMvc.perform(get("/api/v1/developer/agent-workflows"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data[?(@.key == 'discover_skill_inventory')]").isNotEmpty())
-                .andExpect(jsonPath(
-                        "$.data[?(@.key == 'import_remote_skill_safely' "
-                                + "&& @.tools[0] == 'get_skill_categories')]"
-                ).isNotEmpty())
-                .andExpect(jsonPath(
-                        "$.data[?(@.key == 'import_remote_skill_safely' "
-                                + "&& @.requiredScopes[?(@ == 'skills:import')])]"
-                ).isNotEmpty())
-                .andExpect(jsonPath(
-                        "$.data[?(@.key == 'retire_skill_with_gate' && @.risk == 'destructive')]"
-                ).isNotEmpty())
-                .andExpect(jsonPath(
-                        "$.data[?(@.key == 'download_and_reuse_skill' "
-                                + "&& @.verification == '校验下载文件名和大小')]"
-                ).isNotEmpty())
-                .andExpect(jsonPath("$.data[?(@.key == 'maintain_user_accounts')]").isEmpty());
-    }
+    void developerApiDoesNotExposeAgentWorkflowEndpoint() throws Exception {
+        String adminToken = createAdminAndLogin("admin_no_workflow_endpoint", "admin-no-workflow-endpoint@example.com");
+        createUser(adminToken, "no_workflow_endpoint_dev", "no-workflow-endpoint@example.com", "No Workflow Endpoint", "DEVELOPER");
+        String jwt = login("no_workflow_endpoint_dev", "secret123");
 
-    @Test
-    void developerAgentWorkflowsUseDirectAgentSkillAndArticleNames() throws Exception {
-        mockMvc.perform(get("/api/v1/developer/agent-workflows"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data[?(@.key == 'maintain_agents')]").isNotEmpty())
-                .andExpect(jsonPath("$.data[?(@.key == 'maintain_articles')]").isNotEmpty())
-                .andExpect(jsonPath("$.data[?(@.key == 'maintain_agent_assets')]").isEmpty())
-                .andExpect(jsonPath("$.data[?(@.key == 'maintain_knowledge_articles')]").isEmpty());
-    }
-
-    @Test
-    void developerAgentWorkflowsUseObjectOperationLanguage() throws Exception {
-        mockMvc.perform(get("/api/v1/developer/agent-workflows"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data[?(@.trigger =~ /.*任务.*/)]").isEmpty())
-                .andExpect(jsonPath("$.data[?(@.riskGate =~ /.*任务.*/)]").isEmpty());
+        mockMvc.perform(get("/api/v1/developer/agent-workflows")
+                        .header("Authorization", "Bearer " + jwt))
+                .andExpect(status().isNotFound());
     }
 
     @Test
@@ -653,26 +623,16 @@ class AuthAndDeveloperApiTest {
     }
 
     @Test
-    void developerDashboardReportsAgentWorkflowReadinessByActiveScopes() throws Exception {
-        String adminToken = createAdminAndLogin("admin_workflow_ready", "admin-workflow-ready@example.com");
-        createUser(adminToken, "workflow_ready_dev", "workflow-ready@example.com", "Workflow Ready", "DEVELOPER");
-        String jwt = login("workflow_ready_dev", "secret123");
+    void developerDashboardDoesNotExposeAgentWorkflowReadiness() throws Exception {
+        String adminToken = createAdminAndLogin("admin_object_ready", "admin-object-ready@example.com");
+        createUser(adminToken, "object_ready_dev", "object-ready@example.com", "Object Ready", "DEVELOPER");
+        String jwt = login("object_ready_dev", "secret123");
         createApiKey(jwt, "skills:read");
 
         mockMvc.perform(get("/api/v1/developer/dashboard")
                         .header("Authorization", "Bearer " + jwt))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath(
-                        "$.data.agentWorkflowReadiness[?(@.key == 'discover_skill_inventory' && @.ready == true)]"
-                ).isNotEmpty())
-                .andExpect(jsonPath(
-                        "$.data.agentWorkflowReadiness[?(@.key == 'import_remote_skill_safely' "
-                                + "&& @.missingScopes[?(@ == 'skills:import')])]"
-                ).isNotEmpty())
-                .andExpect(jsonPath(
-                        "$.data.agentWorkflowReadiness[?(@.key == 'retire_skill_with_gate' "
-                                + "&& @.risk == 'destructive' && @.ready == false)]"
-                ).isNotEmpty());
+                .andExpect(jsonPath("$.data.agentWorkflowReadiness").doesNotExist());
     }
 
     @Test
@@ -691,9 +651,7 @@ class AuthAndDeveloperApiTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.controlPlaneModules").doesNotExist())
                 .andExpect(jsonPath("$.data.governanceChecks").doesNotExist())
-                .andExpect(jsonPath(
-                        "$.data.agentWorkflowReadiness[?(@.key == 'discover_skill_inventory' && @.ready == true)]"
-                ).isNotEmpty())
+                .andExpect(jsonPath("$.data.agentWorkflowReadiness").doesNotExist())
                 .andExpect(jsonPath(
                         "$.data.handoffSignals[?(@.key == 'scope_coverage' && @.status == 'ATTENTION')]"
                 ).isNotEmpty())

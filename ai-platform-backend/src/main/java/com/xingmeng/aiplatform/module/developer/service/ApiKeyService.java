@@ -8,7 +8,6 @@ import com.xingmeng.aiplatform.module.auth.security.ApiKeyAuthenticationDetails;
 import com.xingmeng.aiplatform.module.auth.security.AuthenticatedUser;
 import com.xingmeng.aiplatform.module.developer.dto.ApiKeyCreateRequest;
 import com.xingmeng.aiplatform.module.developer.dto.ApiKeyResponse;
-import com.xingmeng.aiplatform.module.developer.dto.DeveloperAgentWorkflowReadinessResponse;
 import com.xingmeng.aiplatform.module.developer.dto.DeveloperAuditEventResponse;
 import com.xingmeng.aiplatform.module.developer.dto.DeveloperDashboardResponse;
 import com.xingmeng.aiplatform.module.developer.dto.DeveloperHandoffSignalResponse;
@@ -57,19 +56,16 @@ public class ApiKeyService {
     private final ApiKeyRepository apiKeyRepository;
     private final UserRepository userRepository;
     private final AuditLogRepository auditLogRepository;
-    private final DeveloperAgentWorkflowCatalog agentWorkflowCatalog;
     private final SecureRandom secureRandom = new SecureRandom();
 
     public ApiKeyService(
             ApiKeyRepository apiKeyRepository,
             UserRepository userRepository,
-            AuditLogRepository auditLogRepository,
-            DeveloperAgentWorkflowCatalog agentWorkflowCatalog
+            AuditLogRepository auditLogRepository
     ) {
         this.apiKeyRepository = apiKeyRepository;
         this.userRepository = userRepository;
         this.auditLogRepository = auditLogRepository;
-        this.agentWorkflowCatalog = agentWorkflowCatalog;
     }
 
     public List<ApiKeyResponse> list(AuthenticatedUser principal) {
@@ -143,7 +139,6 @@ public class ApiKeyService {
                 .filter(key -> key.getLastUsedAt() != null)
                 .filter(key -> !key.getLastUsedAt().isBefore(recentThreshold))
                 .count();
-        List<DeveloperAgentWorkflowReadinessResponse> agentWorkflowReadiness = agentWorkflowReadiness(activeScopes);
         List<DeveloperAuditEventResponse> recentEvents = recentEvents(user.getUsername());
 
         return new DeveloperDashboardResponse(
@@ -155,7 +150,6 @@ public class ApiKeyService {
                 recentlyUsedKeys,
                 REQUIRED_AGENT_SCOPES,
                 missingScopes,
-                agentWorkflowReadiness,
                 handoffSignals(missingScopes, recentEvents),
                 recentEvents
         );
@@ -165,12 +159,6 @@ public class ApiKeyService {
             List<String> missingScopes,
             List<DeveloperAuditEventResponse> recentEvents
     ) {
-        boolean destructiveGateConfigured = agentWorkflowCatalog.list().stream()
-                .filter(workflow -> "destructive".equals(workflow.risk()))
-                .allMatch(workflow -> workflow.riskGate().contains("确认"));
-        boolean remoteImportGuarded = agentWorkflowCatalog.list().stream()
-                .filter(workflow -> workflow.tools().contains("import_remote_skill"))
-                .allMatch(workflow -> workflow.riskGate().contains("HTTPS"));
         return List.of(
                 handoffSignal(
                         "scope_coverage",
@@ -179,20 +167,6 @@ public class ApiKeyService {
                         missingScopes.isEmpty() ? "Agent、Skill 和文章的最小授权已覆盖" : "仍缺少 "
                                 + String.join(", ", missingScopes),
                         "前往 API Key 页面补齐最小范围"
-                ),
-                handoffSignal(
-                        "destructive_gate",
-                        "高风险确认",
-                        destructiveGateConfigured,
-                        "删除类 Agent API 操作必须带明确人工确认",
-                        "保留删除前的目标 ID 与名称确认"
-                ),
-                handoffSignal(
-                        "remote_import_guard",
-                        "远程导入防护",
-                        remoteImportGuarded,
-                        "远程 Skill 导入路径要求 HTTPS 并依赖服务端安全校验",
-                        "仅接收可信 HTTPS 来源"
                 ),
                 handoffSignal(
                         "audit_trail",
@@ -212,24 +186,6 @@ public class ApiKeyService {
             String action
     ) {
         return new DeveloperHandoffSignalResponse(key, title, pass ? "PASS" : "ATTENTION", description, action);
-    }
-
-    private List<DeveloperAgentWorkflowReadinessResponse> agentWorkflowReadiness(Set<String> activeScopes) {
-        return agentWorkflowCatalog.list().stream()
-                .map(workflow -> {
-                    List<String> missingScopes = workflow.requiredScopes().stream()
-                            .filter(scope -> !activeScopes.contains(scope))
-                            .toList();
-                    return new DeveloperAgentWorkflowReadinessResponse(
-                            workflow.key(),
-                            workflow.title(),
-                            workflow.risk(),
-                            workflow.requiredScopes(),
-                            missingScopes,
-                            missingScopes.isEmpty()
-                    );
-                })
-                .toList();
     }
 
     private User loadUser(AuthenticatedUser principal) {
