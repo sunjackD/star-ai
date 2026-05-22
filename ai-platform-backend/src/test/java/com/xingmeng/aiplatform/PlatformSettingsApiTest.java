@@ -101,6 +101,22 @@ class PlatformSettingsApiTest {
     }
 
     @Test
+    void launchSeedsDoNotExposeDemoFinetuneRecords() throws Exception {
+        String adminToken = createAdminAndLogin("finetune_seed_admin", "finetune-seed-admin@example.com");
+
+        mockMvc.perform(get("/api/v1/finetune/jobs")
+                        .header("Authorization", "Bearer " + adminToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data[*].name", everyItem(not(containsString("客服助手微调")))))
+                .andExpect(jsonPath("$.data[*].status", everyItem(not(containsString("RUNNING")))));
+
+        mockMvc.perform(get("/api/v1/finetune/datasets")
+                        .header("Authorization", "Bearer " + adminToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data[*].name", everyItem(not(containsString("客服问答样例")))));
+    }
+
+    @Test
     void publicLinksOnlyReturnActiveLinksOrderedByCategoryAndSortOrder() throws Exception {
         String adminToken = createAdminAndLogin("links_admin", "links-admin@example.com");
 
