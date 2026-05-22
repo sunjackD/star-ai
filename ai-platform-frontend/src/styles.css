@@ -1335,7 +1335,7 @@ pre {
   gap: 18px;
 }
 
-.knowledge-base-header {
+.article-library-header {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(320px, 0.72fr);
   gap: 18px;
@@ -1343,7 +1343,7 @@ pre {
   margin-bottom: 18px;
 }
 
-.knowledge-base-header > div:first-child {
+.article-library-header > div:first-child {
   padding: 24px;
   border: 1px solid rgba(255, 255, 255, 0.74);
   border-radius: var(--radius-lg);
@@ -1353,20 +1353,20 @@ pre {
   box-shadow: var(--glow);
 }
 
-.knowledge-base-header h1 {
+.article-library-header h1 {
   margin: 12px 0 10px !important;
   font-family: var(--display-font);
   font-weight: 800;
   letter-spacing: 0;
 }
 
-.knowledge-base-metrics {
+.article-library-metrics {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
 }
 
-.knowledge-base-metrics .ant-statistic {
+.article-library-metrics .ant-statistic {
   min-height: 112px;
   display: grid;
   align-content: center;
@@ -1377,7 +1377,7 @@ pre {
   box-shadow: var(--shadow-soft);
 }
 
-.knowledge-base-toolbar {
+.article-library-toolbar {
   display: grid;
   grid-template-columns: 220px 220px;
   gap: 12px;
@@ -1571,7 +1571,7 @@ pre {
 .agent-fleet-metrics .ant-statistic,
 .skill-registry-metrics .ant-statistic,
 .model-layer-metrics .ant-statistic,
-.knowledge-base-metrics .ant-statistic,
+.article-library-metrics .ant-statistic,
 .agent-api-status-panel .ant-statistic,
 .agent-api-guard-card,
 .settings-theme-card,
@@ -1797,8 +1797,8 @@ pre {
   .skill-registry-toolbar,
   .model-layer-header,
   .model-layer-toolbar,
-  .knowledge-base-header,
-  .knowledge-base-toolbar,
+  .article-library-header,
+  .article-library-toolbar,
   .api-key-policy-grid,
   .agent-api-hero,
   .agent-api-handoff-grid {
@@ -1827,7 +1827,7 @@ pre {
   .agent-fleet-metrics,
   .skill-registry-metrics,
   .model-layer-metrics,
-  .knowledge-base-metrics,
+  .article-library-metrics,
   .agent-api-status-panel,
   .console-kpi-strip {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1847,7 +1847,7 @@ pre {
   .agent-fleet-metrics,
   .skill-registry-metrics,
   .model-layer-metrics,
-  .knowledge-base-metrics,
+  .article-library-metrics,
   .agent-api-status-panel {
     grid-template-columns: 1fr;
   }

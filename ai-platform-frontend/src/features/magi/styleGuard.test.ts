@@ -128,4 +128,12 @@ describe('workspace style guard', () => {
     expect(magiSource).toContain('handoffSignals');
     expect(magiSource).toContain('代管进度');
   });
+
+  it('keeps article module semantics out of knowledge-base naming', () => {
+    expect(appSource).not.toContain('knowledge-base-');
+    expect(styles).not.toContain('knowledge-base-');
+    expect(appSource).toContain('article-library-header');
+    expect(appSource).toContain('article-library-metrics');
+    expect(appSource).toContain('article-library-toolbar');
+  });
 });

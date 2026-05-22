@@ -793,7 +793,7 @@ function ArticlesPage() {
 
   return (
     <div className="page">
-      <section className="knowledge-base-header">
+      <section className="article-library-header">
         <div>
           <Tag color="processing" icon={<BookOpenCheck size={14} />}>文章</Tag>
           <Title level={1}>文章</Title>
@@ -801,7 +801,7 @@ function ArticlesPage() {
             沉淀可阅读、可下载、可复用的 AI 教程、脚本、Prompt 和参考材料，作为 Agent 执行复杂任务前的上下文。
           </Paragraph>
         </div>
-        <div className="knowledge-base-metrics">
+        <div className="article-library-metrics">
           <Statistic title="文章数" value={data.length} />
           <Statistic title="分类" value={categories.length} />
           <Statistic title="阅读分钟" value={estimatedMinutes} />
@@ -809,7 +809,7 @@ function ArticlesPage() {
         </div>
       </section>
 
-      <div className="knowledge-base-toolbar">
+      <div className="article-library-toolbar">
         <Select
           value={categoryFilter}
           onChange={setCategoryFilter}
