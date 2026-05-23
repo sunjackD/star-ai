@@ -734,6 +734,8 @@ export function ArticlesAdminPage() {
   const [editing, setEditing] = useState<ArticleSummary>();
   const [selected, setSelected] = useState<ArticleSummary>();
   const [deletingArticleId, setDeletingArticleId] = useState<number>();
+  const [deletingArticleAssetId, setDeletingArticleAssetId] = useState<number>();
+  const [deletingArticleLinkId, setDeletingArticleLinkId] = useState<number>();
   const [articleModalOpen, setArticleModalOpen] = useState(false);
   const [assetModalOpen, setAssetModalOpen] = useState(false);
   const [linkModalOpen, setLinkModalOpen] = useState(false);
@@ -819,7 +821,8 @@ export function ArticlesAdminPage() {
       message.success('附件已删除');
       invalidateSelected();
     },
-    onError: (error) => message.error(articleAssetDeleteFailureNotice(error))
+    onError: (error) => message.error(articleAssetDeleteFailureNotice(error)),
+    onSettled: () => setDeletingArticleAssetId(undefined)
   });
   const linkMutation = useMutation({
     mutationFn: (values: Record<string, unknown>) => postData(`/admin/articles/${selected?.id}/links`, values),
@@ -836,7 +839,8 @@ export function ArticlesAdminPage() {
       message.success('参考链接已删除');
       invalidateSelected();
     },
-    onError: (error) => message.error(articleLinkDeleteFailureNotice(error))
+    onError: (error) => message.error(articleLinkDeleteFailureNotice(error)),
+    onSettled: () => setDeletingArticleLinkId(undefined)
   });
   const shouldSyncArticleEditorDetail = Boolean(articleModalOpen && editing && articleDetail?.id === editing.id);
 
@@ -878,6 +882,16 @@ export function ArticlesAdminPage() {
   function deleteArticle(id: number) {
     setDeletingArticleId(id);
     deleteArticleMutation.mutate(id);
+  }
+
+  function deleteArticleAsset(assetId: number) {
+    setDeletingArticleAssetId(assetId);
+    deleteAssetMutation.mutate(assetId);
+  }
+
+  function deleteArticleLink(linkId: number) {
+    setDeletingArticleLinkId(linkId);
+    deleteLinkMutation.mutate(linkId);
   }
 
   function openAssetCreate(mode: 'TEXT' | 'FILE') {
@@ -992,7 +1006,7 @@ export function ArticlesAdminPage() {
                 rowKey="id"
                 size="small"
                 pagination={false}
-                loading={isDetailLoading || deleteAssetMutation.isPending}
+                loading={isDetailLoading}
                 dataSource={articleDetail?.assets ?? []}
                 locale={{
                   emptyText: <AdminTableEmptyState title="暂无文章附件" description={articleAssetEmptyDescription()} />
@@ -1006,8 +1020,15 @@ export function ArticlesAdminPage() {
                     render: (_, row: ArticleAsset) => (
                       <Space>
                         <Button size="small" onClick={() => downloadAdminArticleAsset(selected.id, row)}>下载</Button>
-                        <Popconfirm title="确认删除该附件？" onConfirm={() => deleteAssetMutation.mutate(row.id)}>
-                          <Button size="small" danger loading={deleteAssetMutation.isPending}>删除</Button>
+                        <Popconfirm title="确认删除该附件？" onConfirm={() => deleteArticleAsset(row.id)}>
+                          <Button
+                            size="small"
+                            danger
+                            loading={deleteAssetMutation.isPending && deletingArticleAssetId === row.id}
+                            disabled={deleteAssetMutation.isPending && deletingArticleAssetId !== row.id}
+                          >
+                            删除
+                          </Button>
                         </Popconfirm>
                       </Space>
                     )
@@ -1021,7 +1042,7 @@ export function ArticlesAdminPage() {
                 rowKey="id"
                 size="small"
                 pagination={false}
-                loading={isDetailLoading || deleteLinkMutation.isPending}
+                loading={isDetailLoading}
                 dataSource={articleDetail?.links ?? []}
                 locale={{
                   emptyText: <AdminTableEmptyState title="暂无文章参考链接" description={articleLinkEmptyDescription()} />
@@ -1032,8 +1053,15 @@ export function ArticlesAdminPage() {
                   {
                     title: '操作',
                     render: (_, row: ArticleLink) => (
-                      <Popconfirm title="确认删除该参考链接？" onConfirm={() => deleteLinkMutation.mutate(row.id)}>
-                        <Button size="small" danger loading={deleteLinkMutation.isPending}>删除</Button>
+                      <Popconfirm title="确认删除该参考链接？" onConfirm={() => deleteArticleLink(row.id)}>
+                        <Button
+                          size="small"
+                          danger
+                          loading={deleteLinkMutation.isPending && deletingArticleLinkId === row.id}
+                          disabled={deleteLinkMutation.isPending && deletingArticleLinkId !== row.id}
+                        >
+                          删除
+                        </Button>
                       </Popconfirm>
                     )
                   }

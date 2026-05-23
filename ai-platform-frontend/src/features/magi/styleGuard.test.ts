@@ -620,8 +620,23 @@ describe('workspace style guard', () => {
   });
 
   it('shows loading feedback while deleting article nested records', () => {
-    expect(adminSource).toContain('<Button size="small" danger loading={deleteAssetMutation.isPending}>删除</Button>');
-    expect(adminSource).toContain('<Button size="small" danger loading={deleteLinkMutation.isPending}>删除</Button>');
+    expect(adminSource).toContain('const [deletingArticleAssetId, setDeletingArticleAssetId] = useState<number>();');
+    expect(adminSource).toContain('const [deletingArticleLinkId, setDeletingArticleLinkId] = useState<number>();');
+    expect(adminSource).toContain('function deleteArticleAsset(assetId: number) {');
+    expect(adminSource).toContain('function deleteArticleLink(linkId: number) {');
+    expect(adminSource).toContain('setDeletingArticleAssetId(assetId);');
+    expect(adminSource).toContain('setDeletingArticleLinkId(linkId);');
+    expect(adminSource).toContain('onSettled: () => setDeletingArticleAssetId(undefined)');
+    expect(adminSource).toContain('onSettled: () => setDeletingArticleLinkId(undefined)');
+    expect(adminSource).toContain('onConfirm={() => deleteArticleAsset(row.id)}');
+    expect(adminSource).toContain('onConfirm={() => deleteArticleLink(row.id)}');
+    expect(adminSource).toContain('loading={deleteAssetMutation.isPending && deletingArticleAssetId === row.id}');
+    expect(adminSource).toContain('loading={deleteLinkMutation.isPending && deletingArticleLinkId === row.id}');
+    expect(adminSource).toContain('disabled={deleteAssetMutation.isPending && deletingArticleAssetId !== row.id}');
+    expect(adminSource).toContain('disabled={deleteLinkMutation.isPending && deletingArticleLinkId !== row.id}');
+    expect(adminSource).toContain('loading={isDetailLoading}');
+    expect(adminSource).not.toContain('loading={isDetailLoading || deleteAssetMutation.isPending}');
+    expect(adminSource).not.toContain('loading={isDetailLoading || deleteLinkMutation.isPending}');
   });
 
   it('renders article admin statuses with distinct tags', () => {
