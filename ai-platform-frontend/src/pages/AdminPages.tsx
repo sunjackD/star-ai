@@ -1355,6 +1355,7 @@ function ResourceAdminPage<T extends ResourceRecord>({ config }: { config: Resou
   const [modalOpen, setModalOpen] = useState(false);
   const [keyword, setKeyword] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>();
+  const [deletingResourceId, setDeletingResourceId] = useState<number>();
   const {
     data: resources = [],
     isLoading,
@@ -1388,7 +1389,8 @@ function ResourceAdminPage<T extends ResourceRecord>({ config }: { config: Resou
       message.success(resourceDeleteSuccessNotice(resourceSubject));
       queryClient.invalidateQueries({ queryKey: [config.queryKey] });
     },
-    onError: (error) => message.error(resourceDeleteFailureNotice(resourceSubject, error))
+    onError: (error) => message.error(resourceDeleteFailureNotice(resourceSubject, error)),
+    onSettled: () => setDeletingResourceId(undefined)
   });
   const columns = useMemo(() => [
     ...config.columns.map((column) => ({
@@ -1402,13 +1404,25 @@ function ResourceAdminPage<T extends ResourceRecord>({ config }: { config: Resou
         <Space>
           {config.rowActions?.(row)}
           <Button size="small" onClick={() => openEdit(row)}>编辑</Button>
-          <Popconfirm title={resourceDeleteConfirmTitle(resourceSubject)} onConfirm={() => deleteMutation.mutate(row.id)}>
-            <Button size="small" danger loading={deleteMutation.isPending}>删除</Button>
+          <Popconfirm title={resourceDeleteConfirmTitle(resourceSubject)} onConfirm={() => deleteResource(row.id)}>
+            <Button
+              size="small"
+              danger
+              loading={deleteMutation.isPending && deletingResourceId === row.id}
+              disabled={deleteMutation.isPending && deletingResourceId !== row.id}
+            >
+              删除
+            </Button>
           </Popconfirm>
         </Space>
       )
     }
-  ], [config, deleteMutation]);
+  ], [config, deleteMutation, deletingResourceId]);
+
+  function deleteResource(id: number) {
+    setDeletingResourceId(id);
+    deleteMutation.mutate(id);
+  }
 
   function openCreate() {
     setEditing(undefined);
@@ -1455,7 +1469,7 @@ function ResourceAdminPage<T extends ResourceRecord>({ config }: { config: Resou
       </Space>
       <Table
         rowKey="id"
-        loading={isLoading || deleteMutation.isPending}
+        loading={isLoading}
         dataSource={filteredResources}
         columns={columns}
         locale={{

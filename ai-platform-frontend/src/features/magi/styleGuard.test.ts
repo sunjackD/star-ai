@@ -479,7 +479,15 @@ describe('workspace style guard', () => {
   });
 
   it('shows loading feedback while deleting shared admin resources', () => {
-    expect(adminSource).toContain('<Button size="small" danger loading={deleteMutation.isPending}>删除</Button>');
+    expect(adminSource).toContain('const [deletingResourceId, setDeletingResourceId] = useState<number>();');
+    expect(adminSource).toContain('function deleteResource(id: number) {');
+    expect(adminSource).toContain('setDeletingResourceId(id);');
+    expect(adminSource).toContain('onSettled: () => setDeletingResourceId(undefined)');
+    expect(adminSource).toContain('onConfirm={() => deleteResource(row.id)}');
+    expect(adminSource).toContain('loading={deleteMutation.isPending && deletingResourceId === row.id}');
+    expect(adminSource).toContain('disabled={deleteMutation.isPending && deletingResourceId !== row.id}');
+    expect(adminSource).toContain('loading={isLoading}');
+    expect(adminSource).not.toContain('loading={isLoading || deleteMutation.isPending}');
   });
 
   it('renders Agent admin statuses with distinct tags', () => {
