@@ -97,6 +97,11 @@ describe('workspace style guard', () => {
     expect(appSource).toContain('developerToolContractEmptyDescription()');
   });
 
+  it('uses the shared markdown renderer for Agent and Skill detail instructions', () => {
+    expect(appSource).toContain('<MarkdownBlock value={props.markdown} />');
+    expect(appSource).not.toContain('<pre>{props.markdown}</pre>');
+  });
+
   it('keeps API Key as the primary label while framing it for Agent use', () => {
     expect(appSource).not.toContain('Agent 授权');
     expect(appSource).not.toContain('授权 Key');

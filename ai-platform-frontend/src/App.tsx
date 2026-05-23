@@ -1416,7 +1416,7 @@ function DetailView(props: { title: string; label: string; description: string; 
         {props.actions && <div className="detail-actions">{props.actions}</div>}
       </Card>
       <Card title="使用说明" className="markdown-card">
-        <pre>{props.markdown}</pre>
+        <MarkdownBlock value={props.markdown} />
       </Card>
     </div>
   );
