@@ -228,6 +228,13 @@ describe('workspace style guard', () => {
     expect(adminSource).toContain('title="暂无文章参考链接"');
   });
 
+  it('gives the user admin table explicit loading and empty feedback', () => {
+    expect(adminSource).toContain('isUsersLoading');
+    expect(adminSource).toContain('userAdminInitialEmptyDescription');
+    expect(adminSource).toContain('filteredUserAdminEmptyDescription');
+    expect(adminSource).toContain('title="暂无用户"');
+  });
+
   it('keeps article module semantics out of knowledge-base naming', () => {
     expect(appSource).not.toContain('knowledge-base-');
     expect(styles).not.toContain('knowledge-base-');

@@ -181,9 +181,12 @@ export function UsersAdminPage() {
   const [statusFilter, setStatusFilter] = useState<string>();
   const [editing, setEditing] = useState<AdminUser>();
   const [modalOpen, setModalOpen] = useState(false);
-  const { data: users = [] } = useQuery({ queryKey: ['admin-users'], queryFn: () => getData<AdminUser[]>('/admin/users') });
+  const { data: users = [], isLoading: isUsersLoading } = useQuery({ queryKey: ['admin-users'], queryFn: () => getData<AdminUser[]>('/admin/users') });
   const { data: roles = [] } = useQuery({ queryKey: ['admin-roles'], queryFn: () => getData<Role[]>('/admin/roles') });
   const roleOptions = roles.map((role) => ({ label: role.name, value: role.name }));
+  const emptyDescription = keyword || statusFilter
+    ? filteredUserAdminEmptyDescription()
+    : userAdminInitialEmptyDescription();
   const filteredUsers = users.filter((user) => {
     const keywordMatched = [user.username, user.email, user.displayName].some((value) => value.toLowerCase().includes(keyword.toLowerCase()));
     const statusMatched = !statusFilter || user.status === statusFilter;
@@ -251,35 +254,44 @@ export function UsersAdminPage() {
         />
         <Button type="primary" onClick={openCreate}>新增用户</Button>
       </Space>
-      <Table rowKey="id" dataSource={filteredUsers} pagination={{ pageSize: 8 }} columns={[
-        { title: '用户', dataIndex: 'username' },
-        { title: '邮箱', dataIndex: 'email' },
-        { title: '显示名', dataIndex: 'displayName' },
-        { title: '状态', dataIndex: 'status', render: (status) => <Tag color={status === 'ACTIVE' ? 'green' : 'red'}>{status}</Tag> },
-        { title: '角色', dataIndex: 'roles', render: (items: string[]) => items.map((item) => <Tag key={item}>{item}</Tag>) },
-        {
-          title: '操作',
-          render: (_, row) => (
-            <Space wrap>
-              <Button size="small" onClick={() => openEdit(row)}>编辑</Button>
-              <Button size="small" onClick={() => statusMutation.mutate({ id: row.id, status: row.status === 'ACTIVE' ? 'DISABLED' : 'ACTIVE' })}>
-                {row.status === 'ACTIVE' ? '禁用' : '启用'}
-              </Button>
-              <Select
-                mode="multiple"
-                size="small"
-                value={row.roles}
-                className="admin-inline-select"
-                options={roleOptions}
-                onChange={(roleNames) => roleMutation.mutate({ id: row.id, roleNames })}
-              />
-              <Popconfirm title="重置为临时密码？" onConfirm={() => passwordMutation.mutate({ id: row.id, password: 'ChangeMe123' })}>
-                <Button size="small" danger>重置密码</Button>
-              </Popconfirm>
-            </Space>
-          )
-        }
-      ]} />
+      <Table
+        rowKey="id"
+        loading={isUsersLoading || statusMutation.isPending || roleMutation.isPending}
+        dataSource={filteredUsers}
+        pagination={{ pageSize: 8 }}
+        locale={{
+          emptyText: <AdminTableEmptyState title="暂无用户" description={emptyDescription} />
+        }}
+        columns={[
+          { title: '用户', dataIndex: 'username' },
+          { title: '邮箱', dataIndex: 'email' },
+          { title: '显示名', dataIndex: 'displayName' },
+          { title: '状态', dataIndex: 'status', render: (status) => <Tag color={status === 'ACTIVE' ? 'green' : 'red'}>{status}</Tag> },
+          { title: '角色', dataIndex: 'roles', render: (items: string[]) => items.map((item) => <Tag key={item}>{item}</Tag>) },
+          {
+            title: '操作',
+            render: (_, row) => (
+              <Space wrap>
+                <Button size="small" onClick={() => openEdit(row)}>编辑</Button>
+                <Button size="small" onClick={() => statusMutation.mutate({ id: row.id, status: row.status === 'ACTIVE' ? 'DISABLED' : 'ACTIVE' })}>
+                  {row.status === 'ACTIVE' ? '禁用' : '启用'}
+                </Button>
+                <Select
+                  mode="multiple"
+                  size="small"
+                  value={row.roles}
+                  className="admin-inline-select"
+                  options={roleOptions}
+                  onChange={(roleNames) => roleMutation.mutate({ id: row.id, roleNames })}
+                />
+                <Popconfirm title="重置为临时密码？" onConfirm={() => passwordMutation.mutate({ id: row.id, password: 'ChangeMe123' })}>
+                  <Button size="small" danger>重置密码</Button>
+                </Popconfirm>
+              </Space>
+            )
+          }
+        ]}
+      />
       <Modal open={modalOpen} title={editing ? '编辑用户' : '新增用户'} footer={null} onCancel={() => setModalOpen(false)}>
         <Form form={form} layout="vertical" onFinish={(values) => saveMutation.mutate(values)}>
           <Form.Item name="username" label="用户名" rules={[{ required: !editing }]}>
@@ -307,6 +319,14 @@ export function UsersAdminPage() {
       </Modal>
     </div>
   );
+}
+
+function userAdminInitialEmptyDescription(): string {
+  return '还没有用户，点击新增用户创建平台账号。';
+}
+
+function filteredUserAdminEmptyDescription(): string {
+  return '没有匹配当前搜索或状态筛选的用户。';
 }
 
 export function AgentsAdminPage() {
