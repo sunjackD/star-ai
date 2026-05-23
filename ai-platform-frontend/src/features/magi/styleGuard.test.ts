@@ -525,6 +525,10 @@ describe('workspace style guard', () => {
     expect(adminSource).toContain("message.success('用户角色已更新');");
   });
 
+  it('uses a specific user admin password reset confirmation', () => {
+    expect(adminSource).toContain('确认重置该用户密码？');
+  });
+
   it('surfaces Skill admin category dependency failures', () => {
     expect(adminSource).toContain('isSkillCategoriesUnavailable');
     expect(adminSource).toContain('skillCategoriesUnavailableNotice()');

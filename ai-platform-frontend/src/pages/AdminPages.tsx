@@ -379,7 +379,7 @@ export function UsersAdminPage() {
                   disabled={isUserRolesUnavailable}
                   onChange={(roleNames) => roleMutation.mutate({ id: row.id, roleNames })}
                 />
-                <Popconfirm title="重置为临时密码？" onConfirm={() => passwordMutation.mutate({ id: row.id, password: 'ChangeMe123' })}>
+                <Popconfirm title="确认重置该用户密码？" onConfirm={() => passwordMutation.mutate({ id: row.id, password: 'ChangeMe123' })}>
                   <Button size="small" danger>重置密码</Button>
                 </Popconfirm>
               </Space>
