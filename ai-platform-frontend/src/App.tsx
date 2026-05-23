@@ -1460,7 +1460,7 @@ function MarketSkillUploadButton(props: {
       closeMarketSkillUploadModal();
       props.onUploaded();
     },
-    onError: (error) => message.error(error instanceof Error ? error.message : getApiErrorMessage(error, '上传失败'))
+    onError: (error) => message.error(marketSkillUploadFailureNotice(error))
   });
 
   function closeMarketSkillUploadModal() {
@@ -1531,6 +1531,10 @@ function MarketSkillUploadButton(props: {
       </Modal>
     </>
   );
+}
+
+function marketSkillUploadFailureNotice(error: unknown): string {
+  return error instanceof Error ? error.message : getApiErrorMessage(error, 'Skill 上传失败');
 }
 
 function skillRelativePath(file: RcFile): string {

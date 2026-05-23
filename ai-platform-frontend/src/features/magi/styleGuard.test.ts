@@ -209,6 +209,12 @@ describe('workspace style guard', () => {
     expect(appSource).toContain('setDirectoryMode(false)');
   });
 
+  it('shows a concrete failure notice when market Skill upload fails', () => {
+    expect(appSource).toContain('marketSkillUploadFailureNotice');
+    expect(appSource).toContain('message.error(marketSkillUploadFailureNotice(error))');
+    expect(appSource).toContain('Skill 上传失败');
+  });
+
   it('shows a clear unavailable state when the article catalog query fails', () => {
     expect(appSource).toContain('articlesUnavailable');
     expect(appSource).toContain('articleCatalogUnavailableDescription()');
