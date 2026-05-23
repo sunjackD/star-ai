@@ -1894,7 +1894,8 @@ function ApiKeysPage() {
       closeApiKeyDialog();
       queryClient.invalidateQueries({ queryKey: ['api-keys'] });
       queryClient.invalidateQueries({ queryKey: ['developer-dashboard'] });
-    }
+    },
+    onError: (error) => message.error(apiKeyCreateFailureNotice(error))
   });
   const revokeMutation = useMutation({
     mutationFn: (id: number) => postData(`/developer/api-keys/${id}/revoke`),
@@ -1902,7 +1903,8 @@ function ApiKeysPage() {
       message.success('API Key 已撤销');
       queryClient.invalidateQueries({ queryKey: ['api-keys'] });
       queryClient.invalidateQueries({ queryKey: ['developer-dashboard'] });
-    }
+    },
+    onError: (error) => message.error(apiKeyRevokeFailureNotice(error))
   });
   const apiBaseUrl = apiUrl('').replace(/\/$/, '');
   const selectedPresetOption = API_KEY_PERMISSION_PRESETS.find((item) => item.key === selectedPreset)
@@ -2054,6 +2056,14 @@ function apiKeysEmptyDescription(): string {
 
 function apiKeysUnavailableDescription(): string {
   return '请确认登录状态、后端服务和 API Key 接口可用，然后刷新页面。';
+}
+
+function apiKeyCreateFailureNotice(error: unknown): string {
+  return getApiErrorMessage(error, 'API Key 创建失败');
+}
+
+function apiKeyRevokeFailureNotice(error: unknown): string {
+  return getApiErrorMessage(error, 'API Key 撤销失败');
 }
 
 function localDateTimeAfterDays(days: number): string {

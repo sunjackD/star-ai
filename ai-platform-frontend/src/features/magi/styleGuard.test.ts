@@ -97,6 +97,13 @@ describe('workspace style guard', () => {
     expect(appSource).toContain('API Key 列表暂不可用');
   });
 
+  it('surfaces API Key create and revoke action failures', () => {
+    expect(appSource).toContain('apiKeyCreateFailureNotice');
+    expect(appSource).toContain('apiKeyRevokeFailureNotice');
+    expect(appSource).toContain('API Key 创建失败');
+    expect(appSource).toContain('API Key 撤销失败');
+  });
+
   it('shows loading and empty feedback for the Agent API tool contract table', () => {
     expect(appSource).toContain('developerToolContractLoading');
     expect(appSource).toContain('loading={developerToolContractLoading}');
