@@ -1293,6 +1293,22 @@ function articleAssetCopyFailureNotice(): string {
   return '复制失败，请使用代码块选择文本复制';
 }
 
+async function downloadArticleAsset(articleId: number, asset: ArticleAsset): Promise<void> {
+  try {
+    await downloadFile(`/articles/${articleId}/assets/${asset.id}/download`, articleAssetDownloadName(asset));
+  } catch (error) {
+    message.error(articleAssetDownloadFailureNotice(error));
+  }
+}
+
+function articleAssetDownloadName(asset: ArticleAsset): string {
+  return asset.fileName ?? `${asset.name}.md`;
+}
+
+function articleAssetDownloadFailureNotice(error: unknown): string {
+  return getApiErrorMessage(error, '附件下载失败，请稍后重试');
+}
+
 function ArticleAssetCard(props: { articleId: number; asset: ArticleAsset }) {
   const { asset } = props;
   const canCopy = Boolean(asset.contentText);
@@ -1318,10 +1334,7 @@ function ArticleAssetCard(props: { articleId: number; asset: ArticleAsset }) {
         {canDownload && (
           <Button
             icon={<Download size={14} />}
-            onClick={() => downloadFile(
-              `/articles/${props.articleId}/assets/${asset.id}/download`,
-              asset.fileName ?? `${asset.name}.md`
-            )}
+            onClick={() => downloadArticleAsset(props.articleId, asset)}
           >
             下载
           </Button>
