@@ -208,8 +208,7 @@ export function UsersAdminPage() {
       : postData('/admin/users', values),
     onSuccess: () => {
       message.success('用户已保存');
-      setModalOpen(false);
-      setEditing(undefined);
+      closeUserDialog();
       queryClient.invalidateQueries({ queryKey: ['admin-users'] });
     }
   });
@@ -243,6 +242,12 @@ export function UsersAdminPage() {
       roles: row.roles
     });
     setModalOpen(true);
+  }
+
+  function closeUserDialog() {
+    setModalOpen(false);
+    setEditing(undefined);
+    form.resetFields();
   }
 
   return (
@@ -297,7 +302,7 @@ export function UsersAdminPage() {
           }
         ]}
       />
-      <Modal open={modalOpen} title={editing ? '编辑用户' : '新增用户'} footer={null} onCancel={() => setModalOpen(false)}>
+      <Modal open={modalOpen} title={editing ? '编辑用户' : '新增用户'} footer={null} onCancel={closeUserDialog}>
         <Form form={form} layout="vertical" onFinish={(values) => saveMutation.mutate(values)}>
           <Form.Item name="username" label="用户名" rules={[{ required: !editing }]}>
             <Input disabled={Boolean(editing)} />
