@@ -363,6 +363,13 @@ describe('workspace style guard', () => {
     expect(adminSource).toContain('title="暂无用户"');
   });
 
+  it('surfaces user admin role dependency failures', () => {
+    expect(adminSource).toContain('isUserRolesUnavailable');
+    expect(adminSource).toContain('userRolesUnavailableNotice()');
+    expect(adminSource).toContain('用户角色暂不可用');
+    expect(adminSource).toContain('disabled={isUserRolesUnavailable}');
+  });
+
   it('gives the article admin table explicit delete loading and empty feedback', () => {
     expect(adminSource).toContain('articleAdminInitialEmptyDescription');
     expect(adminSource).toContain('filteredArticleAdminEmptyDescription');

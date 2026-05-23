@@ -220,7 +220,11 @@ export function UsersAdminPage() {
   const [editing, setEditing] = useState<AdminUser>();
   const [modalOpen, setModalOpen] = useState(false);
   const { data: users = [], isLoading: isUsersLoading } = useQuery({ queryKey: ['admin-users'], queryFn: () => getData<AdminUser[]>('/admin/users') });
-  const { data: roles = [] } = useQuery({ queryKey: ['admin-roles'], queryFn: () => getData<Role[]>('/admin/roles') });
+  const {
+    data: roles = [],
+    isLoading: isUserRolesLoading,
+    isError: isUserRolesUnavailable
+  } = useQuery({ queryKey: ['admin-roles'], queryFn: () => getData<Role[]>('/admin/roles') });
   const roleOptions = roles.map((role) => ({ label: role.name, value: role.name }));
   const emptyDescription = keyword || statusFilter
     ? filteredUserAdminEmptyDescription()
@@ -286,6 +290,14 @@ export function UsersAdminPage() {
   return (
     <div className="page">
       <PageHeader title="用户管理" description="新增用户、编辑资料、管理状态、角色和密码重置。" />
+      {isUserRolesUnavailable && (
+        <Alert
+          showIcon
+          type="warning"
+          message="用户角色暂不可用"
+          description={userRolesUnavailableNotice()}
+        />
+      )}
       <Space className="admin-toolbar" wrap>
         <Input.Search placeholder="搜索用户名、邮箱或显示名" onChange={(event) => setKeyword(event.target.value)} allowClear />
         <Select
@@ -325,6 +337,8 @@ export function UsersAdminPage() {
                   value={row.roles}
                   className="admin-inline-select"
                   options={roleOptions}
+                  loading={isUserRolesLoading}
+                  disabled={isUserRolesUnavailable}
                   onChange={(roleNames) => roleMutation.mutate({ id: row.id, roleNames })}
                 />
                 <Popconfirm title="重置为临时密码？" onConfirm={() => passwordMutation.mutate({ id: row.id, password: 'ChangeMe123' })}>
@@ -355,7 +369,12 @@ export function UsersAdminPage() {
             <Select options={['ACTIVE', 'DISABLED'].map((value) => ({ label: value, value }))} />
           </Form.Item>
           <Form.Item name="roles" label="角色" rules={[{ required: true }]}>
-            <Select mode="multiple" options={roleOptions} />
+            <Select
+              mode="multiple"
+              options={roleOptions}
+              loading={isUserRolesLoading}
+              disabled={isUserRolesUnavailable}
+            />
           </Form.Item>
           <Button type="primary" htmlType="submit" loading={saveMutation.isPending}>保存</Button>
         </Form>
@@ -370,6 +389,10 @@ function userAdminInitialEmptyDescription(): string {
 
 function filteredUserAdminEmptyDescription(): string {
   return '没有匹配当前搜索或状态筛选的用户。';
+}
+
+function userRolesUnavailableNotice(): string {
+  return '角色选择会暂时锁定，请确认角色接口可用后刷新再调整用户角色。';
 }
 
 export function AgentsAdminPage() {
