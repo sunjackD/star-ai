@@ -1132,14 +1132,16 @@ function ResourceAdminPage<T extends ResourceRecord>({ config }: { config: Resou
       message.success('已保存');
       closeResourceDialog();
       queryClient.invalidateQueries({ queryKey: [config.queryKey] });
-    }
+    },
+    onError: (error) => message.error(resourceSaveFailureNotice(resourceSubject, error))
   });
   const deleteMutation = useMutation({
     mutationFn: (id: number) => deleteData(`${config.endpoint}/${id}`),
     onSuccess: () => {
       message.success('已删除');
       queryClient.invalidateQueries({ queryKey: [config.queryKey] });
-    }
+    },
+    onError: (error) => message.error(resourceDeleteFailureNotice(resourceSubject, error))
   });
   const columns = useMemo(() => [
     ...config.columns.map((column) => ({
@@ -1272,6 +1274,14 @@ function filteredResourceEmptyDescription(): string {
 
 function resourceListUnavailableNotice(subject: string): string {
   return `${resourceSubjectLabel(subject).trim()} 列表暂不可用，请确认后端服务和接口可用后刷新。`;
+}
+
+function resourceSaveFailureNotice(subject: string, error: unknown): string {
+  return error instanceof Error ? error.message : `${resourceSubjectLabel(subject).trim()}保存失败`;
+}
+
+function resourceDeleteFailureNotice(subject: string, error: unknown): string {
+  return error instanceof Error ? error.message : `${resourceSubjectLabel(subject).trim()}删除失败`;
 }
 
 function resourceSubjectLabel(subject: string): string {

@@ -332,6 +332,13 @@ describe('workspace style guard', () => {
     expect(adminSource).toContain('dataSource={filteredResources}');
   });
 
+  it('surfaces shared admin resource action failures', () => {
+    expect(adminSource).toContain('resourceSaveFailureNotice(resourceSubject, error)');
+    expect(adminSource).toContain('resourceDeleteFailureNotice(resourceSubject, error)');
+    expect(adminSource).toContain('保存失败');
+    expect(adminSource).toContain('删除失败');
+  });
+
   it('gives API Key and audit admin records loading and empty feedback', () => {
     expect(adminSource).toContain('apiKeyRecordEmptyDescription');
     expect(adminSource).toContain('auditLogInitialEmptyDescription');
