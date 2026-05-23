@@ -733,6 +733,7 @@ export function ArticlesAdminPage() {
   const [difficultyFilter, setDifficultyFilter] = useState<string>();
   const [editing, setEditing] = useState<ArticleSummary>();
   const [selected, setSelected] = useState<ArticleSummary>();
+  const [deletingArticleId, setDeletingArticleId] = useState<number>();
   const [articleModalOpen, setArticleModalOpen] = useState(false);
   const [assetModalOpen, setAssetModalOpen] = useState(false);
   const [linkModalOpen, setLinkModalOpen] = useState(false);
@@ -787,7 +788,8 @@ export function ArticlesAdminPage() {
       queryClient.invalidateQueries({ queryKey: ['admin-articles'] });
       queryClient.invalidateQueries({ queryKey: ['articles'] });
     },
-    onError: (error) => message.error(articleDeleteFailureNotice(error))
+    onError: (error) => message.error(articleDeleteFailureNotice(error)),
+    onSettled: () => setDeletingArticleId(undefined)
   });
   const assetMutation = useMutation({
     mutationFn: (values: Record<string, unknown>) => {
@@ -873,6 +875,11 @@ export function ArticlesAdminPage() {
     articleForm.resetFields();
   }
 
+  function deleteArticle(id: number) {
+    setDeletingArticleId(id);
+    deleteArticleMutation.mutate(id);
+  }
+
   function openAssetCreate(mode: 'TEXT' | 'FILE') {
     setAssetMode(mode);
     setAssetFile(undefined);
@@ -929,7 +936,7 @@ export function ArticlesAdminPage() {
       </Space>
       <Table
         rowKey="id"
-        loading={articlesLoading || deleteArticleMutation.isPending}
+        loading={articlesLoading}
         dataSource={filteredArticles}
         pagination={{ pageSize: 8, showSizeChanger: true }}
         locale={{
@@ -947,8 +954,15 @@ export function ArticlesAdminPage() {
               <Space wrap>
                 <Button size="small" onClick={() => setSelected(row)}>内容</Button>
                 <Button size="small" onClick={() => openEdit(row)}>编辑</Button>
-                <Popconfirm title="确认删除该文章？" onConfirm={() => deleteArticleMutation.mutate(row.id)}>
-                  <Button size="small" danger loading={deleteArticleMutation.isPending}>删除</Button>
+                <Popconfirm title="确认删除该文章？" onConfirm={() => deleteArticle(row.id)}>
+                  <Button
+                    size="small"
+                    danger
+                    loading={deleteArticleMutation.isPending && deletingArticleId === row.id}
+                    disabled={deleteArticleMutation.isPending && deletingArticleId !== row.id}
+                  >
+                    删除
+                  </Button>
                 </Popconfirm>
               </Space>
             )

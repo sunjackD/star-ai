@@ -608,7 +608,15 @@ describe('workspace style guard', () => {
   });
 
   it('shows loading feedback while deleting articles', () => {
-    expect(adminSource).toContain('<Button size="small" danger loading={deleteArticleMutation.isPending}>删除</Button>');
+    expect(adminSource).toContain('const [deletingArticleId, setDeletingArticleId] = useState<number>();');
+    expect(adminSource).toContain('function deleteArticle(id: number) {');
+    expect(adminSource).toContain('setDeletingArticleId(id);');
+    expect(adminSource).toContain('onSettled: () => setDeletingArticleId(undefined)');
+    expect(adminSource).toContain('onConfirm={() => deleteArticle(row.id)}');
+    expect(adminSource).toContain('loading={deleteArticleMutation.isPending && deletingArticleId === row.id}');
+    expect(adminSource).toContain('disabled={deleteArticleMutation.isPending && deletingArticleId !== row.id}');
+    expect(adminSource).toContain('loading={articlesLoading}');
+    expect(adminSource).not.toContain('loading={articlesLoading || deleteArticleMutation.isPending}');
   });
 
   it('shows loading feedback while deleting article nested records', () => {
