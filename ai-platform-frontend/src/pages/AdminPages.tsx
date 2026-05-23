@@ -786,7 +786,10 @@ export function ApiKeysAdminPage() {
   const queryClient = useQueryClient();
   const [keyword, setKeyword] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>();
-  const { data = [] } = useQuery({ queryKey: ['admin-api-keys'], queryFn: () => getData<ApiKey[]>('/admin/api-keys') });
+  const { data = [], isLoading } = useQuery({ queryKey: ['admin-api-keys'], queryFn: () => getData<ApiKey[]>('/admin/api-keys') });
+  const emptyDescription = keyword || statusFilter
+    ? filteredAdminRecordEmptyDescription()
+    : apiKeyRecordEmptyDescription();
   const filteredData = data.filter((item) => {
     const keywordMatched = [item.name, item.keyPrefix, item.scopes.join(',')]
       .some((value) => value.toLowerCase().includes(keyword.toLowerCase()));
@@ -810,21 +813,33 @@ export function ApiKeysAdminPage() {
           onChange={setStatusFilter}
         />
       </Space>
-      <Table rowKey="id" dataSource={filteredData} pagination={{ pageSize: 8 }} columns={[
-        { title: '名称', dataIndex: 'name' },
-        { title: '前缀', dataIndex: 'keyPrefix' },
-        { title: '权限', dataIndex: 'scopes', render: (scopes: string[]) => scopes.map((scope) => <Tag key={scope}>{scope}</Tag>) },
-        { title: '状态', dataIndex: 'status' },
-        { title: '最后使用', dataIndex: 'lastUsedAt', render: (value) => value ?? '-' },
-        { title: '操作', render: (_, row) => <Button danger size="small" onClick={() => mutation.mutate(row.id)}>禁用</Button> }
-      ]} />
+      <Table
+        rowKey="id"
+        loading={isLoading || mutation.isPending}
+        dataSource={filteredData}
+        pagination={{ pageSize: 8 }}
+        locale={{
+          emptyText: <AdminTableEmptyState title="暂无 API Key 记录" description={emptyDescription} />
+        }}
+        columns={[
+          { title: '名称', dataIndex: 'name' },
+          { title: '前缀', dataIndex: 'keyPrefix' },
+          { title: '权限', dataIndex: 'scopes', render: (scopes: string[]) => scopes.map((scope) => <Tag key={scope}>{scope}</Tag>) },
+          { title: '状态', dataIndex: 'status' },
+          { title: '最后使用', dataIndex: 'lastUsedAt', render: (value) => value ?? '-' },
+          { title: '操作', render: (_, row) => <Button danger size="small" onClick={() => mutation.mutate(row.id)}>禁用</Button> }
+        ]}
+      />
     </div>
   );
 }
 
 export function AuditLogsAdminPage() {
   const [keyword, setKeyword] = useState('');
-  const { data = [] } = useQuery({ queryKey: ['admin-audit-logs'], queryFn: () => getData<AuditLog[]>('/admin/audit-logs') });
+  const { data = [], isLoading } = useQuery({ queryKey: ['admin-audit-logs'], queryFn: () => getData<AuditLog[]>('/admin/audit-logs') });
+  const emptyDescription = keyword
+    ? filteredAdminRecordEmptyDescription()
+    : auditLogInitialEmptyDescription();
   const filteredData = data.filter((item) => [item.actor, item.action, item.resourceType, item.resourceId, item.detail]
     .some((value) => String(value ?? '').toLowerCase().includes(keyword.toLowerCase())));
   return (
@@ -833,15 +848,36 @@ export function AuditLogsAdminPage() {
       <Space className="admin-toolbar" wrap>
         <Input.Search placeholder="搜索操作者、动作或资源" onChange={(event) => setKeyword(event.target.value)} allowClear />
       </Space>
-      <Table rowKey="id" dataSource={filteredData} pagination={{ pageSize: 10 }} columns={[
-        { title: '操作者', dataIndex: 'actor' },
-        { title: '动作', dataIndex: 'action' },
-        { title: '资源', dataIndex: 'resourceType' },
-        { title: '资源 ID', dataIndex: 'resourceId' },
-        { title: '详情', dataIndex: 'detail' }
-      ]} />
+      <Table
+        rowKey="id"
+        loading={isLoading}
+        dataSource={filteredData}
+        pagination={{ pageSize: 10 }}
+        locale={{
+          emptyText: <AdminTableEmptyState title="暂无操作记录" description={emptyDescription} />
+        }}
+        columns={[
+          { title: '操作者', dataIndex: 'actor' },
+          { title: '动作', dataIndex: 'action' },
+          { title: '资源', dataIndex: 'resourceType' },
+          { title: '资源 ID', dataIndex: 'resourceId' },
+          { title: '详情', dataIndex: 'detail' }
+        ]}
+      />
     </div>
   );
+}
+
+function apiKeyRecordEmptyDescription(): string {
+  return '还没有 Agent 代管 API Key 记录，用户创建后会出现在这里。';
+}
+
+function auditLogInitialEmptyDescription(): string {
+  return '还没有后台编辑或 Agent 代管调用记录。';
+}
+
+function filteredAdminRecordEmptyDescription(): string {
+  return '没有匹配当前搜索或状态筛选的记录。';
 }
 
 function ResourceAdminPage<T extends ResourceRecord>({ config }: { config: ResourceConfig<T> }) {

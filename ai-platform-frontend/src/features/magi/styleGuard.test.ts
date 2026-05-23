@@ -212,6 +212,14 @@ describe('workspace style guard', () => {
     expect(styles).toContain('.admin-table-empty');
   });
 
+  it('gives API Key and audit admin records loading and empty feedback', () => {
+    expect(adminSource).toContain('apiKeyRecordEmptyDescription');
+    expect(adminSource).toContain('auditLogInitialEmptyDescription');
+    expect(adminSource).toContain('filteredAdminRecordEmptyDescription');
+    expect(adminSource).toContain('title="暂无 API Key 记录"');
+    expect(adminSource).toContain('title="暂无操作记录"');
+  });
+
   it('keeps article module semantics out of knowledge-base naming', () => {
     expect(appSource).not.toContain('knowledge-base-');
     expect(styles).not.toContain('knowledge-base-');
