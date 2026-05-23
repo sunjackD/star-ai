@@ -380,7 +380,7 @@ export function UsersAdminPage() {
                   onChange={(roleNames) => roleMutation.mutate({ id: row.id, roleNames })}
                 />
                 <Popconfirm title="确认重置该用户密码？" onConfirm={() => passwordMutation.mutate({ id: row.id, password: 'ChangeMe123' })}>
-                  <Button size="small" danger>重置密码</Button>
+                  <Button size="small" danger loading={passwordMutation.isPending}>重置密码</Button>
                 </Popconfirm>
               </Space>
             )

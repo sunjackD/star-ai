@@ -621,6 +621,10 @@ describe('workspace style guard', () => {
     expect(adminSource).toContain('确认重置该用户密码？');
   });
 
+  it('shows loading feedback while resetting user passwords', () => {
+    expect(adminSource).toContain('<Button size="small" danger loading={passwordMutation.isPending}>重置密码</Button>');
+  });
+
   it('surfaces Skill admin category dependency failures', () => {
     expect(adminSource).toContain('isSkillCategoriesUnavailable');
     expect(adminSource).toContain('skillCategoriesUnavailableNotice()');
