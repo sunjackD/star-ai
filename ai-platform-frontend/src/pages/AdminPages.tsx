@@ -982,8 +982,7 @@ function ResourceAdminPage<T extends ResourceRecord>({ config }: { config: Resou
       : postData(config.endpoint, values),
     onSuccess: () => {
       message.success('已保存');
-      setModalOpen(false);
-      setEditing(undefined);
+      closeResourceDialog();
       queryClient.invalidateQueries({ queryKey: [config.queryKey] });
     }
   });
@@ -1027,6 +1026,12 @@ function ResourceAdminPage<T extends ResourceRecord>({ config }: { config: Resou
     setModalOpen(true);
   }
 
+  function closeResourceDialog() {
+    setModalOpen(false);
+    setEditing(undefined);
+    form.resetFields();
+  }
+
   return (
     <div className="page">
       <PageHeader title={config.title} description={config.description} />
@@ -1063,7 +1068,7 @@ function ResourceAdminPage<T extends ResourceRecord>({ config }: { config: Resou
         open={modalOpen}
         title={editing ? editResourceDialogTitle(resourceSubject) : createResourceDialogTitle(resourceSubject)}
         footer={null}
-        onCancel={() => setModalOpen(false)}
+        onCancel={closeResourceDialog}
         width={720}
       >
         <Form form={form} layout="vertical" onFinish={(values) => saveMutation.mutate(values)}>
