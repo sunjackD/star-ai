@@ -565,6 +565,20 @@ describe('workspace style guard', () => {
     expect(adminSource).toContain("if (status === 'DRAFT') {");
   });
 
+  it('renders article admin difficulties with distinct tags', () => {
+    const articleAdminStart = adminSource.indexOf('export function ArticlesAdminPage()');
+    const apiKeyAdminStart = adminSource.indexOf('export function ApiKeysAdminPage()');
+    expect(articleAdminStart).toBeGreaterThanOrEqual(0);
+    expect(apiKeyAdminStart).toBeGreaterThan(articleAdminStart);
+    const articleAdminSource = adminSource.slice(articleAdminStart, apiKeyAdminStart);
+    expect(articleAdminSource).toContain(
+      "render: (difficulty) => <Tag color={articleDifficultyColor(difficulty)}>{difficulty}</Tag>"
+    );
+    expect(adminSource).toContain("function articleDifficultyColor(difficulty: string): string");
+    expect(adminSource).toContain("if (difficulty === 'BEGINNER') {");
+    expect(adminSource).toContain("if (difficulty === 'ADVANCED') {");
+  });
+
   it('gives the user admin table explicit loading and empty feedback', () => {
     expect(adminSource).toContain('isUsersLoading');
     expect(adminSource).toContain('userAdminInitialEmptyDescription');
