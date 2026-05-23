@@ -153,6 +153,11 @@ describe('workspace style guard', () => {
     expect(styles).toContain('.boot-screen-feedback');
   });
 
+  it('keeps auth profile sync from showing a blank boot screen', () => {
+    expect(appSource).toContain('authProfileLoadingNotice()');
+    expect(appSource).toContain('正在同步登录状态');
+  });
+
   it('surfaces dashboard catalog loading failures instead of only showing zeroes', () => {
     expect(appSource).toContain('dashboardCatalogUnavailable');
     expect(appSource).toContain('dashboardCatalogUnavailableNotice()');

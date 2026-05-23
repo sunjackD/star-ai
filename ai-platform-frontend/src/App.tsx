@@ -151,9 +151,20 @@ function RequireAuth() {
     return <Navigate to="/login" replace state={{ from: location.pathname }} />;
   }
   if (isLoading) {
-    return <div className="boot-screen"><Spin size="large" /></div>;
+    return (
+      <div className="boot-screen boot-screen-feedback">
+        <Space direction="vertical" align="center" size={12}>
+          <Spin size="large" />
+          <Text type="secondary">{authProfileLoadingNotice()}</Text>
+        </Space>
+      </div>
+    );
   }
   return <Outlet />;
+}
+
+function authProfileLoadingNotice(): string {
+  return '正在同步登录状态';
 }
 
 function RequireAdmin() {
