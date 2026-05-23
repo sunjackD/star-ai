@@ -219,7 +219,11 @@ export function UsersAdminPage() {
   const [statusFilter, setStatusFilter] = useState<string>();
   const [editing, setEditing] = useState<AdminUser>();
   const [modalOpen, setModalOpen] = useState(false);
-  const { data: users = [], isLoading: isUsersLoading } = useQuery({ queryKey: ['admin-users'], queryFn: () => getData<AdminUser[]>('/admin/users') });
+  const {
+    data: users = [],
+    isLoading: isUsersLoading,
+    isError: isUsersUnavailable
+  } = useQuery({ queryKey: ['admin-users'], queryFn: () => getData<AdminUser[]>('/admin/users') });
   const {
     data: roles = [],
     isLoading: isUserRolesLoading,
@@ -294,6 +298,14 @@ export function UsersAdminPage() {
   return (
     <div className="page">
       <PageHeader title="用户管理" description="新增用户、编辑资料、管理状态、角色和密码重置。" />
+      {isUsersUnavailable && (
+        <Alert
+          showIcon
+          type="warning"
+          message="用户列表暂不可用"
+          description={userAdminListUnavailableNotice()}
+        />
+      )}
       {isUserRolesUnavailable && (
         <Alert
           showIcon
@@ -393,6 +405,10 @@ function userAdminInitialEmptyDescription(): string {
 
 function filteredUserAdminEmptyDescription(): string {
   return '没有匹配当前搜索或状态筛选的用户。';
+}
+
+function userAdminListUnavailableNotice(): string {
+  return '请确认后端服务和用户管理接口可用，然后刷新页面。';
 }
 
 function userRolesUnavailableNotice(): string {

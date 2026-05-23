@@ -395,6 +395,13 @@ describe('workspace style guard', () => {
     expect(adminSource).toContain('title="暂无用户"');
   });
 
+  it('surfaces user admin list query failures', () => {
+    expect(adminSource).toContain('isUsersUnavailable');
+    expect(adminSource).toContain('userAdminListUnavailableNotice()');
+    expect(adminSource).toContain('用户列表暂不可用');
+    expect(adminSource).toContain('dataSource={filteredUsers}');
+  });
+
   it('surfaces user admin role dependency failures', () => {
     expect(adminSource).toContain('isUserRolesUnavailable');
     expect(adminSource).toContain('userRolesUnavailableNotice()');
