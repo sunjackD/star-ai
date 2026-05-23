@@ -281,6 +281,11 @@ describe('workspace style guard', () => {
     expect(adminSource).toContain('onCancel={closeUserDialog}');
   });
 
+  it('clears article editor dialog state when the article dialog closes', () => {
+    expect(adminSource).toContain('closeArticleDialog');
+    expect(adminSource).toContain('onCancel={closeArticleDialog}');
+  });
+
   it('keeps article module semantics out of knowledge-base naming', () => {
     expect(appSource).not.toContain('knowledge-base-');
     expect(styles).not.toContain('knowledge-base-');

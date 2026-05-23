@@ -522,8 +522,7 @@ export function ArticlesAdminPage() {
       : postData<ArticleDetail>('/admin/articles', values),
     onSuccess: () => {
       message.success('文章已保存');
-      setArticleModalOpen(false);
-      setEditing(undefined);
+      closeArticleDialog();
       queryClient.invalidateQueries({ queryKey: ['admin-articles'] });
       queryClient.invalidateQueries({ queryKey: ['articles'] });
     }
@@ -597,6 +596,12 @@ export function ArticlesAdminPage() {
     setSelected(row);
     articleForm.setFieldsValue(detail && detail.id === row.id ? detail : row);
     setArticleModalOpen(true);
+  }
+
+  function closeArticleDialog() {
+    setArticleModalOpen(false);
+    setEditing(undefined);
+    articleForm.resetFields();
   }
 
   function openAssetCreate(mode: 'TEXT' | 'FILE') {
@@ -738,7 +743,7 @@ export function ArticlesAdminPage() {
         </Card>
       )}
 
-      <Modal open={articleModalOpen} title={editing ? '编辑文章' : '新增文章'} footer={null} onCancel={() => setArticleModalOpen(false)} width={920}>
+      <Modal open={articleModalOpen} title={editing ? '编辑文章' : '新增文章'} footer={null} onCancel={closeArticleDialog} width={920}>
         <Form form={articleForm} layout="vertical" onFinish={(values) => articleMutation.mutate(values)}>
           <Form.Item name="title" label="标题" rules={[{ required: true, whitespace: true }]}>
             <Input />
