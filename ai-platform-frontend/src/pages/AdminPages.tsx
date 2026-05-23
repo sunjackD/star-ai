@@ -234,6 +234,7 @@ export function UsersAdminPage() {
   const [form] = Form.useForm();
   const [keyword, setKeyword] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>();
+  const [updatingStatusUserId, setUpdatingStatusUserId] = useState<number>();
   const [editing, setEditing] = useState<AdminUser>();
   const [modalOpen, setModalOpen] = useState(false);
   const {
@@ -271,13 +272,14 @@ export function UsersAdminPage() {
     },
     onError: (error) => message.error(adminUserSaveFailureNotice(error))
   });
-  const statusMutation = useMutation({
+  const userStatusMutation = useMutation({
     mutationFn: ({ id, status }: { id: number; status: string }) => putData(`/admin/users/${id}/status`, { status }),
     onSuccess: () => {
       message.success('用户状态已更新');
       queryClient.invalidateQueries({ queryKey: ['admin-users'] });
     },
-    onError: (error) => message.error(adminUserStatusFailureNotice(error))
+    onError: (error) => message.error(adminUserStatusFailureNotice(error)),
+    onSettled: () => setUpdatingStatusUserId(undefined)
   });
   const roleMutation = useMutation({
     mutationFn: ({ id, roleNames }: { id: number; roleNames: string[] }) => putData(`/admin/users/${id}/roles`, { roles: roleNames }),
@@ -318,6 +320,11 @@ export function UsersAdminPage() {
     form.resetFields();
   }
 
+  function updateUserStatus(row: AdminUser) {
+    setUpdatingStatusUserId(row.id);
+    userStatusMutation.mutate({ id: row.id, status: row.status === 'ACTIVE' ? 'DISABLED' : 'ACTIVE' });
+  }
+
   return (
     <div className="page">
       <PageHeader title="用户管理" description="新增用户、编辑资料、管理状态、角色和密码重置。" />
@@ -350,7 +357,7 @@ export function UsersAdminPage() {
       </Space>
       <Table
         rowKey="id"
-        loading={isUsersLoading || statusMutation.isPending || roleMutation.isPending}
+        loading={isUsersLoading || roleMutation.isPending}
         dataSource={filteredUsers}
         pagination={{ pageSize: 8 }}
         locale={{
@@ -369,8 +376,9 @@ export function UsersAdminPage() {
                 <Button size="small" onClick={() => openEdit(row)}>编辑</Button>
                 <Button
                   size="small"
-                  loading={statusMutation.isPending}
-                  onClick={() => statusMutation.mutate({ id: row.id, status: row.status === 'ACTIVE' ? 'DISABLED' : 'ACTIVE' })}
+                  loading={userStatusMutation.isPending && updatingStatusUserId === row.id}
+                  disabled={userStatusMutation.isPending && updatingStatusUserId !== row.id}
+                  onClick={() => updateUserStatus(row)}
                 >
                   {row.status === 'ACTIVE' ? '禁用' : '启用'}
                 </Button>

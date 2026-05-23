@@ -681,7 +681,15 @@ describe('workspace style guard', () => {
   });
 
   it('shows loading feedback while updating user statuses', () => {
-    expect(adminSource).toContain('loading={statusMutation.isPending}');
+    expect(adminSource).toContain('const [updatingStatusUserId, setUpdatingStatusUserId] = useState<number>();');
+    expect(adminSource).toContain('const userStatusMutation = useMutation({');
+    expect(adminSource).toContain('function updateUserStatus(row: AdminUser) {');
+    expect(adminSource).toContain('setUpdatingStatusUserId(row.id);');
+    expect(adminSource).toContain('onSettled: () => setUpdatingStatusUserId(undefined)');
+    expect(adminSource).toContain('onClick={() => updateUserStatus(row)}');
+    expect(adminSource).toContain('loading={userStatusMutation.isPending && updatingStatusUserId === row.id}');
+    expect(adminSource).toContain('disabled={userStatusMutation.isPending && updatingStatusUserId !== row.id}');
+    expect(adminSource).toContain('loading={isUsersLoading || roleMutation.isPending}');
     expect(adminSource).toContain("status: row.status === 'ACTIVE' ? 'DISABLED' : 'ACTIVE'");
   });
 
