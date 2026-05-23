@@ -2186,6 +2186,14 @@ function developerSelfSkillDownloadFailureNotice(error: unknown): string {
   return getApiErrorMessage(error, '平台 Skill 下载失败，请稍后重试');
 }
 
+function agentConfigCopySuccessNotice(): string {
+  return '已复制 Agent 接入配置';
+}
+
+function agentConfigCopyFailureNotice(): string {
+  return '请使用配置文本右侧复制按钮';
+}
+
 function DeveloperPage() {
   const selfSkillUrl = apiUrl('/developer/self-skill/download');
   const apiBaseUrl = apiUrl('').replace(/\/$/, '');
@@ -2239,9 +2247,9 @@ function DeveloperPage() {
   const copyAgentConfig = async () => {
     try {
       await navigator.clipboard.writeText(access.copyToAgentText);
-      message.success('已复制 Agent 接入配置');
+      message.success(agentConfigCopySuccessNotice());
     } catch {
-      message.warning('请使用配置文本右侧复制按钮');
+      message.warning(agentConfigCopyFailureNotice());
     }
   };
   return (

@@ -213,6 +213,14 @@ describe('workspace style guard', () => {
     expect(appSource).not.toContain('href={access.builtinSkill.downloadUrl}');
   });
 
+  it('uses named notices when copying the Agent handoff config', () => {
+    expect(appSource).toContain('agentConfigCopySuccessNotice()');
+    expect(appSource).toContain('agentConfigCopyFailureNotice()');
+    expect(appSource).toContain('message.success(agentConfigCopySuccessNotice())');
+    expect(appSource).toContain('message.warning(agentConfigCopyFailureNotice())');
+    expect(appSource).toContain('请使用配置文本右侧复制按钮');
+  });
+
   it('shows a clear unavailable state when the Agent catalog query fails', () => {
     expect(appSource).toContain('agentsUnavailable');
     expect(appSource).toContain('agentCatalogUnavailableDescription()');
