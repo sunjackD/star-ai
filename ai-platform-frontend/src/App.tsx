@@ -1769,8 +1769,14 @@ function ModelsPage() {
               ))}
             </div>
             <Text type="secondary">{model.pricing}</Text>
-            <Button size="small" icon={<ExternalLink size={14} />} href={model.endpoint} target="_blank">
-              服务入口
+            <Button
+              size="small"
+              icon={<ExternalLink size={14} />}
+              href={model.endpoint || undefined}
+              target="_blank"
+              disabled={!model.endpoint}
+            >
+              {model.endpoint ? '服务入口' : '暂无入口'}
             </Button>
           </section>
         ))}

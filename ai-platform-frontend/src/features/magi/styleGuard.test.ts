@@ -290,6 +290,17 @@ describe('workspace style guard', () => {
     expect(appSource).toContain('模型能力层暂不可用');
   });
 
+  it('disables model service entry buttons when endpoints are missing', () => {
+    const modelsPageStart = appSource.indexOf('function ModelsPage()');
+    const modelUnavailableStart = appSource.indexOf('function modelCatalogUnavailableDescription()');
+    expect(modelsPageStart).toBeGreaterThanOrEqual(0);
+    expect(modelUnavailableStart).toBeGreaterThan(modelsPageStart);
+    const modelsPageSource = appSource.slice(modelsPageStart, modelUnavailableStart);
+    expect(modelsPageSource).toContain('href={model.endpoint || undefined}');
+    expect(modelsPageSource).toContain('disabled={!model.endpoint}');
+    expect(modelsPageSource).toContain("{model.endpoint ? '服务入口' : '暂无入口'}");
+  });
+
   it('shows loading, empty, and unavailable states for finetune jobs', () => {
     expect(appSource).toContain('finetuneJobsLoading');
     expect(appSource).toContain('finetuneJobsUnavailable');
