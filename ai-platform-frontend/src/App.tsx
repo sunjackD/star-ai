@@ -964,7 +964,7 @@ function ArticlesPage() {
   const token = useAuthStore((state) => state.token);
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [difficultyFilter, setDifficultyFilter] = useState('all');
-  const { data = [], isLoading: articlesLoading } = useQuery({
+  const { data = [], isLoading: articlesLoading, isError: articlesUnavailable } = useQuery({
     queryKey: ['articles'],
     queryFn: () => getPublicData<ArticleSummary[]>('/articles')
   });
@@ -1026,6 +1026,8 @@ function ArticlesPage() {
       <div className="article-grid">
         {articlesLoading ? (
           <CatalogLoadingState title="正在加载文章" />
+        ) : articlesUnavailable ? (
+          <CatalogEmptyState title="文章目录暂不可用" description={articleCatalogUnavailableDescription()} />
         ) : filteredArticles.length === 0 ? (
           <CatalogEmptyState title="暂无匹配文章" description="切换分类或难度，或者在平台后台新增文章。" />
         ) : filteredArticles.map((article) => (
@@ -1048,6 +1050,10 @@ function ArticlesPage() {
       </div>
     </div>
   );
+}
+
+function articleCatalogUnavailableDescription(): string {
+  return '请确认后端服务和公开文章接口可用，然后刷新页面。';
 }
 
 function ArticleDetailPage() {
