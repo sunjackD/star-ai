@@ -23,7 +23,7 @@ import {
 } from 'antd';
 import type { Rule } from 'antd/es/form';
 import type { RcFile } from 'antd/es/upload';
-import { deleteData, downloadFile, getData, postData, putData, uploadData } from '../api/client';
+import { apiErrorMessage, deleteData, downloadFile, getData, postData, putData, uploadData } from '../api/client';
 import { themes } from '../themes/tokens';
 import type {
   AdminOverview,
@@ -217,7 +217,7 @@ export function SettingsAdminPage() {
 }
 
 function settingsSaveFailureNotice(error: unknown): string {
-  return error instanceof Error ? error.message : '系统设置保存失败';
+  return apiErrorMessage(error, '系统设置保存失败');
 }
 
 function settingsLoadFailureNotice(): string {
@@ -432,19 +432,19 @@ function userRolesUnavailableNotice(): string {
 }
 
 function adminUserSaveFailureNotice(error: unknown): string {
-  return error instanceof Error ? error.message : '用户保存失败';
+  return apiErrorMessage(error, '用户保存失败');
 }
 
 function adminUserStatusFailureNotice(error: unknown): string {
-  return error instanceof Error ? error.message : '用户状态更新失败';
+  return apiErrorMessage(error, '用户状态更新失败');
 }
 
 function adminUserRoleFailureNotice(error: unknown): string {
-  return error instanceof Error ? error.message : '用户角色更新失败';
+  return apiErrorMessage(error, '用户角色更新失败');
 }
 
 function adminUserPasswordFailureNotice(error: unknown): string {
-  return error instanceof Error ? error.message : '密码重置失败';
+  return apiErrorMessage(error, '密码重置失败');
 }
 
 export function AgentsAdminPage() {
@@ -523,7 +523,7 @@ async function downloadAdminSkillPackage(skill: Skill): Promise<void> {
 }
 
 function adminSkillDownloadFailureNotice(error: unknown): string {
-  return error instanceof Error ? error.message : '后台 Skill 下载失败，请稍后重试';
+  return apiErrorMessage(error, '后台 Skill 下载失败，请稍后重试');
 }
 
 function skillDownloadName(skill: Skill): string {
@@ -1052,19 +1052,19 @@ function articleLinkEmptyDescription(): string {
 }
 
 function articleSaveFailureNotice(error: unknown): string {
-  return error instanceof Error ? error.message : '文章保存失败';
+  return apiErrorMessage(error, '文章保存失败');
 }
 
 function articleDeleteFailureNotice(error: unknown): string {
-  return error instanceof Error ? error.message : '文章删除失败';
+  return apiErrorMessage(error, '文章删除失败');
 }
 
 function articleAssetSaveFailureNotice(error: unknown): string {
-  return error instanceof Error ? error.message : '附件保存失败';
+  return apiErrorMessage(error, '附件保存失败');
 }
 
 function articleAssetDeleteFailureNotice(error: unknown): string {
-  return error instanceof Error ? error.message : '附件删除失败';
+  return apiErrorMessage(error, '附件删除失败');
 }
 
 async function downloadAdminArticleAsset(articleId: number, asset: ArticleAsset): Promise<void> {
@@ -1080,15 +1080,15 @@ function adminArticleAssetDownloadName(asset: ArticleAsset): string {
 }
 
 function adminArticleAssetDownloadFailureNotice(error: unknown): string {
-  return error instanceof Error ? error.message : '后台附件下载失败，请稍后重试';
+  return apiErrorMessage(error, '后台附件下载失败，请稍后重试');
 }
 
 function articleLinkSaveFailureNotice(error: unknown): string {
-  return error instanceof Error ? error.message : '参考链接保存失败';
+  return apiErrorMessage(error, '参考链接保存失败');
 }
 
 function articleLinkDeleteFailureNotice(error: unknown): string {
-  return error instanceof Error ? error.message : '参考链接删除失败';
+  return apiErrorMessage(error, '参考链接删除失败');
 }
 
 export function ApiKeysAdminPage() {
@@ -1205,7 +1205,7 @@ function apiKeyRecordEmptyDescription(): string {
 }
 
 function apiKeyDisableFailureNotice(error: unknown): string {
-  return error instanceof Error ? error.message : 'API Key 禁用失败';
+  return apiErrorMessage(error, 'API Key 禁用失败');
 }
 
 function auditLogInitialEmptyDescription(): string {
@@ -1396,11 +1396,11 @@ function resourceListUnavailableNotice(subject: string): string {
 }
 
 function resourceSaveFailureNotice(subject: string, error: unknown): string {
-  return error instanceof Error ? error.message : `${resourceSubjectLabel(subject).trim()}保存失败`;
+  return apiErrorMessage(error, `${resourceSubjectLabel(subject).trim()}保存失败`);
 }
 
 function resourceDeleteFailureNotice(subject: string, error: unknown): string {
-  return error instanceof Error ? error.message : `${resourceSubjectLabel(subject).trim()}删除失败`;
+  return apiErrorMessage(error, `${resourceSubjectLabel(subject).trim()}删除失败`);
 }
 
 function resourceSubjectLabel(subject: string): string {
@@ -1530,7 +1530,7 @@ function IconInput({ value, onChange }: { value?: string; onChange?: (value?: st
 }
 
 function iconUploadFailureNotice(error: unknown): string {
-  return error instanceof Error ? error.message : '图标上传失败';
+  return apiErrorMessage(error, '图标上传失败');
 }
 
 function SkillCategoryDependencyToolbar(props: {
@@ -1562,7 +1562,7 @@ function skillCategoriesUnavailableNotice(): string {
 }
 
 function skillUploadFailureNotice(error: unknown): string {
-  return error instanceof Error ? error.message : 'Skill 上传失败';
+  return apiErrorMessage(error, 'Skill 上传失败');
 }
 
 function SkillUploadButton({

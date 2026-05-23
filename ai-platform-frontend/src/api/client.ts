@@ -64,6 +64,19 @@ export function apiUrl(url: string): string {
   return `${window.location.origin}${baseUrl}${url}`;
 }
 
+export function apiErrorMessage(error: unknown, fallback: string): string {
+  if (typeof error === 'object' && error !== null && 'response' in error) {
+    const response = (error as { response?: { data?: { message?: unknown } } }).response;
+    if (typeof response?.data?.message === 'string' && response.data.message.trim()) {
+      return response.data.message;
+    }
+  }
+  if (error instanceof Error && error.message.trim()) {
+    return error.message;
+  }
+  return fallback;
+}
+
 export async function downloadFile(url: string, fallbackFileName: string): Promise<void> {
   const response = await apiClient.get<Blob>(url, { responseType: 'blob' });
   const fileName = parseFileName(response.headers['content-disposition']) ?? fallbackFileName;

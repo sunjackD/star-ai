@@ -26,7 +26,7 @@ import {
   Sparkles,
   Workflow
 } from 'lucide-react';
-import { apiUrl, downloadFile, getData, getPublicData, postData, postPublicData, uploadData } from './api/client';
+import { apiErrorMessage, apiUrl, downloadFile, getData, getPublicData, postData, postPublicData, uploadData } from './api/client';
 import { buildAgentApiAccess } from './features/agentApi/agentApiAccess';
 import { buildMagiCyclePlan, summarizeMagiCycle, type MagiCycleStageKey } from './features/magi/magiCycle';
 import { useAuthStore } from './store/authStore';
@@ -625,11 +625,11 @@ function LoginPage() {
 }
 
 function loginFailureNotice(error: unknown): string {
-  return getApiErrorMessage(error, '登录失败，请检查账号密码或后端服务');
+  return apiErrorMessage(error, '登录失败，请检查账号密码或后端服务');
 }
 
 function setupAdminFailureNotice(error: unknown): string {
-  return getApiErrorMessage(error, '初始化失败，请检查输入或刷新后重试');
+  return apiErrorMessage(error, '初始化失败，请检查输入或刷新后重试');
 }
 
 function SetupPage() {
@@ -692,16 +692,6 @@ function SetupPage() {
       </Card>
     </div>
   );
-}
-
-function getApiErrorMessage(error: unknown, fallback: string): string {
-  if (typeof error === 'object' && error !== null && 'response' in error) {
-    const response = (error as { response?: { data?: { message?: unknown } } }).response;
-    if (typeof response?.data?.message === 'string' && response.data.message.trim()) {
-      return response.data.message;
-    }
-  }
-  return fallback;
 }
 
 function AccountProfilePage() {
@@ -1049,7 +1039,7 @@ async function downloadSkillPackage(skill: Skill): Promise<void> {
 }
 
 function skillPackageDownloadFailureNotice(error: unknown): string {
-  return getApiErrorMessage(error, 'Skill 下载失败，请稍后重试');
+  return apiErrorMessage(error, 'Skill 下载失败，请稍后重试');
 }
 
 function skillDownloadName(skill: Skill): string {
@@ -1306,7 +1296,7 @@ function articleAssetDownloadName(asset: ArticleAsset): string {
 }
 
 function articleAssetDownloadFailureNotice(error: unknown): string {
-  return getApiErrorMessage(error, '附件下载失败，请稍后重试');
+  return apiErrorMessage(error, '附件下载失败，请稍后重试');
 }
 
 function ArticleAssetCard(props: { articleId: number; asset: ArticleAsset }) {
@@ -1581,7 +1571,7 @@ function MarketSkillUploadButton(props: {
 }
 
 function marketSkillUploadFailureNotice(error: unknown): string {
-  return error instanceof Error ? error.message : getApiErrorMessage(error, 'Skill 上传失败');
+  return apiErrorMessage(error, 'Skill 上传失败');
 }
 
 function skillRelativePath(file: RcFile): string {
@@ -2110,11 +2100,11 @@ function apiKeysUnavailableDescription(): string {
 }
 
 function apiKeyCreateFailureNotice(error: unknown): string {
-  return getApiErrorMessage(error, 'API Key 创建失败');
+  return apiErrorMessage(error, 'API Key 创建失败');
 }
 
 function apiKeyRevokeFailureNotice(error: unknown): string {
-  return getApiErrorMessage(error, 'API Key 撤销失败');
+  return apiErrorMessage(error, 'API Key 撤销失败');
 }
 
 function localDateTimeAfterDays(days: number): string {
@@ -2183,7 +2173,7 @@ async function downloadDeveloperSelfSkill(): Promise<void> {
 }
 
 function developerSelfSkillDownloadFailureNotice(error: unknown): string {
-  return getApiErrorMessage(error, '平台 Skill 下载失败，请稍后重试');
+  return apiErrorMessage(error, '平台 Skill 下载失败，请稍后重试');
 }
 
 function agentConfigCopySuccessNotice(): string {
