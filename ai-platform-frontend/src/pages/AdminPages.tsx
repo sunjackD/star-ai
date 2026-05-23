@@ -717,7 +717,10 @@ export function ArticlesAdminPage() {
   });
   const deleteAssetMutation = useMutation({
     mutationFn: (assetId: number) => deleteData(`/admin/articles/${selected?.id}/assets/${assetId}`),
-    onSuccess: () => invalidateSelected(),
+    onSuccess: () => {
+      message.success('附件已删除');
+      invalidateSelected();
+    },
     onError: (error) => message.error(articleAssetDeleteFailureNotice(error))
   });
   const linkMutation = useMutation({
@@ -731,7 +734,10 @@ export function ArticlesAdminPage() {
   });
   const deleteLinkMutation = useMutation({
     mutationFn: (linkId: number) => deleteData(`/admin/articles/${selected?.id}/links/${linkId}`),
-    onSuccess: () => invalidateSelected(),
+    onSuccess: () => {
+      message.success('参考链接已删除');
+      invalidateSelected();
+    },
     onError: (error) => message.error(articleLinkDeleteFailureNotice(error))
   });
   const shouldSyncArticleEditorDetail = Boolean(articleModalOpen && editing && articleDetail?.id === editing.id);

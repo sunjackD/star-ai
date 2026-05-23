@@ -553,6 +553,11 @@ describe('workspace style guard', () => {
     expect(adminSource).toContain('setSelected(savedArticle);');
   });
 
+  it('confirms article admin nested deletions before refreshing detail', () => {
+    expect(adminSource).toContain("message.success('附件已删除');");
+    expect(adminSource).toContain("message.success('参考链接已删除');");
+  });
+
   it('surfaces article admin action failures', () => {
     expect(adminSource).toContain('articleSaveFailureNotice');
     expect(adminSource).toContain('articleDeleteFailureNotice');
