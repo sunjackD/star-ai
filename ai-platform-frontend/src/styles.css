@@ -433,6 +433,49 @@ html[data-theme='minimal-modern'] .app-sider .ant-menu-submenu-title {
   white-space: nowrap;
 }
 
+.magi-cycle-panel {
+  margin-bottom: 22px;
+  padding: 22px;
+  border: 1px solid rgba(255, 255, 255, 0.76);
+  border-radius: var(--radius-lg);
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.88), rgba(248, 251, 255, 0.62)),
+    linear-gradient(112deg, rgba(91, 140, 255, 0.13), transparent 44%, rgba(34, 197, 94, 0.10));
+  box-shadow: var(--shadow-soft), inset 0 1px 0 rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(24px) saturate(155%);
+}
+
+.magi-cycle-heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  align-items: flex-start;
+  margin-bottom: 16px;
+}
+
+.magi-cycle-heading h2 {
+  margin: 10px 0 8px !important;
+  font-family: var(--display-font);
+  font-weight: 800;
+  letter-spacing: 0;
+}
+
+.magi-cycle-heading p {
+  max-width: 760px;
+  margin-bottom: 0 !important;
+  color: var(--text-soft);
+  line-height: 1.8;
+}
+
+.magi-cycle-list {
+  display: grid;
+  gap: 12px;
+}
+
+.magi-cycle-list .magi-action-strip {
+  margin-bottom: 0;
+}
+
 .workspace-hero::before {
   content: "";
   position: absolute;
@@ -1813,6 +1856,10 @@ pre {
 
   .magi-action-strip {
     grid-template-columns: 44px minmax(0, 1fr);
+  }
+
+  .magi-cycle-heading {
+    flex-direction: column;
   }
 
   .magi-action-link {

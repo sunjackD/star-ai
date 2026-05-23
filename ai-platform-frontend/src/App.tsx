@@ -27,6 +27,7 @@ import {
 } from 'lucide-react';
 import { apiUrl, downloadFile, getData, getPublicData, postData, postPublicData, uploadData } from './api/client';
 import { buildAgentApiAccess } from './features/agentApi/agentApiAccess';
+import { buildMagiCyclePlan, summarizeMagiCycle, type MagiCycleStageKey } from './features/magi/magiCycle';
 import { useAuthStore } from './store/authStore';
 import { useThemeStore } from './store/themeStore';
 import type {
@@ -238,6 +239,8 @@ function DashboardPage() {
   const activeSkills = skills.filter((skill) => skill.status === 'ACTIVE').length;
   const activeAgents = agents.filter((agent) => agent.status === 'ACTIVE').length;
   const developerTools = manifest?.tools.length ?? 0;
+  const magiPlan = buildPublicMagiCyclePlan(manifest);
+  const magiSummary = summarizeMagiCycle(magiPlan);
   const consoleModules = [
     {
       title: 'Agent',
@@ -327,6 +330,8 @@ function DashboardPage() {
         </div>
       </section>
 
+      <MagiCyclePanel plan={magiPlan} summary={magiSummary} />
+
       <div className="console-module-grid">
         {consoleModules.map((module) => (
           <Link to={module.path} key={module.title} className="console-module-card">
@@ -381,6 +386,62 @@ function DashboardPage() {
       </div>
     </div>
   );
+}
+
+function MagiCyclePanel({
+  plan,
+  summary
+}: {
+  plan: ReturnType<typeof buildMagiCyclePlan>;
+  summary: ReturnType<typeof summarizeMagiCycle>;
+}) {
+  return (
+    <section className="magi-cycle-panel" aria-label="MAGI 三脑轮次">
+      <div className="magi-cycle-heading">
+        <div>
+          <Tag color="processing" icon={<Workflow size={14} />}>MAGI 三脑轮次</Tag>
+          <Title level={2}>审视、执行、提升</Title>
+          <Paragraph>{summary.progressLabel} · {summary.primaryAction}</Paragraph>
+        </div>
+        <Link to={summary.route}>
+          <Button type="primary" icon={<Workflow size={16} />}>{summary.focusLabel}入口</Button>
+        </Link>
+      </div>
+      <div className="magi-cycle-list">
+        {plan.stages.map((stage) => (
+          <Link to={summary.route} key={stage.key} className={`magi-action-strip is-${stage.key}`}>
+            <span className="magi-action-icon">{MAGI_STAGE_ICONS[stage.key]}</span>
+            <span>
+              <small>{stage.label}</small>
+              <strong>{stage.title}</strong>
+              <small>{stage.question}</small>
+            </span>
+            <span className="magi-action-link">{stage.metric} {stage.metricLabel}</span>
+          </Link>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function buildPublicMagiCyclePlan(manifest?: DeveloperSkillManifest) {
+  const requiredScopes = manifest?.requiredScopes ?? DEFAULT_PLATFORM_SCOPES;
+  const managedObjects = manifest?.managedObjects ?? [];
+  return buildMagiCyclePlan({
+    requiredScopes,
+    missingScopes: requiredScopes,
+    objects: managedObjects.map((object) => ({
+      key: object.key,
+      title: object.name,
+      risk: 'write',
+      requiredScopes: object.scopes,
+      missingScopes: object.scopes,
+      ready: false
+    })),
+    handoffSignals: [PUBLIC_MAGI_HANDOFF_SIGNAL],
+    recentEventCount: 0,
+    recentlyUsedKeys: 0
+  });
 }
 
 function groupLinks(links: RedirectLink[]) {
@@ -1402,6 +1463,20 @@ const DEFAULT_DEVELOPER_TOOLS = [
   'create_article',
   'update_article'
 ];
+
+const PUBLIC_MAGI_HANDOFF_SIGNAL = {
+  key: 'api_key_scope',
+  title: 'API Key 范围',
+  status: 'ATTENTION',
+  description: '需要把代管范围压缩到 Agent、Skill 和文章。',
+  action: '先创建最小权限 API Key，再把接入配置交给 Agent。'
+};
+
+const MAGI_STAGE_ICONS: Record<MagiCycleStageKey, ReactNode> = {
+  review: <AlertTriangle size={18} />,
+  execute: <CheckCircle2 size={18} />,
+  elevate: <Sparkles size={18} />
+};
 
 function ApiKeysPage() {
   const queryClient = useQueryClient();

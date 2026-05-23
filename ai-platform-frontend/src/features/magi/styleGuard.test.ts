@@ -136,6 +136,17 @@ describe('workspace style guard', () => {
     expect(magiSource).toContain('代管进度');
   });
 
+  it('surfaces the MAGI three-brain cycle on the main workspace', () => {
+    expect(appSource).toContain('buildMagiCyclePlan');
+    expect(appSource).toContain('summarizeMagiCycle');
+    expect(appSource).toContain('MAGI 三脑轮次');
+    expect(appSource).toContain('magi-action-strip');
+    expect(appSource).toContain('{stage.title}');
+    expect(magiSource).toContain('提出问题');
+    expect(magiSource).toContain('解决问题');
+    expect(magiSource).toContain('指引方向');
+  });
+
   it('keeps article module semantics out of knowledge-base naming', () => {
     expect(appSource).not.toContain('knowledge-base-');
     expect(styles).not.toContain('knowledge-base-');
