@@ -547,6 +547,12 @@ describe('workspace style guard', () => {
     expect(adminSource).toContain('articleForm.setFieldsValue(articleDetail);');
   });
 
+  it('refreshes the selected article detail after article admin saves', () => {
+    expect(adminSource).toContain('onSuccess: (savedArticle) => {');
+    expect(adminSource).toContain("queryClient.invalidateQueries({ queryKey: ['admin-article', savedArticle.id] });");
+    expect(adminSource).toContain('setSelected(savedArticle);');
+  });
+
   it('surfaces article admin action failures', () => {
     expect(adminSource).toContain('articleSaveFailureNotice');
     expect(adminSource).toContain('articleDeleteFailureNotice');

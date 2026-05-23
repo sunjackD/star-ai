@@ -673,10 +673,12 @@ export function ArticlesAdminPage() {
     mutationFn: (values: Record<string, unknown>) => editing
       ? putData<ArticleDetail>(`/admin/articles/${editing.id}`, values)
       : postData<ArticleDetail>('/admin/articles', values),
-    onSuccess: () => {
+    onSuccess: (savedArticle) => {
       message.success('文章已保存');
+      setSelected(savedArticle);
       closeArticleDialog();
       queryClient.invalidateQueries({ queryKey: ['admin-articles'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-article', savedArticle.id] });
       queryClient.invalidateQueries({ queryKey: ['articles'] });
     },
     onError: (error) => message.error(articleSaveFailureNotice(error))
