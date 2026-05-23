@@ -174,6 +174,12 @@ describe('workspace style guard', () => {
     expect(styles).toContain('.boot-screen-feedback');
   });
 
+  it('shows backend-aware login failure feedback', () => {
+    expect(appSource).toContain('loginFailureNotice');
+    expect(appSource).toContain('onError: (error) => message.error(loginFailureNotice(error))');
+    expect(appSource).toContain('登录失败，请检查账号密码或后端服务');
+  });
+
   it('keeps auth profile sync from showing a blank boot screen', () => {
     expect(appSource).toContain('authProfileLoadingNotice()');
     expect(appSource).toContain('正在同步登录状态');

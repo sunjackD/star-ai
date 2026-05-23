@@ -602,7 +602,7 @@ function LoginPage() {
       setSession(data.token, data.profile);
       navigate(from, { replace: true });
     },
-    onError: () => message.error('登录失败，请检查账号密码')
+    onError: (error) => message.error(loginFailureNotice(error))
   });
 
   return (
@@ -622,6 +622,10 @@ function LoginPage() {
       </Card>
     </div>
   );
+}
+
+function loginFailureNotice(error: unknown): string {
+  return getApiErrorMessage(error, '登录失败，请检查账号密码或后端服务');
 }
 
 function SetupPage() {
