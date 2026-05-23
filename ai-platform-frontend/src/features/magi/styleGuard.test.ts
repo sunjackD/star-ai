@@ -156,6 +156,14 @@ describe('workspace style guard', () => {
     expect(styles).toContain('.catalog-empty-state');
   });
 
+  it('keeps detail pages from rendering blank while records load', () => {
+    expect(appSource).toContain('DetailLoadingState');
+    expect(appSource).toContain('DetailMissingState');
+    expect(appSource).not.toContain('if (!data) return null;');
+    expect(appSource).not.toMatch(/if \(!data\)\s*\{\s*return null;\s*\}/);
+    expect(styles).toContain('.detail-state-card');
+  });
+
   it('keeps article module semantics out of knowledge-base naming', () => {
     expect(appSource).not.toContain('knowledge-base-');
     expect(styles).not.toContain('knowledge-base-');

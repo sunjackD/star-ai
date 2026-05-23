@@ -619,6 +619,23 @@ html[data-theme='minimal-modern'] .app-sider .ant-menu-submenu-title {
   margin: 0;
 }
 
+.detail-state-card .ant-card-body {
+  min-height: 280px;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 12px;
+  text-align: center;
+}
+
+.detail-state-card h3 {
+  margin: 8px 0 0 !important;
+}
+
+.detail-state-card .ant-empty {
+  margin: 0;
+}
+
 .resource-card {
   height: 100%;
   transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;

@@ -656,8 +656,13 @@ function AgentsPage() {
 
 function AgentDetailPage() {
   const { id } = useParams();
-  const { data } = useQuery({ queryKey: ['agent', id], queryFn: () => getData<Agent>(`/agents/${id}`), enabled: Boolean(id) });
-  if (!data) return null;
+  const { data, isLoading } = useQuery({ queryKey: ['agent', id], queryFn: () => getData<Agent>(`/agents/${id}`), enabled: Boolean(id) });
+  if (isLoading) {
+    return <DetailLoadingState title="正在加载 Agent" />;
+  }
+  if (!data) {
+    return <DetailMissingState title="未找到 Agent" description="请返回 Agent 列表重新选择，或刷新后再试。" />;
+  }
   return <DetailView title={data.name} label={data.category} description={data.description} markdown={data.guideMarkdown} stats={[['浏览量', data.viewCount], ['点赞数', data.likeCount]]} />;
 }
 
@@ -776,8 +781,13 @@ function SkillsPage() {
 
 function SkillDetailPage() {
   const { id } = useParams();
-  const { data } = useQuery({ queryKey: ['skill', id], queryFn: () => getData<Skill>(`/skills/${id}`), enabled: Boolean(id) });
-  if (!data) return null;
+  const { data, isLoading } = useQuery({ queryKey: ['skill', id], queryFn: () => getData<Skill>(`/skills/${id}`), enabled: Boolean(id) });
+  if (isLoading) {
+    return <DetailLoadingState title="正在加载 Skill" />;
+  }
+  if (!data) {
+    return <DetailMissingState title="未找到 Skill" description="请返回 Skill 列表重新选择，或刷新后再试。" />;
+  }
   return (
     <DetailView
       title={data.name}
@@ -922,14 +932,18 @@ function ArticlesPage() {
 
 function ArticleDetailPage() {
   const { id } = useParams();
-  const { data } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: ['article', id],
     queryFn: () => getData<ArticleDetail>(`/articles/${id}`),
     enabled: Boolean(id)
   });
 
+  if (isLoading) {
+    return <DetailLoadingState title="正在加载文章" />;
+  }
+
   if (!data) {
-    return null;
+    return <DetailMissingState title="未找到文章" description="请返回文章列表重新选择，或刷新后再试。" />;
   }
 
   return (
@@ -1298,6 +1312,36 @@ function CatalogEmptyState(props: { title: string; description: string }) {
           </Space>
         )}
       />
+    </div>
+  );
+}
+
+function DetailLoadingState(props: { title: string }) {
+  return (
+    <div className="page">
+      <Card className="detail-state-card">
+        <Spin size="large" />
+        <Title level={3}>{props.title}</Title>
+        <Text type="secondary">正在读取详情内容，请稍候。</Text>
+      </Card>
+    </div>
+  );
+}
+
+function DetailMissingState(props: { title: string; description: string }) {
+  return (
+    <div className="page">
+      <Card className="detail-state-card">
+        <Empty
+          image={Empty.PRESENTED_IMAGE_SIMPLE}
+          description={(
+            <Space direction="vertical" size={4}>
+              <Text strong>{props.title}</Text>
+              <Text type="secondary">{props.description}</Text>
+            </Space>
+          )}
+        />
+      </Card>
     </div>
   );
 }
