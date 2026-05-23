@@ -495,6 +495,17 @@ describe('workspace style guard', () => {
     expect(adminSource).toContain("function agentAdminStatusColor(status: string): string");
   });
 
+  it('uses user-facing column titles in Skill category admin tables', () => {
+    const skillCategoryAdminStart = adminSource.indexOf('export function SkillCategoriesAdminPage()');
+    const skillAdminStart = adminSource.indexOf('export function SkillsAdminPage()');
+    expect(skillCategoryAdminStart).toBeGreaterThanOrEqual(0);
+    expect(skillAdminStart).toBeGreaterThan(skillCategoryAdminStart);
+    const skillCategoryAdminSource = adminSource.slice(skillCategoryAdminStart, skillAdminStart);
+    expect(skillCategoryAdminSource).toContain("{ title: '描述', dataIndex: 'description' }");
+    expect(skillCategoryAdminSource).not.toContain("baseColumns<SkillCategory>(['description'])");
+    expect(adminSource).not.toContain('function baseColumns');
+  });
+
   it('gives API Key and audit admin records loading and empty feedback', () => {
     expect(adminSource).toContain('apiKeyRecordEmptyDescription');
     expect(adminSource).toContain('auditLogInitialEmptyDescription');

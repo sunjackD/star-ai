@@ -497,7 +497,10 @@ export function SkillCategoriesAdminPage() {
     queryKey: 'admin-skill-categories',
     endpoint: '/admin/skill-categories',
     fields: [field('name', '名称'), field('description', '描述', 'textarea')],
-    columns: baseColumns<SkillCategory>(['description'])
+    columns: [
+      { title: '名称', dataIndex: 'name' },
+      { title: '描述', dataIndex: 'description' }
+    ]
   }} />;
 }
 
@@ -1598,13 +1601,6 @@ function selectField(name: string, label: string, options: FieldDef['options'], 
 
 function statusField(): FieldDef {
   return { ...selectField('status', '状态', STATUS_OPTIONS.map((value) => ({ label: value, value }))), defaultValue: 'ACTIVE' };
-}
-
-function baseColumns<T extends ResourceRecord>(keys: string[]) {
-  return [
-    { title: '名称', dataIndex: 'name' },
-    ...keys.map((key) => ({ title: key, dataIndex: key, render: (row: T) => String(row[key as keyof T] ?? '-') }))
-  ];
 }
 
 function rulesForField(fieldDef: FieldDef): Rule[] {
