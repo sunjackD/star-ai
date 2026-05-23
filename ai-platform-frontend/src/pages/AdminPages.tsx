@@ -389,13 +389,13 @@ export function UsersAdminPage() {
       />
       <Modal open={modalOpen} title={editing ? '编辑用户' : '新增用户'} footer={null} onCancel={closeUserDialog}>
         <Form form={form} layout="vertical" onFinish={(values) => saveMutation.mutate(values)}>
-          <Form.Item name="username" label="用户名" rules={[{ required: !editing }]}>
+          <Form.Item name="username" label="用户名" rules={[{ required: !editing, whitespace: true }]}>
             <Input disabled={Boolean(editing)} />
           </Form.Item>
           <Form.Item name="email" label="邮箱" rules={[{ required: true, type: 'email' }]}>
             <Input />
           </Form.Item>
-          <Form.Item name="displayName" label="显示名" rules={[{ required: true }]}>
+          <Form.Item name="displayName" label="显示名" rules={[{ required: true, whitespace: true }]}>
             <Input />
           </Form.Item>
           {!editing && (

@@ -526,6 +526,11 @@ describe('workspace style guard', () => {
     expect(adminSource).toContain('title="暂无用户"');
   });
 
+  it('rejects blank user admin names at the form edge', () => {
+    expect(adminSource).toContain('name="username" label="用户名" rules={[{ required: !editing, whitespace: true }]}');
+    expect(adminSource).toContain('name="displayName" label="显示名" rules={[{ required: true, whitespace: true }]}');
+  });
+
   it('surfaces user admin list query failures', () => {
     expect(adminSource).toContain('isUsersUnavailable');
     expect(adminSource).toContain('userAdminListUnavailableNotice()');
