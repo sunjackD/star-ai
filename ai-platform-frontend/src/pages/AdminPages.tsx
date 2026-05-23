@@ -1259,19 +1259,23 @@ function SkillUploadButton({ categories }: { categories: SkillCategory[] }) {
     },
     onSuccess: () => {
       message.success('Skill 已上传');
-      setModalOpen(false);
-      setFiles([]);
-      form.resetFields();
+      closeSkillUploadModal();
       queryClient.invalidateQueries({ queryKey: ['admin-skills'] });
       queryClient.invalidateQueries({ queryKey: ['skills'] });
     },
     onError: (error) => message.error(error instanceof Error ? error.message : '上传失败')
   });
 
+  function closeSkillUploadModal() {
+    setModalOpen(false);
+    setFiles([]);
+    form.resetFields();
+  }
+
   return (
     <>
       <Button onClick={() => setModalOpen(true)}>上传 Skill</Button>
-      <Modal open={modalOpen} title="上传 Skill 包" footer={null} onCancel={() => setModalOpen(false)} width={720}>
+      <Modal open={modalOpen} title="上传 Skill 包" footer={null} onCancel={closeSkillUploadModal} width={720}>
         <Form
           form={form}
           layout="vertical"

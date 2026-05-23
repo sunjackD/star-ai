@@ -258,6 +258,12 @@ describe('workspace style guard', () => {
     expect(adminSource).toContain('message.error(iconUploadFailureNotice(error))');
   });
 
+  it('clears pending Skill upload selections when the upload dialog closes', () => {
+    expect(adminSource).toContain('closeSkillUploadModal');
+    expect(adminSource).toContain('onCancel={closeSkillUploadModal}');
+    expect(adminSource).toContain('form.resetFields();');
+  });
+
   it('keeps article module semantics out of knowledge-base naming', () => {
     expect(appSource).not.toContain('knowledge-base-');
     expect(styles).not.toContain('knowledge-base-');
