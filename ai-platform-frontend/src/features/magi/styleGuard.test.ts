@@ -676,8 +676,14 @@ describe('workspace style guard', () => {
   });
 
   it('locks user role inline selection while saving roles', () => {
-    expect(adminSource).toContain('loading={isUserRolesLoading || roleMutation.isPending}');
-    expect(adminSource).toContain('disabled={isUserRolesUnavailable || roleMutation.isPending}');
+    expect(adminSource).toContain('const [updatingRoleUserId, setUpdatingRoleUserId] = useState<number>();');
+    expect(adminSource).toContain('const userRoleMutation = useMutation({');
+    expect(adminSource).toContain('function updateUserRoles(row: AdminUser, roleNames: string[]) {');
+    expect(adminSource).toContain('setUpdatingRoleUserId(row.id);');
+    expect(adminSource).toContain('onSettled: () => setUpdatingRoleUserId(undefined)');
+    expect(adminSource).toContain('onChange={(roleNames) => updateUserRoles(row, roleNames)}');
+    expect(adminSource).toContain('loading={isUserRolesLoading || (userRoleMutation.isPending && updatingRoleUserId === row.id)}');
+    expect(adminSource).toContain('disabled={isUserRolesUnavailable || (userRoleMutation.isPending && updatingRoleUserId !== row.id)}');
   });
 
   it('shows loading feedback while updating user statuses', () => {
@@ -689,7 +695,7 @@ describe('workspace style guard', () => {
     expect(adminSource).toContain('onClick={() => updateUserStatus(row)}');
     expect(adminSource).toContain('loading={userStatusMutation.isPending && updatingStatusUserId === row.id}');
     expect(adminSource).toContain('disabled={userStatusMutation.isPending && updatingStatusUserId !== row.id}');
-    expect(adminSource).toContain('loading={isUsersLoading || roleMutation.isPending}');
+    expect(adminSource).toContain('loading={isUsersLoading}');
     expect(adminSource).toContain("status: row.status === 'ACTIVE' ? 'DISABLED' : 'ACTIVE'");
   });
 

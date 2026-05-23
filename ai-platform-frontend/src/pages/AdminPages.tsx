@@ -236,6 +236,7 @@ export function UsersAdminPage() {
   const [statusFilter, setStatusFilter] = useState<string>();
   const [updatingStatusUserId, setUpdatingStatusUserId] = useState<number>();
   const [resettingPasswordUserId, setResettingPasswordUserId] = useState<number>();
+  const [updatingRoleUserId, setUpdatingRoleUserId] = useState<number>();
   const [editing, setEditing] = useState<AdminUser>();
   const [modalOpen, setModalOpen] = useState(false);
   const {
@@ -282,13 +283,14 @@ export function UsersAdminPage() {
     onError: (error) => message.error(adminUserStatusFailureNotice(error)),
     onSettled: () => setUpdatingStatusUserId(undefined)
   });
-  const roleMutation = useMutation({
+  const userRoleMutation = useMutation({
     mutationFn: ({ id, roleNames }: { id: number; roleNames: string[] }) => putData(`/admin/users/${id}/roles`, { roles: roleNames }),
     onSuccess: () => {
       message.success('用户角色已更新');
       queryClient.invalidateQueries({ queryKey: ['admin-users'] });
     },
-    onError: (error) => message.error(adminUserRoleFailureNotice(error))
+    onError: (error) => message.error(adminUserRoleFailureNotice(error)),
+    onSettled: () => setUpdatingRoleUserId(undefined)
   });
   const userPasswordMutation = useMutation({
     mutationFn: ({ id, password }: { id: number; password: string }) => postData(`/admin/users/${id}/reset-password`, { password }),
@@ -332,6 +334,11 @@ export function UsersAdminPage() {
     userPasswordMutation.mutate({ id: row.id, password: 'ChangeMe123' });
   }
 
+  function updateUserRoles(row: AdminUser, roleNames: string[]) {
+    setUpdatingRoleUserId(row.id);
+    userRoleMutation.mutate({ id: row.id, roleNames });
+  }
+
   return (
     <div className="page">
       <PageHeader title="用户管理" description="新增用户、编辑资料、管理状态、角色和密码重置。" />
@@ -364,7 +371,7 @@ export function UsersAdminPage() {
       </Space>
       <Table
         rowKey="id"
-        loading={isUsersLoading || roleMutation.isPending}
+        loading={isUsersLoading}
         dataSource={filteredUsers}
         pagination={{ pageSize: 8 }}
         locale={{
@@ -395,9 +402,9 @@ export function UsersAdminPage() {
                   value={row.roles}
                   className="admin-inline-select"
                   options={roleOptions}
-                  loading={isUserRolesLoading || roleMutation.isPending}
-                  disabled={isUserRolesUnavailable || roleMutation.isPending}
-                  onChange={(roleNames) => roleMutation.mutate({ id: row.id, roleNames })}
+                  loading={isUserRolesLoading || (userRoleMutation.isPending && updatingRoleUserId === row.id)}
+                  disabled={isUserRolesUnavailable || (userRoleMutation.isPending && updatingRoleUserId !== row.id)}
+                  onChange={(roleNames) => updateUserRoles(row, roleNames)}
                 />
                 <Popconfirm title="确认重置该用户密码？" onConfirm={() => resetUserPassword(row)}>
                   <Button
