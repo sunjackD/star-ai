@@ -296,6 +296,18 @@ describe('workspace style guard', () => {
     expect(appSource).toContain('finetuneJobsEmptyDescription()');
   });
 
+  it('renders public finetune job statuses with distinct tags', () => {
+    const finetunePageStart = appSource.indexOf('function FinetunePage()');
+    const finetuneEmptyStart = appSource.indexOf('function finetuneJobsEmptyDescription()');
+    expect(finetunePageStart).toBeGreaterThanOrEqual(0);
+    expect(finetuneEmptyStart).toBeGreaterThan(finetunePageStart);
+    const finetunePageSource = appSource.slice(finetunePageStart, finetuneEmptyStart);
+    expect(finetunePageSource).toContain(
+      '<Tag color={finetuneJobStatusColor(job.status)}>{job.status}</Tag>'
+    );
+    expect(appSource).toContain("function finetuneJobStatusColor(status: string): string");
+  });
+
   it('keeps API Key as the primary label while framing it for Agent use', () => {
     expect(appSource).not.toContain('Agent 授权');
     expect(appSource).not.toContain('授权 Key');

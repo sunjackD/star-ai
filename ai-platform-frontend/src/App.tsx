@@ -1804,7 +1804,7 @@ function FinetunePage() {
           <Card key={job.id} title={job.name}>
             <Text>{job.baseModel}</Text>
             <Progress percent={job.progress} />
-            <Tag>{job.status}</Tag>
+            <Tag color={finetuneJobStatusColor(job.status)}>{job.status}</Tag>
           </Card>
         ))}
       </div>
@@ -1818,6 +1818,22 @@ function finetuneJobsEmptyDescription(): string {
 
 function finetuneJobsUnavailableDescription(): string {
   return '请确认登录状态、后端服务和微调任务接口可用，然后刷新页面。';
+}
+
+function finetuneJobStatusColor(status: string): string {
+  if (status === 'COMPLETED' || status === 'ACTIVE') {
+    return 'green';
+  }
+  if (status === 'RUNNING') {
+    return 'blue';
+  }
+  if (status === 'DRAFT') {
+    return 'gold';
+  }
+  if (status === 'DISABLED') {
+    return 'red';
+  }
+  return 'default';
 }
 
 const API_KEY_SCOPE_OPTIONS = [
