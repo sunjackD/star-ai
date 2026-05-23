@@ -203,6 +203,15 @@ describe('workspace style guard', () => {
     expect(adminSource).not.toContain("title={editing ? '编辑资源' : '新增资源'}");
   });
 
+  it('gives admin resource tables contextual search and empty states', () => {
+    expect(adminSource).toContain('AdminTableEmptyState');
+    expect(adminSource).toContain('resourceSearchPlaceholder');
+    expect(adminSource).toContain('filteredResourceEmptyDescription');
+    expect(adminSource).toContain('initialResourceEmptyDescription');
+    expect(adminSource).not.toContain('placeholder="搜索资源内容"');
+    expect(styles).toContain('.admin-table-empty');
+  });
+
   it('keeps article module semantics out of knowledge-base naming', () => {
     expect(appSource).not.toContain('knowledge-base-');
     expect(styles).not.toContain('knowledge-base-');

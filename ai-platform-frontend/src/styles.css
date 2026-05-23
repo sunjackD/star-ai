@@ -1158,6 +1158,18 @@ pre {
   width: 100%;
 }
 
+.admin-table-empty {
+  padding: 18px 0;
+}
+
+.admin-table-empty .ant-empty {
+  margin: 0;
+}
+
+.admin-table-empty .ant-typography {
+  margin: 0;
+}
+
 .navigation-card {
   margin-bottom: 26px;
 }

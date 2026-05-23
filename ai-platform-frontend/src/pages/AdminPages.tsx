@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   Button,
   Card,
+  Empty,
   Form,
   Input,
   InputNumber,
@@ -852,6 +853,9 @@ function ResourceAdminPage<T extends ResourceRecord>({ config }: { config: Resou
   const [statusFilter, setStatusFilter] = useState<string>();
   const { data = [], isLoading } = useQuery({ queryKey: [config.queryKey], queryFn: () => getData<T[]>(config.endpoint) });
   const resourceSubject = resourceDialogSubject(config.title);
+  const resourceEmptyDescription = keyword || statusFilter
+    ? filteredResourceEmptyDescription()
+    : initialResourceEmptyDescription(resourceSubject);
   const hasStatus = config.fields.some((item) => item.name === 'status') || data.some((item) => item.status);
   const statusOptions = Array.from(new Set(data.map((item) => item.status).filter(Boolean) as string[]));
   const filteredData = useMemo(() => data.filter((row) => {
@@ -914,7 +918,7 @@ function ResourceAdminPage<T extends ResourceRecord>({ config }: { config: Resou
     <div className="page">
       <PageHeader title={config.title} description={config.description} />
       <Space className="admin-toolbar" wrap>
-        <Input.Search placeholder="搜索资源内容" onChange={(event) => setKeyword(event.target.value)} allowClear />
+        <Input.Search placeholder={resourceSearchPlaceholder(resourceSubject)} onChange={(event) => setKeyword(event.target.value)} allowClear />
         {hasStatus && (
           <Select
             allowClear
@@ -932,6 +936,14 @@ function ResourceAdminPage<T extends ResourceRecord>({ config }: { config: Resou
         loading={isLoading || deleteMutation.isPending}
         dataSource={filteredData}
         columns={columns}
+        locale={{
+          emptyText: (
+            <AdminTableEmptyState
+              title={resourceEmptyTitle(resourceSubject)}
+              description={resourceEmptyDescription}
+            />
+          )
+        }}
         pagination={{ pageSize: 8, showSizeChanger: true }}
       />
       <Modal
@@ -959,15 +971,50 @@ function resourceDialogSubject(title: string): string {
 }
 
 function createResourceDialogTitle(subject: string): string {
-  return `新增${resourceDialogTitleSuffix(subject)}`;
+  return `新增${resourceSubjectLabel(subject)}`;
 }
 
 function editResourceDialogTitle(subject: string): string {
-  return `编辑${resourceDialogTitleSuffix(subject)}`;
+  return `编辑${resourceSubjectLabel(subject)}`;
 }
 
-function resourceDialogTitleSuffix(subject: string): string {
+function resourceSearchPlaceholder(subject: string): string {
+  if (/^[A-Za-z0-9]/.test(subject)) {
+    return `搜索 ${subject} 内容`;
+  }
+  return `搜索${subject}内容`;
+}
+
+function resourceEmptyTitle(subject: string): string {
+  return `暂无${resourceSubjectLabel(subject)}`;
+}
+
+function initialResourceEmptyDescription(subject: string): string {
+  return `点击新增开始维护${resourceSubjectLabel(subject)}。`;
+}
+
+function filteredResourceEmptyDescription(): string {
+  return '没有匹配当前搜索或状态筛选的记录。';
+}
+
+function resourceSubjectLabel(subject: string): string {
   return /^[A-Za-z0-9]/.test(subject) ? ` ${subject}` : subject;
+}
+
+function AdminTableEmptyState(props: { title: string; description: string }) {
+  return (
+    <div className="admin-table-empty">
+      <Empty
+        image={Empty.PRESENTED_IMAGE_SIMPLE}
+        description={(
+          <Space direction="vertical" size={4}>
+            <Typography.Text strong>{props.title}</Typography.Text>
+            <Typography.Text type="secondary">{props.description}</Typography.Text>
+          </Space>
+        )}
+      />
+    </div>
+  );
 }
 
 function renderField(fieldDef: FieldDef) {
