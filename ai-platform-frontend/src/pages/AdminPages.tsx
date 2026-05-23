@@ -1124,7 +1124,7 @@ export function ApiKeysAdminPage() {
     isError: apiKeyRecordListUnavailable
   } = useQuery({ queryKey: ['admin-api-keys'], queryFn: () => getData<ApiKey[]>('/admin/api-keys') });
   const emptyDescription = keyword || statusFilter
-    ? filteredAdminRecordEmptyDescription()
+    ? filteredApiKeyRecordEmptyDescription()
     : apiKeyRecordEmptyDescription();
   const filteredApiKeys = apiKeys.filter((item) => {
     const keywordMatched = [item.name, item.keyPrefix, item.scopes.join(',')]
@@ -1196,7 +1196,7 @@ export function AuditLogsAdminPage() {
     isError: auditLogListUnavailable
   } = useQuery({ queryKey: ['admin-audit-logs'], queryFn: () => getData<AuditLog[]>('/admin/audit-logs') });
   const emptyDescription = keyword
-    ? filteredAdminRecordEmptyDescription()
+    ? filteredAuditLogEmptyDescription()
     : auditLogInitialEmptyDescription();
   const filteredAuditLogs = auditLogs.filter((item) => [item.actor, item.action, item.resourceType, item.resourceId, item.detail]
     .some((value) => String(value ?? '').toLowerCase().includes(keyword.toLowerCase())));
@@ -1237,6 +1237,10 @@ function apiKeyRecordEmptyDescription(): string {
   return '还没有 Agent 代管 API Key 记录，用户创建后会出现在这里。';
 }
 
+function filteredApiKeyRecordEmptyDescription(): string {
+  return '没有匹配当前搜索或状态筛选的 API Key 记录。';
+}
+
 function apiKeyDisableFailureNotice(error: unknown): string {
   return apiErrorMessage(error, 'API Key 禁用失败');
 }
@@ -1255,8 +1259,8 @@ function auditLogInitialEmptyDescription(): string {
   return '还没有后台编辑或 Agent 代管调用记录。';
 }
 
-function filteredAdminRecordEmptyDescription(): string {
-  return '没有匹配当前搜索或状态筛选的记录。';
+function filteredAuditLogEmptyDescription(): string {
+  return '没有匹配当前搜索的操作记录。';
 }
 
 function adminRecordListUnavailableNotice(subject: string): string {

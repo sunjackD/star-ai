@@ -481,7 +481,8 @@ describe('workspace style guard', () => {
   it('gives API Key and audit admin records loading and empty feedback', () => {
     expect(adminSource).toContain('apiKeyRecordEmptyDescription');
     expect(adminSource).toContain('auditLogInitialEmptyDescription');
-    expect(adminSource).toContain('filteredAdminRecordEmptyDescription');
+    expect(adminSource).toContain('filteredApiKeyRecordEmptyDescription');
+    expect(adminSource).toContain('filteredAuditLogEmptyDescription');
     expect(adminSource).toContain('title="暂无 API Key 记录"');
     expect(adminSource).toContain('title="暂无操作记录"');
   });
@@ -525,6 +526,14 @@ describe('workspace style guard', () => {
     expect(adminSource).toContain("function apiKeyStatusColor(status: string): string");
     expect(adminSource).toContain("if (status === 'ACTIVE') {");
     expect(adminSource).toContain("if (status === 'EXPIRED') {");
+  });
+
+  it('uses record-specific filtered empty descriptions', () => {
+    expect(adminSource).toContain('filteredApiKeyRecordEmptyDescription()');
+    expect(adminSource).toContain('filteredAuditLogEmptyDescription()');
+    expect(adminSource).toContain('没有匹配当前搜索或状态筛选的 API Key 记录。');
+    expect(adminSource).toContain('没有匹配当前搜索的操作记录。');
+    expect(adminSource).not.toContain('filteredAdminRecordEmptyDescription');
   });
 
   it('gives article admin detail tables explicit loading and empty feedback', () => {
