@@ -171,6 +171,15 @@ describe('workspace style guard', () => {
     expect(styles).toContain('.one-time-key-value');
   });
 
+  it('keeps account actions inside the required top-right user menu', () => {
+    expect(appSource).toContain('Dropdown');
+    expect(appSource).toContain('userMenuItems');
+    expect(appSource).toContain('用户菜单');
+    expect(appSource).toContain('个人中心');
+    expect(appSource).toContain('API Key 管理');
+    expect(appSource).toContain('退出登录');
+  });
+
   it('keeps article module semantics out of knowledge-base naming', () => {
     expect(appSource).not.toContain('knowledge-base-');
     expect(styles).not.toContain('knowledge-base-');

@@ -1,7 +1,8 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import { BrowserRouter, Link, Navigate, Outlet, Route, Routes, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Alert, Button, Card, Empty, Form, Input, Layout, Menu, Modal, Popconfirm, Progress, Segmented, Select, Space, Spin, Statistic, Switch, Table, Tag, Typography, Upload, message } from 'antd';
+import { Alert, Button, Card, Dropdown, Empty, Form, Input, Layout, Menu, Modal, Popconfirm, Progress, Segmented, Select, Space, Spin, Statistic, Switch, Table, Tag, Typography, Upload, message } from 'antd';
+import type { MenuProps } from 'antd';
 import type { RcFile } from 'antd/es/upload';
 import {
   Activity,
@@ -70,6 +71,7 @@ import {
 
 const { Header, Sider, Content } = Layout;
 const { Title, Paragraph, Text } = Typography;
+type UserMenuKey = 'profile' | 'apiKeys' | 'settings' | 'logout';
 
 function SetupGate() {
   const location = useLocation();
@@ -172,6 +174,30 @@ function Shell() {
       ]
     }] : [])
   ];
+  const userMenuItems: MenuProps['items'] = [
+    { key: 'profile', icon: <CircleUserRound size={16} />, label: '个人中心' },
+    { key: 'apiKeys', icon: <KeyRound size={16} />, label: 'API Key 管理' },
+    { key: 'settings', icon: <Settings size={16} />, label: '设置' },
+    { type: 'divider' },
+    { key: 'logout', icon: <LogOut size={16} />, label: '退出登录', danger: true }
+  ];
+  const handleUserMenuClick: MenuProps['onClick'] = ({ key }) => {
+    const userMenuKey = key as UserMenuKey;
+    if (userMenuKey === 'logout') {
+      logout();
+      navigate('/login');
+      return;
+    }
+    if (userMenuKey === 'settings') {
+      navigate(isAdmin ? '/admin/settings' : '/account/profile');
+      return;
+    }
+    const userMenuRoutes: Record<Exclude<UserMenuKey, 'settings' | 'logout'>, string> = {
+      profile: '/account/profile',
+      apiKeys: '/account/api-keys'
+    };
+    navigate(userMenuRoutes[userMenuKey]);
+  };
 
   return (
     <Layout className="app-shell">
@@ -191,14 +217,9 @@ function Shell() {
             {token ? (
               <>
                 <Text>{profile?.displayName ?? profile?.username}</Text>
-                <Link to="/account/profile"><Button icon={<CircleUserRound size={16} />}>用户中心</Button></Link>
-                <Link to="/account/api-keys"><Button icon={<KeyRound size={16} />}>API Key 管理</Button></Link>
-                <Link to={isAdmin ? '/admin/settings' : '/account/profile'}>
-                  <Button icon={<Settings size={16} />}>设置</Button>
-                </Link>
-                <Button icon={<LogOut size={16} />} onClick={() => { logout(); navigate('/login'); }}>
-                  退出
-                </Button>
+                <Dropdown menu={{ items: userMenuItems, onClick: handleUserMenuClick }} placement="bottomRight" trigger={['click']}>
+                  <Button icon={<CircleUserRound size={16} />}>用户菜单</Button>
+                </Dropdown>
               </>
             ) : (
               <Button type="primary" onClick={() => navigate('/login')}>登录</Button>
