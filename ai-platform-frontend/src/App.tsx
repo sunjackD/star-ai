@@ -2174,6 +2174,18 @@ function formatDateTime(value?: string): string {
   return value.replace('T', ' ').slice(0, 19);
 }
 
+async function downloadDeveloperSelfSkill(): Promise<void> {
+  try {
+    await downloadFile('/developer/self-skill/download', 'ai-platform-manager.SKILL.md');
+  } catch (error) {
+    message.error(developerSelfSkillDownloadFailureNotice(error));
+  }
+}
+
+function developerSelfSkillDownloadFailureNotice(error: unknown): string {
+  return getApiErrorMessage(error, '平台 Skill 下载失败，请稍后重试');
+}
+
 function DeveloperPage() {
   const selfSkillUrl = apiUrl('/developer/self-skill/download');
   const apiBaseUrl = apiUrl('').replace(/\/$/, '');
@@ -2242,7 +2254,7 @@ function DeveloperPage() {
              外部 Agent 只用这里的 API Base、Manifest、API Key 和平台 Skill 管理 Agent、Skill 和文章。
           </Paragraph>
           <Space wrap>
-            <Button type="primary" icon={<Download size={16} />} href={selfSkillUrl}>
+            <Button type="primary" icon={<Download size={16} />} onClick={downloadDeveloperSelfSkill}>
               下载 Skill
             </Button>
             <Link to="/account/api-keys"><Button icon={<KeyRound size={16} />}>创建 API Key</Button></Link>
@@ -2300,7 +2312,7 @@ function DeveloperPage() {
                 <Text code copyable={{ text: access.builtinSkill.downloadUrl }}>{access.builtinSkill.downloadUrl}</Text>
               </div>
             </div>
-            <Button type="primary" icon={<Download size={16} />} href={access.builtinSkill.downloadUrl}>
+            <Button type="primary" icon={<Download size={16} />} onClick={downloadDeveloperSelfSkill}>
               一键配置平台 Skill
             </Button>
           </section>

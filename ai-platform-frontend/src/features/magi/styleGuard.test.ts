@@ -203,6 +203,16 @@ describe('workspace style guard', () => {
     expect(appSource).toContain('Agent 代管 Manifest 暂不可用');
   });
 
+  it('surfaces Agent handoff self Skill download failures from both download actions', () => {
+    expect(appSource).toContain('downloadDeveloperSelfSkill');
+    expect(appSource).toContain("await downloadFile('/developer/self-skill/download', 'ai-platform-manager.SKILL.md');");
+    expect(appSource).toContain('message.error(developerSelfSkillDownloadFailureNotice(error))');
+    expect(appSource).toContain('平台 Skill 下载失败，请稍后重试');
+    expect(appSource.match(/onClick=\{downloadDeveloperSelfSkill\}/g)).toHaveLength(2);
+    expect(appSource).not.toContain('href={selfSkillUrl}');
+    expect(appSource).not.toContain('href={access.builtinSkill.downloadUrl}');
+  });
+
   it('shows a clear unavailable state when the Agent catalog query fails', () => {
     expect(appSource).toContain('agentsUnavailable');
     expect(appSource).toContain('agentCatalogUnavailableDescription()');
