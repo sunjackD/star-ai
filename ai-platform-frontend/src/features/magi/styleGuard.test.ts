@@ -143,6 +143,12 @@ describe('workspace style guard', () => {
     expect(appSource).toContain('文章目录暂不可用');
   });
 
+  it('shows a clear unavailable state when the model catalog query fails', () => {
+    expect(appSource).toContain('modelsUnavailable');
+    expect(appSource).toContain('modelCatalogUnavailableDescription()');
+    expect(appSource).toContain('模型能力层暂不可用');
+  });
+
   it('keeps API Key as the primary label while framing it for Agent use', () => {
     expect(appSource).not.toContain('Agent 授权');
     expect(appSource).not.toContain('授权 Key');

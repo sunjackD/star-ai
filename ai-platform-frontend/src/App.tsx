@@ -1521,7 +1521,10 @@ function DetailView(props: { title: string; label: string; description: string; 
 }
 
 function ModelsPage() {
-  const { data = [], isLoading: modelsLoading } = useQuery({ queryKey: ['models'], queryFn: () => getPublicData<AiModel[]>('/models') });
+  const { data = [], isLoading: modelsLoading, isError: modelsUnavailable } = useQuery({
+    queryKey: ['models'],
+    queryFn: () => getPublicData<AiModel[]>('/models')
+  });
   const [providerFilter, setProviderFilter] = useState('all');
   const [typeFilter, setTypeFilter] = useState('all');
   const providers = Array.from(new Set(data.map((model) => model.provider))).sort();
@@ -1572,6 +1575,8 @@ function ModelsPage() {
       <div className="model-layer-grid">
         {modelsLoading ? (
           <CatalogLoadingState title="正在加载模型" />
+        ) : modelsUnavailable ? (
+          <CatalogEmptyState title="模型能力层暂不可用" description={modelCatalogUnavailableDescription()} />
         ) : filteredModels.length === 0 ? (
           <CatalogEmptyState title="暂无匹配模型" description="切换供应商或模型类型，或者在平台后台新增模型。" />
         ) : filteredModels.map((model) => (
@@ -1595,6 +1600,10 @@ function ModelsPage() {
       </div>
     </div>
   );
+}
+
+function modelCatalogUnavailableDescription(): string {
+  return '请确认后端服务和公开模型接口可用，然后刷新页面。';
 }
 
 function FinetunePage() {
