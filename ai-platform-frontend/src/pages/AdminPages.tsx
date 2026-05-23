@@ -607,7 +607,12 @@ export function DatasetsAdminPage() {
     queryKey: 'admin-datasets',
     endpoint: '/admin/datasets',
     fields: [field('name', '名称'), field('filePath', '文件路径'), numberField('recordCount', '记录数'), field('format', '格式')],
-    columns: baseColumns<Dataset>(['filePath', 'recordCount', 'format'])
+    columns: [
+      { title: '名称', dataIndex: 'name' },
+      { title: '文件路径', dataIndex: 'filePath' },
+      { title: '记录数', dataIndex: 'recordCount' },
+      { title: '格式', dataIndex: 'format' }
+    ]
   }} />;
 }
 

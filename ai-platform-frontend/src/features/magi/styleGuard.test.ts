@@ -697,6 +697,18 @@ describe('workspace style guard', () => {
     expect(modelAdminSource).not.toContain("baseColumns<AiModel>(['provider', 'modelType', 'endpoint'])");
   });
 
+  it('uses user-facing column titles in dataset admin tables', () => {
+    const datasetAdminStart = adminSource.indexOf('export function DatasetsAdminPage()');
+    const finetuneAdminStart = adminSource.indexOf('export function FinetuneJobsAdminPage()');
+    expect(datasetAdminStart).toBeGreaterThanOrEqual(0);
+    expect(finetuneAdminStart).toBeGreaterThan(datasetAdminStart);
+    const datasetAdminSource = adminSource.slice(datasetAdminStart, finetuneAdminStart);
+    expect(datasetAdminSource).toContain("{ title: '文件路径', dataIndex: 'filePath' }");
+    expect(datasetAdminSource).toContain("{ title: '记录数', dataIndex: 'recordCount' }");
+    expect(datasetAdminSource).toContain("{ title: '格式', dataIndex: 'format' }");
+    expect(datasetAdminSource).not.toContain("baseColumns<Dataset>(['filePath', 'recordCount', 'format'])");
+  });
+
   it('surfaces finetune job dataset dependency failures', () => {
     expect(adminSource).toContain('isFinetuneDatasetsUnavailable');
     expect(adminSource).toContain('finetuneDatasetsUnavailableNotice()');
