@@ -660,6 +660,18 @@ describe('workspace style guard', () => {
     expect(adminSource).toContain('disabled={categoriesUnavailable}');
   });
 
+  it('renders Skill admin statuses with distinct tags', () => {
+    const skillAdminStart = adminSource.indexOf('export function SkillsAdminPage()');
+    const skillDownloadStart = adminSource.indexOf('async function downloadAdminSkillPackage');
+    expect(skillAdminStart).toBeGreaterThanOrEqual(0);
+    expect(skillDownloadStart).toBeGreaterThan(skillAdminStart);
+    const skillAdminSource = adminSource.slice(skillAdminStart, skillDownloadStart);
+    expect(skillAdminSource).toContain(
+      "render: (row) => <Tag color={skillAdminStatusColor(row.status)}>{row.status}</Tag>"
+    );
+    expect(adminSource).toContain("function skillAdminStatusColor(status: string): string");
+  });
+
   it('surfaces finetune job dataset dependency failures', () => {
     expect(adminSource).toContain('isFinetuneDatasetsUnavailable');
     expect(adminSource).toContain('finetuneDatasetsUnavailableNotice()');

@@ -506,7 +506,7 @@ export function SkillsAdminPage() {
       { title: '分类', render: (row) => row.category.name },
       { title: '文件', render: (row) => skillArtifactLabel(row) },
       { title: '下载', dataIndex: 'downloadCount' },
-      { title: '状态', dataIndex: 'status' }
+      { title: '状态', render: (row) => <Tag color={skillAdminStatusColor(row.status)}>{row.status}</Tag> }
     ],
     normalizeInitial: (row) => ({ ...row, categoryId: row.category.id }),
     extraToolbar: (
@@ -551,6 +551,16 @@ function skillArtifactLabel(skill: Skill): string {
     return `文件包: ${skill.artifactFileName ?? '未命名文件'}`;
   }
   return '文本 Skill';
+}
+
+function skillAdminStatusColor(status: string): string {
+  if (status === 'ACTIVE') {
+    return 'green';
+  }
+  if (status === 'DRAFT') {
+    return 'gold';
+  }
+  return 'default';
 }
 
 export function ModelsAdminPage() {
