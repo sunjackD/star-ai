@@ -417,6 +417,13 @@ describe('workspace style guard', () => {
     expect(adminSource).toContain('disabled={categoriesUnavailable}');
   });
 
+  it('surfaces finetune job dataset dependency failures', () => {
+    expect(adminSource).toContain('isFinetuneDatasetsUnavailable');
+    expect(adminSource).toContain('finetuneDatasetsUnavailableNotice()');
+    expect(adminSource).toContain('微调数据集暂不可用');
+    expect(adminSource).toContain("queryKey: ['admin-datasets']");
+  });
+
   it('surfaces user admin action failures', () => {
     expect(adminSource).toContain('adminUserSaveFailureNotice');
     expect(adminSource).toContain('adminUserStatusFailureNotice');

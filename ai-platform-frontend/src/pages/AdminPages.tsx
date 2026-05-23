@@ -541,7 +541,10 @@ export function DatasetsAdminPage() {
 }
 
 export function FinetuneJobsAdminPage() {
-  const { data: datasets = [] } = useQuery({ queryKey: ['admin-datasets'], queryFn: () => getData<Dataset[]>('/admin/datasets') });
+  const {
+    data: datasets = [],
+    isError: isFinetuneDatasetsUnavailable
+  } = useQuery({ queryKey: ['admin-datasets'], queryFn: () => getData<Dataset[]>('/admin/datasets') });
   return <ResourceAdminPage<FinetuneJob> config={{
     title: '微调任务管理',
     description: '维护微调任务、基础模型、数据集和运行状态。',
@@ -559,8 +562,20 @@ export function FinetuneJobsAdminPage() {
       { title: '状态', dataIndex: 'status' },
       { title: '进度', dataIndex: 'progress' }
     ],
+    extraToolbar: isFinetuneDatasetsUnavailable ? (
+      <Alert
+        showIcon
+        type="warning"
+        message="微调数据集暂不可用"
+        description={finetuneDatasetsUnavailableNotice()}
+      />
+    ) : undefined,
     normalizeInitial: (row) => ({ ...row, datasetId: row.dataset?.id })
   }} />;
+}
+
+function finetuneDatasetsUnavailableNotice(): string {
+  return '数据集下拉会暂时为空，请确认数据集接口可用后刷新再维护微调任务。';
 }
 
 export function LinksAdminPage() {
