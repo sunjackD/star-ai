@@ -514,6 +514,10 @@ describe('workspace style guard', () => {
     expect(apiKeyAdminSource).toContain("render: (_, row) => row.status === 'ACTIVE' ? (");
   });
 
+  it('shows loading feedback while disabling API Keys', () => {
+    expect(adminSource).toContain('<Button danger size="small" loading={mutation.isPending}>禁用</Button>');
+  });
+
   it('renders API Key admin statuses with distinct tags', () => {
     const apiKeyAdminStart = adminSource.indexOf('export function ApiKeysAdminPage()');
     const auditLogAdminStart = adminSource.indexOf('export function AuditLogsAdminPage()');

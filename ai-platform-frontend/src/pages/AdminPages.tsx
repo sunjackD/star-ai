@@ -1198,7 +1198,7 @@ export function ApiKeysAdminPage() {
             title: '操作',
             render: (_, row) => row.status === 'ACTIVE' ? (
               <Popconfirm title="确认禁用该 API Key？" onConfirm={() => mutation.mutate(row.id)}>
-                <Button danger size="small">禁用</Button>
+                <Button danger size="small" loading={mutation.isPending}>禁用</Button>
               </Popconfirm>
             ) : '-'
           }
