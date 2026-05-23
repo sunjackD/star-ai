@@ -471,7 +471,7 @@ export function ArticlesAdminPage() {
     queryKey: ['admin-articles'],
     queryFn: () => getData<ArticleSummary[]>('/admin/articles')
   });
-  const { data: detail } = useQuery({
+  const { data: detail, isLoading: isDetailLoading } = useQuery({
     queryKey: ['admin-article', selected?.id],
     queryFn: () => getData<ArticleDetail>(`/admin/articles/${selected?.id}`),
     enabled: Boolean(selected?.id)
@@ -637,36 +637,56 @@ export function ArticlesAdminPage() {
           </Space>
           <div className="admin-subgrid">
             <Card title="附件">
-              <Table rowKey="id" size="small" pagination={false} dataSource={detail?.assets ?? []} columns={[
-                { title: '名称', dataIndex: 'name' },
-                { title: '类型', dataIndex: 'assetType' },
-                { title: '文件', render: (row: ArticleAsset) => row.fileName ?? '文本' },
-                {
-                  title: '操作',
-                  render: (_, row: ArticleAsset) => (
-                    <Space>
-                      <Button size="small" onClick={() => downloadFile(`/articles/${selected.id}/assets/${row.id}/download`, row.fileName ?? `${row.name}.md`)}>下载</Button>
-                      <Popconfirm title="删除附件？" onConfirm={() => deleteAssetMutation.mutate(row.id)}>
-                        <Button size="small" danger>删除</Button>
-                      </Popconfirm>
-                    </Space>
-                  )
-                }
-              ]} />
+              <Table
+                rowKey="id"
+                size="small"
+                pagination={false}
+                loading={isDetailLoading || deleteAssetMutation.isPending}
+                dataSource={detail?.assets ?? []}
+                locale={{
+                  emptyText: <AdminTableEmptyState title="暂无文章附件" description={articleAssetEmptyDescription()} />
+                }}
+                columns={[
+                  { title: '名称', dataIndex: 'name' },
+                  { title: '类型', dataIndex: 'assetType' },
+                  { title: '文件', render: (row: ArticleAsset) => row.fileName ?? '文本' },
+                  {
+                    title: '操作',
+                    render: (_, row: ArticleAsset) => (
+                      <Space>
+                        <Button size="small" onClick={() => downloadFile(`/articles/${selected.id}/assets/${row.id}/download`, row.fileName ?? `${row.name}.md`)}>下载</Button>
+                        <Popconfirm title="删除附件？" onConfirm={() => deleteAssetMutation.mutate(row.id)}>
+                          <Button size="small" danger>删除</Button>
+                        </Popconfirm>
+                      </Space>
+                    )
+                  }
+                ]}
+              />
             </Card>
             <Card title="参考链接">
-              <Table rowKey="id" size="small" pagination={false} dataSource={detail?.links ?? []} columns={[
-                { title: '标题', dataIndex: 'title' },
-                { title: '类型', dataIndex: 'linkType' },
-                {
-                  title: '操作',
-                  render: (_, row: ArticleLink) => (
-                    <Popconfirm title="删除参考链接？" onConfirm={() => deleteLinkMutation.mutate(row.id)}>
-                      <Button size="small" danger>删除</Button>
-                    </Popconfirm>
-                  )
-                }
-              ]} />
+              <Table
+                rowKey="id"
+                size="small"
+                pagination={false}
+                loading={isDetailLoading || deleteLinkMutation.isPending}
+                dataSource={detail?.links ?? []}
+                locale={{
+                  emptyText: <AdminTableEmptyState title="暂无文章参考链接" description={articleLinkEmptyDescription()} />
+                }}
+                columns={[
+                  { title: '标题', dataIndex: 'title' },
+                  { title: '类型', dataIndex: 'linkType' },
+                  {
+                    title: '操作',
+                    render: (_, row: ArticleLink) => (
+                      <Popconfirm title="删除参考链接？" onConfirm={() => deleteLinkMutation.mutate(row.id)}>
+                        <Button size="small" danger>删除</Button>
+                      </Popconfirm>
+                    )
+                  }
+                ]}
+              />
             </Card>
           </div>
         </Card>
@@ -780,6 +800,14 @@ export function ArticlesAdminPage() {
       </Modal>
     </div>
   );
+}
+
+function articleAssetEmptyDescription(): string {
+  return '可新增文本附件、Prompt、配置文件或上传文件附件。';
+}
+
+function articleLinkEmptyDescription(): string {
+  return '可新增外部或站内参考链接，帮助读者继续阅读。';
 }
 
 export function ApiKeysAdminPage() {
