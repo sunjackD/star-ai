@@ -272,12 +272,18 @@ export function UsersAdminPage() {
   });
   const statusMutation = useMutation({
     mutationFn: ({ id, status }: { id: number; status: string }) => putData(`/admin/users/${id}/status`, { status }),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['admin-users'] }),
+    onSuccess: () => {
+      message.success('用户状态已更新');
+      queryClient.invalidateQueries({ queryKey: ['admin-users'] });
+    },
     onError: (error) => message.error(adminUserStatusFailureNotice(error))
   });
   const roleMutation = useMutation({
     mutationFn: ({ id, roleNames }: { id: number; roleNames: string[] }) => putData(`/admin/users/${id}/roles`, { roles: roleNames }),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['admin-users'] }),
+    onSuccess: () => {
+      message.success('用户角色已更新');
+      queryClient.invalidateQueries({ queryKey: ['admin-users'] });
+    },
     onError: (error) => message.error(adminUserRoleFailureNotice(error))
   });
   const passwordMutation = useMutation({

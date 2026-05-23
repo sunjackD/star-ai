@@ -500,6 +500,11 @@ describe('workspace style guard', () => {
     expect(adminSource).toContain('disabled={isUserRolesUnavailable}');
   });
 
+  it('confirms user admin inline updates after table actions', () => {
+    expect(adminSource).toContain("message.success('用户状态已更新');");
+    expect(adminSource).toContain("message.success('用户角色已更新');");
+  });
+
   it('surfaces Skill admin category dependency failures', () => {
     expect(adminSource).toContain('isSkillCategoriesUnavailable');
     expect(adminSource).toContain('skillCategoriesUnavailableNotice()');
