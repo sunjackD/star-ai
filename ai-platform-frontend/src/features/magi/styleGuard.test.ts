@@ -488,6 +488,13 @@ describe('workspace style guard', () => {
     expect(adminSource).toContain('系统设置暂不可用');
   });
 
+  it('surfaces settings default role dependency failures', () => {
+    expect(adminSource).toContain('isSettingsRolesUnavailable');
+    expect(adminSource).toContain('settingsRolesUnavailableNotice()');
+    expect(adminSource).toContain('注册默认角色暂不可用');
+    expect(adminSource).toContain('loading={isSettingsRolesLoading}');
+  });
+
   it('shows a concrete failure notice when icon upload fails', () => {
     expect(adminSource).toContain('iconUploadFailureNotice');
     expect(adminSource).toContain('message.error(iconUploadFailureNotice(error))');

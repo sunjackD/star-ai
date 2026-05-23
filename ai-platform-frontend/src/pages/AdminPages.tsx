@@ -128,7 +128,11 @@ export function SettingsAdminPage() {
     queryKey: ['admin-settings'],
     queryFn: () => getData<AdminSettings>('/admin/settings')
   });
-  const { data: roles = [] } = useQuery({ queryKey: ['admin-roles'], queryFn: () => getData<Role[]>('/admin/roles') });
+  const {
+    data: roles = [],
+    isLoading: isSettingsRolesLoading,
+    isError: isSettingsRolesUnavailable
+  } = useQuery({ queryKey: ['admin-roles'], queryFn: () => getData<Role[]>('/admin/roles') });
   const roleOptions = roles.length
     ? roles.map((role) => ({ label: role.name, value: role.name }))
     : ['VIEWER', 'DEVELOPER', 'ADMIN'].map((role) => ({ label: role, value: role }));
@@ -160,6 +164,14 @@ export function SettingsAdminPage() {
           description={settingsLoadFailureNotice()}
         />
       )}
+      {isSettingsRolesUnavailable && (
+        <Alert
+          showIcon
+          type="warning"
+          message="注册默认角色暂不可用"
+          description={settingsRolesUnavailableNotice()}
+        />
+      )}
       <div className="settings-grid">
         <Card className="settings-form-card" loading={isSettingsLoading}>
           <Form form={form} layout="vertical" onFinish={(values) => mutation.mutate(values as AdminSettings)}>
@@ -173,7 +185,7 @@ export function SettingsAdminPage() {
               <Select options={THEME_OPTIONS} />
             </Form.Item>
             <Form.Item name="defaultUserRole" label="注册默认角色" rules={[{ required: true }]}>
-              <Select options={roleOptions} />
+              <Select options={roleOptions} loading={isSettingsRolesLoading} />
             </Form.Item>
             <Form.Item
               name="apiKeyDefaultExpireDays"
@@ -210,6 +222,10 @@ function settingsSaveFailureNotice(error: unknown): string {
 
 function settingsLoadFailureNotice(): string {
   return '请确认后端服务和系统设置接口可用，然后刷新页面。';
+}
+
+function settingsRolesUnavailableNotice(): string {
+  return '当前使用内置角色选项兜底，请确认角色接口可用后刷新再调整默认注册角色。';
 }
 
 export function UsersAdminPage() {
