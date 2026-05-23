@@ -607,7 +607,7 @@ export function FinetuneJobsAdminPage() {
       { title: '名称', dataIndex: 'name' },
       { title: '基础模型', dataIndex: 'baseModel' },
       { title: '数据集', render: (row) => row.dataset?.name ?? '-' },
-      { title: '状态', dataIndex: 'status' },
+      { title: '状态', render: (row) => <Tag color={finetuneJobStatusColor(row.status)}>{row.status}</Tag> },
       { title: '进度', dataIndex: 'progress' }
     ],
     extraToolbar: isFinetuneDatasetsUnavailable ? (
@@ -624,6 +624,22 @@ export function FinetuneJobsAdminPage() {
 
 function finetuneDatasetsUnavailableNotice(): string {
   return '数据集下拉会暂时为空，请确认数据集接口可用后刷新再维护微调任务。';
+}
+
+function finetuneJobStatusColor(status: string): string {
+  if (status === 'COMPLETED' || status === 'ACTIVE') {
+    return 'green';
+  }
+  if (status === 'RUNNING') {
+    return 'blue';
+  }
+  if (status === 'DRAFT') {
+    return 'gold';
+  }
+  if (status === 'DISABLED') {
+    return 'red';
+  }
+  return 'default';
 }
 
 export function LinksAdminPage() {

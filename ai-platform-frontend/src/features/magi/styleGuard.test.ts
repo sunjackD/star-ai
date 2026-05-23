@@ -679,6 +679,18 @@ describe('workspace style guard', () => {
     expect(adminSource).toContain("queryKey: ['admin-datasets']");
   });
 
+  it('renders finetune job statuses with distinct tags', () => {
+    const finetuneAdminStart = adminSource.indexOf('export function FinetuneJobsAdminPage()');
+    const linksAdminStart = adminSource.indexOf('export function LinksAdminPage()');
+    expect(finetuneAdminStart).toBeGreaterThanOrEqual(0);
+    expect(linksAdminStart).toBeGreaterThan(finetuneAdminStart);
+    const finetuneAdminSource = adminSource.slice(finetuneAdminStart, linksAdminStart);
+    expect(finetuneAdminSource).toContain(
+      "render: (row) => <Tag color={finetuneJobStatusColor(row.status)}>{row.status}</Tag>"
+    );
+    expect(adminSource).toContain("function finetuneJobStatusColor(status: string): string");
+  });
+
   it('surfaces user admin action failures', () => {
     expect(adminSource).toContain('adminUserSaveFailureNotice');
     expect(adminSource).toContain('adminUserStatusFailureNotice');
