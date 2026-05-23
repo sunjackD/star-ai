@@ -1405,18 +1405,23 @@ function MarketSkillUploadButton(props: {
     },
     onSuccess: () => {
       message.success('Skill 已上传');
-      setModalOpen(false);
-      setFiles([]);
-      form.resetFields();
+      closeMarketSkillUploadModal();
       props.onUploaded();
     },
     onError: (error) => message.error(error instanceof Error ? error.message : getApiErrorMessage(error, '上传失败'))
   });
 
+  function closeMarketSkillUploadModal() {
+    setModalOpen(false);
+    setFiles([]);
+    setDirectoryMode(false);
+    form.resetFields();
+  }
+
   return (
     <>
       <Button type="primary" onClick={() => props.requireLogin(() => setModalOpen(true))}>上传 Skill</Button>
-      <Modal open={modalOpen} title="上传 Skill 到市场" footer={null} onCancel={() => setModalOpen(false)} width={720}>
+      <Modal open={modalOpen} title="上传 Skill 到市场" footer={null} onCancel={closeMarketSkillUploadModal} width={720}>
         <Form
           form={form}
           layout="vertical"

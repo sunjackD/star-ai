@@ -163,6 +163,12 @@ describe('workspace style guard', () => {
     expect(appSource).toContain('Skill 市场暂不可用');
   });
 
+  it('clears pending market Skill upload selections when the dialog closes', () => {
+    expect(appSource).toContain('closeMarketSkillUploadModal');
+    expect(appSource).toContain('onCancel={closeMarketSkillUploadModal}');
+    expect(appSource).toContain('setDirectoryMode(false)');
+  });
+
   it('shows a clear unavailable state when the article catalog query fails', () => {
     expect(appSource).toContain('articlesUnavailable');
     expect(appSource).toContain('articleCatalogUnavailableDescription()');
