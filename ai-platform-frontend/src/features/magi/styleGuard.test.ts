@@ -12,6 +12,12 @@ describe('workspace style guard', () => {
     expect(styles.length).toBeGreaterThan(1000);
   });
 
+  it('keeps page and admin toolbar alerts from crowding controls', () => {
+    expect(styles).toContain('.page > .ant-alert');
+    expect(styles).toContain('.admin-toolbar .ant-alert');
+    expect(styles).toContain('flex: 1 1 360px');
+  });
+
   it('keeps the operations console free of decorative pseudo-element blobs', () => {
     expect(styles).not.toMatch(/body::after\s*\{/);
     expect(styles).not.toMatch(/\.workspace-hero::after\s*\{/);

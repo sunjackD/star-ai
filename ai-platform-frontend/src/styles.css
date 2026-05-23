@@ -1150,6 +1150,16 @@ pre {
   width: min(420px, 100%);
 }
 
+.page > .ant-alert {
+  margin-bottom: 18px;
+}
+
+.admin-toolbar .ant-alert {
+  flex: 1 1 360px;
+  min-width: min(360px, 100%);
+  margin-bottom: 0;
+}
+
 .admin-filter-select {
   min-width: 150px;
 }
