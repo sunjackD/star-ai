@@ -308,6 +308,12 @@ describe('workspace style guard', () => {
     expect(styles).toContain('.admin-table-empty');
   });
 
+  it('surfaces shared admin resource list query failures', () => {
+    expect(adminSource).toContain('resourceListUnavailable');
+    expect(adminSource).toContain('resourceListUnavailableNotice(resourceSubject)');
+    expect(adminSource).toContain('dataSource={filteredResources}');
+  });
+
   it('gives API Key and audit admin records loading and empty feedback', () => {
     expect(adminSource).toContain('apiKeyRecordEmptyDescription');
     expect(adminSource).toContain('auditLogInitialEmptyDescription');

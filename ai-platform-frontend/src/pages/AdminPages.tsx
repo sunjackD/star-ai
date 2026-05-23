@@ -991,18 +991,22 @@ function ResourceAdminPage<T extends ResourceRecord>({ config }: { config: Resou
   const [modalOpen, setModalOpen] = useState(false);
   const [keyword, setKeyword] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>();
-  const { data = [], isLoading } = useQuery({ queryKey: [config.queryKey], queryFn: () => getData<T[]>(config.endpoint) });
+  const {
+    data: resources = [],
+    isLoading,
+    isError: resourceListUnavailable
+  } = useQuery({ queryKey: [config.queryKey], queryFn: () => getData<T[]>(config.endpoint) });
   const resourceSubject = resourceDialogSubject(config.title);
   const resourceEmptyDescription = keyword || statusFilter
     ? filteredResourceEmptyDescription()
     : initialResourceEmptyDescription(resourceSubject);
-  const hasStatus = config.fields.some((item) => item.name === 'status') || data.some((item) => item.status);
-  const statusOptions = Array.from(new Set(data.map((item) => item.status).filter(Boolean) as string[]));
-  const filteredData = useMemo(() => data.filter((row) => {
+  const hasStatus = config.fields.some((item) => item.name === 'status') || resources.some((item) => item.status);
+  const statusOptions = Array.from(new Set(resources.map((item) => item.status).filter(Boolean) as string[]));
+  const filteredResources = useMemo(() => resources.filter((row) => {
     const keywordMatched = !keyword || JSON.stringify(row).toLowerCase().includes(keyword.toLowerCase());
     const statusMatched = !statusFilter || row.status === statusFilter;
     return keywordMatched && statusMatched;
-  }), [data, keyword, statusFilter]);
+  }), [resources, keyword, statusFilter]);
   const saveMutation = useMutation({
     mutationFn: (values: Record<string, unknown>) => editing
       ? putData(`${config.endpoint}/${editing.id}`, values)
@@ -1062,6 +1066,13 @@ function ResourceAdminPage<T extends ResourceRecord>({ config }: { config: Resou
   return (
     <div className="page">
       <PageHeader title={config.title} description={config.description} />
+      {resourceListUnavailable && (
+        <Alert
+          showIcon
+          type="warning"
+          message={resourceListUnavailableNotice(resourceSubject)}
+        />
+      )}
       <Space className="admin-toolbar" wrap>
         <Input.Search placeholder={resourceSearchPlaceholder(resourceSubject)} onChange={(event) => setKeyword(event.target.value)} allowClear />
         {hasStatus && (
@@ -1079,7 +1090,7 @@ function ResourceAdminPage<T extends ResourceRecord>({ config }: { config: Resou
       <Table
         rowKey="id"
         loading={isLoading || deleteMutation.isPending}
-        dataSource={filteredData}
+        dataSource={filteredResources}
         columns={columns}
         locale={{
           emptyText: (
@@ -1140,6 +1151,10 @@ function initialResourceEmptyDescription(subject: string): string {
 
 function filteredResourceEmptyDescription(): string {
   return '没有匹配当前搜索或状态筛选的记录。';
+}
+
+function resourceListUnavailableNotice(subject: string): string {
+  return `${resourceSubjectLabel(subject).trim()} 列表暂不可用，请确认后端服务和接口可用后刷新。`;
 }
 
 function resourceSubjectLabel(subject: string): string {
