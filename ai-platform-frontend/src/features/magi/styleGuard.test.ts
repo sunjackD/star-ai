@@ -691,6 +691,18 @@ describe('workspace style guard', () => {
     expect(adminSource).toContain("function finetuneJobStatusColor(status: string): string");
   });
 
+  it('renders finetune job progress as a compact progress bar', () => {
+    const finetuneAdminStart = adminSource.indexOf('export function FinetuneJobsAdminPage()');
+    const linksAdminStart = adminSource.indexOf('export function LinksAdminPage()');
+    expect(finetuneAdminStart).toBeGreaterThanOrEqual(0);
+    expect(linksAdminStart).toBeGreaterThan(finetuneAdminStart);
+    const finetuneAdminSource = adminSource.slice(finetuneAdminStart, linksAdminStart);
+    expect(finetuneAdminSource).toContain(
+      "{ title: '进度', render: (row) => <Progress percent={row.progress} size=\"small\" /> }"
+    );
+    expect(adminSource).toContain('Progress,');
+  });
+
   it('surfaces user admin action failures', () => {
     expect(adminSource).toContain('adminUserSaveFailureNotice');
     expect(adminSource).toContain('adminUserStatusFailureNotice');

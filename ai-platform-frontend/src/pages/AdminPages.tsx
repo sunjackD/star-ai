@@ -11,6 +11,7 @@ import {
   InputNumber,
   Modal,
   Popconfirm,
+  Progress,
   Select,
   Space,
   Statistic,
@@ -608,7 +609,7 @@ export function FinetuneJobsAdminPage() {
       { title: '基础模型', dataIndex: 'baseModel' },
       { title: '数据集', render: (row) => row.dataset?.name ?? '-' },
       { title: '状态', render: (row) => <Tag color={finetuneJobStatusColor(row.status)}>{row.status}</Tag> },
-      { title: '进度', dataIndex: 'progress' }
+      { title: '进度', render: (row) => <Progress percent={row.progress} size="small" /> }
     ],
     extraToolbar: isFinetuneDatasetsUnavailable ? (
       <Alert
