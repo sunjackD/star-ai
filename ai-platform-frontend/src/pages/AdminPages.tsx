@@ -858,7 +858,7 @@ export function ArticlesAdminPage() {
                 <Button size="small" onClick={() => setSelected(row)}>内容</Button>
                 <Button size="small" onClick={() => openEdit(row)}>编辑</Button>
                 <Popconfirm title="确认删除该文章？" onConfirm={() => deleteArticleMutation.mutate(row.id)}>
-                  <Button size="small" danger>删除</Button>
+                  <Button size="small" danger loading={deleteArticleMutation.isPending}>删除</Button>
                 </Popconfirm>
               </Space>
             )

@@ -566,6 +566,10 @@ describe('workspace style guard', () => {
     expect(adminSource).not.toContain('title="删除参考链接？"');
   });
 
+  it('shows loading feedback while deleting articles', () => {
+    expect(adminSource).toContain('<Button size="small" danger loading={deleteArticleMutation.isPending}>删除</Button>');
+  });
+
   it('renders article admin statuses with distinct tags', () => {
     const articleAdminStart = adminSource.indexOf('export function ArticlesAdminPage()');
     const apiKeyAdminStart = adminSource.indexOf('export function ApiKeysAdminPage()');
