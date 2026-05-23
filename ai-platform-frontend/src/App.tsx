@@ -628,6 +628,10 @@ function loginFailureNotice(error: unknown): string {
   return getApiErrorMessage(error, '登录失败，请检查账号密码或后端服务');
 }
 
+function setupAdminFailureNotice(error: unknown): string {
+  return getApiErrorMessage(error, '初始化失败，请检查输入或刷新后重试');
+}
+
 function SetupPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -641,7 +645,7 @@ function SetupPage() {
       queryClient.invalidateQueries({ queryKey: ['setup-status'] });
       navigate('/login', { replace: true });
     },
-    onError: (error) => message.error(getApiErrorMessage(error, '初始化失败，请检查输入或刷新后重试'))
+    onError: (error) => message.error(setupAdminFailureNotice(error))
   });
 
   return (

@@ -180,6 +180,12 @@ describe('workspace style guard', () => {
     expect(appSource).toContain('登录失败，请检查账号密码或后端服务');
   });
 
+  it('shows backend-aware setup admin failure feedback', () => {
+    expect(appSource).toContain('setupAdminFailureNotice');
+    expect(appSource).toContain('onError: (error) => message.error(setupAdminFailureNotice(error))');
+    expect(appSource).toContain('初始化失败，请检查输入或刷新后重试');
+  });
+
   it('keeps auth profile sync from showing a blank boot screen', () => {
     expect(appSource).toContain('authProfileLoadingNotice()');
     expect(appSource).toContain('正在同步登录状态');
