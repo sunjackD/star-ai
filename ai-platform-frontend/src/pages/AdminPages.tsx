@@ -1132,7 +1132,10 @@ export function ApiKeysAdminPage() {
   });
   const mutation = useMutation({
     mutationFn: (id: number) => postData(`/admin/api-keys/${id}/disable`),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['admin-api-keys'] }),
+    onSuccess: () => {
+      message.success('API Key 已禁用');
+      queryClient.invalidateQueries({ queryKey: ['admin-api-keys'] });
+    },
     onError: (error) => message.error(apiKeyDisableFailureNotice(error))
   });
   return (
@@ -1169,7 +1172,14 @@ export function ApiKeysAdminPage() {
           { title: '权限', dataIndex: 'scopes', render: (scopes: string[]) => scopes.map((scope) => <Tag key={scope}>{scope}</Tag>) },
           { title: '状态', dataIndex: 'status' },
           { title: '最后使用', dataIndex: 'lastUsedAt', render: (value) => value ?? '-' },
-          { title: '操作', render: (_, row) => <Button danger size="small" onClick={() => mutation.mutate(row.id)}>禁用</Button> }
+          {
+            title: '操作',
+            render: (_, row) => (
+              <Popconfirm title="确认禁用该 API Key？" onConfirm={() => mutation.mutate(row.id)}>
+                <Button danger size="small">禁用</Button>
+              </Popconfirm>
+            )
+          }
         ]}
       />
     </div>

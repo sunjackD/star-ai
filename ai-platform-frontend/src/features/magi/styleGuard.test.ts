@@ -471,6 +471,11 @@ describe('workspace style guard', () => {
     expect(adminSource).toContain('API Key 禁用失败');
   });
 
+  it('confirms API Key admin disable before applying the action', () => {
+    expect(adminSource).toContain('确认禁用该 API Key？');
+    expect(adminSource).toContain("message.success('API Key 已禁用');");
+  });
+
   it('gives article admin detail tables explicit loading and empty feedback', () => {
     expect(adminSource).toContain('articleAssetEmptyDescription');
     expect(adminSource).toContain('articleLinkEmptyDescription');
