@@ -1279,7 +1279,7 @@ function ResourceAdminPage<T extends ResourceRecord>({ config }: { config: Resou
       ? putData(`${config.endpoint}/${editing.id}`, values)
       : postData(config.endpoint, values),
     onSuccess: () => {
-      message.success('已保存');
+      message.success(resourceSaveSuccessNotice(resourceSubject));
       closeResourceDialog();
       queryClient.invalidateQueries({ queryKey: [config.queryKey] });
     },
@@ -1288,7 +1288,7 @@ function ResourceAdminPage<T extends ResourceRecord>({ config }: { config: Resou
   const deleteMutation = useMutation({
     mutationFn: (id: number) => deleteData(`${config.endpoint}/${id}`),
     onSuccess: () => {
-      message.success('已删除');
+      message.success(resourceDeleteSuccessNotice(resourceSubject));
       queryClient.invalidateQueries({ queryKey: [config.queryKey] });
     },
     onError: (error) => message.error(resourceDeleteFailureNotice(resourceSubject, error))
@@ -1432,6 +1432,18 @@ function resourceSaveFailureNotice(subject: string, error: unknown): string {
 
 function resourceDeleteFailureNotice(subject: string, error: unknown): string {
   return apiErrorMessage(error, `${resourceSubjectLabel(subject).trim()}删除失败`);
+}
+
+function resourceSaveSuccessNotice(subject: string): string {
+  return resourceActionSuccessNotice(subject, '已保存');
+}
+
+function resourceDeleteSuccessNotice(subject: string): string {
+  return resourceActionSuccessNotice(subject, '已删除');
+}
+
+function resourceActionSuccessNotice(subject: string, completedAction: string): string {
+  return /^[A-Za-z0-9]/.test(subject) ? `${subject} ${completedAction}` : `${subject}${completedAction}`;
 }
 
 function resourceSubjectLabel(subject: string): string {

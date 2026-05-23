@@ -450,6 +450,11 @@ describe('workspace style guard', () => {
     expect(adminSource).toContain('删除失败');
   });
 
+  it('uses specific shared admin resource success notices', () => {
+    expect(adminSource).toContain('resourceSaveSuccessNotice(resourceSubject)');
+    expect(adminSource).toContain('resourceDeleteSuccessNotice(resourceSubject)');
+  });
+
   it('gives API Key and audit admin records loading and empty feedback', () => {
     expect(adminSource).toContain('apiKeyRecordEmptyDescription');
     expect(adminSource).toContain('auditLogInitialEmptyDescription');
