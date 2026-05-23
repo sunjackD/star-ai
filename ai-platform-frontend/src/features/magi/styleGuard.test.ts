@@ -601,6 +601,7 @@ describe('workspace style guard', () => {
     expect(adminSource).toContain('closeSkillUploadModal');
     expect(adminSource).toContain('onCancel={closeSkillUploadModal}');
     expect(adminSource).toContain('form.resetFields();');
+    expect(adminSource).toContain('setDirectoryMode(false);');
   });
 
   it('clears pending article attachment dialog state when child dialogs close', () => {

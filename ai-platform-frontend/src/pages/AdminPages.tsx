@@ -1612,6 +1612,7 @@ function SkillUploadButton({
   function closeSkillUploadModal() {
     setModalOpen(false);
     setFiles([]);
+    setDirectoryMode(false);
     form.resetFields();
   }
 
