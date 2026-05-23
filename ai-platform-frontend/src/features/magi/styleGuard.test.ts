@@ -551,7 +551,16 @@ describe('workspace style guard', () => {
   });
 
   it('shows loading feedback while disabling API Keys', () => {
-    expect(adminSource).toContain('<Button danger size="small" loading={mutation.isPending}>禁用</Button>');
+    expect(adminSource).toContain('const [disablingApiKeyId, setDisablingApiKeyId] = useState<number>();');
+    expect(adminSource).toContain('const apiKeyDisableMutation = useMutation({');
+    expect(adminSource).toContain('function disableApiKey(id: number) {');
+    expect(adminSource).toContain('setDisablingApiKeyId(id);');
+    expect(adminSource).toContain('onSettled: () => setDisablingApiKeyId(undefined)');
+    expect(adminSource).toContain('onConfirm={() => disableApiKey(row.id)}');
+    expect(adminSource).toContain('loading={apiKeyDisableMutation.isPending && disablingApiKeyId === row.id}');
+    expect(adminSource).toContain('disabled={apiKeyDisableMutation.isPending && disablingApiKeyId !== row.id}');
+    expect(adminSource).toContain('loading={apiKeyRecordsLoading}');
+    expect(adminSource).not.toContain('loading={apiKeyRecordsLoading || mutation.isPending}');
   });
 
   it('renders API Key admin statuses with distinct tags', () => {

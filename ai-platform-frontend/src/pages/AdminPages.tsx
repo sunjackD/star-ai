@@ -1199,6 +1199,7 @@ export function ApiKeysAdminPage() {
   const queryClient = useQueryClient();
   const [keyword, setKeyword] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>();
+  const [disablingApiKeyId, setDisablingApiKeyId] = useState<number>();
   const {
     data: apiKeys = [],
     isLoading: apiKeyRecordsLoading,
@@ -1213,14 +1214,21 @@ export function ApiKeysAdminPage() {
     const statusMatched = !statusFilter || item.status === statusFilter;
     return keywordMatched && statusMatched;
   });
-  const mutation = useMutation({
+  const apiKeyDisableMutation = useMutation({
     mutationFn: (id: number) => postData(`/admin/api-keys/${id}/disable`),
     onSuccess: () => {
       message.success('API Key 已禁用');
       queryClient.invalidateQueries({ queryKey: ['admin-api-keys'] });
     },
-    onError: (error) => message.error(apiKeyDisableFailureNotice(error))
+    onError: (error) => message.error(apiKeyDisableFailureNotice(error)),
+    onSettled: () => setDisablingApiKeyId(undefined)
   });
+
+  function disableApiKey(id: number) {
+    setDisablingApiKeyId(id);
+    apiKeyDisableMutation.mutate(id);
+  }
+
   return (
     <div className="page">
       <PageHeader title="API Key 记录" description="查看 Agent 代管 API Key 状态、范围和最后使用时间。" />
@@ -1243,7 +1251,7 @@ export function ApiKeysAdminPage() {
       </Space>
       <Table
         rowKey="id"
-        loading={apiKeyRecordsLoading || mutation.isPending}
+        loading={apiKeyRecordsLoading}
         dataSource={filteredApiKeys}
         pagination={{ pageSize: 8 }}
         locale={{
@@ -1258,8 +1266,15 @@ export function ApiKeysAdminPage() {
           {
             title: '操作',
             render: (_, row) => row.status === 'ACTIVE' ? (
-              <Popconfirm title="确认禁用该 API Key？" onConfirm={() => mutation.mutate(row.id)}>
-                <Button danger size="small" loading={mutation.isPending}>禁用</Button>
+              <Popconfirm title="确认禁用该 API Key？" onConfirm={() => disableApiKey(row.id)}>
+                <Button
+                  danger
+                  size="small"
+                  loading={apiKeyDisableMutation.isPending && disablingApiKeyId === row.id}
+                  disabled={apiKeyDisableMutation.isPending && disablingApiKeyId !== row.id}
+                >
+                  禁用
+                </Button>
               </Popconfirm>
             ) : '-'
           }
