@@ -1631,15 +1631,7 @@ function ApiKeysPage() {
         </div>
       </Card>
 
-      {createdKey && (
-        <Alert
-          type="success"
-          showIcon
-          message="请立即记录 API Key"
-          description={<code>{createdKey}</code>}
-          className="one-time-key"
-        />
-      )}
+      {createdKey && <CreatedApiKeyNotice value={createdKey} />}
       <Table rowKey="id" dataSource={data} columns={[
         { title: '名称', dataIndex: 'name' },
         { title: '前缀', dataIndex: 'keyPrefix' },
@@ -1739,6 +1731,23 @@ function renderScopeTags(scopes: string[]): ReactNode {
     return <Text type="secondary">按需选择</Text>;
   }
   return scopes.map((scope) => renderScopeTag(scope));
+}
+
+function CreatedApiKeyNotice({ value }: { value: string }) {
+  return (
+    <Alert
+      type="success"
+      showIcon
+      message="请立即记录 API Key"
+      description={(
+        <Space direction="vertical" size={6}>
+          <Text code copyable={{ text: value }} className="one-time-key-value">{value}</Text>
+          <Text type="secondary">只显示一次，关闭页面后无法再次查看。</Text>
+        </Space>
+      )}
+      className="one-time-key"
+    />
+  );
 }
 
 function formatDateTime(value?: string): string {

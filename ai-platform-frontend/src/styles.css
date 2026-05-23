@@ -1025,10 +1025,12 @@ pre {
   margin-bottom: 16px;
 }
 
-.one-time-key code {
+.one-time-key code,
+.one-time-key-value {
   display: block;
   margin-top: 8px;
   word-break: break-all;
+  white-space: normal;
 }
 
 .agent-control-panel {

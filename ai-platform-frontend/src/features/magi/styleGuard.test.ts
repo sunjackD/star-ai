@@ -164,6 +164,13 @@ describe('workspace style guard', () => {
     expect(styles).toContain('.detail-state-card');
   });
 
+  it('makes the one-time API Key value copyable after creation', () => {
+    expect(appSource).toContain('CreatedApiKeyNotice');
+    expect(appSource).toContain('copyable={{ text: value }}');
+    expect(appSource).toContain('只显示一次');
+    expect(styles).toContain('.one-time-key-value');
+  });
+
   it('keeps article module semantics out of knowledge-base naming', () => {
     expect(appSource).not.toContain('knowledge-base-');
     expect(styles).not.toContain('knowledge-base-');
