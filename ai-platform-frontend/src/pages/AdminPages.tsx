@@ -591,7 +591,12 @@ export function ModelsAdminPage() {
       field('name', '名称'), field('provider', '提供商'), field('modelType', '类型'),
       field('capabilities', '能力'), field('pricing', '价格'), field('endpoint', '入口')
     ],
-    columns: baseColumns<AiModel>(['provider', 'modelType', 'endpoint'])
+    columns: [
+      { title: '名称', dataIndex: 'name' },
+      { title: '提供商', dataIndex: 'provider' },
+      { title: '类型', dataIndex: 'modelType' },
+      { title: '入口', dataIndex: 'endpoint' }
+    ]
   }} />;
 }
 

@@ -685,6 +685,18 @@ describe('workspace style guard', () => {
     expect(adminSource).toContain("function skillAdminStatusColor(status: string): string");
   });
 
+  it('uses user-facing column titles in model admin tables', () => {
+    const modelAdminStart = adminSource.indexOf('export function ModelsAdminPage()');
+    const datasetAdminStart = adminSource.indexOf('export function DatasetsAdminPage()');
+    expect(modelAdminStart).toBeGreaterThanOrEqual(0);
+    expect(datasetAdminStart).toBeGreaterThan(modelAdminStart);
+    const modelAdminSource = adminSource.slice(modelAdminStart, datasetAdminStart);
+    expect(modelAdminSource).toContain("{ title: '提供商', dataIndex: 'provider' }");
+    expect(modelAdminSource).toContain("{ title: '类型', dataIndex: 'modelType' }");
+    expect(modelAdminSource).toContain("{ title: '入口', dataIndex: 'endpoint' }");
+    expect(modelAdminSource).not.toContain("baseColumns<AiModel>(['provider', 'modelType', 'endpoint'])");
+  });
+
   it('surfaces finetune job dataset dependency failures', () => {
     expect(adminSource).toContain('isFinetuneDatasetsUnavailable');
     expect(adminSource).toContain('finetuneDatasetsUnavailableNotice()');
