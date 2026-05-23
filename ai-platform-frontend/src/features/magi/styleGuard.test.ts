@@ -131,6 +131,12 @@ describe('workspace style guard', () => {
     expect(appSource).toContain('Agent 目录暂不可用');
   });
 
+  it('shows a clear unavailable state when the Skill catalog query fails', () => {
+    expect(appSource).toContain('skillsUnavailable');
+    expect(appSource).toContain('skillCatalogUnavailableDescription()');
+    expect(appSource).toContain('Skill 市场暂不可用');
+  });
+
   it('keeps API Key as the primary label while framing it for Agent use', () => {
     expect(appSource).not.toContain('Agent 授权');
     expect(appSource).not.toContain('授权 Key');

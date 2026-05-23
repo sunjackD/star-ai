@@ -768,8 +768,18 @@ function SkillsPage() {
   const token = useAuthStore((state) => state.token);
   const queryClient = useQueryClient();
   const navigate = useNavigate();
-  const { data = [], isLoading: skillsLoading } = useQuery({ queryKey: ['skills'], queryFn: () => getPublicData<Skill[]>('/skills') });
-  const { data: categories = [], isLoading: skillCategoriesLoading } = useQuery({ queryKey: ['skill-categories'], queryFn: () => getPublicData<SkillCategory[]>('/skills/categories') });
+  const { data = [], isLoading: skillsLoading, isError: skillListUnavailable } = useQuery({
+    queryKey: ['skills'],
+    queryFn: () => getPublicData<Skill[]>('/skills')
+  });
+  const {
+    data: categories = [],
+    isLoading: skillCategoriesLoading,
+    isError: skillCategoriesUnavailable
+  } = useQuery({
+    queryKey: ['skill-categories'],
+    queryFn: () => getPublicData<SkillCategory[]>('/skills/categories')
+  });
   const [keyword, setKeyword] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [artifactFilter, setArtifactFilter] = useState('all');
@@ -784,6 +794,7 @@ function SkillsPage() {
   const totalStars = data.reduce((sum, skill) => sum + skill.starCount, 0);
   const fileSkills = data.filter((skill) => skill.artifactType === 'FILE').length;
   const skillCatalogLoading = skillsLoading || skillCategoriesLoading;
+  const skillsUnavailable = skillListUnavailable || skillCategoriesUnavailable;
 
   function requireLogin(action: () => void) {
     if (!token) {
@@ -845,6 +856,8 @@ function SkillsPage() {
       <div className="skill-registry-grid">
         {skillCatalogLoading ? (
           <CatalogLoadingState title="正在加载 Skill" />
+        ) : skillsUnavailable ? (
+          <CatalogEmptyState title="Skill 市场暂不可用" description={skillCatalogUnavailableDescription()} />
         ) : rows.length === 0 ? (
           <CatalogEmptyState title="暂无匹配 Skill" description="调整搜索词、分类或包类型，或者上传新的 Skill。" />
         ) : rows.map((row) => (
@@ -878,6 +891,10 @@ function SkillsPage() {
       </div>
     </div>
   );
+}
+
+function skillCatalogUnavailableDescription(): string {
+  return '请确认后端服务、公开 Skill 列表和分类接口可用，然后刷新页面。';
 }
 
 function SkillDetailPage() {
