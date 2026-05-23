@@ -109,6 +109,11 @@ describe('workspace style guard', () => {
     expect(appSource).toContain('dashboardSkillTableEmptyDescription()');
   });
 
+  it('keeps dashboard summary tables horizontally scannable on small screens', () => {
+    expect(appSource).toContain('DASHBOARD_SUMMARY_TABLE_SCROLL');
+    expect(appSource.match(/scroll=\{DASHBOARD_SUMMARY_TABLE_SCROLL\}/g)).toHaveLength(2);
+  });
+
   it('keeps API Key as the primary label while framing it for Agent use', () => {
     expect(appSource).not.toContain('Agent 授权');
     expect(appSource).not.toContain('授权 Key');

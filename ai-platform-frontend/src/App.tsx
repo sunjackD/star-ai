@@ -72,6 +72,7 @@ import {
 const { Header, Sider, Content } = Layout;
 const { Title, Paragraph, Text } = Typography;
 type UserMenuKey = 'profile' | 'apiKeys' | 'settings' | 'logout';
+const DASHBOARD_SUMMARY_TABLE_SCROLL = { x: 560 };
 
 function SetupGate() {
   const location = useLocation();
@@ -402,6 +403,7 @@ function DashboardPage() {
             dataSource={agents.slice(0, 5)}
             loading={dashboardAgentsLoading}
             pagination={false}
+            scroll={DASHBOARD_SUMMARY_TABLE_SCROLL}
             locale={{ emptyText: <Empty description={dashboardAgentTableEmptyDescription()} /> }}
             columns={[
               { title: '名称', dataIndex: 'name', render: (name, row) => <Link to={`/agents/${row.id}`}>{name}</Link> },
@@ -416,6 +418,7 @@ function DashboardPage() {
             dataSource={skills.slice(0, 5)}
             loading={dashboardSkillsLoading}
             pagination={false}
+            scroll={DASHBOARD_SUMMARY_TABLE_SCROLL}
             locale={{ emptyText: <Empty description={dashboardSkillTableEmptyDescription()} /> }}
             columns={[
               { title: '名称', dataIndex: 'name', render: (name, row) => <Link to={`/skills/${row.id}`}>{name}</Link> },
