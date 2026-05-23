@@ -600,6 +600,25 @@ html[data-theme='minimal-modern'] .app-sider .ant-menu-submenu-title {
   grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
 }
 
+.catalog-empty-state {
+  grid-column: 1 / -1;
+  min-height: 220px;
+  display: grid;
+  place-items: center;
+  padding: 38px 20px;
+  border: 1px solid rgba(255, 255, 255, 0.74);
+  border-radius: var(--radius);
+  background:
+    var(--glass),
+    linear-gradient(145deg, rgba(159, 211, 255, 0.12), transparent 54%, rgba(124, 108, 255, 0.08));
+  box-shadow: var(--shadow-soft), inset 0 1px 0 rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(22px) saturate(158%);
+}
+
+.catalog-empty-state .ant-empty {
+  margin: 0;
+}
+
 .resource-card {
   height: 100%;
   transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;

@@ -147,6 +147,15 @@ describe('workspace style guard', () => {
     expect(magiSource).toContain('指引方向');
   });
 
+  it('gives public catalog pages an explicit empty state instead of blank grids', () => {
+    expect(appSource).toContain('CatalogEmptyState');
+    expect(appSource).toContain('暂无匹配 Agent');
+    expect(appSource).toContain('暂无匹配 Skill');
+    expect(appSource).toContain('暂无匹配文章');
+    expect(appSource).toContain('暂无匹配模型');
+    expect(styles).toContain('.catalog-empty-state');
+  });
+
   it('keeps article module semantics out of knowledge-base naming', () => {
     expect(appSource).not.toContain('knowledge-base-');
     expect(styles).not.toContain('knowledge-base-');

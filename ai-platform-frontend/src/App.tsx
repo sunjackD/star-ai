@@ -1,7 +1,7 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import { BrowserRouter, Link, Navigate, Outlet, Route, Routes, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Alert, Button, Card, Form, Input, Layout, Menu, Modal, Popconfirm, Progress, Segmented, Select, Space, Spin, Statistic, Switch, Table, Tag, Typography, Upload, message } from 'antd';
+import { Alert, Button, Card, Empty, Form, Input, Layout, Menu, Modal, Popconfirm, Progress, Segmented, Select, Space, Spin, Statistic, Switch, Table, Tag, Typography, Upload, message } from 'antd';
 import type { RcFile } from 'antd/es/upload';
 import {
   Activity,
@@ -625,7 +625,9 @@ function AgentsPage() {
       </div>
 
       <div className="agent-fleet-grid">
-        {filteredAgents.map((agent) => (
+        {filteredAgents.length === 0 ? (
+          <CatalogEmptyState title="暂无匹配 Agent" description="调整搜索词或分类，或者在平台后台新增 Agent。" />
+        ) : filteredAgents.map((agent) => (
           <section key={agent.id} className="agent-fleet-card">
             <div className="agent-fleet-card-heading">
               <Tag color="blue">{agent.category}</Tag>
@@ -737,7 +739,9 @@ function SkillsPage() {
       </div>
 
       <div className="skill-registry-grid">
-        {rows.map((row) => (
+        {rows.length === 0 ? (
+          <CatalogEmptyState title="暂无匹配 Skill" description="调整搜索词、分类或包类型，或者上传新的 Skill。" />
+        ) : rows.map((row) => (
           <section className="skill-registry-card" key={row.id}>
             <div className="skill-registry-card-heading">
               <Tag>{row.category.name}</Tag>
@@ -892,7 +896,9 @@ function ArticlesPage() {
       </div>
 
       <div className="article-grid">
-        {filteredArticles.map((article) => (
+        {filteredArticles.length === 0 ? (
+          <CatalogEmptyState title="暂无匹配文章" description="切换分类或难度，或者在平台后台新增文章。" />
+        ) : filteredArticles.map((article) => (
           <section key={article.id} className="article-card">
             <div className="article-meta">
               <Tag color="blue">{article.category}</Tag>
@@ -1280,6 +1286,22 @@ function ResourceList<T extends { id: number; name: string; description: string 
   );
 }
 
+function CatalogEmptyState(props: { title: string; description: string }) {
+  return (
+    <div className="catalog-empty-state">
+      <Empty
+        image={Empty.PRESENTED_IMAGE_SIMPLE}
+        description={(
+          <Space direction="vertical" size={4}>
+            <Text strong>{props.title}</Text>
+            <Text type="secondary">{props.description}</Text>
+          </Space>
+        )}
+      />
+    </div>
+  );
+}
+
 function DetailView(props: { title: string; label: string; description: string; markdown: string; stats: [string, number][]; actions?: ReactNode }) {
   return (
     <div className="page">
@@ -1349,7 +1371,9 @@ function ModelsPage() {
       </div>
 
       <div className="model-layer-grid">
-        {filteredModels.map((model) => (
+        {filteredModels.length === 0 ? (
+          <CatalogEmptyState title="暂无匹配模型" description="切换供应商或模型类型，或者在平台后台新增模型。" />
+        ) : filteredModels.map((model) => (
           <section key={model.id} className="model-layer-card">
             <div className="model-layer-card-heading">
               <Tag color="blue">{model.provider}</Tag>
