@@ -119,6 +119,12 @@ describe('workspace style guard', () => {
     expect(appSource).toContain('v7_relativeSplatPath: true');
   });
 
+  it('surfaces dashboard catalog loading failures instead of only showing zeroes', () => {
+    expect(appSource).toContain('dashboardCatalogUnavailable');
+    expect(appSource).toContain('dashboardCatalogUnavailableNotice()');
+    expect(appSource).toContain('type="warning"');
+  });
+
   it('keeps API Key as the primary label while framing it for Agent use', () => {
     expect(appSource).not.toContain('Agent 授权');
     expect(appSource).not.toContain('授权 Key');

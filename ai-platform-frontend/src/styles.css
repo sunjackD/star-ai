@@ -445,6 +445,10 @@ html[data-theme='minimal-modern'] .app-sider .ant-menu-submenu-title {
   backdrop-filter: blur(24px) saturate(155%);
 }
 
+.dashboard-catalog-alert {
+  margin-bottom: 18px;
+}
+
 .magi-cycle-heading {
   display: flex;
   justify-content: space-between;

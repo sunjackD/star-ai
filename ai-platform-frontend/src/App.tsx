@@ -247,17 +247,34 @@ function selectedShellMenuKey(pathname: string): string {
 }
 
 function DashboardPage() {
-  const { data: agents = [], isLoading: dashboardAgentsLoading } = useQuery({
+  const {
+    data: agents = [],
+    isLoading: dashboardAgentsLoading,
+    isError: dashboardAgentsUnavailable
+  } = useQuery({
     queryKey: ['agents'],
     queryFn: () => getPublicData<Agent[]>('/agents')
   });
-  const { data: skills = [], isLoading: dashboardSkillsLoading } = useQuery({
+  const {
+    data: skills = [],
+    isLoading: dashboardSkillsLoading,
+    isError: dashboardSkillsUnavailable
+  } = useQuery({
     queryKey: ['skills'],
     queryFn: () => getPublicData<Skill[]>('/skills')
   });
-  const { data: models = [] } = useQuery({ queryKey: ['models'], queryFn: () => getPublicData<AiModel[]>('/models') });
-  const { data: articles = [] } = useQuery({ queryKey: ['articles'], queryFn: () => getPublicData<ArticleSummary[]>('/articles') });
-  const { data: links = [] } = useQuery({ queryKey: ['links'], queryFn: () => getPublicData<RedirectLink[]>('/links') });
+  const { data: models = [], isError: dashboardModelsUnavailable } = useQuery({
+    queryKey: ['models'],
+    queryFn: () => getPublicData<AiModel[]>('/models')
+  });
+  const { data: articles = [], isError: dashboardArticlesUnavailable } = useQuery({
+    queryKey: ['articles'],
+    queryFn: () => getPublicData<ArticleSummary[]>('/articles')
+  });
+  const { data: links = [], isError: dashboardLinksUnavailable } = useQuery({
+    queryKey: ['links'],
+    queryFn: () => getPublicData<RedirectLink[]>('/links')
+  });
   const { data: platform } = useQuery({ queryKey: ['platform-config'], queryFn: () => getPublicData<PlatformConfig>('/platform/config') });
   const { data: manifest } = useQuery({
     queryKey: ['developer-skill-manifest'],
@@ -267,6 +284,11 @@ function DashboardPage() {
   const activeSkills = skills.filter((skill) => skill.status === 'ACTIVE').length;
   const activeAgents = agents.filter((agent) => agent.status === 'ACTIVE').length;
   const developerTools = manifest?.tools.length ?? 0;
+  const dashboardCatalogUnavailable = dashboardAgentsUnavailable
+    || dashboardSkillsUnavailable
+    || dashboardModelsUnavailable
+    || dashboardArticlesUnavailable
+    || dashboardLinksUnavailable;
   const magiPlan = buildPublicMagiCyclePlan(manifest);
   const magiSummary = summarizeMagiCycle(magiPlan);
   const consoleModules = [
@@ -358,6 +380,15 @@ function DashboardPage() {
         </div>
       </section>
 
+      {dashboardCatalogUnavailable && (
+        <Alert
+          showIcon
+          type="warning"
+          message={dashboardCatalogUnavailableNotice()}
+          className="dashboard-catalog-alert"
+        />
+      )}
+
       <MagiCyclePanel plan={magiPlan} summary={magiSummary} />
 
       <div className="console-module-grid">
@@ -438,6 +469,10 @@ function dashboardAgentTableEmptyDescription(): string {
 
 function dashboardSkillTableEmptyDescription(): string {
   return '暂无 Skill 下载数据，可在平台后台发布 Skill 后查看。';
+}
+
+function dashboardCatalogUnavailableNotice(): string {
+  return '目录接口暂不可用，当前数字可能是占位值；请确认后端服务运行后再刷新。';
 }
 
 function MagiCyclePanel({
