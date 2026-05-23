@@ -102,6 +102,13 @@ describe('workspace style guard', () => {
     expect(appSource).not.toContain('<pre>{props.markdown}</pre>');
   });
 
+  it('shows loading and empty feedback for dashboard summary tables', () => {
+    expect(appSource).toContain('dashboardAgentsLoading');
+    expect(appSource).toContain('dashboardSkillsLoading');
+    expect(appSource).toContain('dashboardAgentTableEmptyDescription()');
+    expect(appSource).toContain('dashboardSkillTableEmptyDescription()');
+  });
+
   it('keeps API Key as the primary label while framing it for Agent use', () => {
     expect(appSource).not.toContain('Agent 授权');
     expect(appSource).not.toContain('授权 Key');

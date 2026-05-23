@@ -246,8 +246,14 @@ function selectedShellMenuKey(pathname: string): string {
 }
 
 function DashboardPage() {
-  const { data: agents = [] } = useQuery({ queryKey: ['agents'], queryFn: () => getPublicData<Agent[]>('/agents') });
-  const { data: skills = [] } = useQuery({ queryKey: ['skills'], queryFn: () => getPublicData<Skill[]>('/skills') });
+  const { data: agents = [], isLoading: dashboardAgentsLoading } = useQuery({
+    queryKey: ['agents'],
+    queryFn: () => getPublicData<Agent[]>('/agents')
+  });
+  const { data: skills = [], isLoading: dashboardSkillsLoading } = useQuery({
+    queryKey: ['skills'],
+    queryFn: () => getPublicData<Skill[]>('/skills')
+  });
   const { data: models = [] } = useQuery({ queryKey: ['models'], queryFn: () => getPublicData<AiModel[]>('/models') });
   const { data: articles = [] } = useQuery({ queryKey: ['articles'], queryFn: () => getPublicData<ArticleSummary[]>('/articles') });
   const { data: links = [] } = useQuery({ queryKey: ['links'], queryFn: () => getPublicData<RedirectLink[]>('/links') });
@@ -391,22 +397,44 @@ function DashboardPage() {
 
       <div className="content-grid">
         <Card title="Agent 热度">
-          <Table rowKey="id" dataSource={agents.slice(0, 5)} pagination={false} columns={[
-            { title: '名称', dataIndex: 'name', render: (name, row) => <Link to={`/agents/${row.id}`}>{name}</Link> },
-            { title: '分类', dataIndex: 'category' },
-            { title: '浏览', dataIndex: 'viewCount' }
-          ]} />
+          <Table
+            rowKey="id"
+            dataSource={agents.slice(0, 5)}
+            loading={dashboardAgentsLoading}
+            pagination={false}
+            locale={{ emptyText: <Empty description={dashboardAgentTableEmptyDescription()} /> }}
+            columns={[
+              { title: '名称', dataIndex: 'name', render: (name, row) => <Link to={`/agents/${row.id}`}>{name}</Link> },
+              { title: '分类', dataIndex: 'category' },
+              { title: '浏览', dataIndex: 'viewCount' }
+            ]}
+          />
         </Card>
         <Card title="Skill 下载">
-          <Table rowKey="id" dataSource={skills.slice(0, 5)} pagination={false} columns={[
-            { title: '名称', dataIndex: 'name', render: (name, row) => <Link to={`/skills/${row.id}`}>{name}</Link> },
-            { title: '分类', render: (_, row) => row.category.name },
-            { title: '下载', dataIndex: 'downloadCount' }
-          ]} />
+          <Table
+            rowKey="id"
+            dataSource={skills.slice(0, 5)}
+            loading={dashboardSkillsLoading}
+            pagination={false}
+            locale={{ emptyText: <Empty description={dashboardSkillTableEmptyDescription()} /> }}
+            columns={[
+              { title: '名称', dataIndex: 'name', render: (name, row) => <Link to={`/skills/${row.id}`}>{name}</Link> },
+              { title: '分类', render: (_, row) => row.category.name },
+              { title: '下载', dataIndex: 'downloadCount' }
+            ]}
+          />
         </Card>
       </div>
     </div>
   );
+}
+
+function dashboardAgentTableEmptyDescription(): string {
+  return '暂无 Agent 热度数据，可在平台后台维护 Agent 后查看。';
+}
+
+function dashboardSkillTableEmptyDescription(): string {
+  return '暂无 Skill 下载数据，可在平台后台发布 Skill 后查看。';
 }
 
 function MagiCyclePanel({
