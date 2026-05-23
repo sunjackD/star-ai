@@ -1431,23 +1431,23 @@ function resourceListUnavailableNotice(subject: string): string {
 }
 
 function resourceSaveFailureNotice(subject: string, error: unknown): string {
-  return apiErrorMessage(error, `${resourceSubjectLabel(subject).trim()}保存失败`);
+  return apiErrorMessage(error, resourceSubjectActionNotice(subject, '保存失败'));
 }
 
 function resourceDeleteFailureNotice(subject: string, error: unknown): string {
-  return apiErrorMessage(error, `${resourceSubjectLabel(subject).trim()}删除失败`);
+  return apiErrorMessage(error, resourceSubjectActionNotice(subject, '删除失败'));
 }
 
 function resourceSaveSuccessNotice(subject: string): string {
-  return resourceActionSuccessNotice(subject, '已保存');
+  return resourceSubjectActionNotice(subject, '已保存');
 }
 
 function resourceDeleteSuccessNotice(subject: string): string {
-  return resourceActionSuccessNotice(subject, '已删除');
+  return resourceSubjectActionNotice(subject, '已删除');
 }
 
-function resourceActionSuccessNotice(subject: string, completedAction: string): string {
-  return /^[A-Za-z0-9]/.test(subject) ? `${subject} ${completedAction}` : `${subject}${completedAction}`;
+function resourceSubjectActionNotice(subject: string, actionText: string): string {
+  return /^[A-Za-z0-9]/.test(subject) ? `${subject} ${actionText}` : `${subject}${actionText}`;
 }
 
 function resourceSubjectLabel(subject: string): string {

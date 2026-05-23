@@ -446,6 +446,8 @@ describe('workspace style guard', () => {
   it('surfaces shared admin resource action failures', () => {
     expect(adminSource).toContain('resourceSaveFailureNotice(resourceSubject, error)');
     expect(adminSource).toContain('resourceDeleteFailureNotice(resourceSubject, error)');
+    expect(adminSource).toContain("resourceSubjectActionNotice(subject, '保存失败')");
+    expect(adminSource).toContain("resourceSubjectActionNotice(subject, '删除失败')");
     expect(adminSource).toContain('保存失败');
     expect(adminSource).toContain('删除失败');
   });
