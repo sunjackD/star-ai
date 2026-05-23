@@ -366,6 +366,12 @@ describe('workspace style guard', () => {
     expect(adminSource).toContain('loading={isOverviewLoading}');
   });
 
+  it('surfaces admin overview query failures before metrics are trusted', () => {
+    expect(adminSource).toContain('isOverviewUnavailable');
+    expect(adminSource).toContain('adminOverviewUnavailableNotice()');
+    expect(adminSource).toContain('后台总览暂不可用');
+  });
+
   it('shows a concrete failure notice when system settings fail to save', () => {
     expect(adminSource).toContain('settingsSaveFailureNotice');
     expect(adminSource).toContain("onError: (error) => message.error(settingsSaveFailureNotice(error))");

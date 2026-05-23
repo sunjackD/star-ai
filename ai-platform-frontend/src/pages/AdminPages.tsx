@@ -73,23 +73,35 @@ type ResourceConfig<T extends ResourceRecord> = {
 };
 
 export function AdminLandingPage() {
-  const { data, isLoading: isOverviewLoading } = useQuery({ queryKey: ['admin-overview'], queryFn: () => getData<AdminOverview>('/admin/overview') });
+  const {
+    data: overview,
+    isLoading: isOverviewLoading,
+    isError: isOverviewUnavailable
+  } = useQuery({ queryKey: ['admin-overview'], queryFn: () => getData<AdminOverview>('/admin/overview') });
   const adminOverviewCards = [
-    ['用户', data?.users ?? 0, '/admin/users'],
-    ['Agent', data?.agents ?? 0, '/admin/agents'],
-    ['Skill', data?.skills ?? 0, '/admin/skills'],
-    ['模型', data?.models ?? 0, '/admin/models'],
-    ['数据集', data?.datasets ?? 0, '/admin/datasets'],
-    ['微调任务', data?.finetuneJobs ?? 0, '/admin/finetune-jobs'],
-    ['文章', data?.articles ?? 0, '/admin/articles'],
-    ['链接', data?.links ?? 0, '/admin/links'],
+    ['用户', overview?.users ?? 0, '/admin/users'],
+    ['Agent', overview?.agents ?? 0, '/admin/agents'],
+    ['Skill', overview?.skills ?? 0, '/admin/skills'],
+    ['模型', overview?.models ?? 0, '/admin/models'],
+    ['数据集', overview?.datasets ?? 0, '/admin/datasets'],
+    ['微调任务', overview?.finetuneJobs ?? 0, '/admin/finetune-jobs'],
+    ['文章', overview?.articles ?? 0, '/admin/articles'],
+    ['链接', overview?.links ?? 0, '/admin/links'],
     ['系统设置', '配置', '/admin/settings'],
-    ['操作记录', data?.auditLogs ?? 0, '/admin/audit-logs']
+    ['操作记录', overview?.auditLogs ?? 0, '/admin/audit-logs']
   ];
 
   return (
     <div className="page">
       <PageHeader title="平台后台" description="维护用户、Agent、Skill、模型、文章、数据集、微调任务和工具导航。" />
+      {isOverviewUnavailable && (
+        <Alert
+          showIcon
+          type="warning"
+          message="后台总览暂不可用"
+          description={adminOverviewUnavailableNotice()}
+        />
+      )}
       <div className="metric-grid">
         {adminOverviewCards.map(([label, value, href]) => (
           <Link to={href as string} key={label as string}>
@@ -99,6 +111,10 @@ export function AdminLandingPage() {
       </div>
     </div>
   );
+}
+
+function adminOverviewUnavailableNotice(): string {
+  return '请确认后端服务和后台总览接口可用，当前指标可能只是占位值。';
 }
 
 export function SettingsAdminPage() {
