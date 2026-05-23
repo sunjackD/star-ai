@@ -1176,11 +1176,11 @@ export function ApiKeysAdminPage() {
           { title: '最后使用', dataIndex: 'lastUsedAt', render: (value) => value ?? '-' },
           {
             title: '操作',
-            render: (_, row) => (
+            render: (_, row) => row.status === 'ACTIVE' ? (
               <Popconfirm title="确认禁用该 API Key？" onConfirm={() => mutation.mutate(row.id)}>
                 <Button danger size="small">禁用</Button>
               </Popconfirm>
-            )
+            ) : '-'
           }
         ]}
       />

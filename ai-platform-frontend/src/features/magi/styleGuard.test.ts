@@ -504,6 +504,15 @@ describe('workspace style guard', () => {
     expect(adminSource).toContain("message.success('API Key 已禁用');");
   });
 
+  it('only exposes API Key admin disable for active records', () => {
+    const apiKeyAdminStart = adminSource.indexOf('export function ApiKeysAdminPage()');
+    const auditLogAdminStart = adminSource.indexOf('export function AuditLogsAdminPage()');
+    expect(apiKeyAdminStart).toBeGreaterThanOrEqual(0);
+    expect(auditLogAdminStart).toBeGreaterThan(apiKeyAdminStart);
+    const apiKeyAdminSource = adminSource.slice(apiKeyAdminStart, auditLogAdminStart);
+    expect(apiKeyAdminSource).toContain("render: (_, row) => row.status === 'ACTIVE' ? (");
+  });
+
   it('gives article admin detail tables explicit loading and empty feedback', () => {
     expect(adminSource).toContain('articleAssetEmptyDescription');
     expect(adminSource).toContain('articleLinkEmptyDescription');
