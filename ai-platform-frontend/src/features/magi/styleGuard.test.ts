@@ -85,6 +85,12 @@ describe('workspace style guard', () => {
     expect(appSource).toContain("setSelectedPreset('platform')");
   });
 
+  it('shows loading and empty feedback for the API Key table', () => {
+    expect(appSource).toContain('apiKeysLoading');
+    expect(appSource).toContain('loading={apiKeysLoading || revokeMutation.isPending}');
+    expect(appSource).toContain('apiKeysEmptyDescription()');
+  });
+
   it('keeps API Key as the primary label while framing it for Agent use', () => {
     expect(appSource).not.toContain('Agent 授权');
     expect(appSource).not.toContain('授权 Key');

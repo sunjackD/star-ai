@@ -1611,7 +1611,10 @@ function ApiKeysPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [createdKey, setCreatedKey] = useState<string>();
   const [selectedPreset, setSelectedPreset] = useState('platform');
-  const { data = [] } = useQuery({ queryKey: ['api-keys'], queryFn: () => getData<ApiKey[]>('/developer/api-keys') });
+  const { data: apiKeys = [], isLoading: apiKeysLoading } = useQuery({
+    queryKey: ['api-keys'],
+    queryFn: () => getData<ApiKey[]>('/developer/api-keys')
+  });
   const mutation = useMutation({
     mutationFn: (values: { name: string; scopes: string[]; expireDays: number }) => {
       return postData<ApiKey>('/developer/api-keys', {
@@ -1697,30 +1700,36 @@ function ApiKeysPage() {
       </Card>
 
       {createdKey && <CreatedApiKeyNotice value={createdKey} />}
-      <Table rowKey="id" dataSource={data} columns={[
-        { title: '名称', dataIndex: 'name' },
-        { title: '前缀', dataIndex: 'keyPrefix' },
-        {
-          title: '权限',
-          dataIndex: 'scopes',
-          render: (scopes: string[]) => <Space size={[4, 4]} wrap>{renderScopeTags(scopes)}</Space>
-        },
-        {
-          title: '状态',
-          dataIndex: 'status',
-          render: (status) => <Tag color={status === 'ACTIVE' ? 'green' : 'default'}>{statusLabel(status)}</Tag>
-        },
-        { title: '过期时间', dataIndex: 'expiresAt', render: formatDateTime },
-        { title: '最后使用', dataIndex: 'lastUsedAt', render: formatDateTime },
-        {
-          title: '操作',
-          render: (_, row) => row.status === 'ACTIVE' ? (
-            <Popconfirm title="撤销后该 Key 将立即失效，确认撤销？" onConfirm={() => revokeMutation.mutate(row.id)}>
-              <Button danger size="small" loading={revokeMutation.isPending}>撤销</Button>
-            </Popconfirm>
-          ) : '-'
-        }
-      ]} />
+      <Table
+        rowKey="id"
+        dataSource={apiKeys}
+        loading={apiKeysLoading || revokeMutation.isPending}
+        locale={{ emptyText: <Empty description={apiKeysEmptyDescription()} /> }}
+        columns={[
+          { title: '名称', dataIndex: 'name' },
+          { title: '前缀', dataIndex: 'keyPrefix' },
+          {
+            title: '权限',
+            dataIndex: 'scopes',
+            render: (scopes: string[]) => <Space size={[4, 4]} wrap>{renderScopeTags(scopes)}</Space>
+          },
+          {
+            title: '状态',
+            dataIndex: 'status',
+            render: (status) => <Tag color={status === 'ACTIVE' ? 'green' : 'default'}>{statusLabel(status)}</Tag>
+          },
+          { title: '过期时间', dataIndex: 'expiresAt', render: formatDateTime },
+          { title: '最后使用', dataIndex: 'lastUsedAt', render: formatDateTime },
+          {
+            title: '操作',
+            render: (_, row) => row.status === 'ACTIVE' ? (
+              <Popconfirm title="撤销后该 Key 将立即失效，确认撤销？" onConfirm={() => revokeMutation.mutate(row.id)}>
+                <Button danger size="small" loading={revokeMutation.isPending}>撤销</Button>
+              </Popconfirm>
+            ) : '-'
+          }
+        ]}
+      />
       <Modal open={modalOpen} title="创建 API Key" footer={null} onCancel={closeApiKeyDialog}>
         <Form
           form={form}
@@ -1763,6 +1772,10 @@ function ApiKeysPage() {
       </Modal>
     </div>
   );
+}
+
+function apiKeysEmptyDescription(): string {
+  return '暂无 API Key，创建最小权限 Key 后交给 Agent 使用。';
 }
 
 function localDateTimeAfterDays(days: number): string {
