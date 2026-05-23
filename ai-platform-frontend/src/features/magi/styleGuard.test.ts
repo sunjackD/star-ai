@@ -149,6 +149,12 @@ describe('workspace style guard', () => {
     expect(appSource).toContain('模型能力层暂不可用');
   });
 
+  it('shows loading, empty, and unavailable states for finetune jobs', () => {
+    expect(appSource).toContain('finetuneJobsLoading');
+    expect(appSource).toContain('finetuneJobsUnavailable');
+    expect(appSource).toContain('finetuneJobsEmptyDescription()');
+  });
+
   it('keeps API Key as the primary label while framing it for Agent use', () => {
     expect(appSource).not.toContain('Agent 授权');
     expect(appSource).not.toContain('授权 Key');

@@ -1607,12 +1607,23 @@ function modelCatalogUnavailableDescription(): string {
 }
 
 function FinetunePage() {
-  const { data = [] } = useQuery({ queryKey: ['finetune-jobs'], queryFn: () => getData<FinetuneJob[]>('/finetune/jobs') });
+  const {
+    data: finetuneJobs = [],
+    isLoading: finetuneJobsLoading,
+    isError: finetuneJobsUnavailable
+  } = useQuery({ queryKey: ['finetune-jobs'], queryFn: () => getData<FinetuneJob[]>('/finetune/jobs') });
+
   return (
     <div className="page">
       <PageTitle title="微调任务" description="查看训练任务、数据集和进度。" />
       <div className="card-grid">
-        {data.map((job) => (
+        {finetuneJobsLoading ? (
+          <CatalogLoadingState title="正在加载微调任务" />
+        ) : finetuneJobsUnavailable ? (
+          <CatalogEmptyState title="微调任务暂不可用" description={finetuneJobsUnavailableDescription()} />
+        ) : finetuneJobs.length === 0 ? (
+          <CatalogEmptyState title="暂无微调任务" description={finetuneJobsEmptyDescription()} />
+        ) : finetuneJobs.map((job) => (
           <Card key={job.id} title={job.name}>
             <Text>{job.baseModel}</Text>
             <Progress percent={job.progress} />
@@ -1622,6 +1633,14 @@ function FinetunePage() {
       </div>
     </div>
   );
+}
+
+function finetuneJobsEmptyDescription(): string {
+  return '还没有微调记录，可在平台后台维护数据集和微调任务。';
+}
+
+function finetuneJobsUnavailableDescription(): string {
+  return '请确认登录状态、后端服务和微调任务接口可用，然后刷新页面。';
 }
 
 const API_KEY_SCOPE_OPTIONS = [
