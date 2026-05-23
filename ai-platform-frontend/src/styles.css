@@ -619,6 +619,10 @@ html[data-theme='minimal-modern'] .app-sider .ant-menu-submenu-title {
   margin: 0;
 }
 
+.catalog-loading-state {
+  gap: 12px;
+}
+
 .detail-state-card .ant-card-body {
   min-height: 280px;
   display: grid;

@@ -596,7 +596,7 @@ function AccountProfilePage() {
 }
 
 function AgentsPage() {
-  const { data = [] } = useQuery({ queryKey: ['agents'], queryFn: () => getPublicData<Agent[]>('/agents') });
+  const { data = [], isLoading: agentsLoading } = useQuery({ queryKey: ['agents'], queryFn: () => getPublicData<Agent[]>('/agents') });
   const [keyword, setKeyword] = useState('');
   const [category, setCategory] = useState('all');
   const categories = Array.from(new Set(data.map((agent) => agent.category))).sort();
@@ -646,7 +646,9 @@ function AgentsPage() {
       </div>
 
       <div className="agent-fleet-grid">
-        {filteredAgents.length === 0 ? (
+        {agentsLoading ? (
+          <CatalogLoadingState title="正在加载 Agent" />
+        ) : filteredAgents.length === 0 ? (
           <CatalogEmptyState title="暂无匹配 Agent" description="调整搜索词或分类，或者在平台后台新增 Agent。" />
         ) : filteredAgents.map((agent) => (
           <section key={agent.id} className="agent-fleet-card">
@@ -691,8 +693,8 @@ function SkillsPage() {
   const token = useAuthStore((state) => state.token);
   const queryClient = useQueryClient();
   const navigate = useNavigate();
-  const { data = [] } = useQuery({ queryKey: ['skills'], queryFn: () => getPublicData<Skill[]>('/skills') });
-  const { data: categories = [] } = useQuery({ queryKey: ['skill-categories'], queryFn: () => getPublicData<SkillCategory[]>('/skills/categories') });
+  const { data = [], isLoading: skillsLoading } = useQuery({ queryKey: ['skills'], queryFn: () => getPublicData<Skill[]>('/skills') });
+  const { data: categories = [], isLoading: skillCategoriesLoading } = useQuery({ queryKey: ['skill-categories'], queryFn: () => getPublicData<SkillCategory[]>('/skills/categories') });
   const [keyword, setKeyword] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [artifactFilter, setArtifactFilter] = useState('all');
@@ -706,6 +708,7 @@ function SkillsPage() {
   const totalDownloads = data.reduce((sum, skill) => sum + skill.downloadCount, 0);
   const totalStars = data.reduce((sum, skill) => sum + skill.starCount, 0);
   const fileSkills = data.filter((skill) => skill.artifactType === 'FILE').length;
+  const skillCatalogLoading = skillsLoading || skillCategoriesLoading;
 
   function requireLogin(action: () => void) {
     if (!token) {
@@ -765,7 +768,9 @@ function SkillsPage() {
       </div>
 
       <div className="skill-registry-grid">
-        {rows.length === 0 ? (
+        {skillCatalogLoading ? (
+          <CatalogLoadingState title="正在加载 Skill" />
+        ) : rows.length === 0 ? (
           <CatalogEmptyState title="暂无匹配 Skill" description="调整搜索词、分类或包类型，或者上传新的 Skill。" />
         ) : rows.map((row) => (
           <section className="skill-registry-card" key={row.id}>
@@ -867,7 +872,7 @@ function ArticlesPage() {
   const token = useAuthStore((state) => state.token);
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [difficultyFilter, setDifficultyFilter] = useState('all');
-  const { data = [] } = useQuery({
+  const { data = [], isLoading: articlesLoading } = useQuery({
     queryKey: ['articles'],
     queryFn: () => getPublicData<ArticleSummary[]>('/articles')
   });
@@ -927,7 +932,9 @@ function ArticlesPage() {
       </div>
 
       <div className="article-grid">
-        {filteredArticles.length === 0 ? (
+        {articlesLoading ? (
+          <CatalogLoadingState title="正在加载文章" />
+        ) : filteredArticles.length === 0 ? (
           <CatalogEmptyState title="暂无匹配文章" description="切换分类或难度，或者在平台后台新增文章。" />
         ) : filteredArticles.map((article) => (
           <section key={article.id} className="article-card">
@@ -1337,6 +1344,15 @@ function CatalogEmptyState(props: { title: string; description: string }) {
   );
 }
 
+function CatalogLoadingState(props: { title: string }) {
+  return (
+    <div className="catalog-empty-state catalog-loading-state">
+      <Spin size="large" />
+      <Text type="secondary">{props.title}</Text>
+    </div>
+  );
+}
+
 function DetailLoadingState(props: { title: string }) {
   return (
     <div className="page">
@@ -1387,7 +1403,7 @@ function DetailView(props: { title: string; label: string; description: string; 
 }
 
 function ModelsPage() {
-  const { data = [] } = useQuery({ queryKey: ['models'], queryFn: () => getPublicData<AiModel[]>('/models') });
+  const { data = [], isLoading: modelsLoading } = useQuery({ queryKey: ['models'], queryFn: () => getPublicData<AiModel[]>('/models') });
   const [providerFilter, setProviderFilter] = useState('all');
   const [typeFilter, setTypeFilter] = useState('all');
   const providers = Array.from(new Set(data.map((model) => model.provider))).sort();
@@ -1436,7 +1452,9 @@ function ModelsPage() {
       </div>
 
       <div className="model-layer-grid">
-        {filteredModels.length === 0 ? (
+        {modelsLoading ? (
+          <CatalogLoadingState title="正在加载模型" />
+        ) : filteredModels.length === 0 ? (
           <CatalogEmptyState title="暂无匹配模型" description="切换供应商或模型类型，或者在平台后台新增模型。" />
         ) : filteredModels.map((model) => (
           <section key={model.id} className="model-layer-card">

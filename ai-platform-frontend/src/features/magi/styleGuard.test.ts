@@ -180,6 +180,15 @@ describe('workspace style guard', () => {
     expect(appSource).toContain('退出登录');
   });
 
+  it('separates catalog loading states from empty search results', () => {
+    expect(appSource).toContain('CatalogLoadingState');
+    expect(appSource).toContain('正在加载 Agent');
+    expect(appSource).toContain('正在加载 Skill');
+    expect(appSource).toContain('正在加载文章');
+    expect(appSource).toContain('正在加载模型');
+    expect(styles).toContain('.catalog-loading-state');
+  });
+
   it('keeps article module semantics out of knowledge-base naming', () => {
     expect(appSource).not.toContain('knowledge-base-');
     expect(styles).not.toContain('knowledge-base-');
