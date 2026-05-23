@@ -2008,7 +2008,7 @@ function ApiKeysPage() {
         </div>
       </Card>
 
-      {createdKey && <CreatedApiKeyNotice value={createdKey} />}
+      {createdKey && <CreatedApiKeyNotice value={createdKey} onClose={() => setCreatedKey(undefined)} />}
       {apiKeysUnavailable && (
         <Alert
           showIcon
@@ -2140,11 +2140,15 @@ function renderScopeTags(scopes: string[]): ReactNode {
   return scopes.map((scope) => renderScopeTag(scope));
 }
 
-function CreatedApiKeyNotice({ value }: { value: string }) {
+function CreatedApiKeyNotice(props: { value: string; onClose: () => void }) {
+  const { value } = props;
+
   return (
     <Alert
       type="success"
       showIcon
+      closable
+      onClose={props.onClose}
       message="请立即记录 API Key"
       description={(
         <Space direction="vertical" size={6}>

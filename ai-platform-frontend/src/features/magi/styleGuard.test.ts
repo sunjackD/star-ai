@@ -372,6 +372,12 @@ describe('workspace style guard', () => {
     expect(styles).toContain('.one-time-key-value');
   });
 
+  it('lets users clear the one-time API Key value after copying it', () => {
+    expect(appSource).toContain('<CreatedApiKeyNotice value={createdKey} onClose={() => setCreatedKey(undefined)} />');
+    expect(appSource).toContain('closable');
+    expect(appSource).toContain('onClose={props.onClose}');
+  });
+
   it('keeps account actions inside the required top-right user menu', () => {
     expect(appSource).toContain('Dropdown');
     expect(appSource).toContain('userMenuItems');
