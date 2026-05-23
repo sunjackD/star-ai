@@ -1353,7 +1353,7 @@ function ResourceAdminPage<T extends ResourceRecord>({ config }: { config: Resou
             onChange={setStatusFilter}
           />
         )}
-        <Button type="primary" onClick={openCreate}>新增</Button>
+        <Button type="primary" onClick={openCreate}>{createResourceDialogTitle(resourceSubject)}</Button>
         {config.extraToolbar}
       </Space>
       <Table
