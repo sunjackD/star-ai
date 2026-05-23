@@ -890,11 +890,15 @@ export function ApiKeysAdminPage() {
   const queryClient = useQueryClient();
   const [keyword, setKeyword] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>();
-  const { data = [], isLoading } = useQuery({ queryKey: ['admin-api-keys'], queryFn: () => getData<ApiKey[]>('/admin/api-keys') });
+  const {
+    data: apiKeys = [],
+    isLoading: apiKeyRecordsLoading,
+    isError: apiKeyRecordListUnavailable
+  } = useQuery({ queryKey: ['admin-api-keys'], queryFn: () => getData<ApiKey[]>('/admin/api-keys') });
   const emptyDescription = keyword || statusFilter
     ? filteredAdminRecordEmptyDescription()
     : apiKeyRecordEmptyDescription();
-  const filteredData = data.filter((item) => {
+  const filteredApiKeys = apiKeys.filter((item) => {
     const keywordMatched = [item.name, item.keyPrefix, item.scopes.join(',')]
       .some((value) => value.toLowerCase().includes(keyword.toLowerCase()));
     const statusMatched = !statusFilter || item.status === statusFilter;
@@ -907,6 +911,13 @@ export function ApiKeysAdminPage() {
   return (
     <div className="page">
       <PageHeader title="API Key 记录" description="查看 Agent 代管 API Key 状态、范围和最后使用时间。" />
+      {apiKeyRecordListUnavailable && (
+        <Alert
+          showIcon
+          type="warning"
+          message={adminRecordListUnavailableNotice('API Key 记录')}
+        />
+      )}
       <Space className="admin-toolbar" wrap>
         <Input.Search placeholder="搜索名称、前缀或权限" onChange={(event) => setKeyword(event.target.value)} allowClear />
         <Select
@@ -919,8 +930,8 @@ export function ApiKeysAdminPage() {
       </Space>
       <Table
         rowKey="id"
-        loading={isLoading || mutation.isPending}
-        dataSource={filteredData}
+        loading={apiKeyRecordsLoading || mutation.isPending}
+        dataSource={filteredApiKeys}
         pagination={{ pageSize: 8 }}
         locale={{
           emptyText: <AdminTableEmptyState title="暂无 API Key 记录" description={emptyDescription} />
@@ -940,22 +951,33 @@ export function ApiKeysAdminPage() {
 
 export function AuditLogsAdminPage() {
   const [keyword, setKeyword] = useState('');
-  const { data = [], isLoading } = useQuery({ queryKey: ['admin-audit-logs'], queryFn: () => getData<AuditLog[]>('/admin/audit-logs') });
+  const {
+    data: auditLogs = [],
+    isLoading: auditLogsLoading,
+    isError: auditLogListUnavailable
+  } = useQuery({ queryKey: ['admin-audit-logs'], queryFn: () => getData<AuditLog[]>('/admin/audit-logs') });
   const emptyDescription = keyword
     ? filteredAdminRecordEmptyDescription()
     : auditLogInitialEmptyDescription();
-  const filteredData = data.filter((item) => [item.actor, item.action, item.resourceType, item.resourceId, item.detail]
+  const filteredAuditLogs = auditLogs.filter((item) => [item.actor, item.action, item.resourceType, item.resourceId, item.detail]
     .some((value) => String(value ?? '').toLowerCase().includes(keyword.toLowerCase())));
   return (
     <div className="page">
       <PageHeader title="操作记录" description="查看后台编辑和 Agent 代管调用记录。" />
+      {auditLogListUnavailable && (
+        <Alert
+          showIcon
+          type="warning"
+          message={adminRecordListUnavailableNotice('操作记录')}
+        />
+      )}
       <Space className="admin-toolbar" wrap>
         <Input.Search placeholder="搜索操作者、动作或资源" onChange={(event) => setKeyword(event.target.value)} allowClear />
       </Space>
       <Table
         rowKey="id"
-        loading={isLoading}
-        dataSource={filteredData}
+        loading={auditLogsLoading}
+        dataSource={filteredAuditLogs}
         pagination={{ pageSize: 10 }}
         locale={{
           emptyText: <AdminTableEmptyState title="暂无操作记录" description={emptyDescription} />
@@ -982,6 +1004,10 @@ function auditLogInitialEmptyDescription(): string {
 
 function filteredAdminRecordEmptyDescription(): string {
   return '没有匹配当前搜索或状态筛选的记录。';
+}
+
+function adminRecordListUnavailableNotice(subject: string): string {
+  return `${subject}暂不可用，请确认后端服务和接口可用后刷新。`;
 }
 
 function ResourceAdminPage<T extends ResourceRecord>({ config }: { config: ResourceConfig<T> }) {
