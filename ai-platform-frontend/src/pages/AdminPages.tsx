@@ -247,19 +247,23 @@ export function UsersAdminPage() {
       message.success('用户已保存');
       closeUserDialog();
       queryClient.invalidateQueries({ queryKey: ['admin-users'] });
-    }
+    },
+    onError: (error) => message.error(adminUserSaveFailureNotice(error))
   });
   const statusMutation = useMutation({
     mutationFn: ({ id, status }: { id: number; status: string }) => putData(`/admin/users/${id}/status`, { status }),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['admin-users'] })
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['admin-users'] }),
+    onError: (error) => message.error(adminUserStatusFailureNotice(error))
   });
   const roleMutation = useMutation({
     mutationFn: ({ id, roleNames }: { id: number; roleNames: string[] }) => putData(`/admin/users/${id}/roles`, { roles: roleNames }),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['admin-users'] })
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['admin-users'] }),
+    onError: (error) => message.error(adminUserRoleFailureNotice(error))
   });
   const passwordMutation = useMutation({
     mutationFn: ({ id, password }: { id: number; password: string }) => postData(`/admin/users/${id}/reset-password`, { password }),
-    onSuccess: () => message.success('密码已重置')
+    onSuccess: () => message.success('密码已重置'),
+    onError: (error) => message.error(adminUserPasswordFailureNotice(error))
   });
 
   function openCreate() {
@@ -393,6 +397,22 @@ function filteredUserAdminEmptyDescription(): string {
 
 function userRolesUnavailableNotice(): string {
   return '角色选择会暂时锁定，请确认角色接口可用后刷新再调整用户角色。';
+}
+
+function adminUserSaveFailureNotice(error: unknown): string {
+  return error instanceof Error ? error.message : '用户保存失败';
+}
+
+function adminUserStatusFailureNotice(error: unknown): string {
+  return error instanceof Error ? error.message : '用户状态更新失败';
+}
+
+function adminUserRoleFailureNotice(error: unknown): string {
+  return error instanceof Error ? error.message : '用户角色更新失败';
+}
+
+function adminUserPasswordFailureNotice(error: unknown): string {
+  return error instanceof Error ? error.message : '密码重置失败';
 }
 
 export function AgentsAdminPage() {

@@ -370,6 +370,17 @@ describe('workspace style guard', () => {
     expect(adminSource).toContain('disabled={isUserRolesUnavailable}');
   });
 
+  it('surfaces user admin action failures', () => {
+    expect(adminSource).toContain('adminUserSaveFailureNotice');
+    expect(adminSource).toContain('adminUserStatusFailureNotice');
+    expect(adminSource).toContain('adminUserRoleFailureNotice');
+    expect(adminSource).toContain('adminUserPasswordFailureNotice');
+    expect(adminSource).toContain('用户保存失败');
+    expect(adminSource).toContain('用户状态更新失败');
+    expect(adminSource).toContain('用户角色更新失败');
+    expect(adminSource).toContain('密码重置失败');
+  });
+
   it('gives the article admin table explicit delete loading and empty feedback', () => {
     expect(adminSource).toContain('articleAdminInitialEmptyDescription');
     expect(adminSource).toContain('filteredArticleAdminEmptyDescription');
