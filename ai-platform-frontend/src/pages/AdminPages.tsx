@@ -1201,6 +1201,8 @@ function IconInput({ value, onChange }: { value?: string; onChange?: (value?: st
       const result = await uploadData<{ url: string }>('/admin/assets/icons', formData);
       onChange?.(result.url);
       message.success('图标已上传');
+    } catch (error) {
+      message.error(iconUploadFailureNotice(error));
     } finally {
       setUploading(false);
     }
@@ -1222,6 +1224,10 @@ function IconInput({ value, onChange }: { value?: string; onChange?: (value?: st
       </Upload>
     </Space.Compact>
   );
+}
+
+function iconUploadFailureNotice(error: unknown): string {
+  return error instanceof Error ? error.message : '图标上传失败';
 }
 
 function SkillUploadButton({ categories }: { categories: SkillCategory[] }) {

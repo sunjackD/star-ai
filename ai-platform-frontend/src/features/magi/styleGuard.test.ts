@@ -253,6 +253,11 @@ describe('workspace style guard', () => {
     expect(adminSource).toContain("onError: (error) => message.error(settingsSaveFailureNotice(error))");
   });
 
+  it('shows a concrete failure notice when icon upload fails', () => {
+    expect(adminSource).toContain('iconUploadFailureNotice');
+    expect(adminSource).toContain('message.error(iconUploadFailureNotice(error))');
+  });
+
   it('keeps article module semantics out of knowledge-base naming', () => {
     expect(appSource).not.toContain('knowledge-base-');
     expect(styles).not.toContain('knowledge-base-');
