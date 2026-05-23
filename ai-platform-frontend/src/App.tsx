@@ -1622,7 +1622,7 @@ function ApiKeysPage() {
     },
     onSuccess: (data) => {
       setCreatedKey(data.plainKey);
-      setModalOpen(false);
+      closeApiKeyDialog();
       queryClient.invalidateQueries({ queryKey: ['api-keys'] });
       queryClient.invalidateQueries({ queryKey: ['developer-dashboard'] });
     }
@@ -1647,6 +1647,12 @@ function ApiKeysPage() {
       form.setFieldValue('scopes', preset.scopes);
     }
   };
+
+  function closeApiKeyDialog() {
+    setModalOpen(false);
+    setSelectedPreset('platform');
+    form.resetFields();
+  }
 
   return (
     <div className="page">
@@ -1715,7 +1721,7 @@ function ApiKeysPage() {
           ) : '-'
         }
       ]} />
-      <Modal open={modalOpen} title="创建 API Key" footer={null} onCancel={() => setModalOpen(false)}>
+      <Modal open={modalOpen} title="创建 API Key" footer={null} onCancel={closeApiKeyDialog}>
         <Form
           form={form}
           layout="vertical"

@@ -79,6 +79,12 @@ describe('workspace style guard', () => {
     expect(appSource).not.toContain('按任务选择');
   });
 
+  it('clears API Key creation form state when the dialog closes', () => {
+    expect(appSource).toContain('closeApiKeyDialog');
+    expect(appSource).toContain('onCancel={closeApiKeyDialog}');
+    expect(appSource).toContain("setSelectedPreset('platform')");
+  });
+
   it('keeps API Key as the primary label while framing it for Agent use', () => {
     expect(appSource).not.toContain('Agent 授权');
     expect(appSource).not.toContain('授权 Key');
