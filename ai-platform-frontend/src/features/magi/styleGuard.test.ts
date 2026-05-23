@@ -634,6 +634,11 @@ describe('workspace style guard', () => {
     expect(adminSource).toContain("message.success('用户角色已更新');");
   });
 
+  it('shows loading feedback while updating user statuses', () => {
+    expect(adminSource).toContain('loading={statusMutation.isPending}');
+    expect(adminSource).toContain("status: row.status === 'ACTIVE' ? 'DISABLED' : 'ACTIVE'");
+  });
+
   it('uses a specific user admin password reset confirmation', () => {
     expect(adminSource).toContain('确认重置该用户密码？');
   });

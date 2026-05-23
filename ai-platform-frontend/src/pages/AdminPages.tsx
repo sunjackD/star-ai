@@ -366,7 +366,11 @@ export function UsersAdminPage() {
             render: (_, row) => (
               <Space wrap>
                 <Button size="small" onClick={() => openEdit(row)}>编辑</Button>
-                <Button size="small" onClick={() => statusMutation.mutate({ id: row.id, status: row.status === 'ACTIVE' ? 'DISABLED' : 'ACTIVE' })}>
+                <Button
+                  size="small"
+                  loading={statusMutation.isPending}
+                  onClick={() => statusMutation.mutate({ id: row.id, status: row.status === 'ACTIVE' ? 'DISABLED' : 'ACTIVE' })}
+                >
                   {row.status === 'ACTIVE' ? '禁用' : '启用'}
                 </Button>
                 <Select
