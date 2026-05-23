@@ -2001,6 +2001,17 @@ pre {
     width: 100%;
   }
 
+  .admin-toolbar {
+    align-items: stretch;
+  }
+
+  .admin-toolbar .ant-space-item,
+  .admin-toolbar .ant-input-search,
+  .admin-toolbar .ant-select,
+  .admin-toolbar .ant-btn {
+    width: 100%;
+  }
+
   .console-module-card {
     min-height: 204px;
   }

@@ -18,6 +18,14 @@ describe('workspace style guard', () => {
     expect(styles).toContain('flex: 1 1 360px');
   });
 
+  it('keeps admin toolbar controls usable on narrow screens', () => {
+    expect(styles).toContain('.admin-toolbar .ant-space-item');
+    expect(styles).toContain('.admin-toolbar .ant-input-search');
+    expect(styles).toContain('.admin-toolbar .ant-select');
+    expect(styles).toContain('.admin-toolbar .ant-btn');
+    expect(styles).toContain('align-items: stretch');
+  });
+
   it('keeps the operations console free of decorative pseudo-element blobs', () => {
     expect(styles).not.toMatch(/body::after\s*\{/);
     expect(styles).not.toMatch(/\.workspace-hero::after\s*\{/);
