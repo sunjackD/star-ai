@@ -97,6 +97,12 @@ describe('workspace style guard', () => {
     expect(appSource).toContain('developerToolContractEmptyDescription()');
   });
 
+  it('surfaces unavailable dashboard or manifest state on the Agent handoff page', () => {
+    expect(appSource).toContain('developerAccessUnavailable');
+    expect(appSource).toContain('developerAccessUnavailableDescription()');
+    expect(appSource).toContain('Agent 代管配置暂不可用');
+  });
+
   it('uses the shared markdown renderer for Agent and Skill detail instructions', () => {
     expect(appSource).toContain('<MarkdownBlock value={props.markdown} />');
     expect(appSource).not.toContain('<pre>{props.markdown}</pre>');

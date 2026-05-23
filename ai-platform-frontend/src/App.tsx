@@ -1964,15 +1964,24 @@ function formatDateTime(value?: string): string {
 function DeveloperPage() {
   const selfSkillUrl = apiUrl('/developer/self-skill/download');
   const apiBaseUrl = apiUrl('').replace(/\/$/, '');
-  const { data: dashboard, isLoading: developerDashboardLoading } = useQuery({
+  const {
+    data: dashboard,
+    isLoading: developerDashboardLoading,
+    isError: developerDashboardUnavailable
+  } = useQuery({
     queryKey: ['developer-dashboard'],
     queryFn: () => getData<DeveloperDashboard>('/developer/dashboard')
   });
-  const { data: manifest, isLoading: developerManifestLoading } = useQuery({
+  const {
+    data: manifest,
+    isLoading: developerManifestLoading,
+    isError: developerManifestUnavailable
+  } = useQuery({
     queryKey: ['developer-skill-manifest'],
     queryFn: () => getPublicData<DeveloperSkillManifest>('/developer/skill-manifest')
   });
   const developerToolContractLoading = developerDashboardLoading || developerManifestLoading;
+  const developerAccessUnavailable = developerDashboardUnavailable || developerManifestUnavailable;
   const tools = manifest?.tools ?? DEFAULT_DEVELOPER_TOOLS;
   const manifestRequiredScopes = manifest?.requiredScopes ?? DEFAULT_PLATFORM_SCOPES;
   const toolSpecs = manifest?.toolSpecs?.length
@@ -2033,6 +2042,16 @@ function DeveloperPage() {
           <Statistic title="Scope 覆盖" value={scopeCoverage} suffix="%" />
         </div>
       </section>
+
+      {developerAccessUnavailable && (
+        <Alert
+          showIcon
+          type="warning"
+          message="Agent 代管配置暂不可用"
+          description={developerAccessUnavailableDescription()}
+          className="agent-api-card"
+        />
+      )}
 
       <Card title="Agent 快速接入" className="agent-api-card agent-api-handoff-card">
         <div className="agent-api-handoff-grid">
@@ -2187,6 +2206,10 @@ function DeveloperPage() {
 
 function developerToolContractEmptyDescription(): string {
   return '暂无工具契约，刷新 Manifest 或检查 Agent 代管配置。';
+}
+
+function developerAccessUnavailableDescription(): string {
+  return '当前显示默认接入信息，请确认登录状态、后端服务和 Manifest 接口可用后刷新页面。';
 }
 
 function formatToolName(tool: string): string {
