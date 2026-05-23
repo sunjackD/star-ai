@@ -301,6 +301,21 @@ describe('workspace style guard', () => {
     expect(modelsPageSource).toContain("{model.endpoint ? '服务入口' : '暂无入口'}");
   });
 
+  it('filters blank model capability tags and shows an empty fallback', () => {
+    const modelsPageStart = appSource.indexOf('function ModelsPage()');
+    const modelUnavailableStart = appSource.indexOf('function modelCatalogUnavailableDescription()');
+    expect(modelsPageStart).toBeGreaterThanOrEqual(0);
+    expect(modelUnavailableStart).toBeGreaterThan(modelsPageStart);
+    const modelsPageSource = appSource.slice(modelsPageStart, modelUnavailableStart);
+    expect(modelsPageSource).toContain('<ModelCapabilityTags capabilities={model.capabilities} />');
+    expect(appSource).toContain('function ModelCapabilityTags({ capabilities }: { capabilities: string })');
+    expect(appSource).toContain('function modelCapabilityTags(capabilities: string): string[]');
+    expect(appSource).toContain(".split(',')");
+    expect(appSource).toContain('.map((capability) => capability.trim())');
+    expect(appSource).toContain('.filter(Boolean)');
+    expect(appSource).toContain('暂无能力标签');
+  });
+
   it('shows loading, empty, and unavailable states for finetune jobs', () => {
     expect(appSource).toContain('finetuneJobsLoading');
     expect(appSource).toContain('finetuneJobsUnavailable');

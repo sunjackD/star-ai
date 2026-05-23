@@ -1764,9 +1764,7 @@ function ModelsPage() {
             </div>
             <Title level={4}>{model.name}</Title>
             <div className="model-layer-capabilities">
-              {model.capabilities.split(',').map((capability) => (
-                <Tag key={capability.trim()}>{capability.trim()}</Tag>
-              ))}
+              <ModelCapabilityTags capabilities={model.capabilities} />
             </div>
             <Text type="secondary">{model.pricing}</Text>
             <Button
@@ -1783,6 +1781,25 @@ function ModelsPage() {
       </div>
     </div>
   );
+}
+
+function ModelCapabilityTags({ capabilities }: { capabilities: string }) {
+  const tags = modelCapabilityTags(capabilities);
+  if (tags.length === 0) {
+    return <Text type="secondary">暂无能力标签</Text>;
+  }
+  return (
+    <>
+      {tags.map((capability) => <Tag key={capability}>{capability}</Tag>)}
+    </>
+  );
+}
+
+function modelCapabilityTags(capabilities: string): string[] {
+  return capabilities
+    .split(',')
+    .map((capability) => capability.trim())
+    .filter(Boolean);
 }
 
 function modelCatalogUnavailableDescription(): string {
