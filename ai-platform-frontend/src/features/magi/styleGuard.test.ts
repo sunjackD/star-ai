@@ -395,6 +395,14 @@ describe('workspace style guard', () => {
     expect(appSource).toContain('onClick={() => downloadArticleAsset(props.articleId, asset)}');
   });
 
+  it('surfaces admin article asset download failures from the article editor', () => {
+    expect(adminSource).toContain('downloadAdminArticleAsset');
+    expect(adminSource).toContain('await downloadFile(`/articles/${articleId}/assets/${asset.id}/download`, adminArticleAssetDownloadName(asset));');
+    expect(adminSource).toContain('message.error(adminArticleAssetDownloadFailureNotice(error))');
+    expect(adminSource).toContain('后台附件下载失败，请稍后重试');
+    expect(adminSource).toContain('onClick={() => downloadAdminArticleAsset(selected.id, row)}');
+  });
+
   it('uses concrete admin dialog titles instead of generic resource labels', () => {
     expect(adminSource).toContain('createResourceDialogTitle');
     expect(adminSource).toContain('editResourceDialogTitle');

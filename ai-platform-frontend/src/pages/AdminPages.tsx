@@ -879,7 +879,7 @@ export function ArticlesAdminPage() {
                     title: '操作',
                     render: (_, row: ArticleAsset) => (
                       <Space>
-                        <Button size="small" onClick={() => downloadFile(`/articles/${selected.id}/assets/${row.id}/download`, row.fileName ?? `${row.name}.md`)}>下载</Button>
+                        <Button size="small" onClick={() => downloadAdminArticleAsset(selected.id, row)}>下载</Button>
                         <Popconfirm title="删除附件？" onConfirm={() => deleteAssetMutation.mutate(row.id)}>
                           <Button size="small" danger>删除</Button>
                         </Popconfirm>
@@ -1065,6 +1065,22 @@ function articleAssetSaveFailureNotice(error: unknown): string {
 
 function articleAssetDeleteFailureNotice(error: unknown): string {
   return error instanceof Error ? error.message : '附件删除失败';
+}
+
+async function downloadAdminArticleAsset(articleId: number, asset: ArticleAsset): Promise<void> {
+  try {
+    await downloadFile(`/articles/${articleId}/assets/${asset.id}/download`, adminArticleAssetDownloadName(asset));
+  } catch (error) {
+    message.error(adminArticleAssetDownloadFailureNotice(error));
+  }
+}
+
+function adminArticleAssetDownloadName(asset: ArticleAsset): string {
+  return asset.fileName ?? `${asset.name}.md`;
+}
+
+function adminArticleAssetDownloadFailureNotice(error: unknown): string {
+  return error instanceof Error ? error.message : '后台附件下载失败，请稍后重试';
 }
 
 function articleLinkSaveFailureNotice(error: unknown): string {
