@@ -1342,7 +1342,7 @@ function ResourceAdminPage<T extends ResourceRecord>({ config }: { config: Resou
           {config.rowActions?.(row)}
           <Button size="small" onClick={() => openEdit(row)}>编辑</Button>
           <Popconfirm title={resourceDeleteConfirmTitle(resourceSubject)} onConfirm={() => deleteMutation.mutate(row.id)}>
-            <Button size="small" danger>删除</Button>
+            <Button size="small" danger loading={deleteMutation.isPending}>删除</Button>
           </Popconfirm>
         </Space>
       )

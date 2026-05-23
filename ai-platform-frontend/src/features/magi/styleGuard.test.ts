@@ -478,6 +478,10 @@ describe('workspace style guard', () => {
     expect(adminSource).toContain('title={resourceDeleteConfirmTitle(resourceSubject)}');
   });
 
+  it('shows loading feedback while deleting shared admin resources', () => {
+    expect(adminSource).toContain('<Button size="small" danger loading={deleteMutation.isPending}>删除</Button>');
+  });
+
   it('gives API Key and audit admin records loading and empty feedback', () => {
     expect(adminSource).toContain('apiKeyRecordEmptyDescription');
     expect(adminSource).toContain('auditLogInitialEmptyDescription');
