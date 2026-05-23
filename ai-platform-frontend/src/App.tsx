@@ -77,14 +77,38 @@ const DASHBOARD_SUMMARY_TABLE_SCROLL = { x: 560 };
 function SetupGate() {
   const location = useLocation();
   const token = useAuthStore((state) => state.token);
-  const { data, isLoading } = useQuery({
+  const {
+    data,
+    isError: setupStatusUnavailable,
+    isLoading
+  } = useQuery({
     queryKey: ['setup-status'],
     queryFn: () => getPublicData<SetupStatus>('/setup/status'),
     retry: 1
   });
 
   if (isLoading) {
-    return <div className="boot-screen"><Spin size="large" /></div>;
+    return (
+      <div className="boot-screen boot-screen-feedback">
+        <Space direction="vertical" align="center" size={12}>
+          <Spin size="large" />
+          <Text type="secondary">正在检查平台初始化状态</Text>
+        </Space>
+      </div>
+    );
+  }
+  if (setupStatusUnavailable) {
+    return (
+      <div className="boot-screen boot-screen-feedback">
+        <Alert
+          showIcon
+          type="warning"
+          message="初始化状态暂不可用"
+          description={setupStatusUnavailableNotice()}
+          action={<Button onClick={() => window.location.reload()}>刷新</Button>}
+        />
+      </div>
+    );
   }
   if (data?.setupRequired && location.pathname !== '/setup') {
     return <Navigate to="/setup" replace state={{ from: location.pathname }} />;
@@ -93,6 +117,10 @@ function SetupGate() {
     return <Navigate to={token ? '/' : '/login'} replace />;
   }
   return <Outlet />;
+}
+
+function setupStatusUnavailableNotice(): string {
+  return '请确认后端服务和初始化状态接口可用，然后刷新页面继续进入平台。';
 }
 
 function RequireAuth() {

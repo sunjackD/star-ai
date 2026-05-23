@@ -1727,6 +1727,16 @@ pre {
   place-items: center;
 }
 
+.boot-screen-feedback {
+  padding: 24px;
+  text-align: center;
+}
+
+.boot-screen-feedback .ant-alert {
+  max-width: 520px;
+  text-align: left;
+}
+
 .ant-card,
 .ant-table,
 .ant-modal-content,

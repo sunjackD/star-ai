@@ -145,6 +145,14 @@ describe('workspace style guard', () => {
     expect(appSource).toContain('v7_relativeSplatPath: true');
   });
 
+  it('keeps setup status checks from showing a blank boot screen', () => {
+    expect(appSource).toContain('setupStatusUnavailable');
+    expect(appSource).toContain('setupStatusUnavailableNotice()');
+    expect(appSource).toContain('正在检查平台初始化状态');
+    expect(appSource).toContain('初始化状态暂不可用');
+    expect(styles).toContain('.boot-screen-feedback');
+  });
+
   it('surfaces dashboard catalog loading failures instead of only showing zeroes', () => {
     expect(appSource).toContain('dashboardCatalogUnavailable');
     expect(appSource).toContain('dashboardCatalogUnavailableNotice()');
