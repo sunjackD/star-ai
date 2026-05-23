@@ -235,6 +235,13 @@ describe('workspace style guard', () => {
     expect(adminSource).toContain('title="暂无用户"');
   });
 
+  it('gives the article admin table explicit delete loading and empty feedback', () => {
+    expect(adminSource).toContain('articleAdminInitialEmptyDescription');
+    expect(adminSource).toContain('filteredArticleAdminEmptyDescription');
+    expect(adminSource).toContain('deleteArticleMutation.isPending');
+    expect(adminSource).toContain('title="暂无文章"');
+  });
+
   it('keeps article module semantics out of knowledge-base naming', () => {
     expect(appSource).not.toContain('knowledge-base-');
     expect(styles).not.toContain('knowledge-base-');

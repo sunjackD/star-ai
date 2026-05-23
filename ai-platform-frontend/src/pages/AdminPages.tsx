@@ -503,6 +503,9 @@ export function ArticlesAdminPage() {
     const difficultyMatched = !difficultyFilter || item.difficulty === difficultyFilter;
     return keywordMatched && statusMatched && difficultyMatched;
   });
+  const articleEmptyDescription = keyword || statusFilter || difficultyFilter
+    ? filteredArticleAdminEmptyDescription()
+    : articleAdminInitialEmptyDescription();
   const articleMutation = useMutation({
     mutationFn: (values: Record<string, unknown>) => editing
       ? putData<ArticleDetail>(`/admin/articles/${editing.id}`, values)
@@ -624,9 +627,12 @@ export function ArticlesAdminPage() {
       </Space>
       <Table
         rowKey="id"
-        loading={isLoading}
+        loading={isLoading || deleteArticleMutation.isPending}
         dataSource={filteredData}
         pagination={{ pageSize: 8, showSizeChanger: true }}
+        locale={{
+          emptyText: <AdminTableEmptyState title="暂无文章" description={articleEmptyDescription} />
+        }}
         columns={[
           { title: '标题', dataIndex: 'title' },
           { title: '分类', dataIndex: 'category' },
@@ -820,6 +826,14 @@ export function ArticlesAdminPage() {
       </Modal>
     </div>
   );
+}
+
+function articleAdminInitialEmptyDescription(): string {
+  return '还没有文章，点击新增文章维护教程、指南和安全说明。';
+}
+
+function filteredArticleAdminEmptyDescription(): string {
+  return '没有匹配当前搜索、状态或难度筛选的文章。';
 }
 
 function articleAssetEmptyDescription(): string {
