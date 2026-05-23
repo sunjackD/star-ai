@@ -507,11 +507,23 @@ export function SkillsAdminPage() {
       />
     ),
     rowActions: (row) => (
-      <Button size="small" onClick={() => downloadFile(`/admin/skills/${row.id}/download`, skillDownloadName(row))}>
+      <Button size="small" onClick={() => downloadAdminSkillPackage(row)}>
         下载
       </Button>
     )
   }} />;
+}
+
+async function downloadAdminSkillPackage(skill: Skill): Promise<void> {
+  try {
+    await downloadFile(`/admin/skills/${skill.id}/download`, skillDownloadName(skill));
+  } catch (error) {
+    message.error(adminSkillDownloadFailureNotice(error));
+  }
+}
+
+function adminSkillDownloadFailureNotice(error: unknown): string {
+  return error instanceof Error ? error.message : '后台 Skill 下载失败，请稍后重试';
 }
 
 function skillDownloadName(skill: Skill): string {

@@ -227,6 +227,14 @@ describe('workspace style guard', () => {
     expect(appSource).toContain('Skill 上传失败');
   });
 
+  it('surfaces admin Skill download failures from the Skill management table', () => {
+    expect(adminSource).toContain('downloadAdminSkillPackage');
+    expect(adminSource).toContain('await downloadFile(`/admin/skills/${skill.id}/download`, skillDownloadName(skill));');
+    expect(adminSource).toContain('message.error(adminSkillDownloadFailureNotice(error))');
+    expect(adminSource).toContain('后台 Skill 下载失败，请稍后重试');
+    expect(adminSource).toContain('onClick={() => downloadAdminSkillPackage(row)}');
+  });
+
   it('surfaces public Skill download failures instead of dropping the click', () => {
     expect(appSource).toContain('downloadSkillPackage');
     expect(appSource).toContain('await downloadFile(`/skills/${skill.id}/download`, skillDownloadName(skill));');
