@@ -976,7 +976,7 @@ function SkillsPage() {
               <Button
                 size="small"
                 icon={<Download size={14} />}
-                onClick={() => requireLogin(() => downloadFile(`/skills/${row.id}/download`, skillDownloadName(row)))}
+                onClick={() => requireLogin(() => downloadSkillPackage(row))}
               >
                 下载
               </Button>
@@ -1030,7 +1030,7 @@ function SkillDetailPage() {
           <Button
             type="primary"
             icon={<Download size={16} />}
-            onClick={() => downloadFile(`/skills/${skill.id}/download`, skillDownloadName(skill))}
+            onClick={() => downloadSkillPackage(skill)}
           >
             下载 Skill
           </Button>
@@ -1038,6 +1038,18 @@ function SkillDetailPage() {
       }
     />
   );
+}
+
+async function downloadSkillPackage(skill: Skill): Promise<void> {
+  try {
+    await downloadFile(`/skills/${skill.id}/download`, skillDownloadName(skill));
+  } catch (error) {
+    message.error(skillPackageDownloadFailureNotice(error));
+  }
+}
+
+function skillPackageDownloadFailureNotice(error: unknown): string {
+  return getApiErrorMessage(error, 'Skill 下载失败，请稍后重试');
 }
 
 function skillDownloadName(skill: Skill): string {

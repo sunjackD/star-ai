@@ -227,6 +227,15 @@ describe('workspace style guard', () => {
     expect(appSource).toContain('Skill 上传失败');
   });
 
+  it('surfaces public Skill download failures instead of dropping the click', () => {
+    expect(appSource).toContain('downloadSkillPackage');
+    expect(appSource).toContain('await downloadFile(`/skills/${skill.id}/download`, skillDownloadName(skill));');
+    expect(appSource).toContain('message.error(skillPackageDownloadFailureNotice(error))');
+    expect(appSource).toContain('Skill 下载失败，请稍后重试');
+    expect(appSource).toContain('onClick={() => requireLogin(() => downloadSkillPackage(row))}');
+    expect(appSource).toContain('onClick={() => downloadSkillPackage(skill)}');
+  });
+
   it('shows a clear unavailable state when the article catalog query fails', () => {
     expect(appSource).toContain('articlesUnavailable');
     expect(appSource).toContain('articleCatalogUnavailableDescription()');
