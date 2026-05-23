@@ -551,6 +551,13 @@ describe('workspace style guard', () => {
     expect(styles).toContain('.admin-subsection');
   });
 
+  it('uses explicit article nested delete confirmations', () => {
+    expect(adminSource).toContain('title="确认删除该附件？"');
+    expect(adminSource).toContain('title="确认删除该参考链接？"');
+    expect(adminSource).not.toContain('title="删除附件？"');
+    expect(adminSource).not.toContain('title="删除参考链接？"');
+  });
+
   it('renders article admin statuses with distinct tags', () => {
     const articleAdminStart = adminSource.indexOf('export function ArticlesAdminPage()');
     const apiKeyAdminStart = adminSource.indexOf('export function ApiKeysAdminPage()');

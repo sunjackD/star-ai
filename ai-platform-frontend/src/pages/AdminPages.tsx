@@ -902,7 +902,7 @@ export function ArticlesAdminPage() {
                     render: (_, row: ArticleAsset) => (
                       <Space>
                         <Button size="small" onClick={() => downloadAdminArticleAsset(selected.id, row)}>下载</Button>
-                        <Popconfirm title="删除附件？" onConfirm={() => deleteAssetMutation.mutate(row.id)}>
+                        <Popconfirm title="确认删除该附件？" onConfirm={() => deleteAssetMutation.mutate(row.id)}>
                           <Button size="small" danger>删除</Button>
                         </Popconfirm>
                       </Space>
@@ -928,7 +928,7 @@ export function ArticlesAdminPage() {
                   {
                     title: '操作',
                     render: (_, row: ArticleLink) => (
-                      <Popconfirm title="删除参考链接？" onConfirm={() => deleteLinkMutation.mutate(row.id)}>
+                      <Popconfirm title="确认删除该参考链接？" onConfirm={() => deleteLinkMutation.mutate(row.id)}>
                         <Button size="small" danger>删除</Button>
                       </Popconfirm>
                     )
