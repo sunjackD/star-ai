@@ -116,6 +116,12 @@ describe('workspace style guard', () => {
     expect(appSource).toContain('Agent 详情暂不可用');
   });
 
+  it('avoids blank profile fields while account data is syncing', () => {
+    expect(appSource).toContain('accountProfileMissing');
+    expect(appSource).toContain('正在同步个人资料');
+    expect(appSource).toContain('profile.roles.map');
+  });
+
   it('shows loading and empty feedback for dashboard summary tables', () => {
     expect(appSource).toContain('dashboardAgentsLoading');
     expect(appSource).toContain('dashboardSkillsLoading');

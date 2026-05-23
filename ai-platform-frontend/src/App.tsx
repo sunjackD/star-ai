@@ -646,15 +646,26 @@ function getApiErrorMessage(error: unknown, fallback: string): string {
 
 function AccountProfilePage() {
   const profile = useAuthStore((state) => state.profile);
+  const accountProfileMissing = !profile;
+
+  if (accountProfileMissing) {
+    return (
+      <div className="page">
+        <PageTitle title="个人中心" description="查看当前登录账号和角色。" />
+        <CatalogLoadingState title="正在同步个人资料" />
+      </div>
+    );
+  }
+
   return (
     <div className="page">
       <PageTitle title="个人中心" description="查看当前登录账号和角色。" />
       <Card>
         <Space direction="vertical">
-          <Text>用户名：{profile?.username}</Text>
-          <Text>邮箱：{profile?.email}</Text>
-          <Text>显示名：{profile?.displayName}</Text>
-          <Text>角色：{profile?.roles.map((role) => <Tag key={role}>{role}</Tag>)}</Text>
+          <Text>用户名：{profile.username}</Text>
+          <Text>邮箱：{profile.email}</Text>
+          <Text>显示名：{profile.displayName}</Text>
+          <Text>角色：{profile.roles.map((role) => <Tag key={role}>{role}</Tag>)}</Text>
         </Space>
       </Card>
     </div>
