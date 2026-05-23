@@ -442,7 +442,11 @@ export function SkillCategoriesAdminPage() {
 }
 
 export function SkillsAdminPage() {
-  const { data: categories = [] } = useQuery({ queryKey: ['admin-skill-categories'], queryFn: () => getData<SkillCategory[]>('/admin/skill-categories') });
+  const {
+    data: categories = [],
+    isLoading: isSkillCategoriesLoading,
+    isError: isSkillCategoriesUnavailable
+  } = useQuery({ queryKey: ['admin-skill-categories'], queryFn: () => getData<SkillCategory[]>('/admin/skill-categories') });
   return <ResourceAdminPage<Skill> config={{
     title: 'Skill 管理',
     description: '维护站内 Skill，支持文本创建、SKILL.md/zip 上传、下载和上下架。',
@@ -463,7 +467,13 @@ export function SkillsAdminPage() {
       { title: '状态', dataIndex: 'status' }
     ],
     normalizeInitial: (row) => ({ ...row, categoryId: row.category.id }),
-    extraToolbar: <SkillUploadButton categories={categories} />,
+    extraToolbar: (
+      <SkillCategoryDependencyToolbar
+        categories={categories}
+        categoriesLoading={isSkillCategoriesLoading}
+        categoriesUnavailable={isSkillCategoriesUnavailable}
+      />
+    ),
     rowActions: (row) => (
       <Button size="small" onClick={() => downloadFile(`/admin/skills/${row.id}/download`, skillDownloadName(row))}>
         下载
@@ -1444,7 +1454,43 @@ function iconUploadFailureNotice(error: unknown): string {
   return error instanceof Error ? error.message : '图标上传失败';
 }
 
-function SkillUploadButton({ categories }: { categories: SkillCategory[] }) {
+function SkillCategoryDependencyToolbar(props: {
+  categories: SkillCategory[];
+  categoriesLoading: boolean;
+  categoriesUnavailable: boolean;
+}) {
+  return (
+    <Space wrap>
+      {props.categoriesUnavailable && (
+        <Alert
+          showIcon
+          type="warning"
+          message="Skill 分类暂不可用"
+          description={skillCategoriesUnavailableNotice()}
+        />
+      )}
+      <SkillUploadButton
+        categories={props.categories}
+        categoriesLoading={props.categoriesLoading}
+        categoriesUnavailable={props.categoriesUnavailable}
+      />
+    </Space>
+  );
+}
+
+function skillCategoriesUnavailableNotice(): string {
+  return '分类选择和上传入库会暂时锁定，请确认 Skill 分类接口可用后刷新再维护 Skill。';
+}
+
+function SkillUploadButton({
+  categories,
+  categoriesLoading,
+  categoriesUnavailable
+}: {
+  categories: SkillCategory[];
+  categoriesLoading: boolean;
+  categoriesUnavailable: boolean;
+}) {
   const queryClient = useQueryClient();
   const [form] = Form.useForm();
   const [files, setFiles] = useState<RcFile[]>([]);
@@ -1488,7 +1534,13 @@ function SkillUploadButton({ categories }: { categories: SkillCategory[] }) {
 
   return (
     <>
-      <Button onClick={() => setModalOpen(true)}>上传 Skill</Button>
+      <Button
+        onClick={() => setModalOpen(true)}
+        loading={categoriesLoading}
+        disabled={categoriesUnavailable}
+      >
+        上传 Skill
+      </Button>
       <Modal open={modalOpen} title="上传 Skill 包" footer={null} onCancel={closeSkillUploadModal} width={720}>
         <Form
           form={form}
@@ -1528,7 +1580,11 @@ function SkillUploadButton({ categories }: { categories: SkillCategory[] }) {
             <Input />
           </Form.Item>
           <Form.Item name="categoryId" label="分类" rules={[{ required: true }]}>
-            <Select options={categories.map((item) => ({ label: item.name, value: item.id }))} />
+            <Select
+              options={categories.map((item) => ({ label: item.name, value: item.id }))}
+              loading={categoriesLoading}
+              disabled={categoriesUnavailable}
+            />
           </Form.Item>
           <Form.Item name="description" label="描述" rules={[{ required: true, whitespace: true }]}>
             <Input.TextArea rows={3} />
@@ -1545,7 +1601,14 @@ function SkillUploadButton({ categories }: { categories: SkillCategory[] }) {
           <Form.Item name="usageMarkdown" label="使用说明" rules={[{ required: true, whitespace: true }]}>
             <Input.TextArea rows={5} />
           </Form.Item>
-          <Button type="primary" htmlType="submit" loading={mutation.isPending}>上传并入库</Button>
+          <Button
+            type="primary"
+            htmlType="submit"
+            loading={mutation.isPending}
+            disabled={categoriesUnavailable}
+          >
+            上传并入库
+          </Button>
         </Form>
       </Modal>
     </>

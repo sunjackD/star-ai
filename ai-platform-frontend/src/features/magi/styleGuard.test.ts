@@ -402,6 +402,14 @@ describe('workspace style guard', () => {
     expect(adminSource).toContain('disabled={isUserRolesUnavailable}');
   });
 
+  it('surfaces Skill admin category dependency failures', () => {
+    expect(adminSource).toContain('isSkillCategoriesUnavailable');
+    expect(adminSource).toContain('skillCategoriesUnavailableNotice()');
+    expect(adminSource).toContain('Skill 分类暂不可用');
+    expect(adminSource).toContain('categoriesUnavailable={isSkillCategoriesUnavailable}');
+    expect(adminSource).toContain('disabled={categoriesUnavailable}');
+  });
+
   it('surfaces user admin action failures', () => {
     expect(adminSource).toContain('adminUserSaveFailureNotice');
     expect(adminSource).toContain('adminUserStatusFailureNotice');
