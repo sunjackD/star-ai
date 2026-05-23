@@ -662,7 +662,10 @@ function AccountProfilePage() {
 }
 
 function AgentsPage() {
-  const { data = [], isLoading: agentsLoading } = useQuery({ queryKey: ['agents'], queryFn: () => getPublicData<Agent[]>('/agents') });
+  const { data = [], isLoading: agentsLoading, isError: agentsUnavailable } = useQuery({
+    queryKey: ['agents'],
+    queryFn: () => getPublicData<Agent[]>('/agents')
+  });
   const [keyword, setKeyword] = useState('');
   const [category, setCategory] = useState('all');
   const categories = Array.from(new Set(data.map((agent) => agent.category))).sort();
@@ -714,6 +717,8 @@ function AgentsPage() {
       <div className="agent-fleet-grid">
         {agentsLoading ? (
           <CatalogLoadingState title="正在加载 Agent" />
+        ) : agentsUnavailable ? (
+          <CatalogEmptyState title="Agent 目录暂不可用" description={agentCatalogUnavailableDescription()} />
         ) : filteredAgents.length === 0 ? (
           <CatalogEmptyState title="暂无匹配 Agent" description="调整搜索词或分类，或者在平台后台新增 Agent。" />
         ) : filteredAgents.map((agent) => (
@@ -741,6 +746,10 @@ function AgentsPage() {
       </div>
     </div>
   );
+}
+
+function agentCatalogUnavailableDescription(): string {
+  return '请确认后端服务和公开 Agent 接口可用，然后刷新页面。';
 }
 
 function AgentDetailPage() {

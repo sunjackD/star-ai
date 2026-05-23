@@ -125,6 +125,12 @@ describe('workspace style guard', () => {
     expect(appSource).toContain('type="warning"');
   });
 
+  it('shows a clear unavailable state when the Agent catalog query fails', () => {
+    expect(appSource).toContain('agentsUnavailable');
+    expect(appSource).toContain('agentCatalogUnavailableDescription()');
+    expect(appSource).toContain('Agent 目录暂不可用');
+  });
+
   it('keeps API Key as the primary label while framing it for Agent use', () => {
     expect(appSource).not.toContain('Agent 授权');
     expect(appSource).not.toContain('授权 Key');
