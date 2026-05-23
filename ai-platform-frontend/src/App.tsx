@@ -1152,9 +1152,7 @@ function ArticlesPage() {
             </div>
             <Title level={3}>{article.title}</Title>
             <Paragraph>{article.summary}</Paragraph>
-            <Space wrap>
-              {article.tags.split(',').map((tag) => <Tag key={tag}>{tag}</Tag>)}
-            </Space>
+            <ArticleSummaryTags tags={article.tags} />
             <Space wrap className="article-actions">
               <Button size="small" type="primary" onClick={() => openDetail(article.id)}>阅读全文</Button>
             </Space>
@@ -1163,6 +1161,24 @@ function ArticlesPage() {
       </div>
     </div>
   );
+}
+
+function ArticleSummaryTags({ tags }: { tags: string }) {
+  const tagLabels = articleSummaryTagLabels(tags);
+  return (
+    <Space wrap>
+      {tagLabels.length === 0
+        ? <Text type="secondary">暂无文章标签</Text>
+        : tagLabels.map((tag) => <Tag key={tag}>{tag}</Tag>)}
+    </Space>
+  );
+}
+
+function articleSummaryTagLabels(tags: string): string[] {
+  return tags
+    .split(',')
+    .map((tag) => tag.trim())
+    .filter(Boolean);
 }
 
 function articleCatalogUnavailableDescription(): string {

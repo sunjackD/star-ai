@@ -284,6 +284,20 @@ describe('workspace style guard', () => {
     expect(appSource).toContain('文章目录暂不可用');
   });
 
+  it('filters blank article summary tags and shows an empty fallback', () => {
+    const articlesPageStart = appSource.indexOf('function ArticlesPage()');
+    const articleUnavailableStart = appSource.indexOf('function articleCatalogUnavailableDescription()');
+    expect(articlesPageStart).toBeGreaterThanOrEqual(0);
+    expect(articleUnavailableStart).toBeGreaterThan(articlesPageStart);
+    const articlesPageSource = appSource.slice(articlesPageStart, articleUnavailableStart);
+    expect(articlesPageSource).toContain('<ArticleSummaryTags tags={article.tags} />');
+    expect(appSource).toContain('function ArticleSummaryTags({ tags }: { tags: string })');
+    expect(appSource).toContain('function articleSummaryTagLabels(tags: string): string[]');
+    expect(appSource).toContain('.map((tag) => tag.trim())');
+    expect(appSource).toContain('.filter(Boolean)');
+    expect(appSource).toContain('暂无文章标签');
+  });
+
   it('shows a clear unavailable state when the model catalog query fails', () => {
     expect(appSource).toContain('modelsUnavailable');
     expect(appSource).toContain('modelCatalogUnavailableDescription()');
