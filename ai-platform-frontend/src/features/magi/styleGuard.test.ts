@@ -91,6 +91,12 @@ describe('workspace style guard', () => {
     expect(appSource).toContain('apiKeysEmptyDescription()');
   });
 
+  it('shows loading and empty feedback for the Agent API tool contract table', () => {
+    expect(appSource).toContain('developerToolContractLoading');
+    expect(appSource).toContain('loading={developerToolContractLoading}');
+    expect(appSource).toContain('developerToolContractEmptyDescription()');
+  });
+
   it('keeps API Key as the primary label while framing it for Agent use', () => {
     expect(appSource).not.toContain('Agent 授权');
     expect(appSource).not.toContain('授权 Key');

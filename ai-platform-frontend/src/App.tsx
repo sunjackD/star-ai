@@ -1838,14 +1838,15 @@ function formatDateTime(value?: string): string {
 function DeveloperPage() {
   const selfSkillUrl = apiUrl('/developer/self-skill/download');
   const apiBaseUrl = apiUrl('').replace(/\/$/, '');
-  const { data: dashboard } = useQuery({
+  const { data: dashboard, isLoading: developerDashboardLoading } = useQuery({
     queryKey: ['developer-dashboard'],
     queryFn: () => getData<DeveloperDashboard>('/developer/dashboard')
   });
-  const { data: manifest } = useQuery({
+  const { data: manifest, isLoading: developerManifestLoading } = useQuery({
     queryKey: ['developer-skill-manifest'],
     queryFn: () => getPublicData<DeveloperSkillManifest>('/developer/skill-manifest')
   });
+  const developerToolContractLoading = developerDashboardLoading || developerManifestLoading;
   const tools = manifest?.tools ?? DEFAULT_DEVELOPER_TOOLS;
   const manifestRequiredScopes = manifest?.requiredScopes ?? DEFAULT_PLATFORM_SCOPES;
   const toolSpecs = manifest?.toolSpecs?.length
@@ -1989,9 +1990,11 @@ function DeveloperPage() {
         <Table<DeveloperToolSpec>
           rowKey="name"
           dataSource={access.featuredTools}
+          loading={developerToolContractLoading}
           pagination={false}
           size="small"
           scroll={{ x: 760 }}
+          locale={{ emptyText: <Empty description={developerToolContractEmptyDescription()} /> }}
           columns={[
             {
               title: '工具',
@@ -2054,6 +2057,10 @@ function DeveloperPage() {
       </Card>
     </div>
   );
+}
+
+function developerToolContractEmptyDescription(): string {
+  return '暂无工具契约，刷新 Manifest 或检查 Agent 代管配置。';
 }
 
 function formatToolName(tool: string): string {
