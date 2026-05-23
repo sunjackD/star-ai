@@ -732,6 +732,13 @@ export function ArticlesAdminPage() {
     onSuccess: () => invalidateSelected(),
     onError: (error) => message.error(articleLinkDeleteFailureNotice(error))
   });
+  const shouldSyncArticleEditorDetail = Boolean(articleModalOpen && editing && articleDetail?.id === editing.id);
+
+  useEffect(() => {
+    if (shouldSyncArticleEditorDetail && articleDetail) {
+      articleForm.setFieldsValue(articleDetail);
+    }
+  }, [articleDetail, articleForm, shouldSyncArticleEditorDetail]);
 
   function invalidateSelected() {
     queryClient.invalidateQueries({ queryKey: ['admin-article', selected?.id] });

@@ -541,6 +541,12 @@ describe('workspace style guard', () => {
     expect(adminSource).toContain('dataSource={filteredArticles}');
   });
 
+  it('hydrates the article editor from detail data before body fields are saved', () => {
+    expect(adminSource).toContain('shouldSyncArticleEditorDetail');
+    expect(adminSource).toContain('articleDetail?.id === editing.id');
+    expect(adminSource).toContain('articleForm.setFieldsValue(articleDetail);');
+  });
+
   it('surfaces article admin action failures', () => {
     expect(adminSource).toContain('articleSaveFailureNotice');
     expect(adminSource).toContain('articleDeleteFailureNotice');
