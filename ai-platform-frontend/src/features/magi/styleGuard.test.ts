@@ -570,6 +570,11 @@ describe('workspace style guard', () => {
     expect(adminSource).toContain('<Button size="small" danger loading={deleteArticleMutation.isPending}>删除</Button>');
   });
 
+  it('shows loading feedback while deleting article nested records', () => {
+    expect(adminSource).toContain('<Button size="small" danger loading={deleteAssetMutation.isPending}>删除</Button>');
+    expect(adminSource).toContain('<Button size="small" danger loading={deleteLinkMutation.isPending}>删除</Button>');
+  });
+
   it('renders article admin statuses with distinct tags', () => {
     const articleAdminStart = adminSource.indexOf('export function ArticlesAdminPage()');
     const apiKeyAdminStart = adminSource.indexOf('export function ApiKeysAdminPage()');
