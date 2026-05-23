@@ -118,7 +118,8 @@ export function SettingsAdminPage() {
       form.setFieldsValue(settings);
       queryClient.invalidateQueries({ queryKey: ['admin-settings'] });
       queryClient.invalidateQueries({ queryKey: ['platform-config'] });
-    }
+    },
+    onError: (error) => message.error(settingsSaveFailureNotice(error))
   });
 
   useEffect(() => {
@@ -172,6 +173,10 @@ export function SettingsAdminPage() {
       </div>
     </div>
   );
+}
+
+function settingsSaveFailureNotice(error: unknown): string {
+  return error instanceof Error ? error.message : '系统设置保存失败';
 }
 
 export function UsersAdminPage() {

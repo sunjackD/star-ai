@@ -248,6 +248,11 @@ describe('workspace style guard', () => {
     expect(adminSource).toContain('loading={isOverviewLoading}');
   });
 
+  it('shows a concrete failure notice when system settings fail to save', () => {
+    expect(adminSource).toContain('settingsSaveFailureNotice');
+    expect(adminSource).toContain("onError: (error) => message.error(settingsSaveFailureNotice(error))");
+  });
+
   it('keeps article module semantics out of knowledge-base naming', () => {
     expect(appSource).not.toContain('knowledge-base-');
     expect(styles).not.toContain('knowledge-base-');
