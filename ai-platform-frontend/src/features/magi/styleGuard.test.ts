@@ -459,6 +459,10 @@ describe('workspace style guard', () => {
     expect(adminSource).toContain('>{createResourceDialogTitle(resourceSubject)}</Button>');
   });
 
+  it('uses specific shared admin resource delete confirmation labels', () => {
+    expect(adminSource).toContain('title={resourceDeleteConfirmTitle(resourceSubject)}');
+  });
+
   it('gives API Key and audit admin records loading and empty feedback', () => {
     expect(adminSource).toContain('apiKeyRecordEmptyDescription');
     expect(adminSource).toContain('auditLogInitialEmptyDescription');

@@ -1305,7 +1305,7 @@ function ResourceAdminPage<T extends ResourceRecord>({ config }: { config: Resou
         <Space>
           {config.rowActions?.(row)}
           <Button size="small" onClick={() => openEdit(row)}>编辑</Button>
-          <Popconfirm title="确认删除？" onConfirm={() => deleteMutation.mutate(row.id)}>
+          <Popconfirm title={resourceDeleteConfirmTitle(resourceSubject)} onConfirm={() => deleteMutation.mutate(row.id)}>
             <Button size="small" danger>删除</Button>
           </Popconfirm>
         </Space>
@@ -1401,6 +1401,10 @@ function createResourceDialogTitle(subject: string): string {
 
 function editResourceDialogTitle(subject: string): string {
   return `编辑${resourceSubjectLabel(subject)}`;
+}
+
+function resourceDeleteConfirmTitle(subject: string): string {
+  return `确认删除该${resourceSubjectLabel(subject)}？`;
 }
 
 function resourceSearchPlaceholder(subject: string): string {
