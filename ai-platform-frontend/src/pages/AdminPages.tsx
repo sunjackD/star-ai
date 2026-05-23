@@ -1172,7 +1172,7 @@ export function ApiKeysAdminPage() {
           { title: '名称', dataIndex: 'name' },
           { title: '前缀', dataIndex: 'keyPrefix' },
           { title: '权限', dataIndex: 'scopes', render: (scopes: string[]) => scopes.map((scope) => <Tag key={scope}>{scope}</Tag>) },
-          { title: '状态', dataIndex: 'status' },
+          { title: '状态', dataIndex: 'status', render: (status) => <Tag color={apiKeyStatusColor(status)}>{status}</Tag> },
           { title: '最后使用', dataIndex: 'lastUsedAt', render: (value) => value ?? '-' },
           {
             title: '操作',
@@ -1239,6 +1239,16 @@ function apiKeyRecordEmptyDescription(): string {
 
 function apiKeyDisableFailureNotice(error: unknown): string {
   return apiErrorMessage(error, 'API Key 禁用失败');
+}
+
+function apiKeyStatusColor(status: string): string {
+  if (status === 'ACTIVE') {
+    return 'green';
+  }
+  if (status === 'EXPIRED') {
+    return 'orange';
+  }
+  return 'default';
 }
 
 function auditLogInitialEmptyDescription(): string {
