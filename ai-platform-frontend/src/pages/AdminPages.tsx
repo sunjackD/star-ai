@@ -652,7 +652,7 @@ export function ArticlesAdminPage() {
       closeArticleAssetModal();
       invalidateSelected();
     },
-    onError: (error) => message.error(error instanceof Error ? error.message : '附件保存失败')
+    onError: (error) => message.error(articleAssetSaveFailureNotice(error))
   });
   const deleteAssetMutation = useMutation({
     mutationFn: (assetId: number) => deleteData(`/admin/articles/${selected?.id}/assets/${assetId}`),
@@ -998,6 +998,10 @@ function articleSaveFailureNotice(error: unknown): string {
 
 function articleDeleteFailureNotice(error: unknown): string {
   return error instanceof Error ? error.message : '文章删除失败';
+}
+
+function articleAssetSaveFailureNotice(error: unknown): string {
+  return error instanceof Error ? error.message : '附件保存失败';
 }
 
 function articleAssetDeleteFailureNotice(error: unknown): string {

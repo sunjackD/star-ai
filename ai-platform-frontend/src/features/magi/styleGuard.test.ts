@@ -439,11 +439,13 @@ describe('workspace style guard', () => {
   it('surfaces article admin action failures', () => {
     expect(adminSource).toContain('articleSaveFailureNotice');
     expect(adminSource).toContain('articleDeleteFailureNotice');
+    expect(adminSource).toContain('articleAssetSaveFailureNotice');
     expect(adminSource).toContain('articleAssetDeleteFailureNotice');
     expect(adminSource).toContain('articleLinkSaveFailureNotice');
     expect(adminSource).toContain('articleLinkDeleteFailureNotice');
     expect(adminSource).toContain('文章保存失败');
     expect(adminSource).toContain('文章删除失败');
+    expect(adminSource).toContain('附件保存失败');
     expect(adminSource).toContain('附件删除失败');
     expect(adminSource).toContain('参考链接保存失败');
     expect(adminSource).toContain('参考链接删除失败');
