@@ -235,6 +235,7 @@ export function UsersAdminPage() {
   const [keyword, setKeyword] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>();
   const [updatingStatusUserId, setUpdatingStatusUserId] = useState<number>();
+  const [resettingPasswordUserId, setResettingPasswordUserId] = useState<number>();
   const [editing, setEditing] = useState<AdminUser>();
   const [modalOpen, setModalOpen] = useState(false);
   const {
@@ -289,10 +290,11 @@ export function UsersAdminPage() {
     },
     onError: (error) => message.error(adminUserRoleFailureNotice(error))
   });
-  const passwordMutation = useMutation({
+  const userPasswordMutation = useMutation({
     mutationFn: ({ id, password }: { id: number; password: string }) => postData(`/admin/users/${id}/reset-password`, { password }),
     onSuccess: () => message.success('密码已重置'),
-    onError: (error) => message.error(adminUserPasswordFailureNotice(error))
+    onError: (error) => message.error(adminUserPasswordFailureNotice(error)),
+    onSettled: () => setResettingPasswordUserId(undefined)
   });
 
   function openCreate() {
@@ -323,6 +325,11 @@ export function UsersAdminPage() {
   function updateUserStatus(row: AdminUser) {
     setUpdatingStatusUserId(row.id);
     userStatusMutation.mutate({ id: row.id, status: row.status === 'ACTIVE' ? 'DISABLED' : 'ACTIVE' });
+  }
+
+  function resetUserPassword(row: AdminUser) {
+    setResettingPasswordUserId(row.id);
+    userPasswordMutation.mutate({ id: row.id, password: 'ChangeMe123' });
   }
 
   return (
@@ -392,8 +399,15 @@ export function UsersAdminPage() {
                   disabled={isUserRolesUnavailable || roleMutation.isPending}
                   onChange={(roleNames) => roleMutation.mutate({ id: row.id, roleNames })}
                 />
-                <Popconfirm title="确认重置该用户密码？" onConfirm={() => passwordMutation.mutate({ id: row.id, password: 'ChangeMe123' })}>
-                  <Button size="small" danger loading={passwordMutation.isPending}>重置密码</Button>
+                <Popconfirm title="确认重置该用户密码？" onConfirm={() => resetUserPassword(row)}>
+                  <Button
+                    size="small"
+                    danger
+                    loading={userPasswordMutation.isPending && resettingPasswordUserId === row.id}
+                    disabled={userPasswordMutation.isPending && resettingPasswordUserId !== row.id}
+                  >
+                    重置密码
+                  </Button>
                 </Popconfirm>
               </Space>
             )

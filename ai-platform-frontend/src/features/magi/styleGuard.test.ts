@@ -698,7 +698,14 @@ describe('workspace style guard', () => {
   });
 
   it('shows loading feedback while resetting user passwords', () => {
-    expect(adminSource).toContain('<Button size="small" danger loading={passwordMutation.isPending}>重置密码</Button>');
+    expect(adminSource).toContain('const [resettingPasswordUserId, setResettingPasswordUserId] = useState<number>();');
+    expect(adminSource).toContain('const userPasswordMutation = useMutation({');
+    expect(adminSource).toContain('function resetUserPassword(row: AdminUser) {');
+    expect(adminSource).toContain('setResettingPasswordUserId(row.id);');
+    expect(adminSource).toContain('onSettled: () => setResettingPasswordUserId(undefined)');
+    expect(adminSource).toContain('onConfirm={() => resetUserPassword(row)}');
+    expect(adminSource).toContain('loading={userPasswordMutation.isPending && resettingPasswordUserId === row.id}');
+    expect(adminSource).toContain('disabled={userPasswordMutation.isPending && resettingPasswordUserId !== row.id}');
   });
 
   it('surfaces Skill admin category dependency failures', () => {
