@@ -482,6 +482,19 @@ describe('workspace style guard', () => {
     expect(adminSource).toContain('<Button size="small" danger loading={deleteMutation.isPending}>删除</Button>');
   });
 
+  it('renders Agent admin statuses with distinct tags', () => {
+    const agentAdminStart = adminSource.indexOf('export function AgentsAdminPage()');
+    const skillCategoryAdminStart = adminSource.indexOf('export function SkillCategoriesAdminPage()');
+    expect(agentAdminStart).toBeGreaterThanOrEqual(0);
+    expect(skillCategoryAdminStart).toBeGreaterThan(agentAdminStart);
+    const agentAdminSource = adminSource.slice(agentAdminStart, skillCategoryAdminStart);
+    expect(agentAdminSource).toContain("{ title: '分类', dataIndex: 'category' }");
+    expect(agentAdminSource).toContain(
+      "render: (row) => <Tag color={agentAdminStatusColor(row.status)}>{row.status}</Tag>"
+    );
+    expect(adminSource).toContain("function agentAdminStatusColor(status: string): string");
+  });
+
   it('gives API Key and audit admin records loading and empty feedback', () => {
     expect(adminSource).toContain('apiKeyRecordEmptyDescription');
     expect(adminSource).toContain('auditLogInitialEmptyDescription');

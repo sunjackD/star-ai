@@ -469,8 +469,25 @@ export function AgentsAdminPage() {
       iconField(), field('guideMarkdown', '配置指南', 'textarea'),
       field('officialUrl', '官网'), statusField()
     ],
-    columns: baseColumns<Agent>(['category', 'status'])
+    columns: [
+      { title: '名称', dataIndex: 'name' },
+      { title: '分类', dataIndex: 'category' },
+      { title: '状态', render: (row) => <Tag color={agentAdminStatusColor(row.status)}>{row.status}</Tag> }
+    ]
   }} />;
+}
+
+function agentAdminStatusColor(status: string): string {
+  if (status === 'ACTIVE') {
+    return 'green';
+  }
+  if (status === 'DRAFT') {
+    return 'gold';
+  }
+  if (status === 'DISABLED') {
+    return 'red';
+  }
+  return 'default';
 }
 
 export function SkillCategoriesAdminPage() {
