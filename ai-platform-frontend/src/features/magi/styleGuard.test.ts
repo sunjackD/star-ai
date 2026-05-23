@@ -242,6 +242,12 @@ describe('workspace style guard', () => {
     expect(adminSource).toContain('title="暂无文章"');
   });
 
+  it('keeps admin overview metrics from showing stale zeroes while loading', () => {
+    expect(adminSource).toContain('adminOverviewCards');
+    expect(adminSource).toContain('isOverviewLoading');
+    expect(adminSource).toContain('loading={isOverviewLoading}');
+  });
+
   it('keeps article module semantics out of knowledge-base naming', () => {
     expect(appSource).not.toContain('knowledge-base-');
     expect(styles).not.toContain('knowledge-base-');

@@ -72,8 +72,8 @@ type ResourceConfig<T extends ResourceRecord> = {
 };
 
 export function AdminLandingPage() {
-  const { data } = useQuery({ queryKey: ['admin-overview'], queryFn: () => getData<AdminOverview>('/admin/overview') });
-  const cards = [
+  const { data, isLoading: isOverviewLoading } = useQuery({ queryKey: ['admin-overview'], queryFn: () => getData<AdminOverview>('/admin/overview') });
+  const adminOverviewCards = [
     ['用户', data?.users ?? 0, '/admin/users'],
     ['Agent', data?.agents ?? 0, '/admin/agents'],
     ['Skill', data?.skills ?? 0, '/admin/skills'],
@@ -90,9 +90,9 @@ export function AdminLandingPage() {
     <div className="page">
       <PageHeader title="平台后台" description="维护用户、Agent、Skill、模型、文章、数据集、微调任务和工具导航。" />
       <div className="metric-grid">
-        {cards.map(([label, value, href]) => (
+        {adminOverviewCards.map(([label, value, href]) => (
           <Link to={href as string} key={label as string}>
-            <Card hoverable><Statistic title={label as string} value={value as number} /></Card>
+            <Card hoverable loading={isOverviewLoading}><Statistic title={label as string} value={value as number} /></Card>
           </Link>
         ))}
       </div>
