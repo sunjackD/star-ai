@@ -551,6 +551,20 @@ describe('workspace style guard', () => {
     expect(styles).toContain('.admin-subsection');
   });
 
+  it('renders article admin statuses with distinct tags', () => {
+    const articleAdminStart = adminSource.indexOf('export function ArticlesAdminPage()');
+    const apiKeyAdminStart = adminSource.indexOf('export function ApiKeysAdminPage()');
+    expect(articleAdminStart).toBeGreaterThanOrEqual(0);
+    expect(apiKeyAdminStart).toBeGreaterThan(articleAdminStart);
+    const articleAdminSource = adminSource.slice(articleAdminStart, apiKeyAdminStart);
+    expect(articleAdminSource).toContain(
+      "render: (status) => <Tag color={articleStatusColor(status)}>{status}</Tag>"
+    );
+    expect(adminSource).toContain("function articleStatusColor(status: string): string");
+    expect(adminSource).toContain("if (status === 'ACTIVE') {");
+    expect(adminSource).toContain("if (status === 'DRAFT') {");
+  });
+
   it('gives the user admin table explicit loading and empty feedback', () => {
     expect(adminSource).toContain('isUsersLoading');
     expect(adminSource).toContain('userAdminInitialEmptyDescription');

@@ -849,7 +849,7 @@ export function ArticlesAdminPage() {
           { title: '标题', dataIndex: 'title' },
           { title: '分类', dataIndex: 'category' },
           { title: '难度', dataIndex: 'difficulty' },
-          { title: '状态', dataIndex: 'status', render: (status) => <Tag>{status}</Tag> },
+          { title: '状态', dataIndex: 'status', render: (status) => <Tag color={articleStatusColor(status)}>{status}</Tag> },
           { title: '排序', dataIndex: 'sortOrder' },
           {
             title: '操作',
@@ -1056,6 +1056,16 @@ function articleAdminInitialEmptyDescription(): string {
 
 function filteredArticleAdminEmptyDescription(): string {
   return '没有匹配当前搜索、状态或难度筛选的文章。';
+}
+
+function articleStatusColor(status: string): string {
+  if (status === 'ACTIVE') {
+    return 'green';
+  }
+  if (status === 'DRAFT') {
+    return 'gold';
+  }
+  return 'default';
 }
 
 function articleAdminListUnavailableNotice(): string {
