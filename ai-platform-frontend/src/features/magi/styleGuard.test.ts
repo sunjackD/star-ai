@@ -151,6 +151,12 @@ describe('workspace style guard', () => {
     expect(appSource).toContain('type="warning"');
   });
 
+  it('surfaces dashboard Agent handoff manifest failures', () => {
+    expect(appSource).toContain('dashboardManifestUnavailable');
+    expect(appSource).toContain('dashboardManifestUnavailableNotice()');
+    expect(appSource).toContain('Agent 代管 Manifest 暂不可用');
+  });
+
   it('shows a clear unavailable state when the Agent catalog query fails', () => {
     expect(appSource).toContain('agentsUnavailable');
     expect(appSource).toContain('agentCatalogUnavailableDescription()');

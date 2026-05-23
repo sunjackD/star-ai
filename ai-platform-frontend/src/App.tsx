@@ -276,7 +276,7 @@ function DashboardPage() {
     queryFn: () => getPublicData<RedirectLink[]>('/links')
   });
   const { data: platform } = useQuery({ queryKey: ['platform-config'], queryFn: () => getPublicData<PlatformConfig>('/platform/config') });
-  const { data: manifest } = useQuery({
+  const { data: manifest, isError: dashboardManifestUnavailable } = useQuery({
     queryKey: ['developer-skill-manifest'],
     queryFn: () => getPublicData<DeveloperSkillManifest>('/developer/skill-manifest')
   });
@@ -388,6 +388,15 @@ function DashboardPage() {
           className="dashboard-catalog-alert"
         />
       )}
+      {dashboardManifestUnavailable && (
+        <Alert
+          showIcon
+          type="warning"
+          message="Agent 代管 Manifest 暂不可用"
+          description={dashboardManifestUnavailableNotice()}
+          className="dashboard-catalog-alert"
+        />
+      )}
 
       <MagiCyclePanel plan={magiPlan} summary={magiSummary} />
 
@@ -473,6 +482,10 @@ function dashboardSkillTableEmptyDescription(): string {
 
 function dashboardCatalogUnavailableNotice(): string {
   return '目录接口暂不可用，当前数字可能是占位值；请确认后端服务运行后再刷新。';
+}
+
+function dashboardManifestUnavailableNotice(): string {
+  return 'Agent 代管入口会显示默认接入计划，请确认 Manifest 接口可用后刷新。';
 }
 
 function MagiCyclePanel({
