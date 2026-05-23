@@ -609,7 +609,8 @@ export function ArticlesAdminPage() {
       closeArticleDialog();
       queryClient.invalidateQueries({ queryKey: ['admin-articles'] });
       queryClient.invalidateQueries({ queryKey: ['articles'] });
-    }
+    },
+    onError: (error) => message.error(articleSaveFailureNotice(error))
   });
   const deleteArticleMutation = useMutation({
     mutationFn: (id: number) => deleteData(`/admin/articles/${id}`),
@@ -618,7 +619,8 @@ export function ArticlesAdminPage() {
       setSelected(undefined);
       queryClient.invalidateQueries({ queryKey: ['admin-articles'] });
       queryClient.invalidateQueries({ queryKey: ['articles'] });
-    }
+    },
+    onError: (error) => message.error(articleDeleteFailureNotice(error))
   });
   const assetMutation = useMutation({
     mutationFn: (values: Record<string, unknown>) => {
@@ -644,7 +646,8 @@ export function ArticlesAdminPage() {
   });
   const deleteAssetMutation = useMutation({
     mutationFn: (assetId: number) => deleteData(`/admin/articles/${selected?.id}/assets/${assetId}`),
-    onSuccess: () => invalidateSelected()
+    onSuccess: () => invalidateSelected(),
+    onError: (error) => message.error(articleAssetDeleteFailureNotice(error))
   });
   const linkMutation = useMutation({
     mutationFn: (values: Record<string, unknown>) => postData(`/admin/articles/${selected?.id}/links`, values),
@@ -652,11 +655,13 @@ export function ArticlesAdminPage() {
       message.success('参考链接已保存');
       closeArticleLinkModal();
       invalidateSelected();
-    }
+    },
+    onError: (error) => message.error(articleLinkSaveFailureNotice(error))
   });
   const deleteLinkMutation = useMutation({
     mutationFn: (linkId: number) => deleteData(`/admin/articles/${selected?.id}/links/${linkId}`),
-    onSuccess: () => invalidateSelected()
+    onSuccess: () => invalidateSelected(),
+    onError: (error) => message.error(articleLinkDeleteFailureNotice(error))
   });
 
   function invalidateSelected() {
@@ -975,6 +980,26 @@ function articleAssetEmptyDescription(): string {
 
 function articleLinkEmptyDescription(): string {
   return '可新增外部或站内参考链接，帮助读者继续阅读。';
+}
+
+function articleSaveFailureNotice(error: unknown): string {
+  return error instanceof Error ? error.message : '文章保存失败';
+}
+
+function articleDeleteFailureNotice(error: unknown): string {
+  return error instanceof Error ? error.message : '文章删除失败';
+}
+
+function articleAssetDeleteFailureNotice(error: unknown): string {
+  return error instanceof Error ? error.message : '附件删除失败';
+}
+
+function articleLinkSaveFailureNotice(error: unknown): string {
+  return error instanceof Error ? error.message : '参考链接保存失败';
+}
+
+function articleLinkDeleteFailureNotice(error: unknown): string {
+  return error instanceof Error ? error.message : '参考链接删除失败';
 }
 
 export function ApiKeysAdminPage() {

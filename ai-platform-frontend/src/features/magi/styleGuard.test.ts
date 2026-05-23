@@ -428,6 +428,19 @@ describe('workspace style guard', () => {
     expect(adminSource).toContain('dataSource={filteredArticles}');
   });
 
+  it('surfaces article admin action failures', () => {
+    expect(adminSource).toContain('articleSaveFailureNotice');
+    expect(adminSource).toContain('articleDeleteFailureNotice');
+    expect(adminSource).toContain('articleAssetDeleteFailureNotice');
+    expect(adminSource).toContain('articleLinkSaveFailureNotice');
+    expect(adminSource).toContain('articleLinkDeleteFailureNotice');
+    expect(adminSource).toContain('文章保存失败');
+    expect(adminSource).toContain('文章删除失败');
+    expect(adminSource).toContain('附件删除失败');
+    expect(adminSource).toContain('参考链接保存失败');
+    expect(adminSource).toContain('参考链接删除失败');
+  });
+
   it('keeps admin overview metrics from showing stale zeroes while loading', () => {
     expect(adminSource).toContain('adminOverviewCards');
     expect(adminSource).toContain('isOverviewLoading');
