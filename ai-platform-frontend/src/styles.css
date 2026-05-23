@@ -1612,6 +1612,23 @@ pre {
   margin-top: 28px;
 }
 
+.article-tail-empty {
+  grid-column: 1 / -1;
+  min-height: 160px;
+  display: grid;
+  place-items: center;
+  padding: 24px 18px;
+  border: 1px solid rgba(255, 255, 255, 0.72);
+  border-radius: var(--radius);
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.72), rgba(248, 250, 255, 0.54));
+  box-shadow: var(--shadow-soft), inset 0 1px 0 rgba(255, 255, 255, 0.68);
+}
+
+.article-tail-empty .ant-empty {
+  margin: 0;
+}
+
 .article-assets,
 .article-links {
   display: grid;

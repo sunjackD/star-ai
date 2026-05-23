@@ -1006,7 +1006,9 @@ function ArticleDetailPage() {
       <section className="article-tail">
         <Title level={2}>附件与 Prompt</Title>
         <div className="article-assets">
-          {data.assets.map((asset) => (
+          {data.assets.length === 0 ? (
+            <ArticleTailEmptyState title="暂无附件或 Prompt" description="当前文章没有附加脚本、Prompt 或文件。" />
+          ) : data.assets.map((asset) => (
             <ArticleAssetCard key={asset.id} articleId={data.id} asset={asset} />
           ))}
         </div>
@@ -1015,9 +1017,27 @@ function ArticleDetailPage() {
       <section className="article-tail">
         <Title level={2}>参考链接</Title>
         <div className="article-links">
-          {data.links.map((link) => <ArticleLinkCard key={link.id} link={link} />)}
+          {data.links.length === 0 ? (
+            <ArticleTailEmptyState title="暂无参考链接" description="当前文章没有配置外部或站内参考链接。" />
+          ) : data.links.map((link) => <ArticleLinkCard key={link.id} link={link} />)}
         </div>
       </section>
+    </div>
+  );
+}
+
+function ArticleTailEmptyState(props: { title: string; description: string }) {
+  return (
+    <div className="article-tail-empty">
+      <Empty
+        image={Empty.PRESENTED_IMAGE_SIMPLE}
+        description={(
+          <Space direction="vertical" size={4}>
+            <Text strong>{props.title}</Text>
+            <Text type="secondary">{props.description}</Text>
+          </Space>
+        )}
+      />
     </div>
   );
 }

@@ -189,6 +189,13 @@ describe('workspace style guard', () => {
     expect(styles).toContain('.catalog-loading-state');
   });
 
+  it('gives article detail tail sections explicit empty states', () => {
+    expect(appSource).toContain('ArticleTailEmptyState');
+    expect(appSource).toContain('暂无附件或 Prompt');
+    expect(appSource).toContain('暂无参考链接');
+    expect(styles).toContain('.article-tail-empty');
+  });
+
   it('keeps article module semantics out of knowledge-base naming', () => {
     expect(appSource).not.toContain('knowledge-base-');
     expect(styles).not.toContain('knowledge-base-');
