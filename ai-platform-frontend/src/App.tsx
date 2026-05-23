@@ -2208,7 +2208,7 @@ function PageTitle({ title, description }: { title: string; description: string 
 
 function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <PlatformThemeBootstrap />
       <Routes>
         <Route element={<SetupGate />}>
