@@ -1914,6 +1914,7 @@ function ApiKeysPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [createdKey, setCreatedKey] = useState<string>();
   const [selectedPreset, setSelectedPreset] = useState('platform');
+  const [revokingApiKeyId, setRevokingApiKeyId] = useState<number>();
   const {
     data: apiKeys = [],
     isLoading: apiKeysLoading,
@@ -1938,14 +1939,15 @@ function ApiKeysPage() {
     },
     onError: (error) => message.error(apiKeyCreateFailureNotice(error))
   });
-  const revokeMutation = useMutation({
+  const apiKeyRevokeMutation = useMutation({
     mutationFn: (id: number) => postData(`/developer/api-keys/${id}/revoke`),
     onSuccess: () => {
       message.success('API Key 已撤销');
       queryClient.invalidateQueries({ queryKey: ['api-keys'] });
       queryClient.invalidateQueries({ queryKey: ['developer-dashboard'] });
     },
-    onError: (error) => message.error(apiKeyRevokeFailureNotice(error))
+    onError: (error) => message.error(apiKeyRevokeFailureNotice(error)),
+    onSettled: () => setRevokingApiKeyId(undefined)
   });
   const apiBaseUrl = apiUrl('').replace(/\/$/, '');
   const selectedPresetOption = API_KEY_PERMISSION_PRESETS.find((item) => item.key === selectedPreset)
@@ -1964,6 +1966,11 @@ function ApiKeysPage() {
     setModalOpen(false);
     setSelectedPreset('platform');
     form.resetFields();
+  }
+
+  function revokeApiKey(id: number) {
+    setRevokingApiKeyId(id);
+    apiKeyRevokeMutation.mutate(id);
   }
 
   return (
@@ -2020,7 +2027,7 @@ function ApiKeysPage() {
       <Table
         rowKey="id"
         dataSource={apiKeys}
-        loading={apiKeysLoading || revokeMutation.isPending}
+        loading={apiKeysLoading}
         locale={{ emptyText: <Empty description={apiKeysEmptyDescription()} /> }}
         columns={[
           { title: '名称', dataIndex: 'name' },
@@ -2040,8 +2047,15 @@ function ApiKeysPage() {
           {
             title: '操作',
             render: (_, row) => row.status === 'ACTIVE' ? (
-              <Popconfirm title="撤销后该 Key 将立即失效，确认撤销？" onConfirm={() => revokeMutation.mutate(row.id)}>
-                <Button danger size="small" loading={revokeMutation.isPending}>撤销</Button>
+              <Popconfirm title="撤销后该 Key 将立即失效，确认撤销？" onConfirm={() => revokeApiKey(row.id)}>
+                <Button
+                  danger
+                  size="small"
+                  loading={apiKeyRevokeMutation.isPending && revokingApiKeyId === row.id}
+                  disabled={apiKeyRevokeMutation.isPending && revokingApiKeyId !== row.id}
+                >
+                  撤销
+                </Button>
               </Popconfirm>
             ) : '-'
           }

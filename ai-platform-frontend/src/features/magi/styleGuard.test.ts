@@ -108,7 +108,16 @@ describe('workspace style guard', () => {
 
   it('shows loading and empty feedback for the API Key table', () => {
     expect(appSource).toContain('apiKeysLoading');
-    expect(appSource).toContain('loading={apiKeysLoading || revokeMutation.isPending}');
+    expect(appSource).toContain('const [revokingApiKeyId, setRevokingApiKeyId] = useState<number>();');
+    expect(appSource).toContain('const apiKeyRevokeMutation = useMutation({');
+    expect(appSource).toContain('function revokeApiKey(id: number) {');
+    expect(appSource).toContain('setRevokingApiKeyId(id);');
+    expect(appSource).toContain('onSettled: () => setRevokingApiKeyId(undefined)');
+    expect(appSource).toContain('onConfirm={() => revokeApiKey(row.id)}');
+    expect(appSource).toContain('loading={apiKeyRevokeMutation.isPending && revokingApiKeyId === row.id}');
+    expect(appSource).toContain('disabled={apiKeyRevokeMutation.isPending && revokingApiKeyId !== row.id}');
+    expect(appSource).toContain('loading={apiKeysLoading}');
+    expect(appSource).not.toContain('loading={apiKeysLoading || revokeMutation.isPending}');
     expect(appSource).toContain('apiKeysEmptyDescription()');
   });
 
