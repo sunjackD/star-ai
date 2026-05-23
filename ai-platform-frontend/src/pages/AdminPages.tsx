@@ -514,16 +514,24 @@ export function ArticlesAdminPage() {
   const [linkModalOpen, setLinkModalOpen] = useState(false);
   const [assetFile, setAssetFile] = useState<RcFile>();
   const [assetMode, setAssetMode] = useState<'TEXT' | 'FILE'>('TEXT');
-  const { data = [], isLoading } = useQuery({
+  const {
+    data: articles = [],
+    isLoading: articlesLoading,
+    isError: articleAdminListUnavailable
+  } = useQuery({
     queryKey: ['admin-articles'],
     queryFn: () => getData<ArticleSummary[]>('/admin/articles')
   });
-  const { data: detail, isLoading: isDetailLoading } = useQuery({
+  const {
+    data: articleDetail,
+    isLoading: isDetailLoading,
+    isError: articleAdminDetailUnavailable
+  } = useQuery({
     queryKey: ['admin-article', selected?.id],
     queryFn: () => getData<ArticleDetail>(`/admin/articles/${selected?.id}`),
     enabled: Boolean(selected?.id)
   });
-  const filteredData = data.filter((item) => {
+  const filteredArticles = articles.filter((item) => {
     const text = `${item.title} ${item.summary} ${item.tags} ${item.category}`.toLowerCase();
     const keywordMatched = !keyword || text.includes(keyword.toLowerCase());
     const statusMatched = !statusFilter || item.status === statusFilter;
@@ -611,7 +619,7 @@ export function ArticlesAdminPage() {
   function openEdit(row: ArticleSummary) {
     setEditing(row);
     setSelected(row);
-    articleForm.setFieldsValue(detail && detail.id === row.id ? detail : row);
+    articleForm.setFieldsValue(articleDetail && articleDetail.id === row.id ? articleDetail : row);
     setArticleModalOpen(true);
   }
 
@@ -649,6 +657,14 @@ export function ArticlesAdminPage() {
   return (
     <div className="page">
       <PageHeader title="文章管理" description="维护文章、Markdown 正文、安全提示、附件和参考链接。" />
+      {articleAdminListUnavailable && (
+        <Alert
+          showIcon
+          type="warning"
+          message="文章列表暂不可用"
+          description={articleAdminListUnavailableNotice()}
+        />
+      )}
       <Space className="admin-toolbar" wrap>
         <Input.Search placeholder="搜索标题、摘要、分类或标签" onChange={(event) => setKeyword(event.target.value)} allowClear />
         <Select
@@ -669,8 +685,8 @@ export function ArticlesAdminPage() {
       </Space>
       <Table
         rowKey="id"
-        loading={isLoading || deleteArticleMutation.isPending}
-        dataSource={filteredData}
+        loading={articlesLoading || deleteArticleMutation.isPending}
+        dataSource={filteredArticles}
         pagination={{ pageSize: 8, showSizeChanger: true }}
         locale={{
           emptyText: <AdminTableEmptyState title="暂无文章" description={articleEmptyDescription} />
@@ -698,6 +714,14 @@ export function ArticlesAdminPage() {
 
       {selected && (
         <Card title={`内容维护：${selected.title}`} className="admin-detail-card">
+          {articleAdminDetailUnavailable && (
+            <Alert
+              showIcon
+              type="warning"
+              message="文章内容暂不可用"
+              description={articleAdminDetailUnavailableNotice()}
+            />
+          )}
           <Space className="admin-toolbar" wrap>
             <Button onClick={() => openAssetCreate('TEXT')}>新增文本附件</Button>
             <Button onClick={() => openAssetCreate('FILE')}>上传文件附件</Button>
@@ -710,7 +734,7 @@ export function ArticlesAdminPage() {
                 size="small"
                 pagination={false}
                 loading={isDetailLoading || deleteAssetMutation.isPending}
-                dataSource={detail?.assets ?? []}
+                dataSource={articleDetail?.assets ?? []}
                 locale={{
                   emptyText: <AdminTableEmptyState title="暂无文章附件" description={articleAssetEmptyDescription()} />
                 }}
@@ -738,7 +762,7 @@ export function ArticlesAdminPage() {
                 size="small"
                 pagination={false}
                 loading={isDetailLoading || deleteLinkMutation.isPending}
-                dataSource={detail?.links ?? []}
+                dataSource={articleDetail?.links ?? []}
                 locale={{
                   emptyText: <AdminTableEmptyState title="暂无文章参考链接" description={articleLinkEmptyDescription()} />
                 }}
@@ -876,6 +900,14 @@ function articleAdminInitialEmptyDescription(): string {
 
 function filteredArticleAdminEmptyDescription(): string {
   return '没有匹配当前搜索、状态或难度筛选的文章。';
+}
+
+function articleAdminListUnavailableNotice(): string {
+  return '请确认后端服务和文章管理接口可用，然后刷新页面。';
+}
+
+function articleAdminDetailUnavailableNotice(): string {
+  return '请确认后端服务和文章详情接口可用，然后重新选择文章。';
 }
 
 function articleAssetEmptyDescription(): string {

@@ -352,6 +352,14 @@ describe('workspace style guard', () => {
     expect(adminSource).toContain('title="暂无文章"');
   });
 
+  it('surfaces article admin list and selected detail query failures', () => {
+    expect(adminSource).toContain('articleAdminListUnavailable');
+    expect(adminSource).toContain('articleAdminDetailUnavailable');
+    expect(adminSource).toContain('articleAdminListUnavailableNotice()');
+    expect(adminSource).toContain('articleAdminDetailUnavailableNotice()');
+    expect(adminSource).toContain('dataSource={filteredArticles}');
+  });
+
   it('keeps admin overview metrics from showing stale zeroes while loading', () => {
     expect(adminSource).toContain('adminOverviewCards');
     expect(adminSource).toContain('isOverviewLoading');
