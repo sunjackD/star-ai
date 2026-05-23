@@ -851,6 +851,7 @@ function ResourceAdminPage<T extends ResourceRecord>({ config }: { config: Resou
   const [keyword, setKeyword] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>();
   const { data = [], isLoading } = useQuery({ queryKey: [config.queryKey], queryFn: () => getData<T[]>(config.endpoint) });
+  const resourceSubject = resourceDialogSubject(config.title);
   const hasStatus = config.fields.some((item) => item.name === 'status') || data.some((item) => item.status);
   const statusOptions = Array.from(new Set(data.map((item) => item.status).filter(Boolean) as string[]));
   const filteredData = useMemo(() => data.filter((row) => {
@@ -933,7 +934,13 @@ function ResourceAdminPage<T extends ResourceRecord>({ config }: { config: Resou
         columns={columns}
         pagination={{ pageSize: 8, showSizeChanger: true }}
       />
-      <Modal open={modalOpen} title={editing ? '编辑资源' : '新增资源'} footer={null} onCancel={() => setModalOpen(false)} width={720}>
+      <Modal
+        open={modalOpen}
+        title={editing ? editResourceDialogTitle(resourceSubject) : createResourceDialogTitle(resourceSubject)}
+        footer={null}
+        onCancel={() => setModalOpen(false)}
+        width={720}
+      >
         <Form form={form} layout="vertical" onFinish={(values) => saveMutation.mutate(values)}>
           {config.fields.map((item) => (
             <Form.Item key={item.name} name={item.name} label={item.label} rules={rulesForField(item)}>
@@ -945,6 +952,22 @@ function ResourceAdminPage<T extends ResourceRecord>({ config }: { config: Resou
       </Modal>
     </div>
   );
+}
+
+function resourceDialogSubject(title: string): string {
+  return title.replace(/\s*管理$/, '');
+}
+
+function createResourceDialogTitle(subject: string): string {
+  return `新增${resourceDialogTitleSuffix(subject)}`;
+}
+
+function editResourceDialogTitle(subject: string): string {
+  return `编辑${resourceDialogTitleSuffix(subject)}`;
+}
+
+function resourceDialogTitleSuffix(subject: string): string {
+  return /^[A-Za-z0-9]/.test(subject) ? ` ${subject}` : subject;
 }
 
 function renderField(fieldDef: FieldDef) {

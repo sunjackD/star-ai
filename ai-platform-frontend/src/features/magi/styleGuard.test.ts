@@ -196,6 +196,13 @@ describe('workspace style guard', () => {
     expect(styles).toContain('.article-tail-empty');
   });
 
+  it('uses concrete admin dialog titles instead of generic resource labels', () => {
+    expect(adminSource).toContain('createResourceDialogTitle');
+    expect(adminSource).toContain('editResourceDialogTitle');
+    expect(adminSource).toContain('resourceDialogSubject');
+    expect(adminSource).not.toContain("title={editing ? '编辑资源' : '新增资源'}");
+  });
+
   it('keeps article module semantics out of knowledge-base naming', () => {
     expect(appSource).not.toContain('knowledge-base-');
     expect(styles).not.toContain('knowledge-base-');
