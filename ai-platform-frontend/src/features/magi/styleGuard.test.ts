@@ -362,6 +362,14 @@ describe('workspace style guard', () => {
     expect(styles).toContain('.article-tail-empty');
   });
 
+  it('does not claim article asset text was copied before the clipboard confirms it', () => {
+    expect(appSource).toContain('copyArticleAssetText');
+    expect(appSource).toContain('await navigator.clipboard.writeText(contentText);');
+    expect(appSource).toContain('message.success(articleAssetCopySuccessNotice())');
+    expect(appSource).toContain('message.warning(articleAssetCopyFailureNotice())');
+    expect(appSource).toContain("onClick={() => copyArticleAssetText(asset.contentText ?? '')}");
+  });
+
   it('uses concrete admin dialog titles instead of generic resource labels', () => {
     expect(adminSource).toContain('createResourceDialogTitle');
     expect(adminSource).toContain('editResourceDialogTitle');

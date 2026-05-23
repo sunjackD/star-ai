@@ -1264,6 +1264,23 @@ function ArticleTailEmptyState(props: { title: string; description: string }) {
   );
 }
 
+async function copyArticleAssetText(contentText: string): Promise<void> {
+  try {
+    await navigator.clipboard.writeText(contentText);
+    message.success(articleAssetCopySuccessNotice());
+  } catch {
+    message.warning(articleAssetCopyFailureNotice());
+  }
+}
+
+function articleAssetCopySuccessNotice(): string {
+  return '已复制附件文本';
+}
+
+function articleAssetCopyFailureNotice(): string {
+  return '复制失败，请使用代码块选择文本复制';
+}
+
 function ArticleAssetCard(props: { articleId: number; asset: ArticleAsset }) {
   const { asset } = props;
   const canCopy = Boolean(asset.contentText);
@@ -1281,10 +1298,7 @@ function ArticleAssetCard(props: { articleId: number; asset: ArticleAsset }) {
         {canCopy && (
           <Button
             icon={<Copy size={14} />}
-            onClick={() => {
-              navigator.clipboard.writeText(asset.contentText ?? '');
-              message.success('已复制');
-            }}
+            onClick={() => copyArticleAssetText(asset.contentText ?? '')}
           >
             复制
           </Button>
