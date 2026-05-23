@@ -1692,6 +1692,18 @@ pre {
   gap: 16px;
 }
 
+.admin-subsection {
+  min-width: 0;
+  padding: 16px;
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.58);
+}
+
+.admin-subsection-title.ant-typography {
+  margin: 0 0 12px;
+}
+
 .admin-short-input {
   width: 180px;
 }

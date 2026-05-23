@@ -882,7 +882,8 @@ export function ArticlesAdminPage() {
             <Button onClick={openLinkCreate}>新增参考链接</Button>
           </Space>
           <div className="admin-subgrid">
-            <Card title="附件">
+            <section className="admin-subsection">
+              <Title level={4} className="admin-subsection-title">附件</Title>
               <Table
                 rowKey="id"
                 size="small"
@@ -909,8 +910,9 @@ export function ArticlesAdminPage() {
                   }
                 ]}
               />
-            </Card>
-            <Card title="参考链接">
+            </section>
+            <section className="admin-subsection">
+              <Title level={4} className="admin-subsection-title">参考链接</Title>
               <Table
                 rowKey="id"
                 size="small"
@@ -933,7 +935,7 @@ export function ArticlesAdminPage() {
                   }
                 ]}
               />
-            </Card>
+            </section>
           </div>
         </Card>
       )}

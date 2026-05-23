@@ -499,6 +499,13 @@ describe('workspace style guard', () => {
     expect(adminSource).toContain('title="暂无文章参考链接"');
   });
 
+  it('keeps article admin nested tables out of nested cards', () => {
+    expect(adminSource).not.toContain('<Card title="附件">');
+    expect(adminSource).not.toContain('<Card title="参考链接">');
+    expect(adminSource).toContain('className="admin-subsection"');
+    expect(styles).toContain('.admin-subsection');
+  });
+
   it('gives the user admin table explicit loading and empty feedback', () => {
     expect(adminSource).toContain('isUsersLoading');
     expect(adminSource).toContain('userAdminInitialEmptyDescription');
