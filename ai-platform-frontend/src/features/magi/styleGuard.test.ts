@@ -349,6 +349,12 @@ describe('workspace style guard', () => {
     expect(adminSource).toContain("onError: (error) => message.error(settingsSaveFailureNotice(error))");
   });
 
+  it('shows a concrete failure notice when system settings fail to load', () => {
+    expect(adminSource).toContain('isSettingsUnavailable');
+    expect(adminSource).toContain('settingsLoadFailureNotice()');
+    expect(adminSource).toContain('系统设置暂不可用');
+  });
+
   it('shows a concrete failure notice when icon upload fails', () => {
     expect(adminSource).toContain('iconUploadFailureNotice');
     expect(adminSource).toContain('message.error(iconUploadFailureNotice(error))');

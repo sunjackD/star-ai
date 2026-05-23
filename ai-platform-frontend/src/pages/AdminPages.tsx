@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
+  Alert,
   Button,
   Card,
   Empty,
@@ -103,7 +104,11 @@ export function AdminLandingPage() {
 export function SettingsAdminPage() {
   const queryClient = useQueryClient();
   const [form] = Form.useForm<AdminSettings>();
-  const { data, isLoading } = useQuery({
+  const {
+    data: settings,
+    isLoading: isSettingsLoading,
+    isError: isSettingsUnavailable
+  } = useQuery({
     queryKey: ['admin-settings'],
     queryFn: () => getData<AdminSettings>('/admin/settings')
   });
@@ -123,16 +128,24 @@ export function SettingsAdminPage() {
   });
 
   useEffect(() => {
-    if (data) {
-      form.setFieldsValue(data);
+    if (settings) {
+      form.setFieldsValue(settings);
     }
-  }, [data, form]);
+  }, [settings, form]);
 
   return (
     <div className="page">
       <PageHeader title="系统设置" description="维护站点文案、默认主题、注册策略和 API Key 默认有效期。" />
+      {isSettingsUnavailable && (
+        <Alert
+          showIcon
+          type="warning"
+          message="系统设置暂不可用"
+          description={settingsLoadFailureNotice()}
+        />
+      )}
       <div className="settings-grid">
-        <Card className="settings-form-card" loading={isLoading}>
+        <Card className="settings-form-card" loading={isSettingsLoading}>
           <Form form={form} layout="vertical" onFinish={(values) => mutation.mutate(values as AdminSettings)}>
             <Form.Item name="siteName" label="站点名称" rules={[{ required: true, whitespace: true }]}>
               <Input placeholder="星梦 AI 聚合平台" />
@@ -177,6 +190,10 @@ export function SettingsAdminPage() {
 
 function settingsSaveFailureNotice(error: unknown): string {
   return error instanceof Error ? error.message : '系统设置保存失败';
+}
+
+function settingsLoadFailureNotice(): string {
+  return '请确认后端服务和系统设置接口可用，然后刷新页面。';
 }
 
 export function UsersAdminPage() {
