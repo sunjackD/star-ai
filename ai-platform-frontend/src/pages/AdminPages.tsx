@@ -549,8 +549,7 @@ export function ArticlesAdminPage() {
     },
     onSuccess: () => {
       message.success('附件已保存');
-      setAssetModalOpen(false);
-      setAssetFile(undefined);
+      closeArticleAssetModal();
       invalidateSelected();
     },
     onError: (error) => message.error(error instanceof Error ? error.message : '附件保存失败')
@@ -563,7 +562,7 @@ export function ArticlesAdminPage() {
     mutationFn: (values: Record<string, unknown>) => postData(`/admin/articles/${selected?.id}/links`, values),
     onSuccess: () => {
       message.success('参考链接已保存');
-      setLinkModalOpen(false);
+      closeArticleLinkModal();
       invalidateSelected();
     }
   });
@@ -607,6 +606,17 @@ export function ArticlesAdminPage() {
     linkForm.resetFields();
     linkForm.setFieldsValue({ linkType: 'EXTERNAL', sortOrder: 100 });
     setLinkModalOpen(true);
+  }
+
+  function closeArticleAssetModal() {
+    setAssetModalOpen(false);
+    setAssetFile(undefined);
+    assetForm.resetFields();
+  }
+
+  function closeArticleLinkModal() {
+    setLinkModalOpen(false);
+    linkForm.resetFields();
   }
 
   return (
@@ -770,7 +780,7 @@ export function ArticlesAdminPage() {
         </Form>
       </Modal>
 
-      <Modal open={assetModalOpen} title={assetMode === 'FILE' ? '上传文件附件' : '新增文本附件'} footer={null} onCancel={() => setAssetModalOpen(false)} width={720}>
+      <Modal open={assetModalOpen} title={assetMode === 'FILE' ? '上传文件附件' : '新增文本附件'} footer={null} onCancel={closeArticleAssetModal} width={720}>
         <Form form={assetForm} layout="vertical" onFinish={(values) => assetMutation.mutate(values)}>
           <Form.Item name="name" label="名称" rules={[{ required: true, whitespace: true }]}>
             <Input />
@@ -809,7 +819,7 @@ export function ArticlesAdminPage() {
         </Form>
       </Modal>
 
-      <Modal open={linkModalOpen} title="新增参考链接" footer={null} onCancel={() => setLinkModalOpen(false)} width={720}>
+      <Modal open={linkModalOpen} title="新增参考链接" footer={null} onCancel={closeArticleLinkModal} width={720}>
         <Form form={linkForm} layout="vertical" onFinish={(values) => linkMutation.mutate(values)}>
           <Form.Item name="linkType" label="链接类型" rules={[{ required: true }]}>
             <Select options={['EXTERNAL', 'INTERNAL'].map((value) => ({ label: value, value }))} />

@@ -264,6 +264,13 @@ describe('workspace style guard', () => {
     expect(adminSource).toContain('form.resetFields();');
   });
 
+  it('clears pending article attachment dialog state when child dialogs close', () => {
+    expect(adminSource).toContain('closeArticleAssetModal');
+    expect(adminSource).toContain('closeArticleLinkModal');
+    expect(adminSource).toContain('onCancel={closeArticleAssetModal}');
+    expect(adminSource).toContain('onCancel={closeArticleLinkModal}');
+  });
+
   it('keeps article module semantics out of knowledge-base naming', () => {
     expect(appSource).not.toContain('knowledge-base-');
     expect(styles).not.toContain('knowledge-base-');
