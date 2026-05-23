@@ -375,6 +375,11 @@ describe('workspace style guard', () => {
     expect(adminSource).toContain('dataSource={filteredAuditLogs}');
   });
 
+  it('surfaces API Key admin disable action failures', () => {
+    expect(adminSource).toContain('apiKeyDisableFailureNotice');
+    expect(adminSource).toContain('API Key 禁用失败');
+  });
+
   it('gives article admin detail tables explicit loading and empty feedback', () => {
     expect(adminSource).toContain('articleAssetEmptyDescription');
     expect(adminSource).toContain('articleLinkEmptyDescription');

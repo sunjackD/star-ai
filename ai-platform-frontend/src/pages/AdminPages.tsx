@@ -997,7 +997,8 @@ export function ApiKeysAdminPage() {
   });
   const mutation = useMutation({
     mutationFn: (id: number) => postData(`/admin/api-keys/${id}/disable`),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['admin-api-keys'] })
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['admin-api-keys'] }),
+    onError: (error) => message.error(apiKeyDisableFailureNotice(error))
   });
   return (
     <div className="page">
@@ -1087,6 +1088,10 @@ export function AuditLogsAdminPage() {
 
 function apiKeyRecordEmptyDescription(): string {
   return '还没有 Agent 代管 API Key 记录，用户创建后会出现在这里。';
+}
+
+function apiKeyDisableFailureNotice(error: unknown): string {
+  return error instanceof Error ? error.message : 'API Key 禁用失败';
 }
 
 function auditLogInitialEmptyDescription(): string {
