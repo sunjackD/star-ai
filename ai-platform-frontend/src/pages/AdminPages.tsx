@@ -379,8 +379,8 @@ export function UsersAdminPage() {
                   value={row.roles}
                   className="admin-inline-select"
                   options={roleOptions}
-                  loading={isUserRolesLoading}
-                  disabled={isUserRolesUnavailable}
+                  loading={isUserRolesLoading || roleMutation.isPending}
+                  disabled={isUserRolesUnavailable || roleMutation.isPending}
                   onChange={(roleNames) => roleMutation.mutate({ id: row.id, roleNames })}
                 />
                 <Popconfirm title="确认重置该用户密码？" onConfirm={() => passwordMutation.mutate({ id: row.id, password: 'ChangeMe123' })}>

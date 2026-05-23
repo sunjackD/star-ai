@@ -634,6 +634,11 @@ describe('workspace style guard', () => {
     expect(adminSource).toContain("message.success('用户角色已更新');");
   });
 
+  it('locks user role inline selection while saving roles', () => {
+    expect(adminSource).toContain('loading={isUserRolesLoading || roleMutation.isPending}');
+    expect(adminSource).toContain('disabled={isUserRolesUnavailable || roleMutation.isPending}');
+  });
+
   it('shows loading feedback while updating user statuses', () => {
     expect(adminSource).toContain('loading={statusMutation.isPending}');
     expect(adminSource).toContain("status: row.status === 'ACTIVE' ? 'DISABLED' : 'ACTIVE'");
