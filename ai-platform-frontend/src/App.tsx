@@ -1816,7 +1816,11 @@ function ApiKeysPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [createdKey, setCreatedKey] = useState<string>();
   const [selectedPreset, setSelectedPreset] = useState('platform');
-  const { data: apiKeys = [], isLoading: apiKeysLoading } = useQuery({
+  const {
+    data: apiKeys = [],
+    isLoading: apiKeysLoading,
+    isError: apiKeysUnavailable
+  } = useQuery({
     queryKey: ['api-keys'],
     queryFn: () => getData<ApiKey[]>('/developer/api-keys')
   });
@@ -1905,6 +1909,14 @@ function ApiKeysPage() {
       </Card>
 
       {createdKey && <CreatedApiKeyNotice value={createdKey} />}
+      {apiKeysUnavailable && (
+        <Alert
+          showIcon
+          type="warning"
+          message="API Key 列表暂不可用"
+          description={apiKeysUnavailableDescription()}
+        />
+      )}
       <Table
         rowKey="id"
         dataSource={apiKeys}
@@ -1981,6 +1993,10 @@ function ApiKeysPage() {
 
 function apiKeysEmptyDescription(): string {
   return '暂无 API Key，创建最小权限 Key 后交给 Agent 使用。';
+}
+
+function apiKeysUnavailableDescription(): string {
+  return '请确认登录状态、后端服务和 API Key 接口可用，然后刷新页面。';
 }
 
 function localDateTimeAfterDays(days: number): string {

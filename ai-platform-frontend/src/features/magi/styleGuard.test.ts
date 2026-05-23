@@ -91,6 +91,12 @@ describe('workspace style guard', () => {
     expect(appSource).toContain('apiKeysEmptyDescription()');
   });
 
+  it('shows unavailable feedback for API Key table failures', () => {
+    expect(appSource).toContain('apiKeysUnavailable');
+    expect(appSource).toContain('apiKeysUnavailableDescription()');
+    expect(appSource).toContain('API Key 列表暂不可用');
+  });
+
   it('shows loading and empty feedback for the Agent API tool contract table', () => {
     expect(appSource).toContain('developerToolContractLoading');
     expect(appSource).toContain('loading={developerToolContractLoading}');
