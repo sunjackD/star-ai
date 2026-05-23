@@ -754,14 +754,38 @@ function agentCatalogUnavailableDescription(): string {
 
 function AgentDetailPage() {
   const { id } = useParams();
-  const { data, isLoading } = useQuery({ queryKey: ['agent', id], queryFn: () => getData<Agent>(`/agents/${id}`), enabled: Boolean(id) });
+  const {
+    data: agent,
+    isLoading,
+    isError: agentDetailUnavailable
+  } = useQuery({
+    queryKey: ['agent', id],
+    queryFn: () => getData<Agent>(`/agents/${id}`),
+    enabled: Boolean(id)
+  });
   if (isLoading) {
     return <DetailLoadingState title="正在加载 Agent" />;
   }
-  if (!data) {
+  if (agentDetailUnavailable) {
+    return (
+      <DetailUnavailableState
+        title="Agent 详情暂不可用"
+        description="请确认登录状态、后端服务和 Agent 详情接口可用，然后刷新页面。"
+      />
+    );
+  }
+  if (!agent) {
     return <DetailMissingState title="未找到 Agent" description="请返回 Agent 列表重新选择，或刷新后再试。" />;
   }
-  return <DetailView title={data.name} label={data.category} description={data.description} markdown={data.guideMarkdown} stats={[['浏览量', data.viewCount], ['点赞数', data.likeCount]]} />;
+  return (
+    <DetailView
+      title={agent.name}
+      label={agent.category}
+      description={agent.description}
+      markdown={agent.guideMarkdown}
+      stats={[['浏览量', agent.viewCount], ['点赞数', agent.likeCount]]}
+    />
+  );
 }
 
 function SkillsPage() {
@@ -899,27 +923,43 @@ function skillCatalogUnavailableDescription(): string {
 
 function SkillDetailPage() {
   const { id } = useParams();
-  const { data, isLoading } = useQuery({ queryKey: ['skill', id], queryFn: () => getData<Skill>(`/skills/${id}`), enabled: Boolean(id) });
+  const {
+    data: skill,
+    isLoading,
+    isError: skillDetailUnavailable
+  } = useQuery({
+    queryKey: ['skill', id],
+    queryFn: () => getData<Skill>(`/skills/${id}`),
+    enabled: Boolean(id)
+  });
   if (isLoading) {
     return <DetailLoadingState title="正在加载 Skill" />;
   }
-  if (!data) {
+  if (skillDetailUnavailable) {
+    return (
+      <DetailUnavailableState
+        title="Skill 详情暂不可用"
+        description="请确认登录状态、后端服务和 Skill 详情接口可用，然后刷新页面。"
+      />
+    );
+  }
+  if (!skill) {
     return <DetailMissingState title="未找到 Skill" description="请返回 Skill 列表重新选择，或刷新后再试。" />;
   }
   return (
     <DetailView
-      title={data.name}
-      label={data.category.name}
-      description={data.description}
-      markdown={data.usageMarkdown}
-      stats={[['浏览量', data.viewCount], ['下载量', data.downloadCount], ['收藏数', data.starCount]]}
+      title={skill.name}
+      label={skill.category.name}
+      description={skill.description}
+      markdown={skill.usageMarkdown}
+      stats={[['浏览量', skill.viewCount], ['下载量', skill.downloadCount], ['收藏数', skill.starCount]]}
       actions={
         <Space wrap>
-          <Tag color={data.artifactType === 'FILE' ? 'blue' : 'default'}>{skillArtifactLabel(data)}</Tag>
+          <Tag color={skill.artifactType === 'FILE' ? 'blue' : 'default'}>{skillArtifactLabel(skill)}</Tag>
           <Button
             type="primary"
             icon={<Download size={16} />}
-            onClick={() => downloadFile(`/skills/${data.id}/download`, skillDownloadName(data))}
+            onClick={() => downloadFile(`/skills/${skill.id}/download`, skillDownloadName(skill))}
           >
             下载 Skill
           </Button>
@@ -1058,7 +1098,11 @@ function articleCatalogUnavailableDescription(): string {
 
 function ArticleDetailPage() {
   const { id } = useParams();
-  const { data, isLoading } = useQuery({
+  const {
+    data: articleDetail,
+    isLoading,
+    isError: articleDetailUnavailable
+  } = useQuery({
     queryKey: ['article', id],
     queryFn: () => getData<ArticleDetail>(`/articles/${id}`),
     enabled: Boolean(id)
@@ -1068,7 +1112,16 @@ function ArticleDetailPage() {
     return <DetailLoadingState title="正在加载文章" />;
   }
 
-  if (!data) {
+  if (articleDetailUnavailable) {
+    return (
+      <DetailUnavailableState
+        title="文章详情暂不可用"
+        description="请确认登录状态、后端服务和文章详情接口可用，然后刷新页面。"
+      />
+    );
+  }
+
+  if (!articleDetail) {
     return <DetailMissingState title="未找到文章" description="请返回文章列表重新选择，或刷新后再试。" />;
   }
 
@@ -1076,38 +1129,38 @@ function ArticleDetailPage() {
     <div className="page article-page">
       <header className="article-hero">
         <div className="article-meta">
-          <Tag color="blue">{data.category}</Tag>
-          <Tag color={difficultyColor(data.difficulty)}>{difficultyLabel(data.difficulty)}</Tag>
-          <Tag>{data.estimatedMinutes} 分钟</Tag>
+          <Tag color="blue">{articleDetail.category}</Tag>
+          <Tag color={difficultyColor(articleDetail.difficulty)}>{difficultyLabel(articleDetail.difficulty)}</Tag>
+          <Tag>{articleDetail.estimatedMinutes} 分钟</Tag>
         </div>
-        <Title>{data.title}</Title>
-        <Paragraph>{data.summary}</Paragraph>
+        <Title>{articleDetail.title}</Title>
+        <Paragraph>{articleDetail.summary}</Paragraph>
         <Space wrap>
-          {data.sourceUrl && <Button href={data.sourceUrl} target="_blank" icon={<ExternalLink size={16} />}>来源</Button>}
+          {articleDetail.sourceUrl && <Button href={articleDetail.sourceUrl} target="_blank" icon={<ExternalLink size={16} />}>来源</Button>}
         </Space>
       </header>
 
-      {data.safetyMarkdown && (
+      {articleDetail.safetyMarkdown && (
         <Alert
           showIcon
           type="warning"
           className="article-safety"
           message="安全与隐私边界"
-          description={<MarkdownBlock value={data.safetyMarkdown} compact />}
+          description={<MarkdownBlock value={articleDetail.safetyMarkdown} compact />}
         />
       )}
 
       <article className="article-reader">
-        <MarkdownBlock value={data.bodyMarkdown} />
+        <MarkdownBlock value={articleDetail.bodyMarkdown} />
       </article>
 
       <section className="article-tail">
         <Title level={2}>附件与 Prompt</Title>
         <div className="article-assets">
-          {data.assets.length === 0 ? (
+          {articleDetail.assets.length === 0 ? (
             <ArticleTailEmptyState title="暂无附件或 Prompt" description="当前文章没有附加脚本、Prompt 或文件。" />
-          ) : data.assets.map((asset) => (
-            <ArticleAssetCard key={asset.id} articleId={data.id} asset={asset} />
+          ) : articleDetail.assets.map((asset) => (
+            <ArticleAssetCard key={asset.id} articleId={articleDetail.id} asset={asset} />
           ))}
         </div>
       </section>
@@ -1115,9 +1168,9 @@ function ArticleDetailPage() {
       <section className="article-tail">
         <Title level={2}>参考链接</Title>
         <div className="article-links">
-          {data.links.length === 0 ? (
+          {articleDetail.links.length === 0 ? (
             <ArticleTailEmptyState title="暂无参考链接" description="当前文章没有配置外部或站内参考链接。" />
-          ) : data.links.map((link) => <ArticleLinkCard key={link.id} link={link} />)}
+          ) : articleDetail.links.map((link) => <ArticleLinkCard key={link.id} link={link} />)}
         </div>
       </section>
     </div>
@@ -1478,6 +1531,21 @@ function DetailLoadingState(props: { title: string }) {
         <Spin size="large" />
         <Title level={3}>{props.title}</Title>
         <Text type="secondary">正在读取详情内容，请稍候。</Text>
+      </Card>
+    </div>
+  );
+}
+
+function DetailUnavailableState(props: { title: string; description: string }) {
+  return (
+    <div className="page">
+      <Card className="detail-state-card">
+        <Alert
+          showIcon
+          type="warning"
+          message={props.title}
+          description={props.description}
+        />
       </Card>
     </div>
   );

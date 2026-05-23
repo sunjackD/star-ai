@@ -108,6 +108,14 @@ describe('workspace style guard', () => {
     expect(appSource).not.toContain('<pre>{props.markdown}</pre>');
   });
 
+  it('distinguishes unavailable detail queries from missing records', () => {
+    expect(appSource).toContain('agentDetailUnavailable');
+    expect(appSource).toContain('skillDetailUnavailable');
+    expect(appSource).toContain('articleDetailUnavailable');
+    expect(appSource).toContain('DetailUnavailableState');
+    expect(appSource).toContain('Agent 详情暂不可用');
+  });
+
   it('shows loading and empty feedback for dashboard summary tables', () => {
     expect(appSource).toContain('dashboardAgentsLoading');
     expect(appSource).toContain('dashboardSkillsLoading');
