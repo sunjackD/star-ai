@@ -2057,7 +2057,7 @@ function ApiKeysPage() {
           }}
           onFinish={(values) => mutation.mutate(values)}
         >
-          <Form.Item name="name" label="名称" rules={[{ required: true }]}>
+          <Form.Item name="name" label="名称" rules={[{ required: true, whitespace: true }]}>
              <Input placeholder="Agent/Skill 代管" />
           </Form.Item>
           <Form.Item label="权限预设">

@@ -93,6 +93,13 @@ describe('workspace style guard', () => {
     expect(appSource).not.toContain('按任务选择');
   });
 
+  it('rejects blank API Key names at the creation form edge', () => {
+    expect(appSource).toContain(
+      '<Form.Item name="name" label="名称" rules={[{ required: true, whitespace: true }]}>\n'
+      + '             <Input placeholder="Agent/Skill 代管" />'
+    );
+  });
+
   it('clears API Key creation form state when the dialog closes', () => {
     expect(appSource).toContain('closeApiKeyDialog');
     expect(appSource).toContain('onCancel={closeApiKeyDialog}');
