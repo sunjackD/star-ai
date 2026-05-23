@@ -479,6 +479,12 @@ describe('workspace style guard', () => {
     expect(adminSource).toContain('message.error(iconUploadFailureNotice(error))');
   });
 
+  it('shows a concrete failure notice when Skill upload fails', () => {
+    expect(adminSource).toContain('skillUploadFailureNotice');
+    expect(adminSource).toContain('message.error(skillUploadFailureNotice(error))');
+    expect(adminSource).toContain('Skill 上传失败');
+  });
+
   it('clears pending Skill upload selections when the upload dialog closes', () => {
     expect(adminSource).toContain('closeSkillUploadModal');
     expect(adminSource).toContain('onCancel={closeSkillUploadModal}');

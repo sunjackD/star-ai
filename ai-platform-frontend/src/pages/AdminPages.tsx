@@ -1486,6 +1486,10 @@ function skillCategoriesUnavailableNotice(): string {
   return '分类选择和上传入库会暂时锁定，请确认 Skill 分类接口可用后刷新再维护 Skill。';
 }
 
+function skillUploadFailureNotice(error: unknown): string {
+  return error instanceof Error ? error.message : 'Skill 上传失败';
+}
+
 function SkillUploadButton({
   categories,
   categoriesLoading,
@@ -1527,7 +1531,7 @@ function SkillUploadButton({
       queryClient.invalidateQueries({ queryKey: ['admin-skills'] });
       queryClient.invalidateQueries({ queryKey: ['skills'] });
     },
-    onError: (error) => message.error(error instanceof Error ? error.message : '上传失败')
+    onError: (error) => message.error(skillUploadFailureNotice(error))
   });
 
   function closeSkillUploadModal() {
