@@ -615,10 +615,10 @@ function LoginPage() {
         <Title level={2}>登录{platform?.siteName ?? '星梦 AI 聚合平台'}</Title>
         <Paragraph type="secondary">首次使用请先完成初始化；普通用户由管理员在后台创建。</Paragraph>
         <Form layout="vertical" onFinish={(values) => mutation.mutate(values)}>
-          <Form.Item name="username" label="用户名或邮箱" rules={[{ required: true }]}>
+          <Form.Item name="username" label="用户名或邮箱" rules={[{ required: true, message: '请输入用户名或邮箱' }]}>
             <Input placeholder="请输入用户名或邮箱" />
           </Form.Item>
-          <Form.Item name="password" label="密码" rules={[{ required: true }]}>
+          <Form.Item name="password" label="密码" rules={[{ required: true, message: '请输入密码' }]}>
             <Input.Password placeholder="请输入密码" />
           </Form.Item>
           <Button type="primary" htmlType="submit" loading={mutation.isPending} block>登录</Button>

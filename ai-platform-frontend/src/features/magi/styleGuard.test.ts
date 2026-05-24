@@ -242,6 +242,15 @@ describe('workspace style guard', () => {
     expect(appSource).toContain('登录失败，请检查账号密码或后端服务');
   });
 
+  it('uses explicit validation messages on the login form', () => {
+    expect(appSource).toContain(
+      "<Form.Item name=\"username\" label=\"用户名或邮箱\" rules={[{ required: true, message: '请输入用户名或邮箱' }]}>"
+    );
+    expect(appSource).toContain(
+      "<Form.Item name=\"password\" label=\"密码\" rules={[{ required: true, message: '请输入密码' }]}>"
+    );
+  });
+
   it('shows backend-aware setup admin failure feedback', () => {
     expect(appSource).toContain('setupAdminFailureNotice');
     expect(appSource).toContain('onError: (error) => message.error(setupAdminFailureNotice(error))');
