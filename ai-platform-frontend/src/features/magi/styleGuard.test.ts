@@ -948,6 +948,18 @@ describe('workspace style guard', () => {
     expect(adminSource).toContain('title="暂无文章参考链接"');
   });
 
+  it('keeps article admin nested tables horizontally scannable on small screens', () => {
+    const articleAdminStart = adminSource.indexOf('export function ArticlesAdminPage()');
+    const apiKeyAdminStart = adminSource.indexOf('export function ApiKeysAdminPage()');
+    expect(articleAdminStart).toBeGreaterThanOrEqual(0);
+    expect(apiKeyAdminStart).toBeGreaterThan(articleAdminStart);
+    const articleAdminSource = adminSource.slice(articleAdminStart, apiKeyAdminStart);
+    expect(adminSource).toContain('const ADMIN_ARTICLE_ASSET_TABLE_SCROLL = { x: 760 };');
+    expect(adminSource).toContain('const ADMIN_ARTICLE_LINK_TABLE_SCROLL = { x: 640 };');
+    expect(articleAdminSource).toContain('scroll={ADMIN_ARTICLE_ASSET_TABLE_SCROLL}');
+    expect(articleAdminSource).toContain('scroll={ADMIN_ARTICLE_LINK_TABLE_SCROLL}');
+  });
+
   it('keeps article admin nested tables out of nested cards', () => {
     expect(adminSource).not.toContain('<Card title="附件">');
     expect(adminSource).not.toContain('<Card title="参考链接">');

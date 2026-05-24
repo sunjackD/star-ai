@@ -56,6 +56,8 @@ const ADMIN_RESOURCE_TABLE_SCROLL = { x: 960 };
 const ADMIN_USER_TABLE_SCROLL = { x: 1080 };
 const ADMIN_API_KEY_TABLE_SCROLL = { x: 1040 };
 const ADMIN_AUDIT_LOG_TABLE_SCROLL = { x: 1120 };
+const ADMIN_ARTICLE_ASSET_TABLE_SCROLL = { x: 760 };
+const ADMIN_ARTICLE_LINK_TABLE_SCROLL = { x: 640 };
 const THEME_OPTIONS = Object.values(themes).map((theme) => ({ label: theme.label, value: theme.name }));
 const userAdminStatusValues = ['ACTIVE', 'DISABLED'];
 const USER_ADMIN_STATUS_OPTIONS = userAdminStatusValues.map((value) => ({
@@ -1116,6 +1118,7 @@ export function ArticlesAdminPage() {
                 pagination={false}
                 loading={isDetailLoading}
                 dataSource={articleDetail?.assets ?? []}
+                scroll={ADMIN_ARTICLE_ASSET_TABLE_SCROLL}
                 locale={{
                   emptyText: <AdminTableEmptyState title="暂无文章附件" description={articleAssetEmptyDescription()} />
                 }}
@@ -1152,6 +1155,7 @@ export function ArticlesAdminPage() {
                 pagination={false}
                 loading={isDetailLoading}
                 dataSource={articleDetail?.links ?? []}
+                scroll={ADMIN_ARTICLE_LINK_TABLE_SCROLL}
                 locale={{
                   emptyText: <AdminTableEmptyState title="暂无文章参考链接" description={articleLinkEmptyDescription()} />
                 }}
