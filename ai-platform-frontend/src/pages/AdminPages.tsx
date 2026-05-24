@@ -25,6 +25,7 @@ import {
 import type { Rule } from 'antd/es/form';
 import type { RcFile } from 'antd/es/upload';
 import { apiErrorMessage, deleteData, downloadFile, getData, postData, putData, uploadData } from '../api/client';
+import { DEFAULT_ROLE_NAMES, roleDisplayName, roleOption } from '../features/roles/roleLabels';
 import { themes } from '../themes/tokens';
 import type {
   AdminOverview,
@@ -49,7 +50,6 @@ import type {
 const { Title, Paragraph } = Typography;
 const STATUS_OPTIONS = ['ACTIVE', 'DISABLED', 'DRAFT', 'RUNNING', 'COMPLETED'];
 const THEME_OPTIONS = Object.values(themes).map((theme) => ({ label: theme.label, value: theme.name }));
-const DEFAULT_ROLE_NAMES = ['VIEWER', 'DEVELOPER', 'ADMIN'];
 const userAdminStatusValues = ['ACTIVE', 'DISABLED'];
 const USER_ADMIN_STATUS_OPTIONS = userAdminStatusValues.map((value) => ({
   label: userAdminStatusLabel(value),
@@ -258,22 +258,6 @@ function settingsLoadFailureNotice(): string {
 
 function settingsRolesUnavailableNotice(): string {
   return '当前使用内置角色选项兜底，请确认角色接口可用后刷新再调整默认注册角色。';
-}
-
-function roleOption(roleName: string): { label: string; value: string } {
-  return {
-    label: roleDisplayName(roleName),
-    value: roleName
-  };
-}
-
-function roleDisplayName(roleName: string): string {
-  const labels: Record<string, string> = {
-    VIEWER: '查看者',
-    DEVELOPER: '开发者',
-    ADMIN: '管理员'
-  };
-  return labels[roleName] ?? roleName;
 }
 
 export function UsersAdminPage() {

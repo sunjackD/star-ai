@@ -29,6 +29,7 @@ import {
 import { apiErrorMessage, apiUrl, downloadFile, getData, getPublicData, postData, postPublicData, uploadData } from './api/client';
 import { buildAgentApiAccess } from './features/agentApi/agentApiAccess';
 import { buildMagiCyclePlan, summarizeMagiCycle, type MagiCycleStageKey } from './features/magi/magiCycle';
+import { roleDisplayName } from './features/roles/roleLabels';
 import { useAuthStore } from './store/authStore';
 import { useThemeStore } from './store/themeStore';
 import type {
@@ -715,7 +716,7 @@ function AccountProfilePage() {
           <Text>用户名：{profile.username}</Text>
           <Text>邮箱：{profile.email}</Text>
           <Text>显示名：{profile.displayName}</Text>
-          <Text>角色：{profile.roles.map((role) => <Tag key={role}>{role}</Tag>)}</Text>
+          <Text>角色：{profile.roles.map((role) => <Tag key={role}>{roleDisplayName(role)}</Tag>)}</Text>
         </Space>
       </Card>
     </div>

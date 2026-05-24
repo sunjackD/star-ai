@@ -186,7 +186,9 @@ describe('workspace style guard', () => {
   it('avoids blank profile fields while account data is syncing', () => {
     expect(appSource).toContain('accountProfileMissing');
     expect(appSource).toContain('正在同步个人资料');
-    expect(appSource).toContain('profile.roles.map');
+    expect(appSource).toContain("import { roleDisplayName } from './features/roles/roleLabels';");
+    expect(appSource).toContain('profile.roles.map((role) => <Tag key={role}>{roleDisplayName(role)}</Tag>)');
+    expect(appSource).not.toContain('profile.roles.map((role) => <Tag key={role}>{role}</Tag>)');
   });
 
   it('shows loading and empty feedback for dashboard summary tables', () => {
@@ -917,15 +919,13 @@ describe('workspace style guard', () => {
   });
 
   it('uses localized role labels in admin role selects and user tags', () => {
-    expect(adminSource).toContain("const DEFAULT_ROLE_NAMES = ['VIEWER', 'DEVELOPER', 'ADMIN'];");
-    expect(adminSource).toContain('function roleOption(roleName: string): { label: string; value: string }');
-    expect(adminSource).toContain('function roleDisplayName(roleName: string): string');
+    expect(adminSource).toContain("import { DEFAULT_ROLE_NAMES, roleDisplayName, roleOption } from '../features/roles/roleLabels';");
     expect(adminSource.match(/roles\.map\(\(role\) => roleOption\(role\.name\)\)/g) ?? []).toHaveLength(2);
     expect(adminSource).toContain('DEFAULT_ROLE_NAMES.map(roleOption)');
     expect(adminSource).toContain('items.map((item) => <Tag key={item}>{roleDisplayName(item)}</Tag>)');
-    expect(adminSource).toContain("VIEWER: '查看者'");
-    expect(adminSource).toContain("DEVELOPER: '开发者'");
-    expect(adminSource).toContain("ADMIN: '管理员'");
+    expect(adminSource).not.toContain("const DEFAULT_ROLE_NAMES = ['VIEWER', 'DEVELOPER', 'ADMIN'];");
+    expect(adminSource).not.toContain('function roleOption(roleName: string): { label: string; value: string }');
+    expect(adminSource).not.toContain('function roleDisplayName(roleName: string): string');
     expect(adminSource).not.toContain("['VIEWER', 'DEVELOPER', 'ADMIN'].map((role) => ({ label: role, value: role }))");
     expect(adminSource).not.toContain('roles.map((role) => ({ label: role.name, value: role.name }))');
     expect(adminSource).not.toContain('<Tag key={item}>{item}</Tag>');
