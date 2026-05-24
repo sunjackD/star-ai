@@ -2044,6 +2044,8 @@ function ApiKeysPage() {
   const [createdKey, setCreatedKey] = useState<string>();
   const [selectedPreset, setSelectedPreset] = useState('platform');
   const [revokingApiKeyId, setRevokingApiKeyId] = useState<number>();
+  const [apiKeyKeyword, setApiKeyKeyword] = useState('');
+  const [apiKeyStatusFilter, setApiKeyStatusFilter] = useState('all');
   const {
     data: apiKeys = [],
     isLoading: apiKeysLoading,
@@ -2081,6 +2083,18 @@ function ApiKeysPage() {
   const apiBaseUrl = apiUrl('').replace(/\/$/, '');
   const selectedPresetOption = API_KEY_PERMISSION_PRESETS.find((item) => item.key === selectedPreset)
     ?? API_KEY_PERMISSION_PRESETS[0];
+  const apiKeyStatusOptions = Array.from(new Set(apiKeys.map((apiKey) => apiKey.status))).sort();
+  const normalizedApiKeyKeyword = apiKeyKeyword.trim().toLowerCase();
+  const filteredApiKeys = apiKeys.filter((apiKey) => {
+    const searchableApiKeyFields = [apiKey.name, apiKey.keyPrefix, apiKey.status, apiKey.scopes.join(',')];
+    const matchesKeyword = !normalizedApiKeyKeyword
+      || searchableApiKeyFields.some((value) => value.toLowerCase().includes(normalizedApiKeyKeyword));
+    const matchesStatus = apiKeyStatusFilter === 'all' || apiKey.status === apiKeyStatusFilter;
+    return matchesKeyword && matchesStatus;
+  });
+  const apiKeyTableEmptyDescription = apiKeyKeyword || apiKeyStatusFilter !== 'all'
+    ? '没有匹配当前搜索或状态筛选的 API Key。'
+    : apiKeysEmptyDescription();
 
   const applyPermissionPreset = (presetKey: string | number) => {
     const nextKey = String(presetKey);
@@ -2153,11 +2167,26 @@ function ApiKeysPage() {
           description={apiKeysUnavailableDescription()}
         />
       )}
+      <div className="api-key-list-toolbar">
+        <Input.Search
+          placeholder="搜索名称、前缀或权限"
+          allowClear
+          onChange={(event) => setApiKeyKeyword(event.target.value)}
+        />
+        <Select
+          value={apiKeyStatusFilter}
+          onChange={setApiKeyStatusFilter}
+          options={[
+            { value: 'all', label: '全部状态' },
+            ...apiKeyStatusOptions.map((status) => ({ value: status, label: statusLabel(status) }))
+          ]}
+        />
+      </div>
       <Table
         rowKey="id"
-        dataSource={apiKeys}
+        dataSource={filteredApiKeys}
         loading={apiKeysLoading}
-        locale={{ emptyText: <Empty description={apiKeysEmptyDescription()} /> }}
+        locale={{ emptyText: <Empty description={apiKeyTableEmptyDescription} /> }}
         columns={[
           { title: '名称', dataIndex: 'name' },
           { title: '前缀', dataIndex: 'keyPrefix' },

@@ -127,6 +127,23 @@ describe('workspace style guard', () => {
     expect(appSource).toContain('apiKeysEmptyDescription()');
   });
 
+  it('lets users search and filter their API Key table', () => {
+    expect(appSource).toContain("const [apiKeyKeyword, setApiKeyKeyword] = useState('');");
+    expect(appSource).toContain("const [apiKeyStatusFilter, setApiKeyStatusFilter] = useState('all');");
+    expect(appSource).toContain('const normalizedApiKeyKeyword = apiKeyKeyword.trim().toLowerCase();');
+    expect(appSource).toContain("const searchableApiKeyFields = [apiKey.name, apiKey.keyPrefix, apiKey.status, apiKey.scopes.join(',')];");
+    expect(appSource).toContain('const filteredApiKeys = apiKeys.filter((apiKey) => {');
+    expect(appSource).toContain('const matchesStatus = apiKeyStatusFilter === \'all\' || apiKey.status === apiKeyStatusFilter;');
+    expect(appSource).toContain('const apiKeyTableEmptyDescription = apiKeyKeyword || apiKeyStatusFilter !== \'all\'');
+    expect(appSource).toContain('className="api-key-list-toolbar"');
+    expect(appSource).toContain('placeholder="搜索名称、前缀或权限"');
+    expect(appSource).toContain('onChange={(event) => setApiKeyKeyword(event.target.value)}');
+    expect(appSource).toContain('onChange={setApiKeyStatusFilter}');
+    expect(appSource).toContain('dataSource={filteredApiKeys}');
+    expect(appSource).toContain('没有匹配当前搜索或状态筛选的 API Key。');
+    expect(styles).toMatch(/\.api-key-list-toolbar \{[\s\S]*grid-template-columns: minmax\(260px, 1fr\) 220px;/);
+  });
+
   it('shows unavailable feedback for API Key table failures', () => {
     expect(appSource).toContain('apiKeysUnavailable');
     expect(appSource).toContain('apiKeysUnavailableDescription()');
