@@ -845,6 +845,18 @@ describe('workspace style guard', () => {
     expect(adminSource).toContain("DISABLED: '禁用'");
   });
 
+  it('uses localized user admin status options in filters and forms', () => {
+    const usersAdminStart = adminSource.indexOf('export function UsersAdminPage()');
+    const agentsAdminStart = adminSource.indexOf('export function AgentsAdminPage()');
+    expect(usersAdminStart).toBeGreaterThanOrEqual(0);
+    expect(agentsAdminStart).toBeGreaterThan(usersAdminStart);
+    const usersAdminSource = adminSource.slice(usersAdminStart, agentsAdminStart);
+    expect(usersAdminSource.match(/options=\{USER_ADMIN_STATUS_OPTIONS\}/g) ?? []).toHaveLength(2);
+    expect(adminSource).toContain('const USER_ADMIN_STATUS_OPTIONS = userAdminStatusValues.map');
+    expect(adminSource).toContain("const userAdminStatusValues = ['ACTIVE', 'DISABLED'];");
+    expect(usersAdminSource).not.toContain("options={['ACTIVE', 'DISABLED'].map((value) => ({ label: value, value }))}");
+  });
+
   it('confirms user admin inline updates after table actions', () => {
     expect(adminSource).toContain("message.success('用户状态已更新');");
     expect(adminSource).toContain("message.success('用户角色已更新');");

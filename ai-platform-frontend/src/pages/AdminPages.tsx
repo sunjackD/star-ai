@@ -49,6 +49,11 @@ import type {
 const { Title, Paragraph } = Typography;
 const STATUS_OPTIONS = ['ACTIVE', 'DISABLED', 'DRAFT', 'RUNNING', 'COMPLETED'];
 const THEME_OPTIONS = Object.values(themes).map((theme) => ({ label: theme.label, value: theme.name }));
+const userAdminStatusValues = ['ACTIVE', 'DISABLED'];
+const USER_ADMIN_STATUS_OPTIONS = userAdminStatusValues.map((value) => ({
+  label: userAdminStatusLabel(value),
+  value
+}));
 
 type ResourceRecord = { id: number; name: string; status?: string };
 type FieldType = 'text' | 'textarea' | 'number' | 'select' | 'icon';
@@ -364,7 +369,7 @@ export function UsersAdminPage() {
           allowClear
           placeholder="状态"
           className="admin-filter-select"
-          options={['ACTIVE', 'DISABLED'].map((value) => ({ label: value, value }))}
+          options={USER_ADMIN_STATUS_OPTIONS}
           onChange={setStatusFilter}
         />
         <Button type="primary" onClick={openCreate}>新增用户</Button>
@@ -438,7 +443,7 @@ export function UsersAdminPage() {
             </Form.Item>
           )}
           <Form.Item name="status" label="状态" rules={[{ required: true }]}>
-            <Select options={['ACTIVE', 'DISABLED'].map((value) => ({ label: value, value }))} />
+            <Select options={USER_ADMIN_STATUS_OPTIONS} />
           </Form.Item>
           <Form.Item name="roles" label="角色" rules={[{ required: true }]}>
             <Select
