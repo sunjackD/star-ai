@@ -30,6 +30,7 @@ import { apiErrorMessage, apiUrl, downloadFile, getData, getPublicData, postData
 import { buildAgentApiAccess } from './features/agentApi/agentApiAccess';
 import { articleAssetTypeLabel, articleLinkTypeLabel } from './features/articles/articleLabels';
 import { buildMagiCyclePlan, summarizeMagiCycle, type MagiCycleStageKey } from './features/magi/magiCycle';
+import { modelTypeLabel } from './features/models/modelLabels';
 import { roleDisplayName } from './features/roles/roleLabels';
 import { useAuthStore } from './store/authStore';
 import { useThemeStore } from './store/themeStore';
@@ -1782,7 +1783,7 @@ function ModelsPage() {
           onChange={setTypeFilter}
           options={[
             { value: 'all', label: '全部模型类型' },
-            ...modelTypes.map((type) => ({ value: type, label: type }))
+            ...modelTypes.map((type) => ({ value: type, label: modelTypeLabel(type) }))
           ]}
         />
       </div>
@@ -1798,7 +1799,7 @@ function ModelsPage() {
           <section key={model.id} className="model-layer-card">
             <div className="model-layer-card-heading">
               <Tag color="blue">{model.provider}</Tag>
-              <Tag>{model.modelType}</Tag>
+              <Tag>{modelTypeLabel(model.modelType)}</Tag>
             </div>
             <Title level={4}>{model.name}</Title>
             <div className="model-layer-capabilities">

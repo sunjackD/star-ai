@@ -26,6 +26,7 @@ import type { Rule } from 'antd/es/form';
 import type { RcFile } from 'antd/es/upload';
 import { apiErrorMessage, deleteData, downloadFile, getData, postData, putData, uploadData } from '../api/client';
 import { articleAssetTypeLabel, articleLinkTypeLabel } from '../features/articles/articleLabels';
+import { modelTypeLabel } from '../features/models/modelLabels';
 import { DEFAULT_ROLE_NAMES, roleDisplayName, roleOption } from '../features/roles/roleLabels';
 import { themes } from '../themes/tokens';
 import type {
@@ -694,7 +695,7 @@ export function ModelsAdminPage() {
     columns: [
       { title: '名称', dataIndex: 'name' },
       { title: '提供商', dataIndex: 'provider' },
-      { title: '类型', dataIndex: 'modelType' },
+      { title: '类型', dataIndex: 'modelType', render: (row: AiModel) => modelTypeLabel(row.modelType) },
       { title: '入口', dataIndex: 'endpoint' }
     ]
   }} />;

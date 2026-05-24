@@ -382,6 +382,19 @@ describe('workspace style guard', () => {
     expect(appSource).toContain('暂无能力标签');
   });
 
+  it('uses localized model type labels in filters and cards', () => {
+    const modelsPageStart = appSource.indexOf('function ModelsPage()');
+    const modelUnavailableStart = appSource.indexOf('function modelCatalogUnavailableDescription()');
+    expect(modelsPageStart).toBeGreaterThanOrEqual(0);
+    expect(modelUnavailableStart).toBeGreaterThan(modelsPageStart);
+    const modelsPageSource = appSource.slice(modelsPageStart, modelUnavailableStart);
+    expect(appSource).toContain("import { modelTypeLabel } from './features/models/modelLabels';");
+    expect(modelsPageSource).toContain("...modelTypes.map((type) => ({ value: type, label: modelTypeLabel(type) }))");
+    expect(modelsPageSource).toContain('<Tag>{modelTypeLabel(model.modelType)}</Tag>');
+    expect(modelsPageSource).not.toContain("...modelTypes.map((type) => ({ value: type, label: type }))");
+    expect(modelsPageSource).not.toContain('<Tag>{model.modelType}</Tag>');
+  });
+
   it('shows loading, empty, and unavailable states for finetune jobs', () => {
     expect(appSource).toContain('finetuneJobsLoading');
     expect(appSource).toContain('finetuneJobsUnavailable');
@@ -1020,10 +1033,12 @@ describe('workspace style guard', () => {
     expect(modelAdminStart).toBeGreaterThanOrEqual(0);
     expect(datasetAdminStart).toBeGreaterThan(modelAdminStart);
     const modelAdminSource = adminSource.slice(modelAdminStart, datasetAdminStart);
+    expect(adminSource).toContain("import { modelTypeLabel } from '../features/models/modelLabels';");
     expect(modelAdminSource).toContain("{ title: '提供商', dataIndex: 'provider' }");
-    expect(modelAdminSource).toContain("{ title: '类型', dataIndex: 'modelType' }");
+    expect(modelAdminSource).toContain("{ title: '类型', dataIndex: 'modelType', render: (row: AiModel) => modelTypeLabel(row.modelType) }");
     expect(modelAdminSource).toContain("{ title: '入口', dataIndex: 'endpoint' }");
     expect(modelAdminSource).not.toContain("baseColumns<AiModel>(['provider', 'modelType', 'endpoint'])");
+    expect(modelAdminSource).not.toContain("{ title: '类型', dataIndex: 'modelType' }");
   });
 
   it('uses user-facing column titles in dataset admin tables', () => {
