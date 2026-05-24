@@ -509,6 +509,12 @@ describe('workspace style guard', () => {
     expect(styles).toMatch(/\.model-layer-toolbar \{[\s\S]*grid-template-columns: minmax\(260px, 1fr\) 220px 220px;/);
   });
 
+  it('keeps public catalog filter controls stretched within responsive toolbar grids', () => {
+    expect(styles).toMatch(
+      /\.model-layer-toolbar \.ant-input-search,\s*\.model-layer-toolbar \.ant-select,\s*\.finetune-toolbar \.ant-input-search,\s*\.finetune-toolbar \.ant-select \{[\s\S]*width: 100%;/
+    );
+  });
+
   it('shows loading, empty, and unavailable states for finetune jobs', () => {
     expect(appSource).toContain('finetuneJobsLoading');
     expect(appSource).toContain('finetuneJobsUnavailable');

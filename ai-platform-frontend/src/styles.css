@@ -938,6 +938,13 @@ html[data-theme='minimal-modern'] .app-sider .ant-menu-submenu-title {
   margin-bottom: 18px;
 }
 
+.model-layer-toolbar .ant-input-search,
+.model-layer-toolbar .ant-select,
+.finetune-toolbar .ant-input-search,
+.finetune-toolbar .ant-select {
+  width: 100%;
+}
+
 .model-layer-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
