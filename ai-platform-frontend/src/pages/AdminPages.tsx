@@ -1224,10 +1224,10 @@ export function ArticlesAdminPage() {
 
       <Modal open={assetModalOpen} title={assetMode === 'FILE' ? '上传文件附件' : '新增文本附件'} footer={null} onCancel={closeArticleAssetModal} width={720}>
         <Form form={assetForm} layout="vertical" onFinish={(values) => assetMutation.mutate(values)}>
-          <Form.Item name="name" label="名称" rules={[{ required: true, whitespace: true }]}>
+          <Form.Item name="name" label="名称" rules={[{ required: true, whitespace: true, message: '请输入附件名称' }]}>
             <Input />
           </Form.Item>
-          <Form.Item name="assetType" label="类型" rules={[{ required: true }]}>
+          <Form.Item name="assetType" label="类型" rules={[{ required: true, message: '请选择附件类型' }]}>
             <Select options={ARTICLE_ASSET_TYPE_OPTIONS} />
           </Form.Item>
           {assetMode === 'TEXT' ? (
@@ -1235,7 +1235,7 @@ export function ArticlesAdminPage() {
               <Form.Item name="contentText" label="文本内容">
                 <Input.TextArea rows={6} />
               </Form.Item>
-              <Form.Item name="externalUrl" label="外部链接" rules={[{ type: 'url' }]}>
+              <Form.Item name="externalUrl" label="外部链接" rules={[{ type: 'url', message: '请输入有效外部链接' }]}>
                 <Input />
               </Form.Item>
             </>
@@ -1254,7 +1254,7 @@ export function ArticlesAdminPage() {
               </Upload>
             </Form.Item>
           )}
-          <Form.Item name="sortOrder" label="排序" rules={[{ required: true, type: 'number', min: 0 }]}>
+          <Form.Item name="sortOrder" label="排序" rules={[{ required: true, type: 'number', min: 0, message: '请输入不小于 0 的附件排序值' }]}>
             <InputNumber min={0} className="admin-number-input" />
           </Form.Item>
           <Button type="primary" htmlType="submit" loading={assetMutation.isPending}>保存附件</Button>
@@ -1263,19 +1263,19 @@ export function ArticlesAdminPage() {
 
       <Modal open={linkModalOpen} title="新增参考链接" footer={null} onCancel={closeArticleLinkModal} width={720}>
         <Form form={linkForm} layout="vertical" onFinish={(values) => linkMutation.mutate(values)}>
-          <Form.Item name="linkType" label="链接类型" rules={[{ required: true }]}>
+          <Form.Item name="linkType" label="链接类型" rules={[{ required: true, message: '请选择参考链接类型' }]}>
             <Select options={ARTICLE_LINK_TYPE_OPTIONS} />
           </Form.Item>
-          <Form.Item name="title" label="标题" rules={[{ required: true, whitespace: true }]}>
+          <Form.Item name="title" label="标题" rules={[{ required: true, whitespace: true, message: '请输入参考链接标题' }]}>
             <Input />
           </Form.Item>
           <Form.Item name="url" label="跳转链接">
             <Input placeholder="/articles/1 或 https://example.com" />
           </Form.Item>
-          <Form.Item name="description" label="说明" rules={[{ required: true, whitespace: true }]}>
+          <Form.Item name="description" label="说明" rules={[{ required: true, whitespace: true, message: '请输入参考链接说明' }]}>
             <Input.TextArea rows={3} />
           </Form.Item>
-          <Form.Item name="sortOrder" label="排序" rules={[{ required: true, type: 'number', min: 0 }]}>
+          <Form.Item name="sortOrder" label="排序" rules={[{ required: true, type: 'number', min: 0, message: '请输入不小于 0 的参考链接排序值' }]}>
             <InputNumber min={0} className="admin-number-input" />
           </Form.Item>
           <Button type="primary" htmlType="submit" loading={linkMutation.isPending}>保存参考链接</Button>

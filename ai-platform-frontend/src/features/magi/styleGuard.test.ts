@@ -1235,6 +1235,17 @@ describe('workspace style guard', () => {
     expect(adminSource).toContain("name=\"bodyMarkdown\" label=\"Markdown 正文\" rules={[{ required: true, whitespace: true, message: '请输入 Markdown 正文' }]}");
   });
 
+  it('uses explicit validation messages on article attachment and reference forms', () => {
+    expect(adminSource).toContain("name=\"name\" label=\"名称\" rules={[{ required: true, whitespace: true, message: '请输入附件名称' }]}");
+    expect(adminSource).toContain("name=\"assetType\" label=\"类型\" rules={[{ required: true, message: '请选择附件类型' }]}");
+    expect(adminSource).toContain("name=\"externalUrl\" label=\"外部链接\" rules={[{ type: 'url', message: '请输入有效外部链接' }]}");
+    expect(adminSource).toContain("name=\"sortOrder\" label=\"排序\" rules={[{ required: true, type: 'number', min: 0, message: '请输入不小于 0 的附件排序值' }]}");
+    expect(adminSource).toContain("name=\"linkType\" label=\"链接类型\" rules={[{ required: true, message: '请选择参考链接类型' }]}");
+    expect(adminSource).toContain("name=\"title\" label=\"标题\" rules={[{ required: true, whitespace: true, message: '请输入参考链接标题' }]}");
+    expect(adminSource).toContain("name=\"description\" label=\"说明\" rules={[{ required: true, whitespace: true, message: '请输入参考链接说明' }]}");
+    expect(adminSource).toContain("name=\"sortOrder\" label=\"排序\" rules={[{ required: true, type: 'number', min: 0, message: '请输入不小于 0 的参考链接排序值' }]}");
+  });
+
   it('surfaces article admin list and selected detail query failures', () => {
     expect(adminSource).toContain('articleAdminListUnavailable');
     expect(adminSource).toContain('articleAdminDetailUnavailable');
