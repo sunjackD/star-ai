@@ -1011,7 +1011,7 @@ export function ArticlesAdminPage() {
           { title: '标题', dataIndex: 'title' },
           { title: '分类', dataIndex: 'category' },
           { title: '难度', dataIndex: 'difficulty', render: (difficulty) => <Tag color={articleDifficultyColor(difficulty)}>{difficulty}</Tag> },
-          { title: '状态', dataIndex: 'status', render: (status) => <Tag color={articleStatusColor(status)}>{status}</Tag> },
+          { title: '状态', dataIndex: 'status', render: (status) => <Tag color={articleStatusColor(status)}>{articleStatusLabel(status)}</Tag> },
           { title: '排序', dataIndex: 'sortOrder' },
           {
             title: '操作',
@@ -1249,6 +1249,15 @@ function articleStatusColor(status: string): string {
     return 'gold';
   }
   return 'default';
+}
+
+function articleStatusLabel(status: string): string {
+  const labels: Record<string, string> = {
+    ACTIVE: '启用',
+    DRAFT: '草稿',
+    ARCHIVED: '已归档'
+  };
+  return labels[status] ?? status;
 }
 
 function articleDifficultyColor(difficulty: string): string {

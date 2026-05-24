@@ -777,11 +777,13 @@ describe('workspace style guard', () => {
     expect(apiKeyAdminStart).toBeGreaterThan(articleAdminStart);
     const articleAdminSource = adminSource.slice(articleAdminStart, apiKeyAdminStart);
     expect(articleAdminSource).toContain(
-      "render: (status) => <Tag color={articleStatusColor(status)}>{status}</Tag>"
+      "render: (status) => <Tag color={articleStatusColor(status)}>{articleStatusLabel(status)}</Tag>"
     );
     expect(adminSource).toContain("function articleStatusColor(status: string): string");
+    expect(adminSource).toContain("function articleStatusLabel(status: string): string");
     expect(adminSource).toContain("if (status === 'ACTIVE') {");
     expect(adminSource).toContain("if (status === 'DRAFT') {");
+    expect(adminSource).toContain("ARCHIVED: '已归档'");
   });
 
   it('renders article admin difficulties with distinct tags', () => {
