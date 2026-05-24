@@ -140,6 +140,20 @@ describe('workspace style guard', () => {
     expect(appSource).toContain('developerToolContractEmptyDescription()');
   });
 
+  it('filters blank Agent API tool scope tags and shows an empty fallback', () => {
+    const developerPageStart = appSource.indexOf('function DeveloperPage()');
+    const toolContractEmptyStart = appSource.indexOf('function developerToolContractEmptyDescription()');
+    expect(developerPageStart).toBeGreaterThanOrEqual(0);
+    expect(toolContractEmptyStart).toBeGreaterThan(developerPageStart);
+    const developerPageSource = appSource.slice(developerPageStart, toolContractEmptyStart);
+    expect(developerPageSource).toContain('<DeveloperToolScopeTags scope={scope} />');
+    expect(appSource).toContain('function DeveloperToolScopeTags({ scope }: { scope: string })');
+    expect(appSource).toContain('function developerToolScopeLabels(scope: string): string[]');
+    expect(appSource).toContain('.map((item) => item.trim())');
+    expect(appSource).toContain('.filter(Boolean)');
+    expect(appSource).toContain('暂无权限声明');
+  });
+
   it('surfaces unavailable dashboard or manifest state on the Agent handoff page', () => {
     expect(appSource).toContain('developerAccessUnavailable');
     expect(appSource).toContain('developerAccessUnavailableDescription()');

@@ -2477,11 +2477,7 @@ function DeveloperPage() {
             {
               title: '权限',
               dataIndex: 'scope',
-              render: (scope: string) => (
-                <Space size={[4, 4]} wrap>
-                  {scope.split(',').map((item) => renderScopeTag(item.trim()))}
-                </Space>
-              )
+              render: (scope: string) => <DeveloperToolScopeTags scope={scope} />
             },
             {
               title: '风险',
@@ -2514,6 +2510,24 @@ function DeveloperPage() {
       </Card>
     </div>
   );
+}
+
+function DeveloperToolScopeTags({ scope }: { scope: string }) {
+  const scopeLabels = developerToolScopeLabels(scope);
+  return (
+    <Space size={[4, 4]} wrap>
+      {scopeLabels.length === 0
+        ? <Text type="secondary">暂无权限声明</Text>
+        : scopeLabels.map((item) => renderScopeTag(item))}
+    </Space>
+  );
+}
+
+function developerToolScopeLabels(scope: string): string[] {
+  return scope
+    .split(',')
+    .map((item) => item.trim())
+    .filter(Boolean);
 }
 
 function developerToolContractEmptyDescription(): string {
