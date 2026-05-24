@@ -948,6 +948,20 @@ describe('workspace style guard', () => {
     expect(adminSource).toContain('title="暂无文章参考链接"');
   });
 
+  it('keeps the article admin table horizontally scannable on small screens', () => {
+    const articleAdminStart = adminSource.indexOf('export function ArticlesAdminPage()');
+    const apiKeyAdminStart = adminSource.indexOf('export function ApiKeysAdminPage()');
+    expect(articleAdminStart).toBeGreaterThanOrEqual(0);
+    expect(apiKeyAdminStart).toBeGreaterThan(articleAdminStart);
+    const articleAdminSource = adminSource.slice(articleAdminStart, apiKeyAdminStart);
+    const mainArticleTableSource = articleAdminSource.slice(
+      articleAdminSource.indexOf('<PageHeader title="文章管理"'),
+      articleAdminSource.indexOf('{selected && (')
+    );
+    expect(adminSource).toContain('const ADMIN_ARTICLE_TABLE_SCROLL = { x: 980 };');
+    expect(mainArticleTableSource).toContain('scroll={ADMIN_ARTICLE_TABLE_SCROLL}');
+  });
+
   it('keeps article admin nested tables horizontally scannable on small screens', () => {
     const articleAdminStart = adminSource.indexOf('export function ArticlesAdminPage()');
     const apiKeyAdminStart = adminSource.indexOf('export function ApiKeysAdminPage()');
