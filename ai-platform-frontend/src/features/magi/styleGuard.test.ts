@@ -1321,6 +1321,15 @@ describe('workspace style guard', () => {
     expect(adminSource).toContain('setDirectoryMode(false);');
   });
 
+  it('uses explicit validation messages for admin Skill uploads', () => {
+    expect(adminSource).toContain("name=\"name\" label=\"名称\" rules={[{ required: true, whitespace: true, message: '请输入 Skill 名称' }]}");
+    expect(adminSource).toContain("name=\"categoryId\" label=\"分类\" rules={[{ required: true, message: '请选择 Skill 分类' }]}");
+    expect(adminSource).toContain("name=\"description\" label=\"描述\" rules={[{ required: true, whitespace: true, message: '请输入 Skill 描述' }]}");
+    expect(adminSource).toContain("name=\"tags\" label=\"标签\" rules={[{ required: true, whitespace: true, message: '请输入 Skill 标签' }]}");
+    expect(adminSource).toContain("name=\"author\" label=\"作者\" rules={[{ required: true, whitespace: true, message: '请输入作者' }]}");
+    expect(adminSource).toContain("name=\"usageMarkdown\" label=\"使用说明\" rules={[{ required: true, whitespace: true, message: '请输入 Skill 使用说明' }]}");
+  });
+
   it('clears pending article attachment dialog state when child dialogs close', () => {
     expect(adminSource).toContain('closeArticleAssetModal');
     expect(adminSource).toContain('closeArticleLinkModal');

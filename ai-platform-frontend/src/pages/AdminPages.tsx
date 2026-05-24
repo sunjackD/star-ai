@@ -2122,29 +2122,29 @@ function SkillUploadButton({
               <Button>{directoryMode ? '选择包含 SKILL.md 的文件夹' : '选择 SKILL.md 或 zip 包'}</Button>
             </Upload>
           </Form.Item>
-          <Form.Item name="name" label="名称" rules={[{ required: true, whitespace: true }]}>
+          <Form.Item name="name" label="名称" rules={[{ required: true, whitespace: true, message: '请输入 Skill 名称' }]}>
             <Input />
           </Form.Item>
-          <Form.Item name="categoryId" label="分类" rules={[{ required: true }]}>
+          <Form.Item name="categoryId" label="分类" rules={[{ required: true, message: '请选择 Skill 分类' }]}>
             <Select
               options={categories.map((item) => ({ label: item.name, value: item.id }))}
               loading={categoriesLoading}
               disabled={categoriesUnavailable}
             />
           </Form.Item>
-          <Form.Item name="description" label="描述" rules={[{ required: true, whitespace: true }]}>
+          <Form.Item name="description" label="描述" rules={[{ required: true, whitespace: true, message: '请输入 Skill 描述' }]}>
             <Input.TextArea rows={3} />
           </Form.Item>
-          <Form.Item name="tags" label="标签" rules={[{ required: true, whitespace: true }]}>
+          <Form.Item name="tags" label="标签" rules={[{ required: true, whitespace: true, message: '请输入 Skill 标签' }]}>
             <Input />
           </Form.Item>
-          <Form.Item name="author" label="作者" rules={[{ required: true, whitespace: true }]}>
+          <Form.Item name="author" label="作者" rules={[{ required: true, whitespace: true, message: '请输入作者' }]}>
             <Input />
           </Form.Item>
           <Form.Item name="icon" label="图标">
             <IconInput />
           </Form.Item>
-          <Form.Item name="usageMarkdown" label="使用说明" rules={[{ required: true, whitespace: true }]}>
+          <Form.Item name="usageMarkdown" label="使用说明" rules={[{ required: true, whitespace: true, message: '请输入 Skill 使用说明' }]}>
             <Input.TextArea rows={5} />
           </Form.Item>
           <Button
