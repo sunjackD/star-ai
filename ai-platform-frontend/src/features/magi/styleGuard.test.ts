@@ -327,6 +327,27 @@ describe('workspace style guard', () => {
     expect(appSource).toContain('setDirectoryMode(false)');
   });
 
+  it('uses explicit validation messages for market Skill uploads', () => {
+    expect(appSource).toContain(
+      "<Form.Item name=\"name\" label=\"名称\" rules={[{ required: true, whitespace: true, message: '请输入 Skill 名称' }]}>"
+    );
+    expect(appSource).toContain(
+      "<Form.Item name=\"categoryId\" label=\"分类\" rules={[{ required: true, message: '请选择 Skill 分类' }]}>"
+    );
+    expect(appSource).toContain(
+      "<Form.Item name=\"description\" label=\"描述\" rules={[{ required: true, whitespace: true, message: '请输入 Skill 描述' }]}>"
+    );
+    expect(appSource).toContain(
+      "<Form.Item name=\"tags\" label=\"标签\" rules={[{ required: true, whitespace: true, message: '请输入 Skill 标签' }]}>"
+    );
+    expect(appSource).toContain(
+      "<Form.Item name=\"author\" label=\"作者\" rules={[{ required: true, whitespace: true, message: '请输入作者' }]}>"
+    );
+    expect(appSource).toContain(
+      "<Form.Item name=\"usageMarkdown\" label=\"使用说明\" rules={[{ required: true, whitespace: true, message: '请输入 Skill 使用说明' }]}>"
+    );
+  });
+
   it('shows a concrete failure notice when market Skill upload fails', () => {
     expect(appSource).toContain('marketSkillUploadFailureNotice');
     expect(appSource).toContain('message.error(marketSkillUploadFailureNotice(error))');
