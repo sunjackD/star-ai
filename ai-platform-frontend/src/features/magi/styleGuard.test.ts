@@ -804,6 +804,20 @@ describe('workspace style guard', () => {
     expect(adminSource).toContain("INTERMEDIATE: '进阶'");
   });
 
+  it('uses localized article admin status and difficulty options in filters and forms', () => {
+    const articleAdminStart = adminSource.indexOf('export function ArticlesAdminPage()');
+    const apiKeyAdminStart = adminSource.indexOf('export function ApiKeysAdminPage()');
+    expect(articleAdminStart).toBeGreaterThanOrEqual(0);
+    expect(apiKeyAdminStart).toBeGreaterThan(articleAdminStart);
+    const articleAdminSource = adminSource.slice(articleAdminStart, apiKeyAdminStart);
+    expect(articleAdminSource.match(/options=\{ARTICLE_ADMIN_STATUS_OPTIONS\}/g) ?? []).toHaveLength(2);
+    expect(articleAdminSource.match(/options=\{ARTICLE_ADMIN_DIFFICULTY_OPTIONS\}/g) ?? []).toHaveLength(2);
+    expect(adminSource).toContain('const ARTICLE_ADMIN_STATUS_OPTIONS = articleAdminStatusValues.map');
+    expect(adminSource).toContain('const ARTICLE_ADMIN_DIFFICULTY_OPTIONS = articleAdminDifficultyValues.map');
+    expect(articleAdminSource).not.toContain("options={['ACTIVE', 'DRAFT', 'ARCHIVED'].map((value) => ({ label: value, value }))}");
+    expect(articleAdminSource).not.toContain("options={['BEGINNER', 'INTERMEDIATE', 'ADVANCED'].map((value) => ({ label: value, value }))}");
+  });
+
   it('gives the user admin table explicit loading and empty feedback', () => {
     expect(adminSource).toContain('isUsersLoading');
     expect(adminSource).toContain('userAdminInitialEmptyDescription');

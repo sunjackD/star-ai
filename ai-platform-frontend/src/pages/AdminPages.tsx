@@ -54,6 +54,16 @@ const USER_ADMIN_STATUS_OPTIONS = userAdminStatusValues.map((value) => ({
   label: userAdminStatusLabel(value),
   value
 }));
+const articleAdminStatusValues = ['ACTIVE', 'DRAFT', 'ARCHIVED'];
+const ARTICLE_ADMIN_STATUS_OPTIONS = articleAdminStatusValues.map((value) => ({
+  label: articleStatusLabel(value),
+  value
+}));
+const articleAdminDifficultyValues = ['BEGINNER', 'INTERMEDIATE', 'ADVANCED'];
+const ARTICLE_ADMIN_DIFFICULTY_OPTIONS = articleAdminDifficultyValues.map((value) => ({
+  label: articleDifficultyLabel(value),
+  value
+}));
 
 type ResourceRecord = { id: number; name: string; status?: string };
 type FieldType = 'text' | 'textarea' | 'number' | 'select' | 'icon';
@@ -1010,14 +1020,14 @@ export function ArticlesAdminPage() {
           allowClear
           placeholder="状态"
           className="admin-filter-select"
-          options={['ACTIVE', 'DRAFT', 'ARCHIVED'].map((value) => ({ label: value, value }))}
+          options={ARTICLE_ADMIN_STATUS_OPTIONS}
           onChange={setStatusFilter}
         />
         <Select
           allowClear
           placeholder="难度"
           className="admin-filter-select"
-          options={['BEGINNER', 'INTERMEDIATE', 'ADVANCED'].map((value) => ({ label: value, value }))}
+          options={ARTICLE_ADMIN_DIFFICULTY_OPTIONS}
           onChange={setDifficultyFilter}
         />
         <Button type="primary" onClick={openCreate}>新增文章</Button>
@@ -1162,13 +1172,13 @@ export function ArticlesAdminPage() {
               <Input className="admin-short-input" />
             </Form.Item>
             <Form.Item name="difficulty" label="难度" rules={[{ required: true }]}>
-              <Select className="admin-filter-select" options={['BEGINNER', 'INTERMEDIATE', 'ADVANCED'].map((value) => ({ label: value, value }))} />
+              <Select className="admin-filter-select" options={ARTICLE_ADMIN_DIFFICULTY_OPTIONS} />
             </Form.Item>
             <Form.Item name="estimatedMinutes" label="预计分钟" rules={[{ required: true, type: 'number', min: 1 }]}>
               <InputNumber min={1} max={10080} className="admin-number-input" />
             </Form.Item>
             <Form.Item name="status" label="状态" rules={[{ required: true }]}>
-              <Select className="admin-filter-select" options={['ACTIVE', 'DRAFT', 'ARCHIVED'].map((value) => ({ label: value, value }))} />
+              <Select className="admin-filter-select" options={ARTICLE_ADMIN_STATUS_OPTIONS} />
             </Form.Item>
             <Form.Item name="sortOrder" label="排序" rules={[{ required: true, type: 'number', min: 0 }]}>
               <InputNumber min={0} className="admin-number-input" />
