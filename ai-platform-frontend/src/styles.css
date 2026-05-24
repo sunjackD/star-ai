@@ -926,7 +926,7 @@ html[data-theme='minimal-modern'] .app-sider .ant-menu-submenu-title {
 
 .model-layer-toolbar {
   display: grid;
-  grid-template-columns: 220px 220px;
+  grid-template-columns: minmax(260px, 1fr) 220px 220px;
   gap: 12px;
   margin-bottom: 18px;
 }

@@ -474,6 +474,19 @@ describe('workspace style guard', () => {
     expect(modelsPageSource).not.toContain('<Tag>{model.modelType}</Tag>');
   });
 
+  it('lets users search the public model catalog by keyword', () => {
+    expect(appSource).toContain("const [modelKeyword, setModelKeyword] = useState('');");
+    expect(appSource).toContain('const normalizedModelKeyword = modelKeyword.trim().toLowerCase();');
+    expect(appSource).toContain('const searchableModelFields = [model.name, model.provider, model.modelType, model.capabilities, model.pricing];');
+    expect(appSource).toContain('const matchesKeyword = !normalizedModelKeyword');
+    expect(appSource).toContain('|| searchableModelFields.some((value) => value.toLowerCase().includes(normalizedModelKeyword));');
+    expect(appSource).toContain('className="model-layer-search"');
+    expect(appSource).toContain('placeholder="搜索模型、供应商或能力"');
+    expect(appSource).toContain('onChange={(event) => setModelKeyword(event.target.value)}');
+    expect(appSource).toContain('调整搜索词、供应商或模型类型');
+    expect(styles).toMatch(/\.model-layer-toolbar \{[\s\S]*grid-template-columns: minmax\(260px, 1fr\) 220px 220px;/);
+  });
+
   it('shows loading, empty, and unavailable states for finetune jobs', () => {
     expect(appSource).toContain('finetuneJobsLoading');
     expect(appSource).toContain('finetuneJobsUnavailable');

@@ -1753,14 +1753,19 @@ function ModelsPage() {
     queryKey: ['models'],
     queryFn: () => getPublicData<AiModel[]>('/models')
   });
+  const [modelKeyword, setModelKeyword] = useState('');
   const [providerFilter, setProviderFilter] = useState('all');
   const [typeFilter, setTypeFilter] = useState('all');
   const providers = Array.from(new Set(data.map((model) => model.provider))).sort();
   const modelTypes = Array.from(new Set(data.map((model) => model.modelType))).sort();
+  const normalizedModelKeyword = modelKeyword.trim().toLowerCase();
   const filteredModels = data.filter((model) => {
+    const searchableModelFields = [model.name, model.provider, model.modelType, model.capabilities, model.pricing];
+    const matchesKeyword = !normalizedModelKeyword
+      || searchableModelFields.some((value) => value.toLowerCase().includes(normalizedModelKeyword));
     const matchesProvider = providerFilter === 'all' || model.provider === providerFilter;
     const matchesType = typeFilter === 'all' || model.modelType === typeFilter;
-    return matchesProvider && matchesType;
+    return matchesKeyword && matchesProvider && matchesType;
   });
 
   return (
@@ -1782,6 +1787,12 @@ function ModelsPage() {
       </section>
 
       <div className="model-layer-toolbar">
+        <Input.Search
+          className="model-layer-search"
+          placeholder="搜索模型、供应商或能力"
+          allowClear
+          onChange={(event) => setModelKeyword(event.target.value)}
+        />
         <Select
           value={providerFilter}
           onChange={setProviderFilter}
@@ -1806,7 +1817,7 @@ function ModelsPage() {
         ) : modelsUnavailable ? (
           <CatalogEmptyState title="模型能力层暂不可用" description={modelCatalogUnavailableDescription()} />
         ) : filteredModels.length === 0 ? (
-          <CatalogEmptyState title="暂无匹配模型" description="切换供应商或模型类型，或者在平台后台新增模型。" />
+          <CatalogEmptyState title="暂无匹配模型" description="调整搜索词、供应商或模型类型，或者在平台后台新增模型。" />
         ) : filteredModels.map((model) => (
           <section key={model.id} className="model-layer-card">
             <div className="model-layer-card-heading">
