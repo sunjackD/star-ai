@@ -1126,6 +1126,11 @@ pre {
   margin-bottom: 14px;
 }
 
+.api-key-list-toolbar .ant-input-search,
+.api-key-list-toolbar .ant-select {
+  width: 100%;
+}
+
 .api-key-scope-tags {
   display: flex;
   flex-wrap: wrap;

@@ -149,6 +149,12 @@ describe('workspace style guard', () => {
     expect(styles).toMatch(/\.api-key-list-toolbar \{[\s\S]*grid-template-columns: minmax\(260px, 1fr\) 220px;/);
   });
 
+  it('keeps API Key list filter controls stretched within the toolbar grid', () => {
+    expect(styles).toMatch(
+      /\.api-key-list-toolbar \.ant-input-search,[\s\S]*\.api-key-list-toolbar \.ant-select \{[\s\S]*width: 100%;[\s\S]*\}/
+    );
+  });
+
   it('shows unavailable feedback for API Key table failures', () => {
     expect(appSource).toContain('apiKeysUnavailable');
     expect(appSource).toContain('apiKeysUnavailableDescription()');
