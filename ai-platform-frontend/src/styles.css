@@ -1370,6 +1370,13 @@ pre {
   background: rgba(248, 251, 255, 0.78);
 }
 
+.agent-api-handoff-grid > section,
+.agent-api-object-card,
+.agent-api-guard-card,
+.agent-api-copy-block {
+  min-width: 0;
+}
+
 .agent-api-skill-meta {
   display: grid;
   gap: 10px;

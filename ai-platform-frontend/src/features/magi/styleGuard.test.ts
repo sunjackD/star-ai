@@ -336,6 +336,12 @@ describe('workspace style guard', () => {
     expect(appSource).toContain('请使用配置文本右侧复制按钮');
   });
 
+  it('keeps Agent handoff long-text panels from forcing horizontal overflow', () => {
+    expect(styles).toMatch(
+      /\.agent-api-handoff-grid > section,[\s\S]*\.agent-api-object-card,[\s\S]*\.agent-api-guard-card,[\s\S]*\.agent-api-copy-block \{[\s\S]*min-width: 0;[\s\S]*\}/
+    );
+  });
+
   it('shows a clear unavailable state when the Agent catalog query fails', () => {
     expect(appSource).toContain('agentsUnavailable');
     expect(appSource).toContain('agentCatalogUnavailableDescription()');
