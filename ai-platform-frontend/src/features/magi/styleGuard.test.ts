@@ -383,9 +383,12 @@ describe('workspace style guard', () => {
     expect(finetuneEmptyStart).toBeGreaterThan(finetunePageStart);
     const finetunePageSource = appSource.slice(finetunePageStart, finetuneEmptyStart);
     expect(finetunePageSource).toContain(
-      '<Tag color={finetuneJobStatusColor(job.status)}>{job.status}</Tag>'
+      '<Tag color={finetuneJobStatusColor(job.status)}>{finetuneJobStatusLabel(job.status)}</Tag>'
     );
     expect(appSource).toContain("function finetuneJobStatusColor(status: string): string");
+    expect(appSource).toContain("function finetuneJobStatusLabel(status: string): string");
+    expect(appSource).toContain("RUNNING: '运行中'");
+    expect(appSource).toContain("COMPLETED: '已完成'");
   });
 
   it('keeps API Key as the primary label while framing it for Agent use', () => {

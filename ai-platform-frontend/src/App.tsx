@@ -1863,7 +1863,7 @@ function FinetunePage() {
           <Card key={job.id} title={job.name}>
             <Text>{job.baseModel}</Text>
             <Progress percent={job.progress} />
-            <Tag color={finetuneJobStatusColor(job.status)}>{job.status}</Tag>
+            <Tag color={finetuneJobStatusColor(job.status)}>{finetuneJobStatusLabel(job.status)}</Tag>
           </Card>
         ))}
       </div>
@@ -1893,6 +1893,17 @@ function finetuneJobStatusColor(status: string): string {
     return 'red';
   }
   return 'default';
+}
+
+function finetuneJobStatusLabel(status: string): string {
+  const labels: Record<string, string> = {
+    ACTIVE: '启用',
+    COMPLETED: '已完成',
+    DISABLED: '禁用',
+    DRAFT: '草稿',
+    RUNNING: '运行中'
+  };
+  return labels[status] ?? status;
 }
 
 const API_KEY_SCOPE_OPTIONS = [
