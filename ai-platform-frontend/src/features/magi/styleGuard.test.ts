@@ -831,6 +831,21 @@ describe('workspace style guard', () => {
     expect(adminSource).toContain('title="暂无操作记录"');
   });
 
+  it('keeps API Key and audit admin tables horizontally scannable on small screens', () => {
+    const apiKeyAdminStart = adminSource.indexOf('export function ApiKeysAdminPage()');
+    const auditLogAdminStart = adminSource.indexOf('export function AuditLogsAdminPage()');
+    const apiKeyEmptyStart = adminSource.indexOf('function apiKeyRecordEmptyDescription()');
+    expect(apiKeyAdminStart).toBeGreaterThanOrEqual(0);
+    expect(auditLogAdminStart).toBeGreaterThan(apiKeyAdminStart);
+    expect(apiKeyEmptyStart).toBeGreaterThan(auditLogAdminStart);
+    const apiKeyAdminSource = adminSource.slice(apiKeyAdminStart, auditLogAdminStart);
+    const auditAdminSource = adminSource.slice(auditLogAdminStart, apiKeyEmptyStart);
+    expect(adminSource).toContain('const ADMIN_API_KEY_TABLE_SCROLL = { x: 1040 };');
+    expect(adminSource).toContain('const ADMIN_AUDIT_LOG_TABLE_SCROLL = { x: 1120 };');
+    expect(apiKeyAdminSource).toContain('scroll={ADMIN_API_KEY_TABLE_SCROLL}');
+    expect(auditAdminSource).toContain('scroll={ADMIN_AUDIT_LOG_TABLE_SCROLL}');
+  });
+
   it('renders audit log actions and resources with localized labels', () => {
     const auditAdminStart = adminSource.indexOf('export function AuditLogsAdminPage()');
     const apiKeyEmptyStart = adminSource.indexOf('function apiKeyRecordEmptyDescription()');

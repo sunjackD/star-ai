@@ -54,6 +54,8 @@ const { Title, Paragraph } = Typography;
 const STATUS_OPTIONS = ['ACTIVE', 'DISABLED', 'DRAFT', 'RUNNING', 'COMPLETED'];
 const ADMIN_RESOURCE_TABLE_SCROLL = { x: 960 };
 const ADMIN_USER_TABLE_SCROLL = { x: 1080 };
+const ADMIN_API_KEY_TABLE_SCROLL = { x: 1040 };
+const ADMIN_AUDIT_LOG_TABLE_SCROLL = { x: 1120 };
 const THEME_OPTIONS = Object.values(themes).map((theme) => ({ label: theme.label, value: theme.name }));
 const userAdminStatusValues = ['ACTIVE', 'DISABLED'];
 const USER_ADMIN_STATUS_OPTIONS = userAdminStatusValues.map((value) => ({
@@ -1449,6 +1451,7 @@ export function ApiKeysAdminPage() {
         loading={apiKeyRecordsLoading}
         dataSource={filteredApiKeys}
         pagination={{ pageSize: 8 }}
+        scroll={ADMIN_API_KEY_TABLE_SCROLL}
         locale={{
           emptyText: <AdminTableEmptyState title="暂无 API Key 记录" description={emptyDescription} />
         }}
@@ -1509,6 +1512,7 @@ export function AuditLogsAdminPage() {
         loading={auditLogsLoading}
         dataSource={filteredAuditLogs}
         pagination={{ pageSize: 10 }}
+        scroll={ADMIN_AUDIT_LOG_TABLE_SCROLL}
         locale={{
           emptyText: <AdminTableEmptyState title="暂无操作记录" description={emptyDescription} />
         }}
