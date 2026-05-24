@@ -565,7 +565,7 @@ export function SkillsAdminPage() {
       { title: '分类', render: (row) => row.category.name },
       { title: '文件', render: (row) => skillArtifactLabel(row) },
       { title: '下载', dataIndex: 'downloadCount' },
-      { title: '状态', render: (row) => <Tag color={skillAdminStatusColor(row.status)}>{row.status}</Tag> }
+      { title: '状态', render: (row) => <Tag color={skillAdminStatusColor(row.status)}>{skillAdminStatusLabel(row.status)}</Tag> }
     ],
     normalizeInitial: (row) => ({ ...row, categoryId: row.category.id }),
     extraToolbar: (
@@ -620,6 +620,15 @@ function skillAdminStatusColor(status: string): string {
     return 'gold';
   }
   return 'default';
+}
+
+function skillAdminStatusLabel(status: string): string {
+  const labels: Record<string, string> = {
+    ACTIVE: '启用',
+    DRAFT: '草稿',
+    DISABLED: '禁用'
+  };
+  return labels[status] ?? status;
 }
 
 export function ModelsAdminPage() {

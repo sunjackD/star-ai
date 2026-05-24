@@ -883,9 +883,12 @@ describe('workspace style guard', () => {
     expect(skillDownloadStart).toBeGreaterThan(skillAdminStart);
     const skillAdminSource = adminSource.slice(skillAdminStart, skillDownloadStart);
     expect(skillAdminSource).toContain(
-      "render: (row) => <Tag color={skillAdminStatusColor(row.status)}>{row.status}</Tag>"
+      "render: (row) => <Tag color={skillAdminStatusColor(row.status)}>{skillAdminStatusLabel(row.status)}</Tag>"
     );
     expect(adminSource).toContain("function skillAdminStatusColor(status: string): string");
+    expect(adminSource).toContain("function skillAdminStatusLabel(status: string): string");
+    expect(adminSource).toContain("ACTIVE: '启用'");
+    expect(adminSource).toContain("DRAFT: '草稿'");
   });
 
   it('uses user-facing column titles in model admin tables', () => {
