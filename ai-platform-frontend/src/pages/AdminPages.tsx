@@ -746,10 +746,32 @@ export function LinksAdminPage() {
       { title: '分类', dataIndex: 'category' },
       { title: '排序', dataIndex: 'sortOrder' },
       { title: '链接', render: (row) => <a href={row.url} target="_blank" rel="noreferrer">打开</a> },
-      { title: '状态', render: (row) => <Tag color={row.status === 'ACTIVE' ? 'green' : 'default'}>{row.status}</Tag> }
+      { title: '状态', render: (row) => <Tag color={linkAdminStatusColor(row.status)}>{linkAdminStatusLabel(row.status)}</Tag> }
     ],
     normalizeInitial: (row) => ({ ...row, sortOrder: row.sortOrder ?? 0 })
   }} />;
+}
+
+function linkAdminStatusColor(status: string): string {
+  if (status === 'ACTIVE') {
+    return 'green';
+  }
+  if (status === 'DRAFT') {
+    return 'gold';
+  }
+  if (status === 'DISABLED') {
+    return 'red';
+  }
+  return 'default';
+}
+
+function linkAdminStatusLabel(status: string): string {
+  const labels: Record<string, string> = {
+    ACTIVE: '启用',
+    DRAFT: '草稿',
+    DISABLED: '禁用'
+  };
+  return labels[status] ?? status;
 }
 
 export function ArticlesAdminPage() {

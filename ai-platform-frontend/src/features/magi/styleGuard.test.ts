@@ -949,6 +949,21 @@ describe('workspace style guard', () => {
     expect(adminSource).toContain('Progress,');
   });
 
+  it('renders link admin statuses with localized tags', () => {
+    const linksAdminStart = adminSource.indexOf('export function LinksAdminPage()');
+    const articlesAdminStart = adminSource.indexOf('export function ArticlesAdminPage()');
+    expect(linksAdminStart).toBeGreaterThanOrEqual(0);
+    expect(articlesAdminStart).toBeGreaterThan(linksAdminStart);
+    const linksAdminSource = adminSource.slice(linksAdminStart, articlesAdminStart);
+    expect(linksAdminSource).toContain(
+      "render: (row) => <Tag color={linkAdminStatusColor(row.status)}>{linkAdminStatusLabel(row.status)}</Tag>"
+    );
+    expect(adminSource).toContain("function linkAdminStatusColor(status: string): string");
+    expect(adminSource).toContain("function linkAdminStatusLabel(status: string): string");
+    expect(adminSource).toContain("ACTIVE: '启用'");
+    expect(adminSource).toContain("DISABLED: '禁用'");
+  });
+
   it('surfaces user admin action failures', () => {
     expect(adminSource).toContain('adminUserSaveFailureNotice');
     expect(adminSource).toContain('adminUserStatusFailureNotice');
