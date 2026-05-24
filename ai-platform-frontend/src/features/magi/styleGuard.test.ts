@@ -584,6 +584,17 @@ describe('workspace style guard', () => {
     expect(adminSource).toContain('dataSource={filteredResources}');
   });
 
+  it('uses localized status options in shared resource filters and forms', () => {
+    expect(adminSource).toContain("function resourceStatusOptions(values: string[]): FieldDef['options']");
+    expect(adminSource).toContain('function resourceStatusLabel(status: string): string');
+    expect(adminSource).toContain('options={resourceStatusOptions(statusOptions.length ? statusOptions : STATUS_OPTIONS)}');
+    expect(adminSource).toContain("selectField('status', '状态', resourceStatusOptions(STATUS_OPTIONS))");
+    expect(adminSource).toContain("RUNNING: '运行中'");
+    expect(adminSource).toContain("COMPLETED: '已完成'");
+    expect(adminSource).not.toContain("STATUS_OPTIONS.map((value) => ({ label: value, value }))");
+    expect(adminSource).not.toContain("options={(statusOptions.length ? statusOptions : STATUS_OPTIONS).map((value) => ({ label: value, value }))}");
+  });
+
   it('surfaces shared admin resource action failures', () => {
     expect(adminSource).toContain('resourceSaveFailureNotice(resourceSubject, error)');
     expect(adminSource).toContain('resourceDeleteFailureNotice(resourceSubject, error)');

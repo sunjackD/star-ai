@@ -1662,7 +1662,7 @@ function ResourceAdminPage<T extends ResourceRecord>({ config }: { config: Resou
             allowClear
             placeholder="状态"
             className="admin-filter-select"
-            options={(statusOptions.length ? statusOptions : STATUS_OPTIONS).map((value) => ({ label: value, value }))}
+            options={resourceStatusOptions(statusOptions.length ? statusOptions : STATUS_OPTIONS)}
             onChange={setStatusFilter}
           />
         )}
@@ -1816,7 +1816,27 @@ function selectField(name: string, label: string, options: FieldDef['options'], 
 }
 
 function statusField(): FieldDef {
-  return { ...selectField('status', '状态', STATUS_OPTIONS.map((value) => ({ label: value, value }))), defaultValue: 'ACTIVE' };
+  return { ...selectField('status', '状态', resourceStatusOptions(STATUS_OPTIONS)), defaultValue: 'ACTIVE' };
+}
+
+function resourceStatusOptions(values: string[]): FieldDef['options'] {
+  return values.map((value) => ({
+    label: resourceStatusLabel(value),
+    value
+  }));
+}
+
+function resourceStatusLabel(status: string): string {
+  const labels: Record<string, string> = {
+    ACTIVE: '启用',
+    DISABLED: '禁用',
+    DRAFT: '草稿',
+    RUNNING: '运行中',
+    COMPLETED: '已完成',
+    ARCHIVED: '已归档',
+    EXPIRED: '已过期'
+  };
+  return labels[status] ?? status;
 }
 
 function rulesForField(fieldDef: FieldDef): Rule[] {
