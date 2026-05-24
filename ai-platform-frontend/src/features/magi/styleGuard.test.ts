@@ -626,9 +626,12 @@ describe('workspace style guard', () => {
     const agentAdminSource = adminSource.slice(agentAdminStart, skillCategoryAdminStart);
     expect(agentAdminSource).toContain("{ title: '分类', dataIndex: 'category' }");
     expect(agentAdminSource).toContain(
-      "render: (row) => <Tag color={agentAdminStatusColor(row.status)}>{row.status}</Tag>"
+      "render: (row) => <Tag color={agentAdminStatusColor(row.status)}>{agentAdminStatusLabel(row.status)}</Tag>"
     );
     expect(adminSource).toContain("function agentAdminStatusColor(status: string): string");
+    expect(adminSource).toContain("function agentAdminStatusLabel(status: string): string");
+    expect(adminSource).toContain("DRAFT: '草稿'");
+    expect(adminSource).toContain("DISABLED: '禁用'");
   });
 
   it('uses user-facing column titles in Skill category admin tables', () => {

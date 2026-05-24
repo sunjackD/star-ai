@@ -501,7 +501,7 @@ export function AgentsAdminPage() {
     columns: [
       { title: '名称', dataIndex: 'name' },
       { title: '分类', dataIndex: 'category' },
-      { title: '状态', render: (row) => <Tag color={agentAdminStatusColor(row.status)}>{row.status}</Tag> }
+      { title: '状态', render: (row) => <Tag color={agentAdminStatusColor(row.status)}>{agentAdminStatusLabel(row.status)}</Tag> }
     ]
   }} />;
 }
@@ -517,6 +517,15 @@ function agentAdminStatusColor(status: string): string {
     return 'red';
   }
   return 'default';
+}
+
+function agentAdminStatusLabel(status: string): string {
+  const labels: Record<string, string> = {
+    ACTIVE: '启用',
+    DRAFT: '草稿',
+    DISABLED: '禁用'
+  };
+  return labels[status] ?? status;
 }
 
 export function SkillCategoriesAdminPage() {
