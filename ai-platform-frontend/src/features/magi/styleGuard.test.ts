@@ -929,9 +929,12 @@ describe('workspace style guard', () => {
     expect(linksAdminStart).toBeGreaterThan(finetuneAdminStart);
     const finetuneAdminSource = adminSource.slice(finetuneAdminStart, linksAdminStart);
     expect(finetuneAdminSource).toContain(
-      "render: (row) => <Tag color={finetuneJobStatusColor(row.status)}>{row.status}</Tag>"
+      "render: (row) => <Tag color={finetuneJobStatusColor(row.status)}>{finetuneJobStatusLabel(row.status)}</Tag>"
     );
     expect(adminSource).toContain("function finetuneJobStatusColor(status: string): string");
+    expect(adminSource).toContain("function finetuneJobStatusLabel(status: string): string");
+    expect(adminSource).toContain("RUNNING: '运行中'");
+    expect(adminSource).toContain("COMPLETED: '已完成'");
   });
 
   it('renders finetune job progress as a compact progress bar', () => {

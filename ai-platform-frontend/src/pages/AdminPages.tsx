@@ -685,7 +685,7 @@ export function FinetuneJobsAdminPage() {
       { title: '名称', dataIndex: 'name' },
       { title: '基础模型', dataIndex: 'baseModel' },
       { title: '数据集', render: (row) => row.dataset?.name ?? '-' },
-      { title: '状态', render: (row) => <Tag color={finetuneJobStatusColor(row.status)}>{row.status}</Tag> },
+      { title: '状态', render: (row) => <Tag color={finetuneJobStatusColor(row.status)}>{finetuneJobStatusLabel(row.status)}</Tag> },
       { title: '进度', render: (row) => <Progress percent={row.progress} size="small" /> }
     ],
     extraToolbar: isFinetuneDatasetsUnavailable ? (
@@ -718,6 +718,17 @@ function finetuneJobStatusColor(status: string): string {
     return 'red';
   }
   return 'default';
+}
+
+function finetuneJobStatusLabel(status: string): string {
+  const labels: Record<string, string> = {
+    ACTIVE: '启用',
+    COMPLETED: '已完成',
+    DISABLED: '禁用',
+    DRAFT: '草稿',
+    RUNNING: '运行中'
+  };
+  return labels[status] ?? status;
 }
 
 export function LinksAdminPage() {
