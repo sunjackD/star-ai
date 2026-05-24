@@ -499,6 +499,20 @@ describe('workspace style guard', () => {
     expect(styles).toContain('.article-tail-empty');
   });
 
+  it('shows a disabled article reference action when the URL is missing', () => {
+    const linkCardStart = appSource.indexOf('function ArticleLinkCard');
+    const markdownBlockStart = appSource.indexOf('function MarkdownBlock');
+    expect(linkCardStart).toBeGreaterThanOrEqual(0);
+    expect(markdownBlockStart).toBeGreaterThan(linkCardStart);
+    const linkCardSource = appSource.slice(linkCardStart, markdownBlockStart);
+    expect(linkCardSource).toContain('<ArticleLinkAction link={link} />');
+    expect(appSource).toContain('function ArticleLinkAction({ link }: { link: ArticleLink })');
+    expect(appSource).toContain("if (link.url?.startsWith('/'))");
+    expect(appSource).toContain('if (link.url)');
+    expect(appSource).toContain('<Button size="small" disabled>暂无链接</Button>');
+    expect(linkCardSource).not.toContain('} : null;');
+  });
+
   it('does not claim article asset text was copied before the clipboard confirms it', () => {
     expect(appSource).toContain('copyArticleAssetText');
     expect(appSource).toContain('await navigator.clipboard.writeText(contentText);');

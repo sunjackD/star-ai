@@ -1370,20 +1370,24 @@ function ArticleAssetCard(props: { articleId: number; asset: ArticleAsset }) {
 }
 
 function ArticleLinkCard({ link }: { link: ArticleLink }) {
-  const action = link.url?.startsWith('/') ? (
-    <Link to={link.url}><Button size="small">打开</Button></Link>
-  ) : link.url ? (
-    <Button size="small" href={link.url} target="_blank" icon={<ExternalLink size={14} />}>打开</Button>
-  ) : null;
-
   return (
     <Card className="article-link-card">
       <Tag>{link.linkType}</Tag>
       <Title level={4}>{link.title}</Title>
       <Paragraph>{link.description}</Paragraph>
-      {action}
+      <ArticleLinkAction link={link} />
     </Card>
   );
+}
+
+function ArticleLinkAction({ link }: { link: ArticleLink }) {
+  if (link.url?.startsWith('/')) {
+    return <Link to={link.url}><Button size="small">打开</Button></Link>;
+  }
+  if (link.url) {
+    return <Button size="small" href={link.url} target="_blank" icon={<ExternalLink size={14} />}>打开</Button>;
+  }
+  return <Button size="small" disabled>暂无链接</Button>;
 }
 
 function MarkdownBlock({ value, compact = false }: { value: string; compact?: boolean }) {
