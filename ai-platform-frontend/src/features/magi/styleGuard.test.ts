@@ -739,6 +739,11 @@ describe('workspace style guard', () => {
     expect(styles).toContain('.admin-table-empty');
   });
 
+  it('keeps shared admin resource tables horizontally scannable on small screens', () => {
+    expect(adminSource).toContain('const ADMIN_RESOURCE_TABLE_SCROLL = { x: 960 };');
+    expect(adminSource).toContain('scroll={ADMIN_RESOURCE_TABLE_SCROLL}');
+  });
+
   it('surfaces shared admin resource list query failures', () => {
     expect(adminSource).toContain('resourceListUnavailable');
     expect(adminSource).toContain('resourceListUnavailableNotice(resourceSubject)');

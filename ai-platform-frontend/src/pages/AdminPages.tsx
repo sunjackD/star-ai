@@ -52,6 +52,7 @@ import type {
 
 const { Title, Paragraph } = Typography;
 const STATUS_OPTIONS = ['ACTIVE', 'DISABLED', 'DRAFT', 'RUNNING', 'COMPLETED'];
+const ADMIN_RESOURCE_TABLE_SCROLL = { x: 960 };
 const THEME_OPTIONS = Object.values(themes).map((theme) => ({ label: theme.label, value: theme.name }));
 const userAdminStatusValues = ['ACTIVE', 'DISABLED'];
 const USER_ADMIN_STATUS_OPTIONS = userAdminStatusValues.map((value) => ({
@@ -1763,6 +1764,7 @@ function ResourceAdminPage<T extends ResourceRecord>({ config }: { config: Resou
         loading={isLoading}
         dataSource={filteredResources}
         columns={columns}
+        scroll={ADMIN_RESOURCE_TABLE_SCROLL}
         locale={{
           emptyText: (
             <AdminTableEmptyState
