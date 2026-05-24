@@ -661,16 +661,16 @@ function SetupPage() {
           系统未检测到管理员账号。请创建第一个管理员，后续用户可在后台统一新增和授权。
         </Paragraph>
         <Form layout="vertical" onFinish={(values) => mutation.mutate(values as SetupAdminRequest & { confirmPassword?: string })}>
-          <Form.Item name="username" label="管理员用户名" rules={[{ required: true, whitespace: true }]}>
+          <Form.Item name="username" label="管理员用户名" rules={[{ required: true, whitespace: true, message: '请输入管理员用户名' }]}>
             <Input placeholder="例如 owner" />
           </Form.Item>
-          <Form.Item name="email" label="管理员邮箱" rules={[{ required: true, type: 'email' }]}>
+          <Form.Item name="email" label="管理员邮箱" rules={[{ required: true, type: 'email', message: '请输入有效管理员邮箱' }]}>
             <Input placeholder="owner@example.com" />
           </Form.Item>
-          <Form.Item name="displayName" label="显示名" rules={[{ required: true, whitespace: true }]}>
+          <Form.Item name="displayName" label="显示名" rules={[{ required: true, whitespace: true, message: '请输入显示名' }]}>
             <Input placeholder="平台管理员" />
           </Form.Item>
-          <Form.Item name="password" label="密码" rules={[{ required: true, min: 6, max: 64 }]}>
+          <Form.Item name="password" label="密码" rules={[{ required: true, min: 6, max: 64, message: '请输入 6-64 位密码' }]}>
             <Input.Password placeholder="至少 6 位" />
           </Form.Item>
           <Form.Item
@@ -678,7 +678,7 @@ function SetupPage() {
             label="确认密码"
             dependencies={['password']}
             rules={[
-              { required: true },
+              { required: true, message: '请再次输入密码' },
               ({ getFieldValue }) => ({
                 validator(_, value) {
                   if (!value || getFieldValue('password') === value) {

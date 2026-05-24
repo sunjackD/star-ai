@@ -257,6 +257,22 @@ describe('workspace style guard', () => {
     expect(appSource).toContain('初始化失败，请检查输入或刷新后重试');
   });
 
+  it('uses explicit validation messages on the setup admin form', () => {
+    expect(appSource).toContain(
+      "<Form.Item name=\"username\" label=\"管理员用户名\" rules={[{ required: true, whitespace: true, message: '请输入管理员用户名' }]}>"
+    );
+    expect(appSource).toContain(
+      "<Form.Item name=\"email\" label=\"管理员邮箱\" rules={[{ required: true, type: 'email', message: '请输入有效管理员邮箱' }]}>"
+    );
+    expect(appSource).toContain(
+      "<Form.Item name=\"displayName\" label=\"显示名\" rules={[{ required: true, whitespace: true, message: '请输入显示名' }]}>"
+    );
+    expect(appSource).toContain(
+      "<Form.Item name=\"password\" label=\"密码\" rules={[{ required: true, min: 6, max: 64, message: '请输入 6-64 位密码' }]}>"
+    );
+    expect(appSource).toContain("{ required: true, message: '请再次输入密码' },");
+  });
+
   it('keeps auth profile sync from showing a blank boot screen', () => {
     expect(appSource).toContain('authProfileLoadingNotice()');
     expect(appSource).toContain('正在同步登录状态');
