@@ -257,6 +257,18 @@ describe('workspace style guard', () => {
     expect(appSource).toContain('Agent 目录暂不可用');
   });
 
+  it('renders public Agent statuses with localized status tags', () => {
+    const agentsPageStart = appSource.indexOf('function AgentsPage()');
+    const agentUnavailableStart = appSource.indexOf('function agentCatalogUnavailableDescription()');
+    expect(agentsPageStart).toBeGreaterThanOrEqual(0);
+    expect(agentUnavailableStart).toBeGreaterThan(agentsPageStart);
+    const agentsPageSource = appSource.slice(agentsPageStart, agentUnavailableStart);
+    expect(agentsPageSource).toContain('<Tag color={statusTagColor(agent.status)}>{statusLabel(agent.status)}</Tag>');
+    expect(agentsPageSource).not.toContain('<Tag>{agent.status}</Tag>');
+    expect(appSource).toContain("DISABLED: '禁用'");
+    expect(appSource).toContain("DRAFT: '草稿'");
+  });
+
   it('shows a clear unavailable state when the Skill catalog query fails', () => {
     expect(appSource).toContain('skillsUnavailable');
     expect(appSource).toContain('skillCatalogUnavailableDescription()');

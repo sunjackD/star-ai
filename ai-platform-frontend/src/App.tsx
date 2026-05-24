@@ -786,7 +786,7 @@ function AgentsPage() {
           <section key={agent.id} className="agent-fleet-card">
             <div className="agent-fleet-card-heading">
               <Tag color="blue">{agent.category}</Tag>
-              <Tag>{agent.status}</Tag>
+              <Tag color={statusTagColor(agent.status)}>{statusLabel(agent.status)}</Tag>
             </div>
             <Title level={4}>{agent.name}</Title>
             <Paragraph>{agent.description}</Paragraph>
@@ -2610,10 +2610,10 @@ function statusTagColor(status: string): string {
   if (status === 'READY' || status === 'PASS' || status === 'ACTIVE') {
     return 'green';
   }
-  if (status === 'ATTENTION' || status === 'WARN') {
+  if (status === 'ATTENTION' || status === 'WARN' || status === 'DRAFT') {
     return 'gold';
   }
-  if (status === 'BLOCKED' || status === 'REVOKED') {
+  if (status === 'BLOCKED' || status === 'REVOKED' || status === 'DISABLED' || status === 'EXPIRED') {
     return 'red';
   }
   return 'default';
@@ -2624,6 +2624,10 @@ function statusLabel(status: string): string {
     READY: '可用',
     PASS: '通过',
     ACTIVE: '启用',
+    DISABLED: '禁用',
+    DRAFT: '草稿',
+    ARCHIVED: '已归档',
+    EXPIRED: '已过期',
     ATTENTION: '需关注',
     WARN: '需关注',
     BLOCKED: '阻塞',
