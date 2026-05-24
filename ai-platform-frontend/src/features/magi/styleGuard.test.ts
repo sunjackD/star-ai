@@ -916,6 +916,21 @@ describe('workspace style guard', () => {
     expect(usersAdminSource).not.toContain("options={['ACTIVE', 'DISABLED'].map((value) => ({ label: value, value }))}");
   });
 
+  it('uses localized role labels in admin role selects and user tags', () => {
+    expect(adminSource).toContain("const DEFAULT_ROLE_NAMES = ['VIEWER', 'DEVELOPER', 'ADMIN'];");
+    expect(adminSource).toContain('function roleOption(roleName: string): { label: string; value: string }');
+    expect(adminSource).toContain('function roleDisplayName(roleName: string): string');
+    expect(adminSource.match(/roles\.map\(\(role\) => roleOption\(role\.name\)\)/g) ?? []).toHaveLength(2);
+    expect(adminSource).toContain('DEFAULT_ROLE_NAMES.map(roleOption)');
+    expect(adminSource).toContain('items.map((item) => <Tag key={item}>{roleDisplayName(item)}</Tag>)');
+    expect(adminSource).toContain("VIEWER: '查看者'");
+    expect(adminSource).toContain("DEVELOPER: '开发者'");
+    expect(adminSource).toContain("ADMIN: '管理员'");
+    expect(adminSource).not.toContain("['VIEWER', 'DEVELOPER', 'ADMIN'].map((role) => ({ label: role, value: role }))");
+    expect(adminSource).not.toContain('roles.map((role) => ({ label: role.name, value: role.name }))');
+    expect(adminSource).not.toContain('<Tag key={item}>{item}</Tag>');
+  });
+
   it('confirms user admin inline updates after table actions', () => {
     expect(adminSource).toContain("message.success('用户状态已更新');");
     expect(adminSource).toContain("message.success('用户角色已更新');");

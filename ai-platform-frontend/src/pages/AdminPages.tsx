@@ -49,6 +49,7 @@ import type {
 const { Title, Paragraph } = Typography;
 const STATUS_OPTIONS = ['ACTIVE', 'DISABLED', 'DRAFT', 'RUNNING', 'COMPLETED'];
 const THEME_OPTIONS = Object.values(themes).map((theme) => ({ label: theme.label, value: theme.name }));
+const DEFAULT_ROLE_NAMES = ['VIEWER', 'DEVELOPER', 'ADMIN'];
 const userAdminStatusValues = ['ACTIVE', 'DISABLED'];
 const USER_ADMIN_STATUS_OPTIONS = userAdminStatusValues.map((value) => ({
   label: userAdminStatusLabel(value),
@@ -165,8 +166,8 @@ export function SettingsAdminPage() {
     isError: isSettingsRolesUnavailable
   } = useQuery({ queryKey: ['admin-roles'], queryFn: () => getData<Role[]>('/admin/roles') });
   const roleOptions = roles.length
-    ? roles.map((role) => ({ label: role.name, value: role.name }))
-    : ['VIEWER', 'DEVELOPER', 'ADMIN'].map((role) => ({ label: role, value: role }));
+    ? roles.map((role) => roleOption(role.name))
+    : DEFAULT_ROLE_NAMES.map(roleOption);
   const mutation = useMutation({
     mutationFn: (values: AdminSettings) => putData<AdminSettings>('/admin/settings', values),
     onSuccess: (settings) => {
@@ -259,6 +260,22 @@ function settingsRolesUnavailableNotice(): string {
   return '当前使用内置角色选项兜底，请确认角色接口可用后刷新再调整默认注册角色。';
 }
 
+function roleOption(roleName: string): { label: string; value: string } {
+  return {
+    label: roleDisplayName(roleName),
+    value: roleName
+  };
+}
+
+function roleDisplayName(roleName: string): string {
+  const labels: Record<string, string> = {
+    VIEWER: '查看者',
+    DEVELOPER: '开发者',
+    ADMIN: '管理员'
+  };
+  return labels[roleName] ?? roleName;
+}
+
 export function UsersAdminPage() {
   const queryClient = useQueryClient();
   const [form] = Form.useForm();
@@ -279,7 +296,7 @@ export function UsersAdminPage() {
     isLoading: isUserRolesLoading,
     isError: isUserRolesUnavailable
   } = useQuery({ queryKey: ['admin-roles'], queryFn: () => getData<Role[]>('/admin/roles') });
-  const roleOptions = roles.map((role) => ({ label: role.name, value: role.name }));
+  const roleOptions = roles.map((role) => roleOption(role.name));
   const emptyDescription = keyword || statusFilter
     ? filteredUserAdminEmptyDescription()
     : userAdminInitialEmptyDescription();
@@ -412,7 +429,7 @@ export function UsersAdminPage() {
           { title: '邮箱', dataIndex: 'email' },
           { title: '显示名', dataIndex: 'displayName' },
           { title: '状态', dataIndex: 'status', render: (status) => <Tag color={userAdminStatusColor(status)}>{userAdminStatusLabel(status)}</Tag> },
-          { title: '角色', dataIndex: 'roles', render: (items: string[]) => items.map((item) => <Tag key={item}>{item}</Tag>) },
+          { title: '角色', dataIndex: 'roles', render: (items: string[]) => items.map((item) => <Tag key={item}>{roleDisplayName(item)}</Tag>) },
           {
             title: '操作',
             render: (_, row) => (
