@@ -77,6 +77,7 @@ const { Header, Sider, Content } = Layout;
 const { Title, Paragraph, Text } = Typography;
 type UserMenuKey = 'profile' | 'apiKeys' | 'settings' | 'logout';
 const DASHBOARD_SUMMARY_TABLE_SCROLL = { x: 560 };
+const API_KEY_TABLE_SCROLL = { x: 920 };
 
 function SetupGate() {
   const location = useLocation();
@@ -2186,6 +2187,7 @@ function ApiKeysPage() {
         rowKey="id"
         dataSource={filteredApiKeys}
         loading={apiKeysLoading}
+        scroll={API_KEY_TABLE_SCROLL}
         locale={{ emptyText: <Empty description={apiKeyTableEmptyDescription} /> }}
         columns={[
           { title: '名称', dataIndex: 'name' },

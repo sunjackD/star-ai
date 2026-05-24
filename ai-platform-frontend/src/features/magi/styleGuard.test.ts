@@ -127,6 +127,11 @@ describe('workspace style guard', () => {
     expect(appSource).toContain('apiKeysEmptyDescription()');
   });
 
+  it('keeps the user API Key table horizontally scannable on small screens', () => {
+    expect(appSource).toContain('const API_KEY_TABLE_SCROLL = { x: 920 };');
+    expect(appSource).toContain('scroll={API_KEY_TABLE_SCROLL}');
+  });
+
   it('lets users search and filter their API Key table', () => {
     expect(appSource).toContain("const [apiKeyKeyword, setApiKeyKeyword] = useState('');");
     expect(appSource).toContain("const [apiKeyStatusFilter, setApiKeyStatusFilter] = useState('all');");
