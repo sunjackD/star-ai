@@ -53,6 +53,7 @@ import type {
 const { Title, Paragraph } = Typography;
 const STATUS_OPTIONS = ['ACTIVE', 'DISABLED', 'DRAFT', 'RUNNING', 'COMPLETED'];
 const ADMIN_RESOURCE_TABLE_SCROLL = { x: 960 };
+const ADMIN_USER_TABLE_SCROLL = { x: 1080 };
 const THEME_OPTIONS = Object.values(themes).map((theme) => ({ label: theme.label, value: theme.name }));
 const userAdminStatusValues = ['ACTIVE', 'DISABLED'];
 const USER_ADMIN_STATUS_OPTIONS = userAdminStatusValues.map((value) => ({
@@ -409,6 +410,7 @@ export function UsersAdminPage() {
         loading={isUsersLoading}
         dataSource={filteredUsers}
         pagination={{ pageSize: 8 }}
+        scroll={ADMIN_USER_TABLE_SCROLL}
         locale={{
           emptyText: <AdminTableEmptyState title="暂无用户" description={emptyDescription} />
         }}

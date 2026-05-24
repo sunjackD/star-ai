@@ -1172,6 +1172,11 @@ describe('workspace style guard', () => {
     expect(adminSource).toContain('disabled={userPasswordMutation.isPending && resettingPasswordUserId !== row.id}');
   });
 
+  it('keeps the user admin table horizontally scannable on small screens', () => {
+    expect(adminSource).toContain('const ADMIN_USER_TABLE_SCROLL = { x: 1080 };');
+    expect(adminSource).toContain('scroll={ADMIN_USER_TABLE_SCROLL}');
+  });
+
   it('surfaces Skill admin category dependency failures', () => {
     expect(adminSource).toContain('isSkillCategoriesUnavailable');
     expect(adminSource).toContain('skillCategoriesUnavailableNotice()');
