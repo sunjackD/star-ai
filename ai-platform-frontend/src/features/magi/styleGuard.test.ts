@@ -137,6 +137,20 @@ describe('workspace style guard', () => {
     expect(apiKeysPageSource).not.toContain("status === 'ACTIVE' ? 'green' : 'default'");
   });
 
+  it('shares API Key scope labels between user and admin records', () => {
+    expect(appSource).toContain(
+      "import { API_KEY_SCOPE_OPTIONS, apiKeyScopeLabel } from './features/apiKeys/apiKeyScopeLabels';"
+    );
+    expect(appSource).toContain('{apiKeyScopeLabel(scope)} · {scope}');
+    expect(appSource).not.toContain('const API_KEY_SCOPE_OPTIONS = [');
+    expect(appSource).not.toContain('function scopeLabel(scope: string): string');
+    expect(adminSource).toContain("import { apiKeyScopeLabel } from '../features/apiKeys/apiKeyScopeLabels';");
+    expect(adminSource).toContain(
+      'scopes.map((scope) => <Tag key={scope}>{apiKeyScopeLabel(scope)} · {scope}</Tag>)'
+    );
+    expect(adminSource).not.toContain('scopes.map((scope) => <Tag key={scope}>{scope}</Tag>)');
+  });
+
   it('surfaces API Key create and revoke action failures', () => {
     expect(appSource).toContain('apiKeyCreateFailureNotice');
     expect(appSource).toContain('apiKeyRevokeFailureNotice');

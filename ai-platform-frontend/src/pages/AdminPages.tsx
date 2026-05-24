@@ -25,6 +25,7 @@ import {
 import type { Rule } from 'antd/es/form';
 import type { RcFile } from 'antd/es/upload';
 import { apiErrorMessage, deleteData, downloadFile, getData, postData, putData, uploadData } from '../api/client';
+import { apiKeyScopeLabel } from '../features/apiKeys/apiKeyScopeLabels';
 import { articleAssetTypeLabel, articleLinkTypeLabel } from '../features/articles/articleLabels';
 import { modelTypeLabel } from '../features/models/modelLabels';
 import { DEFAULT_ROLE_NAMES, roleDisplayName, roleOption } from '../features/roles/roleLabels';
@@ -1451,7 +1452,7 @@ export function ApiKeysAdminPage() {
         columns={[
           { title: '名称', dataIndex: 'name' },
           { title: '前缀', dataIndex: 'keyPrefix' },
-          { title: '权限', dataIndex: 'scopes', render: (scopes: string[]) => scopes.map((scope) => <Tag key={scope}>{scope}</Tag>) },
+          { title: '权限', dataIndex: 'scopes', render: (scopes: string[]) => scopes.map((scope) => <Tag key={scope}>{apiKeyScopeLabel(scope)} · {scope}</Tag>) },
           { title: '状态', dataIndex: 'status', render: (status) => <Tag color={apiKeyStatusColor(status)}>{apiKeyStatusLabel(status)}</Tag> },
           { title: '最后使用', dataIndex: 'lastUsedAt', render: (value) => value ?? '-' },
           {
