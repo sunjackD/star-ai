@@ -2164,7 +2164,7 @@ function ApiKeysPage() {
               <Text type="secondary">{selectedPresetOption.description}</Text>
             </div>
           </Form.Item>
-          <Form.Item name="scopes" label="权限范围" rules={[{ required: true }]}>
+          <Form.Item name="scopes" label="权限范围" rules={[{ required: true, message: '请选择 API Key 权限范围' }]}>
             <Select
               mode="multiple"
               onChange={() => setSelectedPreset('custom')}
@@ -2174,7 +2174,7 @@ function ApiKeysPage() {
               }))}
             />
           </Form.Item>
-          <Form.Item name="expireDays" label="有效期" rules={[{ required: true }]}>
+          <Form.Item name="expireDays" label="有效期" rules={[{ required: true, message: '请选择 API Key 有效期' }]}>
             <Select options={API_KEY_EXPIRE_OPTIONS} />
           </Form.Item>
           <Button type="primary" htmlType="submit" loading={mutation.isPending}>创建</Button>

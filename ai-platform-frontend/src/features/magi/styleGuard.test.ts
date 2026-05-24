@@ -98,6 +98,12 @@ describe('workspace style guard', () => {
       "<Form.Item name=\"name\" label=\"名称\" rules={[{ required: true, whitespace: true, message: '请输入 API Key 名称' }]}>\n"
       + '             <Input placeholder="Agent/Skill 代管" />'
     );
+    expect(appSource).toContain(
+      "<Form.Item name=\"scopes\" label=\"权限范围\" rules={[{ required: true, message: '请选择 API Key 权限范围' }]}>"
+    );
+    expect(appSource).toContain(
+      "<Form.Item name=\"expireDays\" label=\"有效期\" rules={[{ required: true, message: '请选择 API Key 有效期' }]}>"
+    );
   });
 
   it('clears API Key creation form state when the dialog closes', () => {
