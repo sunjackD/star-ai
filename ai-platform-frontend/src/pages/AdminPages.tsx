@@ -1028,7 +1028,7 @@ export function ArticlesAdminPage() {
         columns={[
           { title: '标题', dataIndex: 'title' },
           { title: '分类', dataIndex: 'category' },
-          { title: '难度', dataIndex: 'difficulty', render: (difficulty) => <Tag color={articleDifficultyColor(difficulty)}>{difficulty}</Tag> },
+          { title: '难度', dataIndex: 'difficulty', render: (difficulty) => <Tag color={articleDifficultyColor(difficulty)}>{articleDifficultyLabel(difficulty)}</Tag> },
           { title: '状态', dataIndex: 'status', render: (status) => <Tag color={articleStatusColor(status)}>{articleStatusLabel(status)}</Tag> },
           { title: '排序', dataIndex: 'sortOrder' },
           {
@@ -1286,6 +1286,15 @@ function articleDifficultyColor(difficulty: string): string {
     return 'red';
   }
   return 'blue';
+}
+
+function articleDifficultyLabel(difficulty: string): string {
+  const labels: Record<string, string> = {
+    BEGINNER: '入门',
+    INTERMEDIATE: '进阶',
+    ADVANCED: '高级'
+  };
+  return labels[difficulty] ?? difficulty;
 }
 
 function articleAdminListUnavailableNotice(): string {

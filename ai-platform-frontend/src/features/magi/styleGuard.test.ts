@@ -795,11 +795,13 @@ describe('workspace style guard', () => {
     expect(apiKeyAdminStart).toBeGreaterThan(articleAdminStart);
     const articleAdminSource = adminSource.slice(articleAdminStart, apiKeyAdminStart);
     expect(articleAdminSource).toContain(
-      "render: (difficulty) => <Tag color={articleDifficultyColor(difficulty)}>{difficulty}</Tag>"
+      "render: (difficulty) => <Tag color={articleDifficultyColor(difficulty)}>{articleDifficultyLabel(difficulty)}</Tag>"
     );
     expect(adminSource).toContain("function articleDifficultyColor(difficulty: string): string");
+    expect(adminSource).toContain("function articleDifficultyLabel(difficulty: string): string");
     expect(adminSource).toContain("if (difficulty === 'BEGINNER') {");
     expect(adminSource).toContain("if (difficulty === 'ADVANCED') {");
+    expect(adminSource).toContain("INTERMEDIATE: '进阶'");
   });
 
   it('gives the user admin table explicit loading and empty feedback', () => {
