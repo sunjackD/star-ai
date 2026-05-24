@@ -828,6 +828,21 @@ describe('workspace style guard', () => {
     expect(adminSource).toContain('disabled={isUserRolesUnavailable}');
   });
 
+  it('renders user admin statuses with localized tags', () => {
+    const usersAdminStart = adminSource.indexOf('export function UsersAdminPage()');
+    const agentsAdminStart = adminSource.indexOf('export function AgentsAdminPage()');
+    expect(usersAdminStart).toBeGreaterThanOrEqual(0);
+    expect(agentsAdminStart).toBeGreaterThan(usersAdminStart);
+    const usersAdminSource = adminSource.slice(usersAdminStart, agentsAdminStart);
+    expect(usersAdminSource).toContain(
+      "render: (status) => <Tag color={userAdminStatusColor(status)}>{userAdminStatusLabel(status)}</Tag>"
+    );
+    expect(adminSource).toContain("function userAdminStatusColor(status: string): string");
+    expect(adminSource).toContain("function userAdminStatusLabel(status: string): string");
+    expect(adminSource).toContain("ACTIVE: '启用'");
+    expect(adminSource).toContain("DISABLED: '禁用'");
+  });
+
   it('confirms user admin inline updates after table actions', () => {
     expect(adminSource).toContain("message.success('用户状态已更新');");
     expect(adminSource).toContain("message.success('用户角色已更新');");

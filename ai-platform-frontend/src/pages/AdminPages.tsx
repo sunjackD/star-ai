@@ -381,7 +381,7 @@ export function UsersAdminPage() {
           { title: '用户', dataIndex: 'username' },
           { title: '邮箱', dataIndex: 'email' },
           { title: '显示名', dataIndex: 'displayName' },
-          { title: '状态', dataIndex: 'status', render: (status) => <Tag color={status === 'ACTIVE' ? 'green' : 'red'}>{status}</Tag> },
+          { title: '状态', dataIndex: 'status', render: (status) => <Tag color={userAdminStatusColor(status)}>{userAdminStatusLabel(status)}</Tag> },
           { title: '角色', dataIndex: 'roles', render: (items: string[]) => items.map((item) => <Tag key={item}>{item}</Tag>) },
           {
             title: '操作',
@@ -469,6 +469,24 @@ function userAdminListUnavailableNotice(): string {
 
 function userRolesUnavailableNotice(): string {
   return '角色选择会暂时锁定，请确认角色接口可用后刷新再调整用户角色。';
+}
+
+function userAdminStatusColor(status: string): string {
+  if (status === 'ACTIVE') {
+    return 'green';
+  }
+  if (status === 'DISABLED') {
+    return 'red';
+  }
+  return 'default';
+}
+
+function userAdminStatusLabel(status: string): string {
+  const labels: Record<string, string> = {
+    ACTIVE: '启用',
+    DISABLED: '禁用'
+  };
+  return labels[status] ?? status;
 }
 
 function adminUserSaveFailureNotice(error: unknown): string {
