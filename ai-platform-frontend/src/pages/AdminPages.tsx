@@ -1511,14 +1511,89 @@ export function AuditLogsAdminPage() {
         }}
         columns={[
           { title: '操作者', dataIndex: 'actor' },
-          { title: '动作', dataIndex: 'action' },
-          { title: '资源', dataIndex: 'resourceType' },
+          { title: '动作', dataIndex: 'action', render: (action: string) => auditActionLabel(action) },
+          { title: '资源', dataIndex: 'resourceType', render: (resourceType: string) => auditResourceTypeLabel(resourceType) },
           { title: '资源 ID', dataIndex: 'resourceId' },
           { title: '详情', dataIndex: 'detail' }
         ]}
       />
     </div>
   );
+}
+
+function auditActionLabel(action: string): string {
+  const labels: Record<string, string> = {
+    USER_CREATED: '创建用户',
+    USER_UPDATED: '更新用户',
+    USER_STATUS_UPDATED: '更新用户状态',
+    USER_ROLES_UPDATED: '更新用户角色',
+    USER_PASSWORD_RESET: '重置用户密码',
+    AGENT_CREATED: '创建 Agent',
+    AGENT_UPDATED: '更新 Agent',
+    AGENT_DELETED: '删除 Agent',
+    SKILL_CATEGORY_CREATED: '创建 Skill 分类',
+    SKILL_CATEGORY_UPDATED: '更新 Skill 分类',
+    SKILL_CATEGORY_DELETED: '删除 Skill 分类',
+    SKILL_CREATED: '创建 Skill',
+    SKILL_UPDATED: '更新 Skill',
+    SKILL_DELETED: '删除 Skill',
+    SKILL_UPLOADED: '上传 Skill',
+    SKILL_DIRECTORY_UPLOADED: '上传 Skill 文件夹',
+    SKILL_PACKAGE_DOWNLOADED: '下载 Skill 包',
+    MODEL_CREATED: '创建模型',
+    MODEL_UPDATED: '更新模型',
+    MODEL_DELETED: '删除模型',
+    DATASET_CREATED: '创建数据集',
+    DATASET_UPDATED: '更新数据集',
+    DATASET_DELETED: '删除数据集',
+    FINETUNE_JOB_CREATED: '创建微调任务',
+    FINETUNE_JOB_UPDATED: '更新微调任务',
+    FINETUNE_JOB_DELETED: '删除微调任务',
+    FINETUNE_JOB_STARTED: '启动微调任务',
+    LINK_CREATED: '创建跳转链接',
+    LINK_UPDATED: '更新跳转链接',
+    LINK_DELETED: '删除跳转链接',
+    API_KEY_CREATED: '创建 API Key',
+    API_KEY_REVOKED: '撤销 API Key',
+    API_KEY_DISABLED: '禁用 API Key',
+    PLATFORM_SETTINGS_UPDATED: '更新平台设置',
+    DEVELOPER_AGENTS_LISTED: 'Agent 代管查询 Agent',
+    DEVELOPER_AGENT_CREATED: 'Agent 代管创建 Agent',
+    DEVELOPER_AGENT_UPDATED: 'Agent 代管更新 Agent',
+    DEVELOPER_ARTICLES_LISTED: 'Agent 代管查询文章',
+    DEVELOPER_ARTICLE_CREATED: 'Agent 代管创建文章',
+    DEVELOPER_ARTICLE_UPDATED: 'Agent 代管更新文章',
+    DEVELOPER_SKILL_CATEGORIES_LISTED: 'Agent 代管查询 Skill 分类',
+    DEVELOPER_SKILLS_LISTED: 'Agent 代管查询 Skill',
+    DEVELOPER_SKILL_IMPORTED: 'Agent 代管导入 Skill',
+    DEVELOPER_SKILL_UPLOADED: 'Agent 代管上传 Skill',
+    DEVELOPER_SKILL_DIRECTORY_UPLOADED: 'Agent 代管上传 Skill 文件夹',
+    DEVELOPER_SKILL_ARTIFACT_REPLACED: 'Agent 代管替换 Skill 文件',
+    DEVELOPER_SKILL_DIRECTORY_REPLACED: 'Agent 代管替换 Skill 文件夹',
+    DEVELOPER_REMOTE_SKILL_ADDED: 'Agent 代管添加远程 Skill',
+    DEVELOPER_REMOTE_SKILL_IMPORTED: 'Agent 代管导入远程 Skill',
+    DEVELOPER_SKILL_UPDATED: 'Agent 代管更新 Skill',
+    DEVELOPER_SKILL_DELETED: 'Agent 代管删除 Skill',
+    DEVELOPER_SKILL_DOWNLOADED: 'Agent 代管下载 Skill'
+  };
+  return labels[action] ?? action;
+}
+
+function auditResourceTypeLabel(resourceType: string): string {
+  const labels: Record<string, string> = {
+    USER: '用户',
+    AGENT: 'Agent',
+    SKILL_CATEGORY: 'Skill 分类',
+    SKILL: 'Skill',
+    AI_MODEL: '模型',
+    DATASET: '数据集',
+    FINETUNE_JOB: '微调任务',
+    REDIRECT_LINK: '跳转链接',
+    API_KEY: 'API Key',
+    PLATFORM_SETTINGS: '平台设置',
+    ARTICLE: '文章'
+  };
+  return labels[resourceType] ?? resourceType;
 }
 
 function apiKeyRecordEmptyDescription(): string {

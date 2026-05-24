@@ -711,6 +711,24 @@ describe('workspace style guard', () => {
     expect(adminSource).toContain('title="暂无操作记录"');
   });
 
+  it('renders audit log actions and resources with localized labels', () => {
+    const auditAdminStart = adminSource.indexOf('export function AuditLogsAdminPage()');
+    const apiKeyEmptyStart = adminSource.indexOf('function apiKeyRecordEmptyDescription()');
+    expect(auditAdminStart).toBeGreaterThanOrEqual(0);
+    expect(apiKeyEmptyStart).toBeGreaterThan(auditAdminStart);
+    const auditAdminSource = adminSource.slice(auditAdminStart, apiKeyEmptyStart);
+    expect(auditAdminSource).toContain("{ title: '动作', dataIndex: 'action', render: (action: string) => auditActionLabel(action) }");
+    expect(auditAdminSource).toContain("{ title: '资源', dataIndex: 'resourceType', render: (resourceType: string) => auditResourceTypeLabel(resourceType) }");
+    expect(adminSource).toContain('function auditActionLabel(action: string): string');
+    expect(adminSource).toContain('function auditResourceTypeLabel(resourceType: string): string');
+    expect(adminSource).toContain("USER_CREATED: '创建用户'");
+    expect(adminSource).toContain("API_KEY_REVOKED: '撤销 API Key'");
+    expect(adminSource).toContain("AI_MODEL: '模型'");
+    expect(adminSource).toContain("PLATFORM_SETTINGS: '平台设置'");
+    expect(auditAdminSource).not.toContain("{ title: '动作', dataIndex: 'action' }");
+    expect(auditAdminSource).not.toContain("{ title: '资源', dataIndex: 'resourceType' }");
+  });
+
   it('surfaces API Key and audit admin record query failures', () => {
     expect(adminSource).toContain('apiKeyRecordListUnavailable');
     expect(adminSource).toContain('auditLogListUnavailable');
