@@ -249,6 +249,20 @@ describe('workspace style guard', () => {
     expect(appSource).toContain('Skill 市场暂不可用');
   });
 
+  it('filters blank Skill registry tags and shows an empty fallback', () => {
+    const skillsPageStart = appSource.indexOf('function SkillsPage()');
+    const skillUnavailableStart = appSource.indexOf('function skillCatalogUnavailableDescription()');
+    expect(skillsPageStart).toBeGreaterThanOrEqual(0);
+    expect(skillUnavailableStart).toBeGreaterThan(skillsPageStart);
+    const skillsPageSource = appSource.slice(skillsPageStart, skillUnavailableStart);
+    expect(skillsPageSource).toContain('<SkillRegistryTags tags={row.tags} />');
+    expect(appSource).toContain('function SkillRegistryTags({ tags }: { tags: string })');
+    expect(appSource).toContain('function skillRegistryTagLabels(tags: string): string[]');
+    expect(appSource).toContain('.map((tag) => tag.trim())');
+    expect(appSource).toContain('.filter(Boolean)');
+    expect(appSource).toContain('暂无 Skill 标签');
+  });
+
   it('clears pending market Skill upload selections when the dialog closes', () => {
     expect(appSource).toContain('closeMarketSkillUploadModal');
     expect(appSource).toContain('onCancel={closeMarketSkillUploadModal}');

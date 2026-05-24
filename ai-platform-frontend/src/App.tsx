@@ -953,9 +953,7 @@ function SkillsPage() {
             </div>
             <Title level={4}>{row.name}</Title>
             <Paragraph>{row.description}</Paragraph>
-            <div className="skill-registry-tags">
-              {row.tags.split(',').map((tag) => <Tag key={tag.trim()}>{tag.trim()}</Tag>)}
-            </div>
+            <SkillRegistryTags tags={row.tags} />
             <div className="skill-registry-card-stats">
               <span><Download size={14} /> {row.downloadCount}</span>
               <span><CheckCircle2 size={14} /> {row.starCount}</span>
@@ -976,6 +974,24 @@ function SkillsPage() {
       </div>
     </div>
   );
+}
+
+function SkillRegistryTags({ tags }: { tags: string }) {
+  const tagLabels = skillRegistryTagLabels(tags);
+  return (
+    <div className="skill-registry-tags">
+      {tagLabels.length === 0
+        ? <Text type="secondary">暂无 Skill 标签</Text>
+        : tagLabels.map((tag) => <Tag key={tag}>{tag}</Tag>)}
+    </div>
+  );
+}
+
+function skillRegistryTagLabels(tags: string): string[] {
+  return tags
+    .split(',')
+    .map((tag) => tag.trim())
+    .filter(Boolean);
 }
 
 function skillCatalogUnavailableDescription(): string {
