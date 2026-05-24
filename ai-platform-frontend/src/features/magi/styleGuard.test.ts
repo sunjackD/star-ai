@@ -540,6 +540,23 @@ describe('workspace style guard', () => {
     expect(linkCardSource).not.toContain('} : null;');
   });
 
+  it('uses localized article detail attachment and reference type tags', () => {
+    const assetCardStart = appSource.indexOf('function ArticleAssetCard');
+    const linkCardStart = appSource.indexOf('function ArticleLinkCard');
+    const markdownBlockStart = appSource.indexOf('function MarkdownBlock');
+    expect(assetCardStart).toBeGreaterThanOrEqual(0);
+    expect(linkCardStart).toBeGreaterThan(assetCardStart);
+    expect(markdownBlockStart).toBeGreaterThan(linkCardStart);
+    const articleTailSource = appSource.slice(assetCardStart, markdownBlockStart);
+    expect(appSource).toContain(
+      "import { articleAssetTypeLabel, articleLinkTypeLabel } from './features/articles/articleLabels';"
+    );
+    expect(articleTailSource).toContain('<Tag color="purple">{articleAssetTypeLabel(asset.assetType)}</Tag>');
+    expect(articleTailSource).toContain('<Tag>{articleLinkTypeLabel(link.linkType)}</Tag>');
+    expect(articleTailSource).not.toContain('<Tag color="purple">{asset.assetType}</Tag>');
+    expect(articleTailSource).not.toContain('<Tag>{link.linkType}</Tag>');
+  });
+
   it('does not claim article asset text was copied before the clipboard confirms it', () => {
     expect(appSource).toContain('copyArticleAssetText');
     expect(appSource).toContain('await navigator.clipboard.writeText(contentText);');
@@ -849,18 +866,17 @@ describe('workspace style guard', () => {
     expect(articleAdminStart).toBeGreaterThanOrEqual(0);
     expect(apiKeyAdminStart).toBeGreaterThan(articleAdminStart);
     const articleAdminSource = adminSource.slice(articleAdminStart, apiKeyAdminStart);
+    expect(adminSource).toContain(
+      "import { articleAssetTypeLabel, articleLinkTypeLabel } from '../features/articles/articleLabels';"
+    );
     expect(adminSource).toContain('const ARTICLE_ASSET_TYPE_OPTIONS = articleAssetTypeValues.map');
     expect(adminSource).toContain('const ARTICLE_LINK_TYPE_OPTIONS = articleLinkTypeValues.map');
-    expect(adminSource).toContain('function articleAssetTypeLabel(assetType: string): string');
-    expect(adminSource).toContain('function articleLinkTypeLabel(linkType: string): string');
     expect(articleAdminSource).toContain("render: (assetType: string) => articleAssetTypeLabel(assetType)");
     expect(articleAdminSource).toContain("render: (linkType: string) => articleLinkTypeLabel(linkType)");
     expect(articleAdminSource).toContain('options={ARTICLE_ASSET_TYPE_OPTIONS}');
     expect(articleAdminSource).toContain('options={ARTICLE_LINK_TYPE_OPTIONS}');
-    expect(adminSource).toContain("SCRIPT: '脚本'");
-    expect(adminSource).toContain("PROMPT: '提示词'");
-    expect(adminSource).toContain("EXTERNAL: '外部链接'");
-    expect(adminSource).toContain("INTERNAL: '站内链接'");
+    expect(adminSource).not.toContain('function articleAssetTypeLabel(assetType: string): string');
+    expect(adminSource).not.toContain('function articleLinkTypeLabel(linkType: string): string');
     expect(articleAdminSource).not.toContain("options={['SCRIPT', 'PROMPT', 'IMAGE', 'CONFIG', 'FILE', 'LINK'].map((value) => ({ label: value, value }))}");
     expect(articleAdminSource).not.toContain("options={['EXTERNAL', 'INTERNAL'].map((value) => ({ label: value, value }))}");
   });

@@ -25,6 +25,7 @@ import {
 import type { Rule } from 'antd/es/form';
 import type { RcFile } from 'antd/es/upload';
 import { apiErrorMessage, deleteData, downloadFile, getData, postData, putData, uploadData } from '../api/client';
+import { articleAssetTypeLabel, articleLinkTypeLabel } from '../features/articles/articleLabels';
 import { DEFAULT_ROLE_NAMES, roleDisplayName, roleOption } from '../features/roles/roleLabels';
 import { themes } from '../themes/tokens';
 import type {
@@ -1326,26 +1327,6 @@ function articleDifficultyLabel(difficulty: string): string {
     ADVANCED: '高级'
   };
   return labels[difficulty] ?? difficulty;
-}
-
-function articleAssetTypeLabel(assetType: string): string {
-  const labels: Record<string, string> = {
-    SCRIPT: '脚本',
-    PROMPT: '提示词',
-    IMAGE: '图片',
-    CONFIG: '配置',
-    FILE: '文件',
-    LINK: '链接'
-  };
-  return labels[assetType] ?? assetType;
-}
-
-function articleLinkTypeLabel(linkType: string): string {
-  const labels: Record<string, string> = {
-    EXTERNAL: '外部链接',
-    INTERNAL: '站内链接'
-  };
-  return labels[linkType] ?? linkType;
 }
 
 function articleAdminListUnavailableNotice(): string {

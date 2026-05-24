@@ -28,6 +28,7 @@ import {
 } from 'lucide-react';
 import { apiErrorMessage, apiUrl, downloadFile, getData, getPublicData, postData, postPublicData, uploadData } from './api/client';
 import { buildAgentApiAccess } from './features/agentApi/agentApiAccess';
+import { articleAssetTypeLabel, articleLinkTypeLabel } from './features/articles/articleLabels';
 import { buildMagiCyclePlan, summarizeMagiCycle, type MagiCycleStageKey } from './features/magi/magiCycle';
 import { roleDisplayName } from './features/roles/roleLabels';
 import { useAuthStore } from './store/authStore';
@@ -1340,7 +1341,7 @@ function ArticleAssetCard(props: { articleId: number; asset: ArticleAsset }) {
   return (
     <Card className="article-asset-card">
       <div className="article-meta">
-        <Tag color="purple">{asset.assetType}</Tag>
+        <Tag color="purple">{articleAssetTypeLabel(asset.assetType)}</Tag>
         {asset.fileName && <Tag>{asset.fileName}</Tag>}
       </div>
       <Title level={4}>{asset.name}</Title>
@@ -1373,7 +1374,7 @@ function ArticleAssetCard(props: { articleId: number; asset: ArticleAsset }) {
 function ArticleLinkCard({ link }: { link: ArticleLink }) {
   return (
     <Card className="article-link-card">
-      <Tag>{link.linkType}</Tag>
+      <Tag>{articleLinkTypeLabel(link.linkType)}</Tag>
       <Title level={4}>{link.title}</Title>
       <Paragraph>{link.description}</Paragraph>
       <ArticleLinkAction link={link} />
