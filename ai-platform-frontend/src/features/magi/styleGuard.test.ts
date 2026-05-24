@@ -1220,6 +1220,21 @@ describe('workspace style guard', () => {
     expect(adminSource).toContain('title="暂无文章"');
   });
 
+  it('uses explicit validation messages on the article editor form', () => {
+    expect(adminSource).toContain("name=\"title\" label=\"标题\" rules={[{ required: true, whitespace: true, message: '请输入文章标题' }]}");
+    expect(adminSource).toContain("name=\"slug\" label=\"标识\" rules={[{ required: true, pattern: /^[a-z0-9][a-z0-9-]*$/, message: '请输入小写字母、数字或连字符标识' }]}");
+    expect(adminSource).toContain("name=\"summary\" label=\"摘要\" rules={[{ required: true, whitespace: true, message: '请输入文章摘要' }]}");
+    expect(adminSource).toContain("name=\"category\" label=\"分类\" rules={[{ required: true, whitespace: true, message: '请输入文章分类' }]}");
+    expect(adminSource).toContain("name=\"difficulty\" label=\"难度\" rules={[{ required: true, message: '请选择文章难度' }]}");
+    expect(adminSource).toContain("name=\"estimatedMinutes\" label=\"预计分钟\" rules={[{ required: true, type: 'number', min: 1, message: '请输入至少 1 分钟' }]}");
+    expect(adminSource).toContain("name=\"status\" label=\"状态\" rules={[{ required: true, message: '请选择文章状态' }]}");
+    expect(adminSource).toContain("name=\"sortOrder\" label=\"排序\" rules={[{ required: true, type: 'number', min: 0, message: '请输入不小于 0 的排序值' }]}");
+    expect(adminSource).toContain("name=\"tags\" label=\"标签\" rules={[{ required: true, whitespace: true, message: '请输入文章标签' }]}");
+    expect(adminSource).toContain("name=\"sourceUrl\" label=\"来源链接\" rules={[{ type: 'url', message: '请输入有效来源链接' }]}");
+    expect(adminSource).toContain("name=\"safetyMarkdown\" label=\"安全说明\" rules={[{ required: true, whitespace: true, message: '请输入安全说明' }]}");
+    expect(adminSource).toContain("name=\"bodyMarkdown\" label=\"Markdown 正文\" rules={[{ required: true, whitespace: true, message: '请输入 Markdown 正文' }]}");
+  });
+
   it('surfaces article admin list and selected detail query failures', () => {
     expect(adminSource).toContain('articleAdminListUnavailable');
     expect(adminSource).toContain('articleAdminDetailUnavailable');

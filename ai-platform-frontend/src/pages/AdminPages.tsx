@@ -1177,45 +1177,45 @@ export function ArticlesAdminPage() {
 
       <Modal open={articleModalOpen} title={editing ? '编辑文章' : '新增文章'} footer={null} onCancel={closeArticleDialog} width={920}>
         <Form form={articleForm} layout="vertical" onFinish={(values) => articleMutation.mutate(values)}>
-          <Form.Item name="title" label="标题" rules={[{ required: true, whitespace: true }]}>
+          <Form.Item name="title" label="标题" rules={[{ required: true, whitespace: true, message: '请输入文章标题' }]}>
             <Input />
           </Form.Item>
-          <Form.Item name="slug" label="标识" rules={[{ required: true, pattern: /^[a-z0-9][a-z0-9-]*$/ }]}>
+          <Form.Item name="slug" label="标识" rules={[{ required: true, pattern: /^[a-z0-9][a-z0-9-]*$/, message: '请输入小写字母、数字或连字符标识' }]}>
             <Input placeholder="chat-style-finetune-astrbot" />
           </Form.Item>
-          <Form.Item name="summary" label="摘要" rules={[{ required: true, whitespace: true }]}>
+          <Form.Item name="summary" label="摘要" rules={[{ required: true, whitespace: true, message: '请输入文章摘要' }]}>
             <Input.TextArea rows={3} />
           </Form.Item>
           <Space wrap>
-            <Form.Item name="category" label="分类" rules={[{ required: true, whitespace: true }]}>
+            <Form.Item name="category" label="分类" rules={[{ required: true, whitespace: true, message: '请输入文章分类' }]}>
               <Input className="admin-short-input" />
             </Form.Item>
-            <Form.Item name="difficulty" label="难度" rules={[{ required: true }]}>
+            <Form.Item name="difficulty" label="难度" rules={[{ required: true, message: '请选择文章难度' }]}>
               <Select className="admin-filter-select" options={ARTICLE_ADMIN_DIFFICULTY_OPTIONS} />
             </Form.Item>
-            <Form.Item name="estimatedMinutes" label="预计分钟" rules={[{ required: true, type: 'number', min: 1 }]}>
+            <Form.Item name="estimatedMinutes" label="预计分钟" rules={[{ required: true, type: 'number', min: 1, message: '请输入至少 1 分钟' }]}>
               <InputNumber min={1} max={10080} className="admin-number-input" />
             </Form.Item>
-            <Form.Item name="status" label="状态" rules={[{ required: true }]}>
+            <Form.Item name="status" label="状态" rules={[{ required: true, message: '请选择文章状态' }]}>
               <Select className="admin-filter-select" options={ARTICLE_ADMIN_STATUS_OPTIONS} />
             </Form.Item>
-            <Form.Item name="sortOrder" label="排序" rules={[{ required: true, type: 'number', min: 0 }]}>
+            <Form.Item name="sortOrder" label="排序" rules={[{ required: true, type: 'number', min: 0, message: '请输入不小于 0 的排序值' }]}>
               <InputNumber min={0} className="admin-number-input" />
             </Form.Item>
           </Space>
-          <Form.Item name="tags" label="标签" rules={[{ required: true, whitespace: true }]}>
+          <Form.Item name="tags" label="标签" rules={[{ required: true, whitespace: true, message: '请输入文章标签' }]}>
             <Input placeholder="逗号分隔" />
           </Form.Item>
-          <Form.Item name="sourceUrl" label="来源链接" rules={[{ type: 'url' }]}>
+          <Form.Item name="sourceUrl" label="来源链接" rules={[{ type: 'url', message: '请输入有效来源链接' }]}>
             <Input />
           </Form.Item>
           <Form.Item name="coverIcon" label="封面图标">
             <Input />
           </Form.Item>
-          <Form.Item name="safetyMarkdown" label="安全说明" rules={[{ required: true, whitespace: true }]}>
+          <Form.Item name="safetyMarkdown" label="安全说明" rules={[{ required: true, whitespace: true, message: '请输入安全说明' }]}>
             <Input.TextArea rows={3} />
           </Form.Item>
-          <Form.Item name="bodyMarkdown" label="Markdown 正文" rules={[{ required: true, whitespace: true }]}>
+          <Form.Item name="bodyMarkdown" label="Markdown 正文" rules={[{ required: true, whitespace: true, message: '请输入 Markdown 正文' }]}>
             <Input.TextArea rows={16} />
           </Form.Item>
           <Button type="primary" htmlType="submit" loading={articleMutation.isPending}>保存</Button>
