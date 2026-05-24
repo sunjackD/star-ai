@@ -2126,7 +2126,7 @@ function ApiKeysPage() {
           {
             title: '状态',
             dataIndex: 'status',
-            render: (status) => <Tag color={status === 'ACTIVE' ? 'green' : 'default'}>{statusLabel(status)}</Tag>
+            render: (status) => <Tag color={statusTagColor(status)}>{statusLabel(status)}</Tag>
           },
           { title: '过期时间', dataIndex: 'expiresAt', render: formatDateTime },
           { title: '最后使用', dataIndex: 'lastUsedAt', render: formatDateTime },

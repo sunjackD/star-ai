@@ -127,6 +127,16 @@ describe('workspace style guard', () => {
     expect(appSource).toContain('API Key 列表暂不可用');
   });
 
+  it('uses shared status colors for user API Key rows', () => {
+    const apiKeysPageStart = appSource.indexOf('function ApiKeysPage()');
+    const apiKeysEmptyStart = appSource.indexOf('function apiKeysEmptyDescription()');
+    expect(apiKeysPageStart).toBeGreaterThanOrEqual(0);
+    expect(apiKeysEmptyStart).toBeGreaterThan(apiKeysPageStart);
+    const apiKeysPageSource = appSource.slice(apiKeysPageStart, apiKeysEmptyStart);
+    expect(apiKeysPageSource).toContain('<Tag color={statusTagColor(status)}>{statusLabel(status)}</Tag>');
+    expect(apiKeysPageSource).not.toContain("status === 'ACTIVE' ? 'green' : 'default'");
+  });
+
   it('surfaces API Key create and revoke action failures', () => {
     expect(appSource).toContain('apiKeyCreateFailureNotice');
     expect(appSource).toContain('apiKeyRevokeFailureNotice');
