@@ -437,6 +437,12 @@ describe('workspace style guard', () => {
     expect(styles).toContain('grid-template-columns: minmax(260px, 1fr) 220px 220px;');
   });
 
+  it('keeps public Agent, Skill, and article filter controls stretched within toolbar grids', () => {
+    expect(styles).toMatch(
+      /\.agent-fleet-toolbar \.ant-input-search,\s*\.agent-fleet-toolbar \.ant-select,\s*\.skill-registry-toolbar \.ant-input-search,\s*\.skill-registry-toolbar \.ant-select,\s*\.article-library-toolbar \.ant-input-search,\s*\.article-library-toolbar \.ant-select \{[\s\S]*width: 100%;/
+    );
+  });
+
   it('filters blank article summary tags and shows an empty fallback', () => {
     const articlesPageStart = appSource.indexOf('function ArticlesPage()');
     const articleUnavailableStart = appSource.indexOf('function articleCatalogUnavailableDescription()');
