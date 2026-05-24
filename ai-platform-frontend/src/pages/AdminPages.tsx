@@ -457,24 +457,24 @@ export function UsersAdminPage() {
       />
       <Modal open={modalOpen} title={editing ? '编辑用户' : '新增用户'} footer={null} onCancel={closeUserDialog}>
         <Form form={form} layout="vertical" onFinish={(values) => saveMutation.mutate(values)}>
-          <Form.Item name="username" label="用户名" rules={[{ required: !editing, whitespace: true }]}>
+          <Form.Item name="username" label="用户名" rules={[{ required: !editing, whitespace: true, message: '请输入用户名' }]}>
             <Input disabled={Boolean(editing)} />
           </Form.Item>
-          <Form.Item name="email" label="邮箱" rules={[{ required: true, type: 'email' }]}>
+          <Form.Item name="email" label="邮箱" rules={[{ required: true, type: 'email', message: '请输入有效邮箱' }]}>
             <Input />
           </Form.Item>
-          <Form.Item name="displayName" label="显示名" rules={[{ required: true, whitespace: true }]}>
+          <Form.Item name="displayName" label="显示名" rules={[{ required: true, whitespace: true, message: '请输入显示名' }]}>
             <Input />
           </Form.Item>
           {!editing && (
-            <Form.Item name="password" label="初始密码" rules={[{ required: true, min: 6 }]}>
+            <Form.Item name="password" label="初始密码" rules={[{ required: true, min: 6, message: '请输入至少 6 位初始密码' }]}>
               <Input.Password />
             </Form.Item>
           )}
-          <Form.Item name="status" label="状态" rules={[{ required: true }]}>
+          <Form.Item name="status" label="状态" rules={[{ required: true, message: '请选择用户状态' }]}>
             <Select options={USER_ADMIN_STATUS_OPTIONS} />
           </Form.Item>
-          <Form.Item name="roles" label="角色" rules={[{ required: true }]}>
+          <Form.Item name="roles" label="角色" rules={[{ required: true, message: '请选择用户角色' }]}>
             <Select
               mode="multiple"
               options={roleOptions}

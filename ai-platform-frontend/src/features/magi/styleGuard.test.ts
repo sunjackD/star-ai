@@ -986,8 +986,24 @@ describe('workspace style guard', () => {
   });
 
   it('rejects blank user admin names at the form edge', () => {
-    expect(adminSource).toContain('name="username" label="用户名" rules={[{ required: !editing, whitespace: true }]}');
-    expect(adminSource).toContain('name="displayName" label="显示名" rules={[{ required: true, whitespace: true }]}');
+    expect(adminSource).toContain(
+      "name=\"username\" label=\"用户名\" rules={[{ required: !editing, whitespace: true, message: '请输入用户名' }]}"
+    );
+    expect(adminSource).toContain(
+      "name=\"email\" label=\"邮箱\" rules={[{ required: true, type: 'email', message: '请输入有效邮箱' }]}"
+    );
+    expect(adminSource).toContain(
+      "name=\"displayName\" label=\"显示名\" rules={[{ required: true, whitespace: true, message: '请输入显示名' }]}"
+    );
+    expect(adminSource).toContain(
+      "name=\"password\" label=\"初始密码\" rules={[{ required: true, min: 6, message: '请输入至少 6 位初始密码' }]}"
+    );
+    expect(adminSource).toContain(
+      "name=\"status\" label=\"状态\" rules={[{ required: true, message: '请选择用户状态' }]}"
+    );
+    expect(adminSource).toContain(
+      "name=\"roles\" label=\"角色\" rules={[{ required: true, message: '请选择用户角色' }]}"
+    );
   });
 
   it('surfaces user admin list query failures', () => {
