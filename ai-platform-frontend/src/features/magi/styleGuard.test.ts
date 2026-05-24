@@ -701,11 +701,13 @@ describe('workspace style guard', () => {
     expect(auditLogAdminStart).toBeGreaterThan(apiKeyAdminStart);
     const apiKeyAdminSource = adminSource.slice(apiKeyAdminStart, auditLogAdminStart);
     expect(apiKeyAdminSource).toContain(
-      "render: (status) => <Tag color={apiKeyStatusColor(status)}>{status}</Tag>"
+      "render: (status) => <Tag color={apiKeyStatusColor(status)}>{apiKeyStatusLabel(status)}</Tag>"
     );
     expect(adminSource).toContain("function apiKeyStatusColor(status: string): string");
+    expect(adminSource).toContain("function apiKeyStatusLabel(status: string): string");
     expect(adminSource).toContain("if (status === 'ACTIVE') {");
     expect(adminSource).toContain("if (status === 'EXPIRED') {");
+    expect(adminSource).toContain("EXPIRED: '已过期'");
   });
 
   it('uses record-specific filtered empty descriptions', () => {
