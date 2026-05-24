@@ -493,6 +493,21 @@ describe('workspace style guard', () => {
     expect(appSource).toContain('finetuneJobsEmptyDescription()');
   });
 
+  it('lets users search and filter public finetune jobs', () => {
+    expect(appSource).toContain("const [finetuneKeyword, setFinetuneKeyword] = useState('');");
+    expect(appSource).toContain("const [finetuneStatusFilter, setFinetuneStatusFilter] = useState('all');");
+    expect(appSource).toContain('const normalizedFinetuneKeyword = finetuneKeyword.trim().toLowerCase();');
+    expect(appSource).toContain('const searchableFinetuneFields = [job.name, job.baseModel, job.dataset?.name ?? \'\', job.status];');
+    expect(appSource).toContain('const matchesKeyword = !normalizedFinetuneKeyword');
+    expect(appSource).toContain('const matchesStatus = finetuneStatusFilter === \'all\' || job.status === finetuneStatusFilter;');
+    expect(appSource).toContain('className="finetune-toolbar"');
+    expect(appSource).toContain('placeholder="搜索任务、模型或数据集"');
+    expect(appSource).toContain('onChange={(event) => setFinetuneKeyword(event.target.value)}');
+    expect(appSource).toContain('onChange={setFinetuneStatusFilter}');
+    expect(appSource).toContain('暂无匹配微调任务');
+    expect(styles).toMatch(/\.finetune-toolbar \{[\s\S]*grid-template-columns: minmax\(260px, 1fr\) 220px;/);
+  });
+
   it('renders public finetune job statuses with distinct tags', () => {
     const finetunePageStart = appSource.indexOf('function FinetunePage()');
     const finetuneEmptyStart = appSource.indexOf('function finetuneJobsEmptyDescription()');

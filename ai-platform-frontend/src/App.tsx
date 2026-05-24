@@ -1869,15 +1869,41 @@ function modelCatalogUnavailableDescription(): string {
 }
 
 function FinetunePage() {
+  const [finetuneKeyword, setFinetuneKeyword] = useState('');
+  const [finetuneStatusFilter, setFinetuneStatusFilter] = useState('all');
   const {
     data: finetuneJobs = [],
     isLoading: finetuneJobsLoading,
     isError: finetuneJobsUnavailable
   } = useQuery({ queryKey: ['finetune-jobs'], queryFn: () => getData<FinetuneJob[]>('/finetune/jobs') });
+  const finetuneStatusOptions = Array.from(new Set(finetuneJobs.map((job) => job.status))).sort();
+  const normalizedFinetuneKeyword = finetuneKeyword.trim().toLowerCase();
+  const filteredFinetuneJobs = finetuneJobs.filter((job) => {
+    const searchableFinetuneFields = [job.name, job.baseModel, job.dataset?.name ?? '', job.status];
+    const matchesKeyword = !normalizedFinetuneKeyword
+      || searchableFinetuneFields.some((value) => value.toLowerCase().includes(normalizedFinetuneKeyword));
+    const matchesStatus = finetuneStatusFilter === 'all' || job.status === finetuneStatusFilter;
+    return matchesKeyword && matchesStatus;
+  });
 
   return (
     <div className="page">
       <PageTitle title="微调任务" description="查看训练任务、数据集和进度。" />
+      <div className="finetune-toolbar">
+        <Input.Search
+          placeholder="搜索任务、模型或数据集"
+          allowClear
+          onChange={(event) => setFinetuneKeyword(event.target.value)}
+        />
+        <Select
+          value={finetuneStatusFilter}
+          onChange={setFinetuneStatusFilter}
+          options={[
+            { value: 'all', label: '全部状态' },
+            ...finetuneStatusOptions.map((status) => ({ value: status, label: finetuneJobStatusLabel(status) }))
+          ]}
+        />
+      </div>
       <div className="card-grid">
         {finetuneJobsLoading ? (
           <CatalogLoadingState title="正在加载微调任务" />
@@ -1885,7 +1911,9 @@ function FinetunePage() {
           <CatalogEmptyState title="微调任务暂不可用" description={finetuneJobsUnavailableDescription()} />
         ) : finetuneJobs.length === 0 ? (
           <CatalogEmptyState title="暂无微调任务" description={finetuneJobsEmptyDescription()} />
-        ) : finetuneJobs.map((job) => (
+        ) : filteredFinetuneJobs.length === 0 ? (
+          <CatalogEmptyState title="暂无匹配微调任务" description="调整搜索词或状态筛选，或者在平台后台新增微调任务。" />
+        ) : filteredFinetuneJobs.map((job) => (
           <Card key={job.id} title={job.name}>
             <Text>{job.baseModel}</Text>
             <Progress percent={job.progress} />

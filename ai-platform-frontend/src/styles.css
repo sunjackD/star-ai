@@ -604,6 +604,13 @@ html[data-theme='minimal-modern'] .app-sider .ant-menu-submenu-title {
   grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
 }
 
+.finetune-toolbar {
+  display: grid;
+  grid-template-columns: minmax(260px, 1fr) 220px;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
 .catalog-empty-state {
   grid-column: 1 / -1;
   min-height: 220px;
@@ -1945,6 +1952,7 @@ pre {
   .agent-fleet-toolbar,
   .skill-registry-header,
   .skill-registry-toolbar,
+  .finetune-toolbar,
   .model-layer-header,
   .model-layer-toolbar,
   .article-library-header,
