@@ -210,22 +210,22 @@ export function SettingsAdminPage() {
       <div className="settings-grid">
         <Card className="settings-form-card" loading={isSettingsLoading}>
           <Form form={form} layout="vertical" onFinish={(values) => mutation.mutate(values as AdminSettings)}>
-            <Form.Item name="siteName" label="站点名称" rules={[{ required: true, whitespace: true }]}>
+            <Form.Item name="siteName" label="站点名称" rules={[{ required: true, whitespace: true, message: '请输入站点名称' }]}>
               <Input placeholder="星梦 AI 聚合平台" />
             </Form.Item>
-            <Form.Item name="siteSubtitle" label="站点副标题" rules={[{ required: true, whitespace: true }]}>
+            <Form.Item name="siteSubtitle" label="站点副标题" rules={[{ required: true, whitespace: true, message: '请输入站点副标题' }]}>
               <Input.TextArea rows={3} placeholder="AI 工具、Skill 与模型的统一工作台" />
             </Form.Item>
-            <Form.Item name="defaultTheme" label="全站默认主题" rules={[{ required: true }]}>
+            <Form.Item name="defaultTheme" label="全站默认主题" rules={[{ required: true, message: '请选择全站默认主题' }]}>
               <Select options={THEME_OPTIONS} />
             </Form.Item>
-            <Form.Item name="defaultUserRole" label="注册默认角色" rules={[{ required: true }]}>
+            <Form.Item name="defaultUserRole" label="注册默认角色" rules={[{ required: true, message: '请选择注册默认角色' }]}>
               <Select options={roleOptions} loading={isSettingsRolesLoading} />
             </Form.Item>
             <Form.Item
               name="apiKeyDefaultExpireDays"
               label="API Key 默认有效期"
-              rules={[{ required: true, type: 'number', min: 1, max: 3650 }]}
+              rules={[{ required: true, type: 'number', min: 1, max: 3650, message: '请输入 1-3650 天' }]}
             >
               <InputNumber min={1} max={3650} className="admin-number-input" />
             </Form.Item>

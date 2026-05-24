@@ -1267,6 +1267,19 @@ describe('workspace style guard', () => {
     expect(adminSource).toContain('系统设置暂不可用');
   });
 
+  it('uses explicit validation messages on the system settings form', () => {
+    expect(adminSource).toContain('name="siteName" label="站点名称"');
+    expect(adminSource).toContain("message: '请输入站点名称'");
+    expect(adminSource).toContain('name="siteSubtitle" label="站点副标题"');
+    expect(adminSource).toContain("message: '请输入站点副标题'");
+    expect(adminSource).toContain('name="defaultTheme" label="全站默认主题"');
+    expect(adminSource).toContain("message: '请选择全站默认主题'");
+    expect(adminSource).toContain('name="defaultUserRole" label="注册默认角色"');
+    expect(adminSource).toContain("message: '请选择注册默认角色'");
+    expect(adminSource).toContain('name="apiKeyDefaultExpireDays"');
+    expect(adminSource).toContain("message: '请输入 1-3650 天'");
+  });
+
   it('surfaces settings default role dependency failures', () => {
     expect(adminSource).toContain('isSettingsRolesUnavailable');
     expect(adminSource).toContain('settingsRolesUnavailableNotice()');
