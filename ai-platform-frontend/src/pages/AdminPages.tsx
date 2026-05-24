@@ -64,6 +64,11 @@ const ARTICLE_ADMIN_DIFFICULTY_OPTIONS = articleAdminDifficultyValues.map((value
   label: articleDifficultyLabel(value),
   value
 }));
+const apiKeyAdminStatusValues = ['ACTIVE', 'DISABLED', 'EXPIRED'];
+const API_KEY_ADMIN_STATUS_OPTIONS = apiKeyAdminStatusValues.map((value) => ({
+  label: apiKeyStatusLabel(value),
+  value
+}));
 
 type ResourceRecord = { id: number; name: string; status?: string };
 type FieldType = 'text' | 'textarea' | 'number' | 'select' | 'icon';
@@ -1418,7 +1423,7 @@ export function ApiKeysAdminPage() {
           allowClear
           placeholder="状态"
           className="admin-filter-select"
-          options={['ACTIVE', 'DISABLED', 'EXPIRED'].map((value) => ({ label: value, value }))}
+          options={API_KEY_ADMIN_STATUS_OPTIONS}
           onChange={setStatusFilter}
         />
       </Space>

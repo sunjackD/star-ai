@@ -710,6 +710,18 @@ describe('workspace style guard', () => {
     expect(adminSource).toContain("EXPIRED: '已过期'");
   });
 
+  it('uses localized API Key admin status options in filters', () => {
+    const apiKeyAdminStart = adminSource.indexOf('export function ApiKeysAdminPage()');
+    const auditLogAdminStart = adminSource.indexOf('export function AuditLogsAdminPage()');
+    expect(apiKeyAdminStart).toBeGreaterThanOrEqual(0);
+    expect(auditLogAdminStart).toBeGreaterThan(apiKeyAdminStart);
+    const apiKeyAdminSource = adminSource.slice(apiKeyAdminStart, auditLogAdminStart);
+    expect(apiKeyAdminSource).toContain('options={API_KEY_ADMIN_STATUS_OPTIONS}');
+    expect(adminSource).toContain('const API_KEY_ADMIN_STATUS_OPTIONS = apiKeyAdminStatusValues.map');
+    expect(adminSource).toContain("const apiKeyAdminStatusValues = ['ACTIVE', 'DISABLED', 'EXPIRED'];");
+    expect(apiKeyAdminSource).not.toContain("options={['ACTIVE', 'DISABLED', 'EXPIRED'].map((value) => ({ label: value, value }))}");
+  });
+
   it('uses record-specific filtered empty descriptions', () => {
     expect(adminSource).toContain('filteredApiKeyRecordEmptyDescription()');
     expect(adminSource).toContain('filteredAuditLogEmptyDescription()');
