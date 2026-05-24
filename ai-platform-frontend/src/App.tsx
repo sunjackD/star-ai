@@ -1095,6 +1095,7 @@ function skillArtifactLabel(skill: Skill): string {
 function ArticlesPage() {
   const navigate = useNavigate();
   const token = useAuthStore((state) => state.token);
+  const [articleKeyword, setArticleKeyword] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [difficultyFilter, setDifficultyFilter] = useState('all');
   const { data = [], isLoading: articlesLoading, isError: articlesUnavailable } = useQuery({
@@ -1102,10 +1103,14 @@ function ArticlesPage() {
     queryFn: () => getPublicData<ArticleSummary[]>('/articles')
   });
   const categories = Array.from(new Set(data.map((article) => article.category))).sort();
+  const normalizedArticleKeyword = articleKeyword.trim().toLowerCase();
   const filteredArticles = data.filter((article) => {
+    const searchableArticleFields = [article.title, article.summary, article.tags, article.category];
+    const matchesKeyword = !normalizedArticleKeyword
+      || searchableArticleFields.some((value) => value.toLowerCase().includes(normalizedArticleKeyword));
     const matchesCategory = categoryFilter === 'all' || article.category === categoryFilter;
     const matchesDifficulty = difficultyFilter === 'all' || article.difficulty === difficultyFilter;
-    return matchesCategory && matchesDifficulty;
+    return matchesKeyword && matchesCategory && matchesDifficulty;
   });
   const estimatedMinutes = data.reduce((sum, article) => sum + article.estimatedMinutes, 0);
 
@@ -1136,6 +1141,12 @@ function ArticlesPage() {
       </section>
 
       <div className="article-library-toolbar">
+        <Input.Search
+          className="article-library-search"
+          placeholder="搜索文章标题、摘要或标签"
+          allowClear
+          onChange={(event) => setArticleKeyword(event.target.value)}
+        />
         <Select
           value={categoryFilter}
           onChange={setCategoryFilter}
@@ -1162,7 +1173,7 @@ function ArticlesPage() {
         ) : articlesUnavailable ? (
           <CatalogEmptyState title="文章目录暂不可用" description={articleCatalogUnavailableDescription()} />
         ) : filteredArticles.length === 0 ? (
-          <CatalogEmptyState title="暂无匹配文章" description="切换分类或难度，或者在平台后台新增文章。" />
+          <CatalogEmptyState title="暂无匹配文章" description="调整搜索词、分类或难度，或者在平台后台新增文章。" />
         ) : filteredArticles.map((article) => (
           <section key={article.id} className="article-card">
             <div className="article-meta">

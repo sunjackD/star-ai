@@ -402,6 +402,19 @@ describe('workspace style guard', () => {
     expect(appSource).toContain('文章目录暂不可用');
   });
 
+  it('lets users search the public article catalog by keyword', () => {
+    expect(appSource).toContain("const [articleKeyword, setArticleKeyword] = useState('');");
+    expect(appSource).toContain('const normalizedArticleKeyword = articleKeyword.trim().toLowerCase();');
+    expect(appSource).toContain('const searchableArticleFields = [article.title, article.summary, article.tags, article.category];');
+    expect(appSource).toContain('const matchesKeyword = !normalizedArticleKeyword');
+    expect(appSource).toContain('|| searchableArticleFields.some((value) => value.toLowerCase().includes(normalizedArticleKeyword));');
+    expect(appSource).toContain('className="article-library-search"');
+    expect(appSource).toContain('placeholder="搜索文章标题、摘要或标签"');
+    expect(appSource).toContain('onChange={(event) => setArticleKeyword(event.target.value)}');
+    expect(appSource).toContain('调整搜索词、分类或难度');
+    expect(styles).toContain('grid-template-columns: minmax(260px, 1fr) 220px 220px;');
+  });
+
   it('filters blank article summary tags and shows an empty fallback', () => {
     const articlesPageStart = appSource.indexOf('function ArticlesPage()');
     const articleUnavailableStart = appSource.indexOf('function articleCatalogUnavailableDescription()');
