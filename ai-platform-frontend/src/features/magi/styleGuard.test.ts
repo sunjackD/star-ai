@@ -841,6 +841,28 @@ describe('workspace style guard', () => {
     expect(articleAdminSource).not.toContain("options={['BEGINNER', 'INTERMEDIATE', 'ADVANCED'].map((value) => ({ label: value, value }))}");
   });
 
+  it('uses localized article attachment and reference type labels', () => {
+    const articleAdminStart = adminSource.indexOf('export function ArticlesAdminPage()');
+    const apiKeyAdminStart = adminSource.indexOf('export function ApiKeysAdminPage()');
+    expect(articleAdminStart).toBeGreaterThanOrEqual(0);
+    expect(apiKeyAdminStart).toBeGreaterThan(articleAdminStart);
+    const articleAdminSource = adminSource.slice(articleAdminStart, apiKeyAdminStart);
+    expect(adminSource).toContain('const ARTICLE_ASSET_TYPE_OPTIONS = articleAssetTypeValues.map');
+    expect(adminSource).toContain('const ARTICLE_LINK_TYPE_OPTIONS = articleLinkTypeValues.map');
+    expect(adminSource).toContain('function articleAssetTypeLabel(assetType: string): string');
+    expect(adminSource).toContain('function articleLinkTypeLabel(linkType: string): string');
+    expect(articleAdminSource).toContain("render: (assetType: string) => articleAssetTypeLabel(assetType)");
+    expect(articleAdminSource).toContain("render: (linkType: string) => articleLinkTypeLabel(linkType)");
+    expect(articleAdminSource).toContain('options={ARTICLE_ASSET_TYPE_OPTIONS}');
+    expect(articleAdminSource).toContain('options={ARTICLE_LINK_TYPE_OPTIONS}');
+    expect(adminSource).toContain("SCRIPT: '脚本'");
+    expect(adminSource).toContain("PROMPT: '提示词'");
+    expect(adminSource).toContain("EXTERNAL: '外部链接'");
+    expect(adminSource).toContain("INTERNAL: '站内链接'");
+    expect(articleAdminSource).not.toContain("options={['SCRIPT', 'PROMPT', 'IMAGE', 'CONFIG', 'FILE', 'LINK'].map((value) => ({ label: value, value }))}");
+    expect(articleAdminSource).not.toContain("options={['EXTERNAL', 'INTERNAL'].map((value) => ({ label: value, value }))}");
+  });
+
   it('gives the user admin table explicit loading and empty feedback', () => {
     expect(adminSource).toContain('isUsersLoading');
     expect(adminSource).toContain('userAdminInitialEmptyDescription');

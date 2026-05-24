@@ -64,6 +64,16 @@ const ARTICLE_ADMIN_DIFFICULTY_OPTIONS = articleAdminDifficultyValues.map((value
   label: articleDifficultyLabel(value),
   value
 }));
+const articleAssetTypeValues = ['SCRIPT', 'PROMPT', 'IMAGE', 'CONFIG', 'FILE', 'LINK'];
+const ARTICLE_ASSET_TYPE_OPTIONS = articleAssetTypeValues.map((value) => ({
+  label: articleAssetTypeLabel(value),
+  value
+}));
+const articleLinkTypeValues = ['EXTERNAL', 'INTERNAL'];
+const ARTICLE_LINK_TYPE_OPTIONS = articleLinkTypeValues.map((value) => ({
+  label: articleLinkTypeLabel(value),
+  value
+}));
 const apiKeyAdminStatusValues = ['ACTIVE', 'DISABLED', 'EXPIRED'];
 const API_KEY_ADMIN_STATUS_OPTIONS = apiKeyAdminStatusValues.map((value) => ({
   label: apiKeyStatusLabel(value),
@@ -1102,7 +1112,7 @@ export function ArticlesAdminPage() {
                 }}
                 columns={[
                   { title: '名称', dataIndex: 'name' },
-                  { title: '类型', dataIndex: 'assetType' },
+                  { title: '类型', dataIndex: 'assetType', render: (assetType: string) => articleAssetTypeLabel(assetType) },
                   { title: '文件', render: (row: ArticleAsset) => row.fileName ?? '文本' },
                   {
                     title: '操作',
@@ -1138,7 +1148,7 @@ export function ArticlesAdminPage() {
                 }}
                 columns={[
                   { title: '标题', dataIndex: 'title' },
-                  { title: '类型', dataIndex: 'linkType' },
+                  { title: '类型', dataIndex: 'linkType', render: (linkType: string) => articleLinkTypeLabel(linkType) },
                   {
                     title: '操作',
                     render: (_, row: ArticleLink) => (
@@ -1214,7 +1224,7 @@ export function ArticlesAdminPage() {
             <Input />
           </Form.Item>
           <Form.Item name="assetType" label="类型" rules={[{ required: true }]}>
-            <Select options={['SCRIPT', 'PROMPT', 'IMAGE', 'CONFIG', 'FILE', 'LINK'].map((value) => ({ label: value, value }))} />
+            <Select options={ARTICLE_ASSET_TYPE_OPTIONS} />
           </Form.Item>
           {assetMode === 'TEXT' ? (
             <>
@@ -1250,7 +1260,7 @@ export function ArticlesAdminPage() {
       <Modal open={linkModalOpen} title="新增参考链接" footer={null} onCancel={closeArticleLinkModal} width={720}>
         <Form form={linkForm} layout="vertical" onFinish={(values) => linkMutation.mutate(values)}>
           <Form.Item name="linkType" label="链接类型" rules={[{ required: true }]}>
-            <Select options={['EXTERNAL', 'INTERNAL'].map((value) => ({ label: value, value }))} />
+            <Select options={ARTICLE_LINK_TYPE_OPTIONS} />
           </Form.Item>
           <Form.Item name="title" label="标题" rules={[{ required: true, whitespace: true }]}>
             <Input />
@@ -1315,6 +1325,26 @@ function articleDifficultyLabel(difficulty: string): string {
     ADVANCED: '高级'
   };
   return labels[difficulty] ?? difficulty;
+}
+
+function articleAssetTypeLabel(assetType: string): string {
+  const labels: Record<string, string> = {
+    SCRIPT: '脚本',
+    PROMPT: '提示词',
+    IMAGE: '图片',
+    CONFIG: '配置',
+    FILE: '文件',
+    LINK: '链接'
+  };
+  return labels[assetType] ?? assetType;
+}
+
+function articleLinkTypeLabel(linkType: string): string {
+  const labels: Record<string, string> = {
+    EXTERNAL: '外部链接',
+    INTERNAL: '站内链接'
+  };
+  return labels[linkType] ?? linkType;
 }
 
 function articleAdminListUnavailableNotice(): string {
