@@ -95,7 +95,7 @@ describe('workspace style guard', () => {
 
   it('rejects blank API Key names at the creation form edge', () => {
     expect(appSource).toContain(
-      '<Form.Item name="name" label="名称" rules={[{ required: true, whitespace: true }]}>\n'
+      "<Form.Item name=\"name\" label=\"名称\" rules={[{ required: true, whitespace: true, message: '请输入 API Key 名称' }]}>\n"
       + '             <Input placeholder="Agent/Skill 代管" />'
     );
   });
